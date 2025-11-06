@@ -1,0 +1,22 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:ProductionAccounting_AvaloniaApplication"
+        xmlns:vm="using:ProductionAccounting_AvaloniaApplication.ViewModels.Pages"
+        x:DataType="vm:AdminPageTemplatedControlViewModel">
+
+  <Design.PreviewWith>
+    <StackPanel Width="400" Spacing="10">      
+        <StackPanel Background="{DynamicResource SystemRegionBrush}">
+          <controls:AdminPageTemplatedControl />
+        </StackPanel>
+    </StackPanel>
+  </Design.PreviewWith>
+ 
+  <ControlTheme x:Key="{x:Type controls:AdminPageTemplatedControl}" TargetType="controls:AdminPageTemplatedControl">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <TextBlock Text="Templated Control" />
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

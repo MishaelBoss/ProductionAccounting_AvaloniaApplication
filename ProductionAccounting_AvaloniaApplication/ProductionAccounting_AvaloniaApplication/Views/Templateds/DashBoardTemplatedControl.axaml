@@ -1,0 +1,41 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:ProductionAccounting_AvaloniaApplication.Templateds">
+  
+  <Design.PreviewWith>
+    <Border Width="800" Height="50" Background="#2D2D2D" Opacity="0.4">      
+
+    </Border>
+  </Design.PreviewWith>
+ 
+  <ControlTheme x:Key="{x:Type controls:DashBoardTemplatedControl}" TargetType="controls:DashBoardTemplatedControl">
+      <Setter Property="Height" Value="50"/>
+      <Setter Property="Opacity" Value="0.4"/>
+      <Setter Property="Template">
+      <ControlTemplate>
+        <Grid VerticalAlignment="Top">
+
+          <Border Background="Gray" Opacity="0.4" CornerRadius="8"/>
+
+          <Grid ColumnDefinitions="*,*" Margin="100,0,150,0">
+            
+            <Button Width="40" 
+                    Height="40"
+                    Background="Transparent">
+            </Button>
+
+            <!-- <Button Classes="ButtonProfileUser"
+                    Grid.Column="1"
+                    HorizontalAlignment="Right"
+                    Width="40" Height="40">
+              <Image Source="{Binding ProfileImage, 
+                             RelativeSource={RelativeSource TemplatedParent}}"
+                     Width="32" Height="32"
+                     Stretch="UniformToFill"/>
+            </Button>-->
+          </Grid>
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

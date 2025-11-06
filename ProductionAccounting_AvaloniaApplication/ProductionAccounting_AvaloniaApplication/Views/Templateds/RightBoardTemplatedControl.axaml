@@ -1,0 +1,101 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:ProductionAccounting_AvaloniaApplication.Templateds"
+        xmlns:vm="using:ProductionAccounting_AvaloniaApplication.ViewModels.Templateds"
+        x:DataType="vm:RightBoardTemplatedControlViewModel">
+
+    <Design.PreviewWith>
+        <Border Width="150" Height="600" Background="#2D2D2D">
+
+        </Border>
+    </Design.PreviewWith>
+ 
+    <ControlTheme x:Key="{x:Type controls:RightBoardTemplatedControl}" TargetType="controls:RightBoardTemplatedControl">
+        <Setter Property="Background" Value="#2D2D2D"/>
+        <Setter Property="Width" Value="150"/>
+        <Setter Property="Template">
+          <ControlTemplate>
+            <Grid Background="{TemplateBinding Background}" 
+                  Width="{TemplateBinding Width}"
+                  Height="{TemplateBinding Height}"
+                  RowDefinitions="40,*,50,40">
+                <Grid Grid.Row="1">
+                    <StackPanel Orientation="Vertical" 
+                                VerticalAlignment="Stretch" 
+                                HorizontalAlignment="Center" 
+                                Spacing="5">
+                    
+                        <Button Classes="Button"
+                                Background="white"
+                                Command="{Binding OpenAdminPanelPageCommand}">
+                            <Grid ColumnDefinitions="24,*">
+                                <Image Source="/Assets/profile-2-64.png" 
+                                       Width="21" 
+                                       Height="21" 
+                                       Stretch="Uniform"/>
+                                <Label Grid.Column="1" Content="Админ панель"/>
+                            </Grid>
+                        </Button>
+                    
+                        <Button Classes="Button"
+                                Command="{Binding OpenProductLibraryPageCommand}">
+                            <Grid ColumnDefinitions="24,*" 
+                                  Classes="GridButtonButton">
+                                <Image Source="/Assets/profile-2-64.png" 
+                                       Width="21" 
+                                       Height="21" 
+                                       Stretch="Uniform"/>
+                                <Label Grid.Column="1" Content="Библиотека продукций"/>
+                            </Grid>
+                        </Button>
+
+                        <Button Classes="Button"
+                                Command="{Binding OpenUserLibraryPageCommand}">
+                            <Grid ColumnDefinitions="24,*" 
+                                  Classes="GridButtonButton">
+                                <Image Source="/Assets/profile-2-64.png" 
+                                       Width="21" 
+                                       Height="21" 
+                                       Stretch="Uniform"/>
+                                <Label Grid.Column="1" Content="Библиотека пользователей"/>
+                            </Grid>
+                        </Button>
+
+                        <Button Classes="Button"
+                                Command="{Binding OpenWorkUserPageCommand}">
+                            <Grid ColumnDefinitions="24,*" 
+                                  Classes="GridButtonButton">
+                                <Image Source="/Assets/profile-2-64.png" 
+                                       Width="21" 
+                                       Height="21" 
+                                       Stretch="Uniform"/>
+                                <Label Grid.Column="1" Content="Рабочая область"/>
+                            </Grid>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+                <Grid Grid.Row="2">
+                    <StackPanel Orientation="Vertical" 
+                                VerticalAlignment="Stretch" 
+                                HorizontalAlignment="Center" 
+                                Spacing="5">
+                        <Separator Background="Gray" VerticalAlignment="Top"/>
+                    
+                        <!--<Button Classes="Button"
+                                Command="{Binding OpenSettingsPageCommand}">
+                            <Grid ColumnDefinitions="24,*" 
+                                  Classes="GridButtonSetting">
+                                <Image Source="/Assets/settings-64.png" 
+                                       Width="21" 
+                                       Height="21" 
+                                       Stretch="Uniform"/>
+                                <Label Grid.Column="1" Content="{Binding SettingsText}"/>
+                            </Grid>
+                        </Button> -->
+                    </StackPanel>
+                </Grid>
+            </Grid>
+          </ControlTemplate>
+        </Setter>
+  </ControlTheme>
+</ResourceDictionary>

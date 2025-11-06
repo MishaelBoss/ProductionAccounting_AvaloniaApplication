@@ -1,0 +1,54 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:controls="using:ProductionAccounting_AvaloniaApplication.Templateds"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:ProductionAccounting_AvaloniaApplication.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="700"
+        Width="1200" Height="700"
+        MinWidth="800" MinHeight="500"
+        Background="White"
+        x:Class="ProductionAccounting_AvaloniaApplication.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        WindowStartupLocation="CenterScreen"
+        ExtendClientAreaToDecorationsHint="True"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="ProductionAccounting_AvaloniaApplication">
+
+    <Window.Styles>
+        <StyleInclude Source="/Styles/Resources/RightBoardStyles.axaml"/>
+    </Window.Styles>
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <Grid RowDefinitions="50, *">
+
+        <DockPanel Grid.Row="0" 
+                   Background="#2D2D2D" 
+                   Height="50">
+            <controls:DashBoardTemplatedControl/>
+        </DockPanel>
+        
+        <Grid Grid.Row="1" 
+              ColumnDefinitions="150, *">
+            
+            <Grid Grid.Column="0"
+                  ZIndex="1"
+                  Background="#2D2D2D">
+
+                <controls:RightBoardTemplatedControl DataContext="{Binding rightBoardTemplatedControlViewModel}">
+					 <controls:RightBoardTemplatedControl.Styles>
+                        <StyleInclude Source="/Styles/Resources/RightBoardStyles.axaml"/>
+                    </controls:RightBoardTemplatedControl.Styles>
+                </controls:RightBoardTemplatedControl>
+            </Grid>
+            
+            <Grid Grid.Column="1" 
+                  Name="CenterContent">
+                <ContentControl Content="{Binding CurrentPage}"/>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>
