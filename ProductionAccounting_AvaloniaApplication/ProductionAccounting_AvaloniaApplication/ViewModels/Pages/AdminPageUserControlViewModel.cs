@@ -1,5 +1,5 @@
 ﻿namespace ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
 
-public class ProductLibraryTemplatedControlViewModel : ViewModelBase
+public class AdminPageUserControlViewModel : ViewModelBase
 {
 }

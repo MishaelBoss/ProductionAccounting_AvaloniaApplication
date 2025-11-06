@@ -13,10 +13,10 @@ public class RightBoardTemplatedControlViewModel : ViewModelBase
         mainWindowViewModel = _mainWindowViewModel;
     }
 
-    private readonly AdminPageTemplatedControlViewModel adminPageTemplatedControlViewModel = new();
-    private readonly ProductLibraryTemplatedControlViewModel productLibraryTemplatedControlViewModel = new();
-    private readonly UserLibraryTemplatedControlViewModel userLibraryTemplatedControlViewModel = new();
-    private readonly WorkUserPageTemplatedControlViewModel workUserPageTemplatedControlViewModel = new();
+    private readonly AdminPageUserControlViewModel adminPageTemplatedControlViewModel = new();
+    private readonly ProductLibraryUserControlViewModel productLibraryTemplatedControlViewModel = new();
+    private readonly UserLibraryUserControlViewModel userLibraryTemplatedControlViewModel = new();
+    private readonly WorkUserPageUserControlViewModel workUserPageTemplatedControlViewModel = new();
 
     public ICommand OpenAdminPanelPageCommand
         => new RelayCommand((o) => OpenPage(adminPageTemplatedControlViewModel));
