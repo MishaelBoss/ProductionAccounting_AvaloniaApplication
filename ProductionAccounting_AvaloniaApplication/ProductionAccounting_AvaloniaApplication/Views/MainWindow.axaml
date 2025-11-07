@@ -11,7 +11,7 @@
         x:Class="ProductionAccounting_AvaloniaApplication.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         WindowStartupLocation="CenterScreen"
-        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaToDecorationsHint="False"
         Icon="/Assets/avalonia-logo.ico"
         Title="ProductionAccounting_AvaloniaApplication">
 
@@ -23,32 +23,23 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <Grid RowDefinitions="50, *">
-
-        <DockPanel Grid.Row="0" 
-                   Background="#2D2D2D" 
-                   Height="50">
-            <controls:DashBoardTemplatedControl/>
-        </DockPanel>
+    <Grid
+          ColumnDefinitions="150, *">
         
-        <Grid Grid.Row="1" 
-              ColumnDefinitions="150, *">
-            
-            <Grid Grid.Column="0"
-                  ZIndex="1"
-                  Background="#2D2D2D">
+        <Grid Grid.Column="0"
+              ZIndex="1"
+              Background="#2D2D2D">
 
-                <controls:RightBoardTemplatedControl DataContext="{Binding rightBoardTemplatedControlViewModel}">
-					 <controls:RightBoardTemplatedControl.Styles>
-                        <StyleInclude Source="/Styles/Resources/RightBoardStyles.axaml"/>
-                    </controls:RightBoardTemplatedControl.Styles>
-                </controls:RightBoardTemplatedControl>
-            </Grid>
-            
-            <Grid Grid.Column="1" 
-                  Name="CenterContent">
-                <ContentControl Content="{Binding CurrentPage}"/>
-            </Grid>
+            <controls:RightBoardTemplatedControl DataContext="{Binding rightBoardTemplatedControlViewModel}">
+	 <controls:RightBoardTemplatedControl.Styles>
+                    <StyleInclude Source="/Styles/Resources/RightBoardStyles.axaml"/>
+                </controls:RightBoardTemplatedControl.Styles>
+            </controls:RightBoardTemplatedControl>
+        </Grid>
+        
+        <Grid Grid.Column="1" 
+              Name="CenterContent">
+            <ContentControl Content="{Binding CurrentPage}"/>
         </Grid>
     </Grid>
 </Window>
