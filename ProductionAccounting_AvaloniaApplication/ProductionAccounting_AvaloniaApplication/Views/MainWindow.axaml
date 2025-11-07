@@ -1,5 +1,5 @@
 <Window xmlns="https://github.com/avaloniaui"
-        xmlns:controls="using:ProductionAccounting_AvaloniaApplication.Templateds"
+        xmlns:controls="using:ProductionAccounting_AvaloniaApplication.Views.Control"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:ProductionAccounting_AvaloniaApplication.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -12,33 +12,21 @@
         x:DataType="vm:MainWindowViewModel"
         WindowStartupLocation="CenterScreen"
         ExtendClientAreaToDecorationsHint="False"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/icon/avalonia-logo.ico"
         Title="ProductionAccounting_AvaloniaApplication">
-
-    <Window.Styles>
-        <StyleInclude Source="/Styles/Resources/RightBoardStyles.axaml"/>
-    </Window.Styles>
 
     <Design.DataContext>
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <Grid
-          ColumnDefinitions="150, *">
+    <Grid ColumnDefinitions="150, *">
         
         <Grid Grid.Column="0"
-              ZIndex="1"
-              Background="#2D2D2D">
-
-            <controls:RightBoardTemplatedControl DataContext="{Binding rightBoardTemplatedControlViewModel}">
-	 <controls:RightBoardTemplatedControl.Styles>
-                    <StyleInclude Source="/Styles/Resources/RightBoardStyles.axaml"/>
-                </controls:RightBoardTemplatedControl.Styles>
-            </controls:RightBoardTemplatedControl>
+              ZIndex="1">
+            <controls:RightBoardUserControl DataContext="{Binding RightBoardUserControlViewModel}" />
         </Grid>
         
-        <Grid Grid.Column="1" 
-              Name="CenterContent">
+        <Grid Grid.Column="1">
             <ContentControl Content="{Binding CurrentPage}"/>
         </Grid>
     </Grid>

@@ -1,13 +1,11 @@
-﻿using Avalonia.Controls;
-using ProductionAccounting_AvaloniaApplication.ViewModels.Templateds;
+﻿using ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 using ReactiveUI;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase
     {
-        public RightBoardTemplatedControlViewModel rightBoardTemplatedControlViewModel { get; }
-        public Grid? CenterContent { get; set; } = null;
+        public RightBoardUserControlViewModel RightBoardUserControlViewModel { get; }
 
         private ViewModelBase? _currentPage;
         public ViewModelBase? CurrentPage
@@ -18,7 +16,7 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
 
         public MainWindowViewModel()
         {
-            rightBoardTemplatedControlViewModel = new RightBoardTemplatedControlViewModel(this);
+            RightBoardUserControlViewModel = new RightBoardUserControlViewModel(this);
         }
     }
 }

@@ -1,14 +1,16 @@
-﻿using MsBox.Avalonia.ViewModels.Commands;
+﻿using CommunityToolkit.Mvvm.Input;
+using MsBox.Avalonia;
 using ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
+using System;
 using System.Windows.Input;
 
-namespace ProductionAccounting_AvaloniaApplication.ViewModels.Templateds;
+namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
-public class RightBoardTemplatedControlViewModel : ViewModelBase
+public class RightBoardUserControlViewModel : ViewModelBase
 {
     private MainWindowViewModel mainWindowViewModel { get; set; }
 
-    public RightBoardTemplatedControlViewModel(MainWindowViewModel _mainWindowViewModel)
+    public RightBoardUserControlViewModel(MainWindowViewModel _mainWindowViewModel)
     {
         mainWindowViewModel = _mainWindowViewModel;
     }
@@ -19,16 +21,16 @@ public class RightBoardTemplatedControlViewModel : ViewModelBase
     private readonly WorkUserPageUserControlViewModel workUserPageTemplatedControlViewModel = new();
 
     public ICommand OpenAdminPanelPageCommand
-        => new RelayCommand((o) => OpenPage(adminPageTemplatedControlViewModel));
+        => new RelayCommand(() => OpenPage(adminPageTemplatedControlViewModel));
 
     public ICommand OpenProductLibraryPageCommand 
-        => new RelayCommand((o) => OpenPage(productLibraryTemplatedControlViewModel));
+        => new RelayCommand(() => OpenPage(productLibraryTemplatedControlViewModel));
 
     public ICommand OpenUserLibraryPageCommand 
-        => new RelayCommand((o) => OpenPage(userLibraryTemplatedControlViewModel));
+        => new RelayCommand(() => OpenPage(userLibraryTemplatedControlViewModel));
 
     public ICommand OpenWorkUserPageCommand 
-        => new RelayCommand((o) => OpenPage(workUserPageTemplatedControlViewModel));
+        => new RelayCommand(() => OpenPage(workUserPageTemplatedControlViewModel));
 
     private object? _objectViewModels = null;
 

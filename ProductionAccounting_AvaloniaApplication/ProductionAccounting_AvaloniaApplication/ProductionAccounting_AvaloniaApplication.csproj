@@ -6,6 +6,7 @@
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+	<AvaloniaUseCompiledBindingsByDefault>false</AvaloniaUseCompiledBindingsByDefault>
     <LangVersion>preview</LangVersion>
   </PropertyGroup>
 
@@ -24,6 +25,11 @@
 
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.3.8" />
+    <PackageReference Include="Avalonia.Angle.Windows.Natives" Version="2.1.25547.20250602" />
+    <PackageReference Include="Avalonia.BuildServices" Version="11.3.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Avalonia.Desktop" Version="11.3.8" />
     <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.8" />
     <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.8" />
@@ -38,5 +44,14 @@
     <PackageReference Include="Newtonsoft.Json.Bson" Version="1.0.3" />
     <PackageReference Include="Npgsql" Version="9.0.4" />
     <PackageReference Include="ReactiveUI" Version="22.2.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Views\Pages\AdminPageUserControlView.axaml.cs">
+      <DependentUpon>AdminPageUserControlView.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Pages\ProductLibraryUserControlView.axaml.cs">
+      <DependentUpon>ProductLibraryUserControlView.axaml</DependentUpon>
+    </Compile>
   </ItemGroup>
 </Project>

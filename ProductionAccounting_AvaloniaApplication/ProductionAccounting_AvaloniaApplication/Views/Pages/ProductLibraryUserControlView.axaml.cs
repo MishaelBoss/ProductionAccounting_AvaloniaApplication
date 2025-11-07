@@ -1,11 +1,11 @@
 using Avalonia.Controls;
 using ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
 
-namespace ProductionAccounting_AvaloniaApplication;
+namespace ProductionAccounting_AvaloniaApplication.Views.Pages;
 
-public partial class ProductLibraryUserControl : UserControl
+public partial class ProductLibraryUserControlView : UserControl
 {
-    public ProductLibraryUserControl()
+    public ProductLibraryUserControlView()
     {
         InitializeComponent();
         DataContext = new ProductLibraryUserControlViewModel();
