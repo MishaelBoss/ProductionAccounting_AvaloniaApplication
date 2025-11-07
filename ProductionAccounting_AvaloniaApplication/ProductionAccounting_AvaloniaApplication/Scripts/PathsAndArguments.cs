@@ -62,7 +62,7 @@ class Arguments
         {
             Ip = "192.168.0.108";
             Port = "5432";
-            Database = "equipmentlibrary";
+            Database = "ProductionAccounting";
             UserId = "postgres";
             Password = "cr2032";
         }
@@ -70,7 +70,7 @@ class Arguments
         {
             Ip = "localhost";
             Port = "5432";
-            Database = "EquipmentLibrary";
+            Database = "ProductionAccounting";
             UserId = "postgres";
             Password = "cr2032";
         }

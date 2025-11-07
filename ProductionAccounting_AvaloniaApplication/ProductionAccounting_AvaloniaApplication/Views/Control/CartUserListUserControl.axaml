@@ -1,0 +1,106 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:ProductionAccounting_AvaloniaApplication.ViewModels.Control"
+             x:DataType="vm:CartUserListUserControlViewModel"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="80"
+             x:Class="ProductionAccounting_AvaloniaApplication.CartUserListUserControl">
+
+    <Design.DataContext>
+		<vm:CartUserListUserControlViewModel/>
+	</Design.DataContext>
+
+    <Border CornerRadius="12"
+            Background="LightGray"
+            BorderBrush="#E1E5E9"
+            BorderThickness="1"
+            Margin="5">
+
+		<Grid Margin="15"
+			  ColumnDefinitions="Auto, *, Auto">
+
+			<Border Grid.Column="0"
+                    Width="45"
+                    Height="45"
+                    CornerRadius="22"
+                    Background="#4A90E2"
+                    Margin="0,0,15,0"
+                    VerticalAlignment="Center">
+				<TextBlock Text="{Binding UserName}"
+                           Foreground="White"
+                           FontSize="16"
+                           FontWeight="Bold"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+			</Border>
+
+			<StackPanel Grid.Column="1"
+                        VerticalAlignment="Center"
+                        Margin="0,0,15,0">
+				<TextBlock Text="{Binding UserName}"
+                           Foreground="#2C3E50"
+                           FontSize="14"
+                           FontWeight="SemiBold"
+                           Margin="0,0,0,2"/>
+
+				<TextBlock Text="{Binding FirstName}"
+                           Foreground="#7F8C8D"
+                           FontSize="12"
+                           Margin="0,0,0,1"/>
+
+				<TextBlock Text="{Binding LastName}"
+                           Foreground="#7F8C8D"
+                           FontSize="11"
+                           TextTrimming="CharacterEllipsis"/>
+
+				<TextBlock Text="{Binding DateJoined}"
+                           Foreground="#7F8C8D"
+                           FontSize="11"
+                           TextTrimming="CharacterEllipsis"/>
+			</StackPanel>
+
+			<StackPanel Grid.Column="2"
+						Orientation="Horizontal"
+						Spacing="6"
+						VerticalAlignment="Center">
+
+				<Button Click="OpenProfileUser_Click"
+						Width="34"
+						Height="34"
+						CornerRadius="6"
+						Background="#4A90E2"
+						BorderThickness="0"
+						ToolTip.Tip="Просмотр профиля">
+					<Image Source="/Assets/find-user-64.png"
+						   Width="18"
+						   Height="18"/>
+				</Button>
+
+				<Button Click="OpenWindowsProfileUser_Click"
+						Width="34"
+						Height="34"
+						CornerRadius="6"
+						Background="#34C759"
+						BorderThickness="0"
+						ToolTip.Tip="Редактировать пользователя">
+					<Image Source="/Assets/edit-64.png"
+						   Width="18"
+						   Height="18"/>
+				</Button>
+
+				<Button Click="OpenWindowsConfirmDeleteUser_Click"
+						Width="34"
+						Height="34"
+						CornerRadius="6"
+						Background="#FF3B30"
+						BorderThickness="0"
+						ToolTip.Tip="Удалить пользователя">
+					<Image Source="/Assets/remove-64.png"
+						   Width="18"
+						   Height="18"/>
+				</Button>
+			</StackPanel>
+		</Grid>
+	</Border>
+</UserControl>

@@ -19,6 +19,7 @@ namespace ProductionAccounting_AvaloniaApplication
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
                 InitializeFolderAndFile.Initialize();
+                ManagerSettingsJson.InitializeSettings();
 
                 desktop.MainWindow = new MainWindow
                 {

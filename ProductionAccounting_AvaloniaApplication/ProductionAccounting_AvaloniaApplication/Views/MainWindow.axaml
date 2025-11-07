@@ -7,7 +7,7 @@
         mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="700"
         Width="1200" Height="700"
         MinWidth="800" MinHeight="500"
-        Background="White"
+        Background="Gray"
         x:Class="ProductionAccounting_AvaloniaApplication.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         WindowStartupLocation="CenterScreen"
@@ -26,7 +26,7 @@
             <controls:RightBoardUserControl DataContext="{Binding RightBoardUserControlViewModel}" />
         </Grid>
         
-        <Grid Grid.Column="1">
+        <Grid Grid.Column="1" Name="ContentCenter">
             <ContentControl Content="{Binding CurrentPage}"/>
         </Grid>
     </Grid>

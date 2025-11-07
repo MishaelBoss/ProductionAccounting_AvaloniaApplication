@@ -96,12 +96,10 @@ internal abstract class ManagerSettingsJson
         catch (JsonException ex)
         {
             MessageBoxManager.GetMessageBoxStandard("Ошибка", ex.Message).ShowAsync();
-
         }
         catch (Exception ex)
         {
             MessageBoxManager.GetMessageBoxStandard("Ошибка", ex.Message).ShowAsync();
-
         }
     }
 
