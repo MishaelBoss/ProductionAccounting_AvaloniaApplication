@@ -1,7 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.Input;
-using MsBox.Avalonia;
 using ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
-using System;
 using System.Windows.Input;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
@@ -31,6 +29,9 @@ public class RightBoardUserControlViewModel : ViewModelBase
 
     public ICommand OpenWorkUserPageCommand 
         => new RelayCommand(() => OpenPage(workUserPageTemplatedControlViewModel));
+
+    public ICommand OpenAuthorizationCommand
+        => new RelayCommand(() => mainWindowViewModel.ShowAuthorization());
 
     private object? _objectViewModels = null;
 

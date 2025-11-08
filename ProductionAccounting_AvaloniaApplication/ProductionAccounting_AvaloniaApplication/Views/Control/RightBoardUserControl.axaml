@@ -72,6 +72,18 @@
                             <Label Grid.Column="1" Content="Рабочая область пользователя"/>
                         </Grid>
                     </Button>
+
+                    <Button Classes="Button"
+                            Command="{Binding OpenAuthorizationCommand}">
+                        <Grid ColumnDefinitions="24,*" 
+                              Classes="GridButtonButton">
+                            <Image Source="/Assets/login-64.png" 
+                                   Width="21" 
+                                   Height="21" 
+                                   Stretch="Uniform"/>
+                            <Label Grid.Column="1" Content="Войти"/>
+                        </Grid>
+                    </Button>
                 </StackPanel>
             </Grid>
             <Grid Grid.Row="2">
