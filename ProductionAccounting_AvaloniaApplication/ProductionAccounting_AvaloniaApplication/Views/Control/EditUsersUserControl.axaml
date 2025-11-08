@@ -1,0 +1,72 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:ProductionAccounting_AvaloniaApplication.ViewModels.Control"
+             x:DataType="vm:EditUsersUserControlViewModel"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ProductionAccounting_AvaloniaApplication.EditUsersUserControl">
+
+    <Design.DataContext>
+		<vm:EditUsersUserControlViewModel/>
+	</Design.DataContext>
+
+    <Grid>
+		<Border Background="#000000" Opacity="0.5"/>
+		
+		<Border VerticalAlignment="Center" 
+				HorizontalAlignment="Center" 
+				Width="400" 
+				Height="400" 
+				Background="Gray" 
+				CornerRadius="12">
+			<Grid>
+				<StackPanel Margin="20">
+					<TextBlock Margin="0 5" HorizontalAlignment="Center" Text="{Binding Messageerror}" />
+					<TextBlock Margin="0 5">Username:</TextBlock>
+					<TextBox Watermark="Enter username" Text="{Binding Username}"/>
+					<TextBlock Margin="0 5">First name:</TextBlock>
+					<TextBox Watermark="Enter first name" Text="{Binding FirstUsername}"/>
+					<TextBlock Margin="0 5">Last name:</TextBlock>
+					<TextBox Watermark="Enter last name" Text="{Binding LastUsername}"/>
+					<DockPanel HorizontalAlignment="Center">
+						<ComboBox Margin="3"
+								  Width="95"
+								  MinHeight="15"
+								  Height="27"
+								  DockPanel.Dock="Right"
+								  FontSize="12"
+								  ItemsSource="{Binding ComboBoxItems}"
+								  SelectedItem="{Binding SelectedComboBoxItem}">
+							<ComboBox.Styles>
+								<Style Selector="ComboBoxItem">
+									<Setter Property="Padding" Value="5, 0"/>
+									<Setter Property="Height" Value="20"/>
+									<Setter Property="MinHeight" Value="12"/>
+									<Setter Property="Foreground" Value="White"/>
+								</Style>
+							</ComboBox.Styles>
+						</ComboBox>
+						<TextBlock Text="Звание"
+								   VerticalAlignment="Center"
+								   HorizontalAlignment="Right"/>
+					</DockPanel>
+					<StackPanel Orientation="Vertical"
+								VerticalAlignment="Center"
+								HorizontalAlignment="Center"
+								Spacing="10">
+						<Button Classes="ButtonLogin"
+								IsEnabled="{Binding IsActiveConfirmButton}"
+								Click="Confirm_Click"
+								Content="Добавить нового пользователя"/>
+
+						<Button Click="Cancel_Click"
+								Content="Отмена"
+								HorizontalAlignment="Center"
+								Background="Transparent"/>
+					</StackPanel>
+				</StackPanel>
+			</Grid>
+		</Border>
+	</Grid>
+</UserControl>

@@ -4,6 +4,7 @@ using ProductionAccounting_AvaloniaApplication.Scripts;
 using ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
@@ -15,6 +16,7 @@ public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChang
     public Grid? Content { get; set; } = null;
 
     private readonly AddUsersUserControl _addUsers = new();
+    private readonly EditUsersUserControl _editUsers = new();
 
     private List<CartUserListUserControl> userList = [];
 
@@ -155,6 +157,30 @@ public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChang
         {
             Content.Children.Clear();
             if (_addUsers.Parent == Content) Content.Children.Remove(_addUsers);
+        }
+    }
+
+    public void ShowEditUsersUserControl(double userID)
+    {
+        if (Content != null)
+        {
+            var editViewModel = new EditUsersUserControlViewModel(userID);
+            _editUsers.DataContext = editViewModel;
+
+            if (Content.Children.Contains(_editUsers)) return;
+
+            if (_editUsers.Parent is Panel currentParent) currentParent.Children.Remove(_editUsers);
+            Content.Children.Clear();
+            Content.Children.Add(_editUsers);
+        }
+    }
+
+    public void CloseEditUsersUserControl()
+    {
+        if (Content != null)
+        {
+            Content.Children.Clear();
+            if (_editUsers.Parent == Content) Content.Children.Remove(_editUsers);
         }
     }
 

@@ -93,7 +93,7 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
     {
         try
         {
-            string sql = @"SELECT * FROM public.""user_type""";
+            string sql = "SELECT * FROM public.user_type";
 
             using (var connection = new NpgsqlConnection(Arguments.connection))
             {

@@ -77,14 +77,14 @@
 						   Height="18"/>
 				</Button>
 
-				<Button Click="OpenWindowsProfileUser_Click"
+				<Button Click="EditUser_Click"
 						Width="34"
 						Height="34"
 						CornerRadius="6"
 						Background="#34C759"
 						BorderThickness="0"
 						ToolTip.Tip="Редактировать пользователя">
-					<Image Source="/Assets/edit-64.png"
+					<Image Source="/Assets/edit-user-64.png"
 						   Width="18"
 						   Height="18"/>
 				</Button>
