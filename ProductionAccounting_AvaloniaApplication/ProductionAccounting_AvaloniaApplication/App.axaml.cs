@@ -20,6 +20,7 @@ namespace ProductionAccounting_AvaloniaApplication
             {
                 InitializeFolderAndFile.Initialize();
                 ManagerSettingsJson.InitializeSettings();
+                ManagerCookie.IsUserLoggedIn();
 
                 desktop.MainWindow = new MainWindow
                 {

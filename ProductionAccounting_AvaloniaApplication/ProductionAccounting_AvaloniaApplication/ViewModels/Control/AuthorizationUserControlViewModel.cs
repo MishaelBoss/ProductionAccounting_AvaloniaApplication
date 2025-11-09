@@ -1,5 +1,4 @@
 ﻿using Npgsql;
-using ProductionAccounting_AvaloniaApplication.Script;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ReactiveUI;
 using System;
@@ -63,7 +62,7 @@ public class AuthorizationUserControlViewModel : ViewModelBase, INotifyPropertyC
 
             try
             {
-                string query = @"SELECT id, last_name, first_name, middle_name, password FROM public.""user"" WHERE login = @login";
+                string query = @"SELECT id, login, last_name, first_name, middle_name, password FROM public.""user"" WHERE login = @login";
 
                 using (var connection = new NpgsqlConnection(Arguments.connection))
                 {
@@ -76,16 +75,16 @@ public class AuthorizationUserControlViewModel : ViewModelBase, INotifyPropertyC
                         {
                             if (reader.Read())
                             {
-                                double dbid = reader.GetDouble(0);
-                                string dblast_name = reader.GetString(1);
-                                string dbpassword = reader.GetString(4);
+                                double id = reader.GetDouble(0);
+                                string login = reader.GetString(1);
+                                string password = reader.GetString(5);
 
-                                if (dbpassword == Password)
+                                if (password == Password)
                                 {
                                     if (!Directory.Exists(Paths.SharedFolder))
                                         Directory.CreateDirectory(Paths.SharedFolder);
 
-                                    ManagerCookie.SaveLoginCookie(dbid, dblast_name, Guid.NewGuid().ToString(), DateTime.Now.AddDays(7), Paths.SharedFolder);
+                                    ManagerCookie.SaveLoginCookie(id, login, Guid.NewGuid().ToString(), DateTime.Now.AddDays(7), Paths.SharedFolder);
 
                                     return true;
                                 }

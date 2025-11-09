@@ -22,6 +22,7 @@ public partial class AuthorizationUserControl : UserControl
         {
             var parent = this.FindAncestorOfType<MainWindow>()?.DataContext as MainWindowViewModel;
             parent?.CloseAuthorization();
+            parent?.NotifyLoginStatusChanged();
         }
     }
 
@@ -29,5 +30,13 @@ public partial class AuthorizationUserControl : UserControl
     {
         var parent = this.FindAncestorOfType<MainWindow>()?.DataContext as MainWindowViewModel;
         parent?.CloseAuthorization();
+    }
+
+    public void RefreshData()
+    {
+        if (DataContext is not AuthorizationUserControlViewModel viewModel) return;
+        viewModel.Messageerror = string.Empty;
+        viewModel.Login = string.Empty;
+        viewModel.Password = string.Empty;
     }
 }

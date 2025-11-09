@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using ProductionAccounting_AvaloniaApplication.Scripts;
 using ProductionAccounting_AvaloniaApplication.ViewModels;
 
 namespace ProductionAccounting_AvaloniaApplication.Views
@@ -11,6 +12,8 @@ namespace ProductionAccounting_AvaloniaApplication.Views
             InitializeComponent();
             DataContext = new MainWindowViewModel();
             Loaded += OnLoaded;
+
+            ManagerSettingsJson.InitializeSettings();
         }
 
         private void OnLoaded(object? sender, RoutedEventArgs e) 

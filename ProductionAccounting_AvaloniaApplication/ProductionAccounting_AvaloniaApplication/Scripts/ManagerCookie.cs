@@ -1,18 +1,20 @@
-﻿using Npgsql;
+﻿using MsBox.Avalonia;
+using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Models;
-using ProductionAccounting_AvaloniaApplication.Scripts;
 using System;
 using System.IO;
 using System.Text.Json;
 
-namespace ProductionAccounting_AvaloniaApplication.Script;
+namespace ProductionAccounting_AvaloniaApplication.Scripts;
 
 public class ManagerCookie
 {
-    public static Double GETIDUSER { get; set; }
-    public static string? GETUSERNAME { get; set; } = string.Empty;
-    public static string? GETFIRSTNAME { get; set; } = string.Empty;
-    public static string? GETLASTNAME { get; set; } = string.Empty;
+    public static Double? GetIdUser { get; set; } = 0;
+    public static string? GetLogin { get; set; } = string.Empty;
+    public static string? GetFirstName { get; set; } = string.Empty;
+    public static string? GetLastName { get; set; } = string.Empty;
+    public static string? GetMiddleName { get; set; } = string.Empty;
+    public static string? GetTypeUser { get; set; } = string.Empty;
 
     public static void SaveLoginCookie(double id, string username, string token, DateTime expires, string path)
     {
@@ -27,7 +29,6 @@ public class ManagerCookie
         string cookieFilePath = Path.Combine(path, "login.cookie");
         File.WriteAllText(cookieFilePath, JsonSerializer.Serialize(data));
     }
-
     public static bool IsUserLoggedIn()
     {
         try
@@ -45,175 +46,102 @@ public class ManagerCookie
             if (data == null || data.Expires <= DateTime.Now)
                 return false;
 
-            try
+            using (var connection = new NpgsqlConnection(Arguments.connection))
             {
-                string query = "SELECT id, username, first_name, last_name FROM public.\"user\" WHERE id = @id";
+                connection.Open();
 
-                using (var connection = new NpgsqlConnection(Arguments.connection))
+                double? id = 0;
+                string? login = string.Empty;
+                string? first_name = string.Empty;
+                string? last_name = string.Empty;
+                string? middle_name = string.Empty;
+                double? user_type_id = 0;
+                string? user_type_name = string.Empty;
+
+                try
                 {
-                    connection.Open();
-                    using (var command = new NpgsqlCommand(query, connection))
+                    string sql1 = "SELECT id, login, first_name, last_name, middle_name FROM public.\"user\" WHERE id = @id";
+                    using (var command = new NpgsqlCommand(sql1, connection))
                     {
                         command.Parameters.AddWithValue("@id", data.Id);
 
                         using (var reader = command.ExecuteReader())
                         {
-                            try
+                            if (reader.Read())
                             {
-                                if (!reader.Read()) return false;
+                                id = reader.IsDBNull(0) ? 0 : reader.GetDouble(0);
+                                login = reader.IsDBNull(1) ? string.Empty : reader.GetString(1);
+                                first_name = reader.IsDBNull(2) ? string.Empty : reader.GetString(2);
+                                last_name = reader.IsDBNull(3) ? string.Empty : reader.GetString(3);
+                                middle_name = reader.IsDBNull(4) ? string.Empty : reader.GetString(4);
 
-                                double dbid = reader.GetDouble(0);
-                                string dbusername = reader.GetString(1);
-                                string dbfist_name = reader.GetString(2);
-                                string dblast_name = reader.GetString(3);
-
-                                GETIDUSER = dbid;
-                                GETUSERNAME = dbusername;
-                                GETFIRSTNAME = dbfist_name;
-                                GETLASTNAME = dblast_name;
-                                return dbusername == data.Username;
+                                GetIdUser = id;
+                                GetLogin = login;
+                                GetFirstName = first_name;
+                                GetLastName = last_name;
+                                GetMiddleName = middle_name;
                             }
-                            catch
+                            else 
                             {
+                                Loges.LoggingProcess(level: LogLevel.ERROR,
+                                        "No found user");
                                 return false;
                             }
                         }
                     }
-                }
-            }
-            catch (Exception ex)
-            {
-                Loges.LoggingProcess(level: LogLevel.ERROR,
-                    ex: ex,
-                    message: "error to connect db");
-            }
 
-            return data?.Expires > DateTime.Now;
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
-    public static bool IsSuperUser()
-    {
-        try
-        {
-            if (!Directory.Exists(Paths.SharedFolder)) Directory.CreateDirectory(Paths.SharedFolder);
-
-            string cookieFilePath = Path.Combine(Paths.SharedFolder, "login.cookie");
-
-            if (!File.Exists(cookieFilePath))
-                return false;
-
-            var json = File.ReadAllText(cookieFilePath);
-            var data = JsonSerializer.Deserialize<CookieServer>(json);
-
-            if (data == null || data.Expires <= DateTime.Now)
-                return false;
-
-            try
-            {
-                string query = "SELECT is_superuser FROM public.\"user\" WHERE id = @id";
-
-                using (var connection = new NpgsqlConnection(Arguments.connection))
-                {
-                    connection.Open();
-                    using (var command = new NpgsqlCommand(query, connection))
+                    string sql2 = "SELECT user_type_id FROM public.\"user_to_user_type\" WHERE user_id = @id";
+                    using (var command = new NpgsqlCommand(sql2, connection))
                     {
                         command.Parameters.AddWithValue("@id", data.Id);
 
                         using (var reader = command.ExecuteReader())
                         {
-                            try
+                            if (reader.Read())
                             {
-                                if (!reader.Read()) return false;
-
-                                bool dbis_superuser = reader.GetBoolean(0);
-
-                                return dbis_superuser;
+                                user_type_id = reader.IsDBNull(0) ? 0 : reader.GetDouble(0);
                             }
-                            catch
+                            else
                             {
-                                return false;
+                                user_type_id = 0;
                             }
                         }
                     }
-                }
-            }
-            catch (Exception ex)
-            {
-                Loges.LoggingProcess(level: LogLevel.ERROR,
-                    ex: ex,
-                    message: "error to connect db");
-            }
 
-            return data?.Expires > DateTime.Now;
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
-    public static bool IsMetrologist()
-    {
-        try
-        {
-            if (!Directory.Exists(Paths.SharedFolder)) Directory.CreateDirectory(Paths.SharedFolder);
-
-            string cookieFilePath = Path.Combine(Paths.SharedFolder, "login.cookie");
-
-            if (!File.Exists(cookieFilePath))
-                return false;
-
-            var json = File.ReadAllText(cookieFilePath);
-            var data = JsonSerializer.Deserialize<CookieServer>(json);
-
-            if (data == null || data.Expires <= DateTime.Now)
-                return false;
-
-            try
-            {
-                string query = "SELECT is_metrologist FROM public.\"user\" WHERE id = @id";
-
-                using (var connection = new NpgsqlConnection(Arguments.connection))
-                {
-                    connection.Open();
-                    using (var command = new NpgsqlCommand(query, connection))
+                    if (user_type_id > 0)
                     {
-                        command.Parameters.AddWithValue("@id", data.Id);
-
-                        using (var reader = command.ExecuteReader())
+                        string sql3 = "SELECT type_user FROM public.\"user_type\" WHERE id = @id";
+                        using (var command = new NpgsqlCommand(sql3, connection))
                         {
-                            try
-                            {
-                                if (!reader.Read()) return false;
+                            command.Parameters.AddWithValue("@id", user_type_id);
 
-                                bool dbis_metrologist = reader.GetBoolean(0);
-
-                                return dbis_metrologist;
-                            }
-                            catch
+                            using (var reader = command.ExecuteReader())
                             {
-                                return false;
+                                if (reader.Read())
+                                {
+                                    user_type_name = reader.IsDBNull(0) ? string.Empty : reader.GetString(0);
+
+                                    GetTypeUser = user_type_name;
+                                    //MessageBoxManager.GetMessageBoxStandard("Type user", user_type_name ?? string.Empty).ShowWindowAsync();
+                                }
                             }
                         }
                     }
+
+                    return login == data.Username;
+                }
+                catch (Exception ex)
+                {
+                    Loges.LoggingProcess(level: LogLevel.ERROR,
+                        ex: ex);
+                    return false;
                 }
             }
-            catch (Exception ex)
-            {
-                Loges.LoggingProcess(level: LogLevel.ERROR,
-                    ex: ex,
-                    message: "error to connect db");
-            }
-
-            return data?.Expires > DateTime.Now;
         }
-        catch
+        catch (Exception ex)
         {
+            Loges.LoggingProcess(level: LogLevel.ERROR,
+                ex: ex);
             return false;
         }
     }

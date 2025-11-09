@@ -81,7 +81,7 @@
                                    Width="21" 
                                    Height="21" 
                                    Stretch="Uniform"/>
-                            <Label Grid.Column="1" Content="Войти"/>
+                            <Label Grid.Column="1" Content="{Binding ButtonAuthorizationText}"/>
                         </Grid>
                     </Button>
                 </StackPanel>
