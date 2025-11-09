@@ -23,12 +23,14 @@
 			<Grid>
 				<StackPanel Margin="20">
 					<TextBlock Margin="0 5" HorizontalAlignment="Center" Text="{Binding Messageerror}" />
-					<TextBlock Margin="0 5">Username:</TextBlock>
-					<TextBox Watermark="Enter username" Text="{Binding Username}"/>
+					<TextBlock Margin="0 5">Login:</TextBlock>
+					<TextBox Watermark="Enter login" Text="{Binding Login}"/>
 					<TextBlock Margin="0 5">First name:</TextBlock>
 					<TextBox Watermark="Enter first name" Text="{Binding FirstUsername}"/>
 					<TextBlock Margin="0 5">Last name:</TextBlock>
 					<TextBox Watermark="Enter last name" Text="{Binding LastUsername}"/>
+					<TextBlock Margin="0 5">Middle name:</TextBlock>
+					<TextBox Watermark="Enter Middle name" Text="{Binding MiddleName}"/>
 					<DockPanel HorizontalAlignment="Center">
 						<ComboBox Margin="3"
 								  Width="95"

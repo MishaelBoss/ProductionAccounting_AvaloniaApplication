@@ -23,7 +23,7 @@
                     Background="#4A90E2"
                     Margin="0,0,15,0"
                     VerticalAlignment="Center">
-				<TextBlock Text="{Binding UserName}"
+				<TextBlock Text="{Binding Login}"
                            Foreground="White"
                            FontSize="16"
                            FontWeight="Bold"

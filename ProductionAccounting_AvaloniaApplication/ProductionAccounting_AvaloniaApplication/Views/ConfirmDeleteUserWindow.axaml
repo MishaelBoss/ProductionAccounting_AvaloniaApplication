@@ -1,0 +1,67 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:ProductionAccounting_AvaloniaApplication.ViewModels"
+        x:DataType="vm:ConfirmDeleteUserWindowViewModel"
+        mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="200"
+        MaxWidth="400" MaxHeight="200"
+        x:Class="ProductionAccounting_AvaloniaApplication.ConfirmDeleteUserWindow"
+		ExtendClientAreaToDecorationsHint="True"
+		WindowStartupLocation="CenterScreen"
+        Title="ConfirmDeleteUserWindow">
+
+	<Border CornerRadius="12"
+            Background="LightGray"
+            BorderBrush="#E1E5E9"
+            BorderThickness="1"
+			PointerPressed="TopBorder">
+		
+        <Grid Margin="15"
+			  ColumnDefinitions="Auto, *, Auto">
+
+			<StackPanel Grid.Column="1"
+                        VerticalAlignment="Center"
+                        Margin="0,0,15,0">
+				<TextBlock Text="{Binding Login}"
+                           Foreground="#2C3E50"
+                           FontSize="14"
+                           FontWeight="SemiBold"
+                           Margin="0,0,0,2"/>
+				
+				<TextBlock Text="{Binding UserID}"
+                           Foreground="#7F8C8D"
+                           FontSize="12"
+                           Margin="0,0,0,1"/>
+			</StackPanel>
+
+			<StackPanel Grid.Column="2"
+						Orientation="Horizontal"
+						Spacing="6"
+						VerticalAlignment="Center">
+
+				<Button Click="Cancel_Click"
+						Width="100"
+						Height="34"
+						CornerRadius="6"
+						Background="#757271"
+						BorderThickness="0"
+						ToolTip.Tip="Cancel">
+					<Label	HorizontalAlignment="Center" 
+							Content="Cancel"/>
+				</Button>
+
+				<Button Click="Confirm_Click"
+						Width="100"
+						Height="34"
+						CornerRadius="6"
+						Background="#FF3B30"
+						BorderThickness="0"
+						ToolTip.Tip="Confirm">
+					<Label	HorizontalAlignment="Center" 
+							Content="Confirm"/>
+				</Button>
+			</StackPanel>
+		</Grid>
+    </Border>
+</Window>

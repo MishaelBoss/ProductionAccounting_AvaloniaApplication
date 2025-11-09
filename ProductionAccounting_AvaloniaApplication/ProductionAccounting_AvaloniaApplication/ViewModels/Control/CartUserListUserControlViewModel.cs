@@ -11,6 +11,13 @@ public class CartUserListUserControlViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _userID, value);
     }
 
+    private string _login = string.Empty;
+    public string Login
+    {
+        get => _login;
+        set => this.RaiseAndSetIfChanged(ref _login, value);
+    }
+
     private string _userName = string.Empty;
     public string UserName {
         get => _userName;

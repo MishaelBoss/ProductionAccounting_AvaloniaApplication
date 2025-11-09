@@ -34,7 +34,8 @@ public partial class AdminPageUserControlView : UserControl
 
     private void ReturnList_Click(object? sender, RoutedEventArgs e)
     {
-
+        if (DataContext is not AdminPageUserControlViewModel viewModel) return;
+        viewModel.GetListUsers();
     }
 
     private void UserControl_ActualThemeVariantChanged(object? sender, System.EventArgs e)

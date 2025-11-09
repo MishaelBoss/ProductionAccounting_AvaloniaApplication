@@ -26,5 +26,7 @@ public partial class UserLibraryUserControlView : UserControl
 
     private void ReturnList_Click(object? sender, RoutedEventArgs e)
     {
+        if (DataContext is not UserLibraryUserControlViewModel viewModel) return;
+        viewModel.GetListUsers();
     }
 }

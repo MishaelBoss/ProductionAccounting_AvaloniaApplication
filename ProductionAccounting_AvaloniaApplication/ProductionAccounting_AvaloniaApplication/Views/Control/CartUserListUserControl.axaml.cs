@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.VisualTree;
+using ProductionAccounting_AvaloniaApplication.ViewModels;
 using ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 using ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
 
@@ -28,5 +29,19 @@ public partial class CartUserListUserControl : UserControl
 
     private void OpenWindowsConfirmDeleteUser_Click(object? sender, RoutedEventArgs e)
     {
+        if (DataContext is not CartUserListUserControlViewModel viewModel) return;
+
+        var confirmDeleteUserViewModel = new ConfirmDeleteUserWindowViewModel()
+        {
+            UserID = viewModel.UserID,
+            Login = viewModel.Login,
+        };
+
+        var confirmDeleteUserWindows = new ConfirmDeleteUserWindow()
+        {
+            DataContext = confirmDeleteUserViewModel,
+        };
+
+        confirmDeleteUserWindows.Show();
     }
 }

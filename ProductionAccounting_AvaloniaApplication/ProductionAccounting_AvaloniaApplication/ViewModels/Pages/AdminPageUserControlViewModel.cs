@@ -74,6 +74,7 @@ public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChang
                         {
                             double dbid = reader.GetDouble(0);
                             string dbpassword = reader.GetString(1);
+                            string dblogin = reader.GetString(6);
                             string dbusername = reader.GetString(2);
                             string dbfirst_name = reader.GetString(3);
                             string dblast_name = reader.GetString(4);
@@ -82,6 +83,7 @@ public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChang
                             var userViewModel = new CartUserListUserControlViewModel
                             {
                                 UserID = dbid,
+                                Login = dblogin,
                                 UserName = dbusername,
                                 FirstName = dbfirst_name,
                                 LastName = dblast_name,

@@ -1,5 +1,4 @@
-﻿using MsBox.Avalonia;
-using Npgsql;
+﻿using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Script;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ReactiveUI;
@@ -18,16 +17,16 @@ public class AuthorizationUserControlViewModel : ViewModelBase, INotifyPropertyC
         set => this.RaiseAndSetIfChanged(ref _messageerror, value);
     }
 
-    private string _fullName = string.Empty;
-    public string FullName
+    private string _login = string.Empty;
+    public string Login
     {
-        get => _fullName;
+        get => _login;
         set 
         {
-            if (_fullName != value) 
+            if (_login != value) 
             {
-                _fullName = value;
-                OnPropertyChanged(nameof(FullName));
+                _login = value;
+                OnPropertyChanged(nameof(Login));
                 OnPropertyChanged(nameof(IsActiveConfirmButton));
             }
         }
@@ -49,14 +48,14 @@ public class AuthorizationUserControlViewModel : ViewModelBase, INotifyPropertyC
     }
 
     public bool IsActiveConfirmButton
-        => !string.IsNullOrEmpty(FullName)
+        => !string.IsNullOrEmpty(Login)
         && !string.IsNullOrEmpty(Password);
 
     public bool Authorization()
     {
         try
         {
-            if (string.IsNullOrEmpty(FullName) || string.IsNullOrEmpty(Password))
+            if (string.IsNullOrEmpty(Login) || string.IsNullOrEmpty(Password))
             {
                 Messageerror = "Логин и пароль обязательны";
                 return false;
@@ -64,30 +63,14 @@ public class AuthorizationUserControlViewModel : ViewModelBase, INotifyPropertyC
 
             try
             {
-                string[] words = FullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-
-                if (words.Length < 3)
-                {
-                    Messageerror = "Введите Фамилию Имя Отчество полностью";
-                    return false;
-                }
-
-                string lastName = words[0];
-                string first_name = words[1];
-                string middleName = words[2];
-
-                string query = @"SELECT id, last_name, first_name, middle_name, password FROM public.""user"" WHERE last_name = @last_name AND first_name = @first_name AND middle_name = @middle_name";
+                string query = @"SELECT id, last_name, first_name, middle_name, password FROM public.""user"" WHERE login = @login";
 
                 using (var connection = new NpgsqlConnection(Arguments.connection))
                 {
                     connection.Open();
                     using (var command = new NpgsqlCommand(query, connection))
                     {
-                        command.Parameters.AddWithValue("@last_name", lastName);
-                        command.Parameters.AddWithValue("@first_name", first_name);
-                        command.Parameters.AddWithValue("@middle_name", middleName);
-
-                        MessageBoxManager.GetMessageBoxStandard("dad", $"{middleName}, {lastName}, {first_name}, {Password}").ShowWindowAsync();
+                        command.Parameters.AddWithValue("@login", Login);
 
                         using (var reader = command.ExecuteReader())
                         {

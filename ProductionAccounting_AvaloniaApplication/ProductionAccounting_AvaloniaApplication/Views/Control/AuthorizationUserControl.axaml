@@ -19,8 +19,8 @@
 			<Grid>
 				<StackPanel Margin="20">
 					<TextBlock Margin="0 5" HorizontalAlignment="Center" Text="{Binding Messageerror}" />
-					<TextBlock Margin="0 5" Text="ФИО"/>
-					<TextBox Watermark="Ведите ФИО" Text="{Binding FullName}"/>
+					<TextBlock Margin="0 5" Text="Login"/>
+					<TextBox Watermark="Enter login" Text="{Binding Login}"/>
 					<TextBlock Margin="0 5" Text="Пароль"/>
 					<TextBox PasswordChar="*" Watermark="Введите пароль" Text="{Binding Password}"/>
 					<StackPanel Orientation="Vertical"

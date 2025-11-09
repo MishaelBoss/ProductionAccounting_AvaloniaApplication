@@ -23,6 +23,8 @@
 			<Grid>
 				<StackPanel Margin="20">
 					<TextBlock Margin="0 5" HorizontalAlignment="Center" Text="{Binding Messageerror}" />
+					<TextBlock Margin="0 5">Login:</TextBlock>
+					<TextBox Watermark="Enter login" Text="{Binding Login}"/>
 					<TextBlock Margin="0 5">First name:</TextBlock>
 					<TextBox Watermark="Enter first name" Text="{Binding FirstUsername}"/>
 					<TextBlock Margin="0 5">Last name:</TextBlock>

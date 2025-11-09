@@ -54,6 +54,21 @@ public class EditUsersUserControlViewModel : ViewModelBase, INotifyPropertyChang
         }
     }
 
+    private string _login = string.Empty;
+    public string Login
+    {
+        get => _login;
+        set
+        {
+            if (_login != value)
+            {
+                _login = value;
+                OnPropertyChanged(nameof(Login));
+                OnPropertyChanged(nameof(IsActiveConfirmButton));
+            }
+        }
+    }
+
     private string _firstUsername = string.Empty;
     public string FirstUsername
     {
@@ -101,6 +116,7 @@ public class EditUsersUserControlViewModel : ViewModelBase, INotifyPropertyChang
 
     public bool IsActiveConfirmButton
         => SelectedComboBoxItem != null
+        && !string.IsNullOrEmpty(Login)
         && !string.IsNullOrEmpty(FirstUsername)
         && !string.IsNullOrEmpty(LastUsername) 
         && !string.IsNullOrEmpty(MiddleName);
@@ -140,6 +156,7 @@ public class EditUsersUserControlViewModel : ViewModelBase, INotifyPropertyChang
                             u.first_name, 
                             u.last_name, 
                             u.middle_name,
+                            u.login, 
                             ut.id as user_type_id,
                             ut.type_user
                         FROM public.""user"" u
@@ -161,8 +178,9 @@ public class EditUsersUserControlViewModel : ViewModelBase, INotifyPropertyChang
                             MiddleName = reader.GetString(0);
                             FirstUsername = reader.GetString(1);
                             LastUsername = reader.GetString(2);
+                            Login = reader.GetString(3);
 
-                            if (!reader.IsDBNull(3))
+                            if (!reader.IsDBNull(4))
                             {
                                 var userTypeId = reader.GetDouble(3);
                                 var userTypeName = reader.GetString(4);
@@ -185,7 +203,7 @@ public class EditUsersUserControlViewModel : ViewModelBase, INotifyPropertyChang
     {
         try
         {
-            if (string.IsNullOrEmpty(LastUsername) || string.IsNullOrEmpty(FirstUsername) || string.IsNullOrEmpty(MiddleName) || SelectedComboBoxItem == null)
+            if (string.IsNullOrEmpty(Login) || string.IsNullOrEmpty(LastUsername) || string.IsNullOrEmpty(FirstUsername) || string.IsNullOrEmpty(MiddleName) || SelectedComboBoxItem == null)
             {
                 Messageerror = "Не все поля заполнены";
                 return false;
@@ -197,10 +215,11 @@ public class EditUsersUserControlViewModel : ViewModelBase, INotifyPropertyChang
                 {
                     connection.Open();
 
-                    string sql = "UPDATE public.\"user\" SET middle_name = @newMiddleName, first_name = @newFirstName, last_name = @newLastName WHERE id = @userID";
+                    string sql = "UPDATE public.\"user\" SET login = @newLogin, middle_name = @newMiddleName, first_name = @newFirstName, last_name = @newLastName WHERE id = @userID";
                     using (var command = new NpgsqlCommand(sql, connection))
                     {
                         command.Parameters.AddWithValue("@userID", UserID);
+                        command.Parameters.AddWithValue("@newLogin", Login);
                         command.Parameters.AddWithValue("@newFirstName", FirstUsername);
                         command.Parameters.AddWithValue("@newLastName", LastUsername);
                         command.Parameters.AddWithValue("@newMiddleName", MiddleName);
