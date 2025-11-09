@@ -2,7 +2,6 @@
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
 using ReactiveUI;
-using System;
 using System.Windows.Input;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
@@ -15,9 +14,9 @@ public class RightBoardUserControlViewModel : ViewModelBase
     {
         mainWindowViewModel = _mainWindowViewModel;
 
-        mainWindowViewModel?.LoginStatusChanged += OnLoginStatusChanged;
-
         UpdateUI();
+
+        mainWindowViewModel?.LoginStatusChanged += OnLoginStatusChanged;
     }
 
     private readonly AdminPageUserControlViewModel adminPageTemplatedControlViewModel = new();
@@ -61,6 +60,20 @@ public class RightBoardUserControlViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _buttonAuthorizationText, value);
     }
 
+    private bool _isVisibleAdminPanelButton;
+    public bool IsVisibleAdminPanelButton
+    {
+        get => _isVisibleAdminPanelButton;
+        set => this.RaiseAndSetIfChanged(ref _isVisibleAdminPanelButton, value);
+    }
+
+    private bool _isVisibleWorkUserButton;
+    public bool IsVisibleWorkUserButton
+    {
+        get => _isVisibleWorkUserButton;
+        set => this.RaiseAndSetIfChanged(ref _isVisibleWorkUserButton, value);
+    }
+
     private void OnLoginStatusChanged()
     {
         UpdateUI();
@@ -68,19 +81,13 @@ public class RightBoardUserControlViewModel : ViewModelBase
 
     public void UpdateUI()
     {
-        try
-        {
-            if (ManagerCookie.IsUserLoggedIn())
-            {
-                ButtonAuthorizationText = "Выйти";
-            }
-            else
-            {
-                ButtonAuthorizationText = "Войти";
-            }
-        }
-        catch (Exception ex)
-        {
-        }
+        if (ManagerCookie.IsUserLoggedIn()) ButtonAuthorizationText = "Выйти";
+        else ButtonAuthorizationText = "Войти";
+
+        IsVisibleAdminPanelButton = ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsAdministrator;
+        IsVisibleWorkUserButton = ManagerCookie.IsUserLoggedIn() && (ManagerCookie.IsMaster || ManagerCookie.IsEmployee);
+
+        if (!ManagerCookie.IsUserLoggedIn() || !ManagerCookie.IsAdministrator && _objectViewModels == adminPageTemplatedControlViewModel) OpenPage(workUserPageTemplatedControlViewModel);
+        if (!ManagerCookie.IsUserLoggedIn() || (!ManagerCookie.IsMaster || !ManagerCookie.IsEmployee) && _objectViewModels == workUserPageTemplatedControlViewModel) mainWindowViewModel.ShowAuthorization();
     }
 }

@@ -82,7 +82,8 @@
 						CornerRadius="6"
 						Background="#FF3B30"
 						BorderThickness="0"
-						ToolTip.Tip="Удалить пользователя">
+						IsVisible="{Binding IsVisibleButtonDelete}"
+						ToolTip.Tip="Удалить">
 					<Image Source="/Assets/remove-64.png"
 						   Width="18"
 						   Height="18"/>

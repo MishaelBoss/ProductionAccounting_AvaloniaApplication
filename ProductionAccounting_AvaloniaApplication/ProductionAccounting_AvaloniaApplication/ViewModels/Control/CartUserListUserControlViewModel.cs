@@ -49,6 +49,9 @@ public class CartUserListUserControlViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _dateJoined, value);
     }
 
-    public bool IsVisibleButtonEdit => ManagerCookie.IsAdministrator;
-    public bool IsVisibleButtonDelete => ManagerCookie.IsAdministrator;
+    public bool IsVisibleButtonEdit 
+        => ManagerCookie.IsAdministrator;
+
+    public bool IsVisibleButtonDelete
+        => ManagerCookie.IsAdministrator;
 }

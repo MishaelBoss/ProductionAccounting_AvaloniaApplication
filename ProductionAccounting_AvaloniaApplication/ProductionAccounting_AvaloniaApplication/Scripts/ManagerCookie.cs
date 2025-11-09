@@ -126,7 +126,7 @@ public class ManagerCookie
                         }
                     }
 
-                    if (user_type_id > 0)
+/*                    if (user_type_id > 0)
                     {
                         string sql3 = "SELECT type_user FROM public.\"user_type\" WHERE id = @id";
                         using (var command = new NpgsqlCommand(sql3, connection))
@@ -138,12 +138,10 @@ public class ManagerCookie
                                 if (reader.Read())
                                 {
                                     user_type_name = reader.IsDBNull(0) ? string.Empty : reader.GetString(0);
-
-                                    //MessageBoxManager.GetMessageBoxStandard("Type user", user_type_name ?? string.Empty).ShowWindowAsync();
                                 }
                             }
                         }
-                    }
+                    }*/
 
                     return login == data.Username;
                 }

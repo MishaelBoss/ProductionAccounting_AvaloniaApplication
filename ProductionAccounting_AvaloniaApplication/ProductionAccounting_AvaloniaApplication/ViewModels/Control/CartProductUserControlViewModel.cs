@@ -1,4 +1,5 @@
-﻿using ReactiveUI;
+﻿using ProductionAccounting_AvaloniaApplication.Scripts;
+using ReactiveUI;
 using System.Collections.Generic;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
@@ -45,4 +46,7 @@ public class CartProductUserControlViewModel : ViewModelBase
         get => _selectedUnit;
         set => this.RaiseAndSetIfChanged(ref _selectedUnit, value);
     }
+
+    public bool IsVisibleButtonDelete 
+        => ManagerCookie.IsAdministrator;
 }
