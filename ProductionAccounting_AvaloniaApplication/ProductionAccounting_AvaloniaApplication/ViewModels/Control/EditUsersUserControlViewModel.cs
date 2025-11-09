@@ -114,12 +114,28 @@ public class EditUsersUserControlViewModel : ViewModelBase, INotifyPropertyChang
         }
     }
 
+    private Decimal _baseSalary = 0;
+    public Decimal BaseSalary
+    {
+        get => _baseSalary;
+        set
+        {
+            if (_baseSalary != value)
+            {
+                _baseSalary = value;
+                OnPropertyChanged(nameof(BaseSalary));
+                OnPropertyChanged(nameof(IsActiveConfirmButton));
+            }
+        }
+    }
+
     public bool IsActiveConfirmButton
         => SelectedComboBoxItem != null
         && !string.IsNullOrEmpty(Login)
         && !string.IsNullOrEmpty(FirstUsername)
         && !string.IsNullOrEmpty(LastUsername) 
-        && !string.IsNullOrEmpty(MiddleName);
+        && !string.IsNullOrEmpty(MiddleName)
+        && BaseSalary > 0;
 
     private async Task LoadListTypeToComboBoxAsync()
     {
@@ -157,6 +173,7 @@ public class EditUsersUserControlViewModel : ViewModelBase, INotifyPropertyChang
                             u.last_name, 
                             u.middle_name,
                             u.login, 
+                            u.base_salary,
                             ut.id as user_type_id,
                             ut.type_user
                         FROM public.""user"" u
@@ -179,14 +196,12 @@ public class EditUsersUserControlViewModel : ViewModelBase, INotifyPropertyChang
                             FirstUsername = reader.GetString(1);
                             LastUsername = reader.GetString(2);
                             Login = reader.GetString(3);
+                            BaseSalary = reader.GetDecimal(4);
 
-                            if (!reader.IsDBNull(4))
-                            {
-                                var userTypeId = reader.GetDouble(3);
-                                var userTypeName = reader.GetString(4);
+                            var userTypeId = reader.GetDouble(5);
+                            var userTypeName = reader.GetString(6);
 
-                                SelectedComboBoxItem = ComboBoxItems.FirstOrDefault(x => x.Id == userTypeId);
-                            }
+                            SelectedComboBoxItem = ComboBoxItems.FirstOrDefault(x => x.Id == userTypeId);
                         }
                     }
                 }
@@ -203,7 +218,7 @@ public class EditUsersUserControlViewModel : ViewModelBase, INotifyPropertyChang
     {
         try
         {
-            if (string.IsNullOrEmpty(Login) || string.IsNullOrEmpty(LastUsername) || string.IsNullOrEmpty(FirstUsername) || string.IsNullOrEmpty(MiddleName) || SelectedComboBoxItem == null)
+            if (string.IsNullOrEmpty(Login) || string.IsNullOrEmpty(LastUsername) || string.IsNullOrEmpty(FirstUsername) || string.IsNullOrEmpty(MiddleName) || BaseSalary <= 0|| SelectedComboBoxItem == null)
             {
                 Messageerror = "Не все поля заполнены";
                 return false;
@@ -215,7 +230,7 @@ public class EditUsersUserControlViewModel : ViewModelBase, INotifyPropertyChang
                 {
                     connection.Open();
 
-                    string sql = "UPDATE public.\"user\" SET login = @newLogin, middle_name = @newMiddleName, first_name = @newFirstName, last_name = @newLastName WHERE id = @userID";
+                    string sql = "UPDATE public.\"user\" SET login = @newLogin, middle_name = @newMiddleName, first_name = @newFirstName, last_name = @newLastName, base_salary = @newBaseSalary WHERE id = @userID";
                     using (var command = new NpgsqlCommand(sql, connection))
                     {
                         command.Parameters.AddWithValue("@userID", UserID);
@@ -223,6 +238,7 @@ public class EditUsersUserControlViewModel : ViewModelBase, INotifyPropertyChang
                         command.Parameters.AddWithValue("@newFirstName", FirstUsername);
                         command.Parameters.AddWithValue("@newLastName", LastUsername);
                         command.Parameters.AddWithValue("@newMiddleName", MiddleName);
+                        command.Parameters.AddWithValue("@newBaseSalary", BaseSalary);
                         command.ExecuteNonQuery();
                     }
 

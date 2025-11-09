@@ -14,7 +14,11 @@ public class ManagerCookie
     public static string? GetFirstName { get; set; } = string.Empty;
     public static string? GetLastName { get; set; } = string.Empty;
     public static string? GetMiddleName { get; set; } = string.Empty;
-    public static string? GetTypeUser { get; set; } = string.Empty;
+    public static bool IsAdministrator { get; private set; }
+    public static bool IsManager { get; private set; }
+    public static bool IsMaster { get; private set; }
+    public static bool IsEmployee { get; private set; }
+    public static double? CurrentUserTypeId { get; private set; }
 
     public static void SaveLoginCookie(double id, string username, string token, DateTime expires, string path)
     {
@@ -29,6 +33,7 @@ public class ManagerCookie
         string cookieFilePath = Path.Combine(path, "login.cookie");
         File.WriteAllText(cookieFilePath, JsonSerializer.Serialize(data));
     }
+
     public static bool IsUserLoggedIn()
     {
         try
@@ -100,10 +105,23 @@ public class ManagerCookie
                             if (reader.Read())
                             {
                                 user_type_id = reader.IsDBNull(0) ? 0 : reader.GetDouble(0);
+
+                                CurrentUserTypeId = user_type_id;
+
+                                IsAdministrator = user_type_id == 1;
+                                IsManager = user_type_id == 2;
+                                IsMaster = user_type_id == 3;
+                                IsEmployee = user_type_id == 4;
+
                             }
                             else
                             {
                                 user_type_id = 0;
+                                CurrentUserTypeId = null;
+                                IsAdministrator = false;
+                                IsManager = false;
+                                IsMaster = false;
+                                IsEmployee= false;
                             }
                         }
                     }
@@ -121,7 +139,6 @@ public class ManagerCookie
                                 {
                                     user_type_name = reader.IsDBNull(0) ? string.Empty : reader.GetString(0);
 
-                                    GetTypeUser = user_type_name;
                                     //MessageBoxManager.GetMessageBoxStandard("Type user", user_type_name ?? string.Empty).ShowWindowAsync();
                                 }
                             }

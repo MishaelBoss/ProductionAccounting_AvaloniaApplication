@@ -39,6 +39,7 @@ public partial class AddUsersUserControl : UserControl
         viewModel.MiddleName = string.Empty;
         viewModel.FirstUsername = string.Empty;
         viewModel.LastUsername = string.Empty;
+        viewModel.BaseSalary = 0;
         await viewModel.LoadListTypeToComboBoxAsync();
     }
 }

@@ -79,6 +79,7 @@
 						CornerRadius="6"
 						Background="#34C759"
 						BorderThickness="0"
+						IsVisible="{Binding IsVisibleButtonEdit}"
 						ToolTip.Tip="Редактировать пользователя">
 					<Image Source="/Assets/edit-user-64.png"
 						   Width="18"
@@ -91,6 +92,7 @@
 						CornerRadius="6"
 						Background="#FF3B30"
 						BorderThickness="0"
+						IsVisible="{Binding IsVisibleButtonDelete}"
 						ToolTip.Tip="Удалить пользователя">
 					<Image Source="/Assets/remove-64.png"
 						   Width="18"

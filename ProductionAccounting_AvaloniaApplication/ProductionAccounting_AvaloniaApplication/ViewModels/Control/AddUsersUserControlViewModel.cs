@@ -100,12 +100,28 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
         }
     }
 
+    private Decimal _baseSalary = 0;
+    public Decimal BaseSalary 
+    {
+        get => _baseSalary;
+        set 
+        {
+            if (_baseSalary != value) 
+            {
+                _baseSalary = value;
+                OnPropertyChanged(nameof(BaseSalary));
+                OnPropertyChanged(nameof(IsActiveConfirmButton));
+            }
+        }
+    }
+
     public bool IsActiveConfirmButton
         => SelectedComboBoxItem != null
         && !string.IsNullOrEmpty(Login)
         && !string.IsNullOrEmpty(MiddleName) 
         && !string.IsNullOrEmpty(FirstUsername) 
-        && !string.IsNullOrEmpty(LastUsername);
+        && !string.IsNullOrEmpty(LastUsername)
+        && BaseSalary > 0;
 
     public async Task LoadListTypeToComboBoxAsync()
     {
@@ -145,8 +161,8 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
 
             try
             {
-                string sql = "INSERT INTO public.user (login, password, first_name, last_name, middle_name) " +
-                             "VALUES (@login, @password, @first_name, @last_name, @middle_name) RETURNING id";
+                string sql = "INSERT INTO public.user (login, password, first_name, last_name, middle_name, base_salary) " +
+                             "VALUES (@login, @password, @first_name, @last_name, @middle_name, @base_salary) RETURNING id";
 
                 using (var connection = new NpgsqlConnection(Arguments.connection))
                 {
@@ -167,6 +183,7 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
                             command.Parameters.AddWithValue("@first_name", FirstUsername);
                             command.Parameters.AddWithValue("@last_name", LastUsername);
                             command.Parameters.AddWithValue("@middle_name", MiddleName);
+                            command.Parameters.AddWithValue("@base_salary", BaseSalary);
 
                             var equipmentId = command.ExecuteScalar();
                             if (equipmentId == null) return false;

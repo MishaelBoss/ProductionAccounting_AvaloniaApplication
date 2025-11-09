@@ -31,6 +31,8 @@
 					<TextBox Watermark="Enter last name" Text="{Binding LastUsername}"/>
 					<TextBlock Margin="0 5">Middle name:</TextBlock>
 					<TextBox Watermark="Enter Middle name" Text="{Binding MiddleName}"/>
+					<TextBlock Margin="0 5">Base salary:</TextBlock>
+					<TextBox Watermark="Enter base salary" Text="{Binding BaseSalary}"/>
 					<DockPanel HorizontalAlignment="Center">
 						<ComboBox Margin="3"
 								  Width="95"

@@ -35,12 +35,8 @@ public class CartProductUserControlViewModel : ViewModelBase
 
     public List<string> AvailableUnits { get; } = new List<string>
     {
-        "тонну",
         "кг",
-        "шт",
-        "метр",
-        "лист",
-        "комплект"
+        "еденица"
     };
 
     private string _selectedUnit = string.Empty;

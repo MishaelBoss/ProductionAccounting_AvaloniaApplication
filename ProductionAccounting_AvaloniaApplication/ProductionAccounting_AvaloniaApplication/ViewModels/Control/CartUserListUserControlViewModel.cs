@@ -1,4 +1,5 @@
-﻿using ReactiveUI;
+﻿using ProductionAccounting_AvaloniaApplication.Scripts;
+using ReactiveUI;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
@@ -47,4 +48,7 @@ public class CartUserListUserControlViewModel : ViewModelBase
         get => _dateJoined;
         set => this.RaiseAndSetIfChanged(ref _dateJoined, value);
     }
+
+    public bool IsVisibleButtonEdit => ManagerCookie.IsAdministrator;
+    public bool IsVisibleButtonDelete => ManagerCookie.IsAdministrator;
 }
