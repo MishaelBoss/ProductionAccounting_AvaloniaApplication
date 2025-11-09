@@ -1,4 +1,5 @@
 ﻿using ReactiveUI;
+using System.Collections.Generic;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
@@ -30,5 +31,22 @@ public class CartProductUserControlViewModel : ViewModelBase
     { 
         get => _pricePerUnit;
         set => this.RaiseAndSetIfChanged(ref _pricePerUnit, value);
+    }
+
+    public List<string> AvailableUnits { get; } = new List<string>
+    {
+        "тонну",
+        "кг",
+        "шт",
+        "метр",
+        "лист",
+        "комплект"
+    };
+
+    private string _selectedUnit = string.Empty;
+    public string SelectedUnit
+    {
+        get => _selectedUnit;
+        set => this.RaiseAndSetIfChanged(ref _selectedUnit, value);
     }
 }

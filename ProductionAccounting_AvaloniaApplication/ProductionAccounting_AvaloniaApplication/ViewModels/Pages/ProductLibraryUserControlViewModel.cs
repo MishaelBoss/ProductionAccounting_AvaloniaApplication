@@ -70,7 +70,7 @@ public class ProductLibraryUserControlViewModel : ViewModelBase, INotifyProperty
                             double dbid = reader.GetDouble(0);
                             string dbname = reader.GetString(1);
                             string dbarticle = reader.GetString(2);
-                            string dbpricePerUnit = reader.GetString(3);
+                            string dbpricePerUnit = reader.GetDecimal(5).ToString();
 
                             var viewModel = new CartProductUserControlViewModel
                             {

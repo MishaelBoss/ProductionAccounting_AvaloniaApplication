@@ -34,6 +34,29 @@
                            Foreground="#7F8C8D"
                            FontSize="11"
                            TextTrimming="CharacterEllipsis"/>
+
+				<DockPanel HorizontalAlignment="Left">
+					<ComboBox Margin="3"
+							  Width="95"
+							  MinHeight="15"
+							  Height="27"
+							  DockPanel.Dock="Right"
+							  FontSize="12"
+							  ItemsSource="{Binding AvailableUnits}"
+							  SelectedItem="{Binding SelectedUnit}">
+						<ComboBox.Styles>
+							<Style Selector="ComboBoxItem">
+								<Setter Property="Padding" Value="5, 0"/>
+								<Setter Property="Height" Value="20"/>
+								<Setter Property="MinHeight" Value="12"/>
+								<Setter Property="Foreground" Value="White"/>
+							</Style>
+						</ComboBox.Styles>
+					</ComboBox>
+					<TextBlock Text="Единица измерения *"
+							   VerticalAlignment="Center"
+							   HorizontalAlignment="Right"/>
+				</DockPanel>
 			</StackPanel>
 
 			<StackPanel Grid.Column="2"
