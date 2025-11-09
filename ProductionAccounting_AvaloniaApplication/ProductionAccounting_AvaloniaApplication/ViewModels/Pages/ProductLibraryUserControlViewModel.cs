@@ -1,5 +1,130 @@
-﻿namespace ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
+﻿using Avalonia.Controls;
+using Npgsql;
+using ProductionAccounting_AvaloniaApplication.Scripts;
+using ProductionAccounting_AvaloniaApplication.ViewModels.Control;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Threading.Tasks;
 
-public class ProductLibraryUserControlViewModel : ViewModelBase
+namespace ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
+
+public class ProductLibraryUserControlViewModel : ViewModelBase, INotifyPropertyChanged
 {
+    public StackPanel? MainContent { get; set; } = null;
+
+    private List<CartProductUserControl> _productList = [];
+
+    private string _search = string.Empty;
+    public string Search
+    {
+        get => _search;
+        set
+        {
+            if (_search != value)
+            {
+                _search = value;
+                OnPropertyChanged(nameof(Search));
+                PerformSearchListProduct();
+            }
+        }
+    }
+
+    private async void PerformSearchListProduct()
+    {
+        if (string.IsNullOrWhiteSpace(Search))
+        {
+            GetListProduct();
+            return;
+        }
+
+        await SearchProductAsync($"%{Search}%");
+    }
+
+    public async void GetListProduct()
+    {
+        await SearchProductAsync("%");
+    }
+
+    private async Task SearchProductAsync(string search)
+    {
+        //if (!ManagerCookie.IsUserLoggedIn()) return;
+
+        ClearResults();
+
+        try
+        {
+            string sql = "SELECT * FROM public.\"product\" WHERE name ILIKE @name OR article ILIKE @article";
+
+            using (var connection = new NpgsqlConnection(Arguments.connection))
+            {
+                await connection.OpenAsync();
+                using (var command = new NpgsqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@name", search);
+                    command.Parameters.AddWithValue("@article", search);
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            double dbid = reader.GetDouble(0);
+                            string dbname = reader.GetString(1);
+                            string dbarticle = reader.GetString(2);
+                            string dbpricePerUnit = reader.GetString(3);
+
+                            var viewModel = new CartProductUserControlViewModel
+                            {
+                                ProductID = dbid,
+                                Name = dbname,
+                                Article = dbarticle,
+                                PricePerUnit = dbpricePerUnit
+                            };
+
+                            var userControl = new CartProductUserControl
+                            {
+                                DataContext = viewModel
+                            };
+
+                            _productList.Add(userControl);
+                        }
+                    }
+                }
+            }
+
+            UpdateUI();
+
+            //if (_productList.Count == 0) ShowErrorUserControl(ErrorLevel.NotFound);
+        }
+        catch (NpgsqlException ex)
+        {
+            ClearResults();
+            //ShowErrorUserControl(ErrorLevel.NoConnectToDB);
+
+            Loges.LoggingProcess(LogLevel.CRITICAL,
+                "Connection or request error",
+                ex: ex);
+        }
+    }
+
+    private void ClearResults()
+    {
+        _productList.Clear();
+        UpdateUI();
+    }
+
+    private void UpdateUI()
+    {
+        if (MainContent != null)
+        {
+            MainContent.Children.Clear();
+            foreach (CartProductUserControl item in _productList)
+            {
+                MainContent.Children.Add(item);
+            }
+        }
+    }
+
+    public new event PropertyChangedEventHandler? PropertyChanged;
+    protected void OnPropertyChanged(string propertyName)
+        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }

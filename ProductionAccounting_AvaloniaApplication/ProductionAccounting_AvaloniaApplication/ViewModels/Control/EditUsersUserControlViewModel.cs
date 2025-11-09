@@ -54,21 +54,6 @@ public class EditUsersUserControlViewModel : ViewModelBase, INotifyPropertyChang
         }
     }
 
-    private string _username = string.Empty;
-    public string Username
-    {
-        get => _username;
-        set
-        {
-            if (_username != value)
-            {
-                _username = value;
-                OnPropertyChanged(nameof(Username));
-                OnPropertyChanged(nameof(IsActiveConfirmButton));
-            }
-        }
-    }
-
     private string _firstUsername = string.Empty;
     public string FirstUsername
     {
@@ -99,11 +84,26 @@ public class EditUsersUserControlViewModel : ViewModelBase, INotifyPropertyChang
         }
     }
 
+    private string _middleName = string.Empty;
+    public string MiddleName
+    {
+        get => _middleName;
+        set
+        {
+            if (_middleName != value)
+            {
+                _middleName = value;
+                OnPropertyChanged(nameof(MiddleName));
+                OnPropertyChanged(nameof(IsActiveConfirmButton));
+            }
+        }
+    }
+
     public bool IsActiveConfirmButton
         => SelectedComboBoxItem != null
-        && !string.IsNullOrEmpty(Username)
         && !string.IsNullOrEmpty(FirstUsername)
-        && !string.IsNullOrEmpty(LastUsername);
+        && !string.IsNullOrEmpty(LastUsername) 
+        && !string.IsNullOrEmpty(MiddleName);
 
     private async Task LoadListTypeToComboBoxAsync()
     {
@@ -137,9 +137,9 @@ public class EditUsersUserControlViewModel : ViewModelBase, INotifyPropertyChang
         {
             string sql = @"
                         SELECT 
-                            u.name, 
                             u.first_name, 
-                            u.last_name,
+                            u.last_name, 
+                            u.middle_name,
                             ut.id as user_type_id,
                             ut.type_user
                         FROM public.""user"" u
@@ -158,7 +158,7 @@ public class EditUsersUserControlViewModel : ViewModelBase, INotifyPropertyChang
                     {
                         if (await reader.ReadAsync())
                         {
-                            Username = reader.GetString(0);
+                            MiddleName = reader.GetString(0);
                             FirstUsername = reader.GetString(1);
                             LastUsername = reader.GetString(2);
 
@@ -185,7 +185,7 @@ public class EditUsersUserControlViewModel : ViewModelBase, INotifyPropertyChang
     {
         try
         {
-            if (string.IsNullOrEmpty(Username) || string.IsNullOrEmpty(LastUsername) || string.IsNullOrEmpty(FirstUsername) || SelectedComboBoxItem == null)
+            if (string.IsNullOrEmpty(LastUsername) || string.IsNullOrEmpty(FirstUsername) || string.IsNullOrEmpty(MiddleName) || SelectedComboBoxItem == null)
             {
                 Messageerror = "Не все поля заполнены";
                 return false;
@@ -197,13 +197,13 @@ public class EditUsersUserControlViewModel : ViewModelBase, INotifyPropertyChang
                 {
                     connection.Open();
 
-                    string sql = "UPDATE public.\"user\" SET name = @newName, first_name = @newFirstName, last_name = @newLastName WHERE id = @userID";
+                    string sql = "UPDATE public.\"user\" SET middle_name = @newMiddleName, first_name = @newFirstName, last_name = @newLastName WHERE id = @userID";
                     using (var command = new NpgsqlCommand(sql, connection))
                     {
                         command.Parameters.AddWithValue("@userID", UserID);
-                        command.Parameters.AddWithValue("@newName", Username);
                         command.Parameters.AddWithValue("@newFirstName", FirstUsername);
                         command.Parameters.AddWithValue("@newLastName", LastUsername);
+                        command.Parameters.AddWithValue("@newMiddleName", MiddleName);
                         command.ExecuteNonQuery();
                     }
 

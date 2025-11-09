@@ -3,9 +3,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:ProductionAccounting_AvaloniaApplication.ViewModels.Control"
-             x:DataType="vm:CartUserListUserControlViewModel"
+			 x:DataType="vm:CartProductUserControlViewModel"
              mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="80"
-             x:Class="ProductionAccounting_AvaloniaApplication.CartUserListUserControl">
+             x:Class="ProductionAccounting_AvaloniaApplication.CartProductUserControl">
 
     <Border CornerRadius="12"
             Background="LightGray"
@@ -16,41 +16,21 @@
 		<Grid Margin="15"
 			  ColumnDefinitions="Auto, *, Auto">
 
-			<Border Grid.Column="0"
-                    Width="45"
-                    Height="45"
-                    CornerRadius="22"
-                    Background="#4A90E2"
-                    Margin="0,0,15,0"
-                    VerticalAlignment="Center">
-				<TextBlock Text="{Binding UserName}"
-                           Foreground="White"
-                           FontSize="16"
-                           FontWeight="Bold"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"/>
-			</Border>
-
 			<StackPanel Grid.Column="1"
                         VerticalAlignment="Center"
                         Margin="0,0,15,0">
-				<TextBlock Text="{Binding UserName}"
+				<TextBlock Text="{Binding Name}"
                            Foreground="#2C3E50"
                            FontSize="14"
                            FontWeight="SemiBold"
                            Margin="0,0,0,2"/>
 
-				<TextBlock Text="{Binding FirstName}"
+				<TextBlock Text="{Binding Article}"
                            Foreground="#7F8C8D"
                            FontSize="12"
                            Margin="0,0,0,1"/>
 
-				<TextBlock Text="{Binding LastName}"
-                           Foreground="#7F8C8D"
-                           FontSize="11"
-                           TextTrimming="CharacterEllipsis"/>
-
-				<TextBlock Text="{Binding DateJoined}"
+				<TextBlock Text="{Binding PricePerUnit}"
                            Foreground="#7F8C8D"
                            FontSize="11"
                            TextTrimming="CharacterEllipsis"/>
@@ -61,31 +41,19 @@
 						Spacing="6"
 						VerticalAlignment="Center">
 
-				<Button Click="OpenProfileUser_Click"
+				<Button Click="View_Click"
 						Width="34"
 						Height="34"
 						CornerRadius="6"
 						Background="#4A90E2"
 						BorderThickness="0"
 						ToolTip.Tip="Просмотр профиля">
-					<Image Source="/Assets/find-user-64.png"
+					<Image Source="/Assets/search-list-64.png"
 						   Width="18"
 						   Height="18"/>
 				</Button>
 
-				<Button Click="EditUser_Click"
-						Width="34"
-						Height="34"
-						CornerRadius="6"
-						Background="#34C759"
-						BorderThickness="0"
-						ToolTip.Tip="Редактировать пользователя">
-					<Image Source="/Assets/edit-user-64.png"
-						   Width="18"
-						   Height="18"/>
-				</Button>
-
-				<Button Click="OpenWindowsConfirmDeleteUser_Click"
+				<Button Click="ConfirmDelete_Click"
 						Width="34"
 						Height="34"
 						CornerRadius="6"
