@@ -1,5 +1,4 @@
-﻿using MsBox.Avalonia;
-using Npgsql;
+﻿using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Script;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ReactiveUI;

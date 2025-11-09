@@ -26,7 +26,8 @@
             <controls:RightBoardUserControl DataContext="{Binding RightBoardUserControlViewModel}" />
         </Grid>
         
-        <Grid Grid.Column="1" Name="ContentCenter">
+        <Grid Grid.Column="1">
+            <Grid Name="ContentCenter" ZIndex="1"/>
             <ContentControl Content="{Binding CurrentPage}"/>
         </Grid>
     </Grid>
