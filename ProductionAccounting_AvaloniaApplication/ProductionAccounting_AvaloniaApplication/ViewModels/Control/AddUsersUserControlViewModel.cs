@@ -40,19 +40,6 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
         }
     }
 
-    private string _username = string.Empty;
-    public string Username
-    {
-        get => _username;
-        set {
-            if (_username != value) { 
-                _username = value;
-                OnPropertyChanged(nameof(Username));
-                OnPropertyChanged(nameof(IsActiveConfirmButton));
-            }
-        }
-    }
-
     private string _firstUsername = string.Empty;
     public string FirstUsername
     {
@@ -83,9 +70,24 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
         }
     }
 
+    private string _middle_name = string.Empty;
+    public string MiddleName
+    {
+        get => _middle_name;
+        set
+        {
+            if (_middle_name != value)
+            {
+                _middle_name = value;
+                OnPropertyChanged(nameof(MiddleName));
+                OnPropertyChanged(nameof(IsActiveConfirmButton));
+            }
+        }
+    }
+
     public bool IsActiveConfirmButton
         => SelectedComboBoxItem != null 
-        && !string.IsNullOrEmpty(Username) 
+        && !string.IsNullOrEmpty(MiddleName) 
         && !string.IsNullOrEmpty(FirstUsername) 
         && !string.IsNullOrEmpty(LastUsername);
 
@@ -119,7 +121,7 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
     {
         try
         {
-            if (string.IsNullOrEmpty(Username) || string.IsNullOrEmpty(FirstUsername) || string.IsNullOrEmpty(LastUsername) || SelectedComboBoxItem == null)
+            if (string.IsNullOrEmpty(FirstUsername) || string.IsNullOrEmpty(LastUsername) || string.IsNullOrEmpty(MiddleName) || SelectedComboBoxItem == null)
             {
                 Messageerror = "Не все поля заполнены";
                 return false;
@@ -127,8 +129,8 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
 
             try
             {
-                string sql = "INSERT INTO public.user (password, name, first_name, last_name, date_joined) " +
-                             "VALUES (@password, @name, @first_name, @last_name, @date_joined) RETURNING id";
+                string sql = "INSERT INTO public.user (password, first_name, last_name, middle_name) " +
+                             "VALUES (@password, @first_name, @last_name, @middle_name) RETURNING id";
 
                 using (var connection = new NpgsqlConnection(Arguments.connection))
                 {
@@ -145,10 +147,9 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
                             for (int i = 0; i < 10; i++) randomString += letters[random.Next(letters.Length)];
 
                             command.Parameters.AddWithValue("@password", randomString);
-                            command.Parameters.AddWithValue("@name", Username);
                             command.Parameters.AddWithValue("@first_name", FirstUsername);
                             command.Parameters.AddWithValue("@last_name", LastUsername);
-                            command.Parameters.AddWithValue("@date_joined", DateTime.Now);
+                            command.Parameters.AddWithValue("@middle_name", MiddleName);
 
                             var equipmentId = command.ExecuteScalar();
                             if (equipmentId == null) return false;

@@ -36,7 +36,7 @@ public partial class AddUsersUserControl : UserControl
         if (DataContext is not AddUsersUserControlViewModel viewModel) return;
         viewModel.Messageerror = string.Empty;
         viewModel.ComboBoxItems.Clear();
-        viewModel.Username = string.Empty;
+        viewModel.MiddleName = string.Empty;
         viewModel.FirstUsername = string.Empty;
         viewModel.LastUsername = string.Empty;
         await viewModel.LoadListTypeToComboBoxAsync();

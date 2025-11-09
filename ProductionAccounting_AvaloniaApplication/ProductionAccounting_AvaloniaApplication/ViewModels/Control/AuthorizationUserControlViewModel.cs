@@ -1,4 +1,5 @@
-﻿using Npgsql;
+﻿using MsBox.Avalonia;
+using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Script;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ReactiveUI;
@@ -72,34 +73,36 @@ public class AuthorizationUserControlViewModel : ViewModelBase, INotifyPropertyC
                 }
 
                 string lastName = words[0];
-                string firstName = words[1];
+                string first_name = words[1];
                 string middleName = words[2];
 
-                string query = @"SELECT id, name, password, first_name, last_name FROM public.""user"" WHERE name = @name AND first_name = @first_name AND last_name = @last_name";
+                string query = @"SELECT id, last_name, first_name, middle_name, password FROM public.""user"" WHERE last_name = @last_name AND first_name = @first_name AND middle_name = @middle_name";
 
                 using (var connection = new NpgsqlConnection(Arguments.connection))
                 {
                     connection.Open();
                     using (var command = new NpgsqlCommand(query, connection))
                     {
-                        command.Parameters.AddWithValue("@name", middleName);
-                        command.Parameters.AddWithValue("@first_name", firstName);
                         command.Parameters.AddWithValue("@last_name", lastName);
+                        command.Parameters.AddWithValue("@first_name", first_name);
+                        command.Parameters.AddWithValue("@middle_name", middleName);
+
+                        MessageBoxManager.GetMessageBoxStandard("dad", $"{middleName}, {lastName}, {first_name}, {Password}").ShowWindowAsync();
 
                         using (var reader = command.ExecuteReader())
                         {
                             if (reader.Read())
                             {
                                 double dbid = reader.GetDouble(0);
-                                string dbusername = reader.GetString(1);
-                                string dbpassword = reader.GetString(2);
+                                string dblast_name = reader.GetString(1);
+                                string dbpassword = reader.GetString(4);
 
                                 if (dbpassword == Password)
                                 {
                                     if (!Directory.Exists(Paths.SharedFolder))
                                         Directory.CreateDirectory(Paths.SharedFolder);
 
-                                    ManagerCookie.SaveLoginCookie(dbid, dbusername, Guid.NewGuid().ToString(), DateTime.Now.AddDays(7), Paths.SharedFolder);
+                                    ManagerCookie.SaveLoginCookie(dbid, dblast_name, Guid.NewGuid().ToString(), DateTime.Now.AddDays(7), Paths.SharedFolder);
 
                                     return true;
                                 }

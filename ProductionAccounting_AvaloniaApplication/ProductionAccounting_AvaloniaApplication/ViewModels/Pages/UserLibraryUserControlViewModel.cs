@@ -54,14 +54,14 @@ public class UserLibraryUserControlViewModel : ViewModelBase, INotifyPropertyCha
 
         try
         {
-            string sql = "SELECT * FROM public.\"user\" WHERE name ILIKE @username";
+            string sql = "SELECT * FROM public.\"user\" WHERE middle_name ILIKE @middle_name";
 
             using (var connection = new NpgsqlConnection(Arguments.connection))
             {
                 await connection.OpenAsync();
                 using (var command = new NpgsqlCommand(sql, connection))
                 {
-                    command.Parameters.AddWithValue("@username", search);
+                    command.Parameters.AddWithValue("@middle_name", search);
 
                     using (var reader = await command.ExecuteReaderAsync())
                     {
