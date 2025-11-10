@@ -69,17 +69,21 @@ public class ProductLibraryUserControlViewModel : ViewModelBase, INotifyProperty
                     {
                         while (await reader.ReadAsync())
                         {
-                            double dbid = reader.GetDouble(0);
-                            string dbname = reader.GetString(1);
-                            string dbarticle = reader.GetString(2);
-                            string dbpricePerUnit = reader.GetDecimal(5).ToString();
+                            double dbid = reader.IsDBNull(3) ? 0 : reader.GetDouble(0);
+                            string dbname = reader.IsDBNull(3) ? string.Empty : reader.GetString(1);
+                            string dbarticle = reader.IsDBNull(3) ? string.Empty : reader.GetString(2);
+                            string dbpricePerUnit = reader.IsDBNull(3) ? string.Empty : reader.GetDecimal(5).ToString();
+                            string dbunit = reader.IsDBNull(7) ? string.Empty : reader.GetString(7);
+                            string dbcoefficient = reader.IsDBNull(3) ? string.Empty : reader.GetString(3);
 
                             var viewModel = new CartProductUserControlViewModel
                             {
                                 ProductID = dbid,
                                 Name = dbname,
                                 Article = dbarticle,
-                                PricePerUnit = dbpricePerUnit
+                                PricePerUnit = dbpricePerUnit,
+                                Unit = dbunit,
+                                Coefficient = dbcoefficient
                             };
 
                             var userControl = new CartProductUserControl

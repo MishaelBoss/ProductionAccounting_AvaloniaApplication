@@ -3,8 +3,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:ProductionAccounting_AvaloniaApplication.ViewModels.Pages"
-			 x:DataType="vm:WorkUserPageUserControlViewModel"
+			 x:DataType="vm:ProfileUserUserControlViewModel"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="ProductionAccounting_AvaloniaApplication.Views.Pages.WorkUserPageUserControlView">
-  Welcome to Avalonia!
+             x:Class="ProductionAccounting_AvaloniaApplication.ProfileUserUserControl">
+    <Grid>	
+    </Grid>
 </UserControl>
