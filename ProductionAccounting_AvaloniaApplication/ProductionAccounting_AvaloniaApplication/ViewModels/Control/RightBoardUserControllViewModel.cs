@@ -8,7 +8,7 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class RightBoardUserControlViewModel : ViewModelBase
 {
-    private MainWindowViewModel mainWindowViewModel { get; set; }
+    private MainWindowViewModel? mainWindowViewModel { get; set; } = null;
 
     public RightBoardUserControlViewModel(MainWindowViewModel _mainWindowViewModel)
     {
@@ -40,16 +40,16 @@ public class RightBoardUserControlViewModel : ViewModelBase
         => new RelayCommand(() => {
             if (ManagerCookie.IsUserLoggedIn()) {
                 ManagerCookie.DeleteCookie();
-                mainWindowViewModel.NotifyLoginStatusChanged();
+                mainWindowViewModel?.NotifyLoginStatusChanged();
             }
-            else mainWindowViewModel.ShowAuthorization();
+            else mainWindowViewModel?.ShowAuthorization();
         });
 
     private object? _objectViewModels = null;
 
     private void OpenPage(ViewModelBase ViewModel)
     {
-        mainWindowViewModel.CurrentPage = ViewModel;
+        mainWindowViewModel?.CurrentPage = ViewModel;
         _objectViewModels = ViewModel;
     }
 
@@ -88,6 +88,6 @@ public class RightBoardUserControlViewModel : ViewModelBase
         IsVisibleWorkUserButton = ManagerCookie.IsUserLoggedIn() && (ManagerCookie.IsMaster || ManagerCookie.IsEmployee);
 
         if (!ManagerCookie.IsUserLoggedIn() || !ManagerCookie.IsAdministrator && _objectViewModels == adminPageTemplatedControlViewModel) OpenPage(workUserPageTemplatedControlViewModel);
-        if (!ManagerCookie.IsUserLoggedIn() || (!ManagerCookie.IsMaster || !ManagerCookie.IsEmployee) && _objectViewModels == workUserPageTemplatedControlViewModel) mainWindowViewModel.ShowAuthorization();
+        if (!ManagerCookie.IsUserLoggedIn() || (!ManagerCookie.IsMaster || !ManagerCookie.IsEmployee) && _objectViewModels == workUserPageTemplatedControlViewModel) mainWindowViewModel?.ShowAuthorization();
     }
 }

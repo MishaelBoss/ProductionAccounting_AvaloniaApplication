@@ -1,11 +1,13 @@
 ﻿using Avalonia.Controls;
 using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
+using ProductionAccounting_AvaloniaApplication.View.Control;
 using ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
+using static ProductionAccounting_AvaloniaApplication.ViewModels.Control.NotFoundUserControlViewModel;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
 
@@ -53,7 +55,7 @@ public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChang
 
     private async Task SearchUsersAsync(string search)
     {
-        //if (!ManagerCookie.IsUserLoggedIn()) return;
+        if (!ManagerCookie.IsUserLoggedIn() && !ManagerCookie.IsAdministrator) return;
 
         ClearResults();
 
@@ -104,12 +106,12 @@ public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChang
 
             UpdateUI();
 
-            //if (userList.Count == 0) ShowErrorUserControl(ErrorLevel.NotFound);
+            if (userList.Count == 0) ShowErrorUserControl(ErrorLevel.NotFound);
         }
         catch (NpgsqlException ex)
         {
             ClearResults();
-            //ShowErrorUserControl(ErrorLevel.NoConnectToDB);
+            ShowErrorUserControl(ErrorLevel.NoConnectToDB);
 
             Loges.LoggingProcess(LogLevel.CRITICAL,
                 "Connection or request error",
@@ -183,6 +185,20 @@ public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChang
         {
             Content.Children.Clear();
             if (_editUsers.Parent == Content) Content.Children.Remove(_editUsers);
+        }
+    }
+
+    private void ShowErrorUserControl(ErrorLevel level)
+    {
+        if (HomeMainContent != null)
+        {
+            var notFoundUserControlViewModel = new NotFoundUserControlViewModel(level);
+            var notFoundUserControl = new NotFoundUserControl { DataContext = notFoundUserControlViewModel };
+
+            if (HomeMainContent.Children.Contains(notFoundUserControl)) return;
+
+            HomeMainContent.Children.Clear();
+            HomeMainContent.Children.Add(notFoundUserControl);
         }
     }
 

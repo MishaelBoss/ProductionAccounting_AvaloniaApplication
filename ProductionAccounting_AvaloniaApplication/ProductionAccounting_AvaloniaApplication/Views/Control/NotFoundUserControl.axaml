@@ -1,0 +1,34 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:ProductionAccounting_AvaloniaApplication.ViewModels.Control"
+             x:DataType="vm:NotFoundUserControlViewModel"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ProductionAccounting_AvaloniaApplication.View.Control.NotFoundUserControl">
+    
+    <Border Background="White"
+            ClipToBounds="True"
+            CornerRadius="15"
+            Width="250"
+            Height="50">
+        <Grid HorizontalAlignment="Center" 
+              VerticalAlignment="Center"
+              ColumnDefinitions="Auto, Auto">
+
+            <Image Grid.Column="0" 
+                   Source="/Assets/error-64.png" 
+                   Width="32" 
+                   Height="32"
+                   Margin="0,0,10,0"/>
+
+            <TextBlock  Grid.Column="1"
+                        Foreground="Black"
+                        FontSize="20" 
+                        Text="{Binding Error}"
+                        HorizontalAlignment="Center" 
+                        VerticalAlignment="Center"
+                        FontWeight="Bold"/>
+        </Grid>
+    </Border>
+</UserControl>

@@ -1,10 +1,12 @@
 ﻿using Avalonia.Controls;
 using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
+using ProductionAccounting_AvaloniaApplication.View.Control;
 using ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading.Tasks;
+using static ProductionAccounting_AvaloniaApplication.ViewModels.Control.NotFoundUserControlViewModel;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
 
@@ -98,12 +100,12 @@ public class UserLibraryUserControlViewModel : ViewModelBase, INotifyPropertyCha
 
             UpdateUI();
 
-            //if (userList.Count == 0) ShowErrorUserControl(ErrorLevel.NotFound);
+            if (userList.Count == 0) ShowErrorUserControl(ErrorLevel.NotFound);
         }
         catch (NpgsqlException ex)
         {
             ClearResults();
-            //ShowErrorUserControl(ErrorLevel.NoConnectToDB);
+            ShowErrorUserControl(ErrorLevel.NoConnectToDB);
 
             Loges.LoggingProcess(LogLevel.CRITICAL,
                 "Connection or request error",
@@ -126,6 +128,20 @@ public class UserLibraryUserControlViewModel : ViewModelBase, INotifyPropertyCha
             {
                 HomeMainContent.Children.Add(item);
             }
+        }
+    }
+
+    private void ShowErrorUserControl(ErrorLevel level)
+    {
+        if (HomeMainContent != null)
+        {
+            var notFoundUserControlViewModel = new NotFoundUserControlViewModel(level);
+            var notFoundUserControl = new NotFoundUserControl { DataContext = notFoundUserControlViewModel };
+
+            if (HomeMainContent.Children.Contains(notFoundUserControl)) return;
+
+            HomeMainContent.Children.Clear();
+            HomeMainContent.Children.Add(notFoundUserControl);
         }
     }
 
