@@ -5,7 +5,7 @@
 			 xmlns:vm="using:ProductionAccounting_AvaloniaApplication.ViewModels.Control"
 			 x:DataType="vm:AuthorizationUserControlViewModel"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="ProductionAccounting_AvaloniaApplication.AuthorizationUserControl">
+             x:Class="ProductionAccounting_AvaloniaApplication.Views.Control.AuthorizationUserControl">
 
 	<Grid>
 		<Border Background="#000000" Opacity="0.5"/>

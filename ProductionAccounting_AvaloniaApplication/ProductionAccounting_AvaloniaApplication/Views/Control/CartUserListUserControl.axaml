@@ -5,7 +5,7 @@
              xmlns:vm="using:ProductionAccounting_AvaloniaApplication.ViewModels.Control"
              x:DataType="vm:CartUserListUserControlViewModel"
              mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="80"
-             x:Class="ProductionAccounting_AvaloniaApplication.CartUserListUserControl">
+             x:Class="ProductionAccounting_AvaloniaApplication.Views.Control.CartUserListUserControl">
 
     <Border CornerRadius="12"
             Background="LightGray"

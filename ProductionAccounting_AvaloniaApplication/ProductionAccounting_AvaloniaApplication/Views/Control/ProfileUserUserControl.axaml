@@ -1,0 +1,69 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:ProductionAccounting_AvaloniaApplication.ViewModels.Control"
+			 x:DataType="vm:ProfileUserUserControlViewModel"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ProductionAccounting_AvaloniaApplication.Views.Control.ProfileUserUserControl">
+
+	<Grid>
+		<Border Background="#000000" Opacity="0.5"/>
+		
+		<Border VerticalAlignment="Center" 
+				HorizontalAlignment="Center" 
+				Width="400" 
+				Height="400" 
+				Background="Gray" 
+				CornerRadius="12">
+			<Grid>
+				<StackPanel Margin="20">
+
+					<StackPanel Orientation="Horizontal"
+								Spacing="4">
+						<TextBlock Margin="0 5">Login:</TextBlock>
+						<TextBlock Margin="0 5" Text="{Binding Login}"/>
+					</StackPanel>
+
+					<StackPanel Orientation="Horizontal"
+								Spacing="4">
+						<TextBlock Margin="0 5">First name:</TextBlock>
+						<TextBlock Margin="0 5" Text="{Binding FirstName}"/>
+					</StackPanel>
+
+					<StackPanel Orientation="Horizontal"
+								Spacing="4">
+						<TextBlock Margin="0 5">Last name:</TextBlock>
+						<TextBlock Margin="0 5" Text="{Binding LastName}"/>
+					</StackPanel>
+
+					<StackPanel Orientation="Horizontal"
+								Spacing="4">
+						<TextBlock Margin="0 5">Middle name:</TextBlock>
+						<TextBlock Margin="0 5" Text="{Binding MiddleName}"/>
+					</StackPanel>
+					
+					<StackPanel Orientation="Vertical"
+								VerticalAlignment="Center"
+								HorizontalAlignment="Center"
+								Spacing="10">
+
+						<Button Classes="ButtonLogin"
+								Click="Edit_Click"
+								Content="Edit user"/>
+
+						<Button Click="Logout_Click"
+								Content="Logout"
+								HorizontalAlignment="Center"/>
+
+						<Button Classes="ButtonLogin"
+								Click="Cancel_Click"
+								Content="Cancel"
+								Background="Transparent"/>
+
+					</StackPanel>
+				</StackPanel>
+			</Grid>
+		</Border>
+	</Grid>
+</UserControl>

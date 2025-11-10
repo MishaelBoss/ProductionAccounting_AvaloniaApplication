@@ -3,6 +3,7 @@ using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ProductionAccounting_AvaloniaApplication.View.Control;
 using ProductionAccounting_AvaloniaApplication.ViewModels.Control;
+using ProductionAccounting_AvaloniaApplication.Views.Control;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading.Tasks;

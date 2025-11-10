@@ -5,7 +5,7 @@ using ProductionAccounting_AvaloniaApplication.ViewModels;
 using ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 using ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
 
-namespace ProductionAccounting_AvaloniaApplication;
+namespace ProductionAccounting_AvaloniaApplication.Views.Control;
 
 public partial class CartUserListUserControl : UserControl
 {

@@ -38,10 +38,7 @@ public class RightBoardUserControlViewModel : ViewModelBase
 
     public ICommand OpenAuthorizationCommand
         => new RelayCommand(() => {
-            if (ManagerCookie.IsUserLoggedIn()) {
-                ManagerCookie.DeleteCookie();
-                mainWindowViewModel?.NotifyLoginStatusChanged();
-            }
+            if (ManagerCookie.IsUserLoggedIn()) mainWindowViewModel?.ShowProfileUser();
             else mainWindowViewModel?.ShowAuthorization();
         });
 
@@ -81,7 +78,7 @@ public class RightBoardUserControlViewModel : ViewModelBase
 
     public void UpdateUI()
     {
-        if (ManagerCookie.IsUserLoggedIn()) ButtonAuthorizationText = "Выйти";
+        if (ManagerCookie.IsUserLoggedIn()) ButtonAuthorizationText = "Профиль";
         else ButtonAuthorizationText = "Войти";
 
         IsVisibleAdminPanelButton = ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsAdministrator;

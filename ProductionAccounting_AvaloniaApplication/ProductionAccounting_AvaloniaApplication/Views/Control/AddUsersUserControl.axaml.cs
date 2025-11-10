@@ -5,7 +5,7 @@ using ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 using ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
 using System.Threading.Tasks;
 
-namespace ProductionAccounting_AvaloniaApplication;
+namespace ProductionAccounting_AvaloniaApplication.Views.Control;
 
 public partial class AddUsersUserControl : UserControl
 {

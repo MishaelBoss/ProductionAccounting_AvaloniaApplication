@@ -5,7 +5,7 @@
              xmlns:vm="using:ProductionAccounting_AvaloniaApplication.ViewModels.Control"
 			 x:DataType="vm:CartProductUserControlViewModel"
              mc:Ignorable="d" d:DesignWidth="450" d:DesignHeight="100"
-             x:Class="ProductionAccounting_AvaloniaApplication.CartProductUserControl">
+             x:Class="ProductionAccounting_AvaloniaApplication.Views.Control.CartProductUserControl">
 
     <Border CornerRadius="12"
             Background="LightGray"
@@ -67,7 +67,8 @@
 								   FontWeight="Medium"/>
 					</Border>
 
-					<StackPanel Orientation="Horizontal" Spacing="4">
+					<StackPanel Orientation="Horizontal" 
+								Spacing="4">
 						<TextBlock Text="Коэф:"
 								   Foreground="#6B7280"
 								   FontSize="11"/>

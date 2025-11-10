@@ -3,9 +3,8 @@ using Avalonia.Interactivity;
 using Avalonia.VisualTree;
 using ProductionAccounting_AvaloniaApplication.ViewModels;
 using ProductionAccounting_AvaloniaApplication.ViewModels.Control;
-using ProductionAccounting_AvaloniaApplication.Views;
 
-namespace ProductionAccounting_AvaloniaApplication;
+namespace ProductionAccounting_AvaloniaApplication.Views.Control;
 
 public partial class AuthorizationUserControl : UserControl
 {

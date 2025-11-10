@@ -1,6 +1,6 @@
 ﻿using Avalonia.Controls;
-using ProductionAccounting_AvaloniaApplication.Scripts;
 using ProductionAccounting_AvaloniaApplication.ViewModels.Control;
+using ProductionAccounting_AvaloniaApplication.Views.Control;
 using ReactiveUI;
 using System;
 
@@ -14,6 +14,7 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
 
         public RightBoardUserControlViewModel RightBoardUserControlViewModel { get; }
         private readonly AuthorizationUserControl _authorization = new();
+        private readonly ProfileUserUserControl _profileUser = new();
 
         private ViewModelBase? _currentPage;
         public ViewModelBase? CurrentPage
@@ -55,6 +56,32 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
             {
                 ContentCenter.Children.Clear();
                 if (_authorization.Parent == ContentCenter) ContentCenter.Children.Remove(_authorization);
+            }
+        }
+
+        public void ShowProfileUser()
+        {
+            if (ContentCenter != null)
+            {
+                if (ContentCenter.Children.Contains(_profileUser)) {
+                    _ = _profileUser.RefreshDataAsync();
+                    return;
+                }
+
+                if (_profileUser.Parent is Panel currentParent) currentParent.Children.Remove(_profileUser);
+                ContentCenter.Children.Clear();
+                ContentCenter.Children.Add(_profileUser);
+
+                _ = _profileUser.RefreshDataAsync();
+            }
+        }
+
+        public void CloseProfileUser()
+        {
+            if (ContentCenter != null)
+            {
+                ContentCenter.Children.Clear();
+                if (_profileUser.Parent == ContentCenter) ContentCenter.Children.Remove(_profileUser);
             }
         }
     }
