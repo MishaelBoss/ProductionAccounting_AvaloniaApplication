@@ -34,7 +34,7 @@
                                    Width="21" 
                                    Height="21" 
                                    Stretch="Uniform"/>
-                            <Label Grid.Column="1" Classes="LabelButtonButton" Content="Админ панель"/>
+                            <Label Grid.Column="1" Classes="LabelButtonButton" Content="Admin panel"/>
                         </Grid>
                     </Button>
 
@@ -46,7 +46,7 @@
                                    Width="21"
                                    Height="21"
                                    Stretch="Uniform"/>
-							<Label Grid.Column="1" Classes="LabelButtonButton" Content="Список продукции"/>
+							<Label Grid.Column="1" Classes="LabelButtonButton" Content="Library product"/>
 						</Grid>
 					</Button>
                     
@@ -58,7 +58,7 @@
                                    Width="21" 
                                    Height="21" 
                                    Stretch="Uniform"/>
-                            <Label Grid.Column="1" Classes="LabelButtonButton" Content="Список пользователей"/>
+                            <Label Grid.Column="1" Classes="LabelButtonButton" Content="Library user"/>
                         </Grid>
                     </Button>
                     
@@ -71,7 +71,7 @@
                                    Width="21" 
                                    Height="21" 
                                    Stretch="Uniform"/>
-                            <Label Grid.Column="1" Content="Рабочая область пользователя"/>
+                            <Label Grid.Column="1" Content="Windows user"/>
                         </Grid>
                     </Button>
 
@@ -95,17 +95,17 @@
                             Spacing="5">
                     <Separator Background="Gray" VerticalAlignment="Top"/>
                     
-                    <!--<Button Classes="Setting"
-                            Command="{Binding OpenSettingsPageCommand}">
+                    <Button Classes="Button"
+                            Command="{Binding OpenSettingsUserPageCommand}">
                         <Grid ColumnDefinitions="24,*" 
-                              Classes="GridButtonSetting">
+                              Classes="GridButtonButton">
                             <Image Source="/Assets/settings-64.png" 
                                    Width="21" 
                                    Height="21" 
                                    Stretch="Uniform"/>
-                            <Label Grid.Column="1" Content="{Binding SettingsText}"/>
+                            <Label Grid.Column="1" Content="Settings"/>
                         </Grid>
-                    </Button>-->
+                    </Button>
                 </StackPanel>
             </Grid>
         </Grid>

@@ -1,0 +1,115 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:ProductionAccounting_AvaloniaApplication.ViewModels.Pages"
+             x:DataType="vm:SettingsPageUserControlViewModel"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ProductionAccounting_AvaloniaApplication.Views.Pages.SettingsPageUserControlView">
+
+    <UserControl.Styles>
+        <StyleInclude Source="/Styles/Resources/SettingsStyles.axaml"/>
+    </UserControl.Styles>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+		<Grid RowDefinitions="*,*">
+			<StackPanel>
+				<Grid Classes="GridFile">
+					<Border>
+						<Grid RowDefinitions="40,*">
+							<Label	Grid.Row="0"
+									Content="File settings"/>
+							<Grid 	Grid.Row="1"
+									ColumnDefinitions="*,*">
+								<Label Grid.Column="0"/>
+								<Button Grid.Column="1"
+										Click="OpenFileSetting_Click"
+										Classes="ButtonSettings">
+									<Grid ColumnDefinitions="20, *">
+										<Image 	Grid.Column="0"
+												Source="/Assets/opened-folder-64.png"/>
+										<Label 	Grid.Column="1"
+												Content="Open file"/>
+									</Grid>
+								</Button>
+							</Grid>
+						</Grid>
+					</Border>
+				</Grid>
+				<Grid Classes="GridFile">
+					<Border>
+						<Grid RowDefinitions="40,*">
+							<Label 	Grid.Row="0"
+									Content="Folder loges"/>
+							<Grid 	Grid.Row="1"
+									ColumnDefinitions="*,*">
+								<Label Grid.Column="0"/>
+								<Button Grid.Column="1"
+										Click="OpenFolderLoges_Click"
+										Classes="ButtonSettings">
+									<Grid ColumnDefinitions="20, *">
+										<Image 	Grid.Column="0"
+												Source="/Assets/opened-folder-64.png"/>
+										<Label 	Grid.Column="1"
+												Content="Open folder loges"/>
+									</Grid>
+								</Button>
+							</Grid>
+						</Grid>
+					</Border>
+				</Grid>
+				<Grid Classes="GridFile">
+					<Border Height="50">
+						<Grid 	Grid.Row="1"
+								ColumnDefinitions="*,*">
+							<Button Grid.Row="1" 
+									Content="{Binding CheckUpdateText}" 
+									Click="CheckUpdate"/>
+						</Grid>
+					</Border>
+				</Grid>
+				<Grid Classes="GridFile">
+					<Border>
+						<Grid RowDefinitions="40,*">
+							<Label 	Grid.Row="0"
+									Content="Folder localizationText"/>
+							<Grid 	Grid.Row="1"
+									ColumnDefinitions="*,*">
+								<ComboBox	Margin="3"
+										Width="95"
+										MinHeight="15"
+										Height="35"
+										FontSize="12"
+										ItemsSource="{Binding ComboBoxItems}"
+										SelectedItem="{Binding SelectedComboBoxItem}">
+									<ComboBox.Styles>
+										<Style Selector="ComboBoxItem">
+											<Setter Property="Padding"
+													Value="5, 0"/>
+											<Setter Property="Height"
+													Value="20"/>
+											<Setter Property="MinHeight"
+													Value="12"/>
+											<Setter Property="Foreground"
+													Value="White"/>
+										</Style>
+									</ComboBox.Styles>
+								</ComboBox>
+								<Button Grid.Column="1"
+										Click="OpenFolderLanguage_Click"
+										Classes="ButtonSettings">
+									<Grid ColumnDefinitions="20, *">
+										<Image 	Grid.Column="0"
+												Source="/Assets/opened-folder-64.png"/>
+										<Label 	Grid.Column="1"
+												Content="Open folder language"/>
+									</Grid>
+								</Button>
+							</Grid>
+						</Grid>
+					</Border>
+				</Grid>
+			</StackPanel>			
+		</Grid>
+	</ScrollViewer>
+</UserControl>

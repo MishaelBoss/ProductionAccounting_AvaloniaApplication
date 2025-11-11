@@ -1,0 +1,52 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:ProductionAccounting_AvaloniaApplication.ViewModels.Pages"
+        x:DataType="vm:SettingsPageUserControlViewModel">
+
+        <Style Selector="Grid.GridFile">
+          <Setter Property="Margin" Value="20"/>        
+          <Setter Property="HorizontalAlignment" Value="Center"/>        
+          <Setter Property="VerticalAlignment" Value="Top"/>        
+        </Style>
+        
+        <Style Selector="Grid.GridFile > Border">
+          <Setter Property="Background" Value="White"/>
+          <Setter Property="Opacity" Value="0.8"/>
+          <Setter Property="Width" Value="470"/>
+          <Setter Property="Height" Value="100"/>
+          <Setter Property="CornerRadius" Value="30"/>
+          <Setter Property="ClipToBounds" Value="True"/>
+          <Setter Property="Padding" Value="10"/>
+        </Style>
+
+        <Style Selector="Grid.GridFile > Border > Grid">
+          <Setter Property="HorizontalAlignment" Value="Center"/>        
+          <Setter Property="VerticalAlignment" Value="Center"/>   
+        </Style>
+        
+        <Style Selector="Grid.GridFile > Border > Grid > Label">
+          <Setter Property="FontWeight" Value="Bold"/>
+          <Setter Property="FontSize" Value="22"/>
+          <Setter Property="VerticalAlignment" Value="Top"/>
+          <Setter Property="HorizontalAlignment" Value="Center"/>
+        </Style>
+        
+        <Style Selector="Grid.GridFile > Border > Grid > Grid > Label">
+          <Setter Property="Content" Value="{Binding PathToSettingsFile}"/>
+          <Setter Property="FontWeight" Value="SemiBold"/>
+          <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        
+        <Style Selector="Button.ButtonSettings">
+          <Setter Property="Background" Value="white"/>
+        </Style>
+        
+        <Style Selector="Button.ButtonSettings > Grid">
+          <Setter Property="HorizontalAlignment" Value="Center"/>        
+          <Setter Property="VerticalAlignment" Value="Center"/>  
+        </Style>
+        
+        <Style Selector="Button.ButtonSettings > Grid > Label">
+          <Setter Property="FontWeight" Value="ExtraBold"/> 
+        </Style>
+</Styles>

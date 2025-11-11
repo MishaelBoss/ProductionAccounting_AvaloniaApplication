@@ -19,22 +19,26 @@ public class RightBoardUserControlViewModel : ViewModelBase
         mainWindowViewModel?.LoginStatusChanged += OnLoginStatusChanged;
     }
 
-    private readonly AdminPageUserControlViewModel adminPageTemplatedControlViewModel = new();
-    private readonly ProductLibraryUserControlViewModel productLibraryTemplatedControlViewModel = new();
-    private readonly UserLibraryUserControlViewModel userLibraryTemplatedControlViewModel = new();
-    private readonly WorkUserPageUserControlViewModel workUserPageTemplatedControlViewModel = new();
+    private readonly AdminPageUserControlViewModel adminPageUserControlViewModel = new();
+    private readonly ProductLibraryUserControlViewModel productLibraryUserControlViewModel = new();
+    private readonly UserLibraryUserControlViewModel userLibraryUserControlViewModel = new();
+    private readonly WorkUserPageUserControlViewModel workUserPageUserControlViewModel = new();
+    private readonly SettingsPageUserControlViewModel settingsPageUserControlViewModel = new();
 
     public ICommand OpenAdminPanelPageCommand
-        => new RelayCommand(() => OpenPage(adminPageTemplatedControlViewModel));
+        => new RelayCommand(() => OpenPage(adminPageUserControlViewModel));
 
     public ICommand OpenProductLibraryPageCommand 
-        => new RelayCommand(() => OpenPage(productLibraryTemplatedControlViewModel));
+        => new RelayCommand(() => OpenPage(productLibraryUserControlViewModel));
 
     public ICommand OpenUserLibraryPageCommand 
-        => new RelayCommand(() => OpenPage(userLibraryTemplatedControlViewModel));
+        => new RelayCommand(() => OpenPage(userLibraryUserControlViewModel));
 
-    public ICommand OpenWorkUserPageCommand 
-        => new RelayCommand(() => OpenPage(workUserPageTemplatedControlViewModel));
+    public ICommand OpenWorkUserPageCommand
+        => new RelayCommand(() => OpenPage(workUserPageUserControlViewModel));
+        
+    public ICommand OpenSettingsUserPageCommand 
+        => new RelayCommand(() => OpenPage(settingsPageUserControlViewModel));
 
     public ICommand OpenAuthorizationCommand
         => new RelayCommand(() => {
@@ -84,7 +88,7 @@ public class RightBoardUserControlViewModel : ViewModelBase
         IsVisibleAdminPanelButton = ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsAdministrator;
         IsVisibleWorkUserButton = ManagerCookie.IsUserLoggedIn() && (ManagerCookie.IsMaster || ManagerCookie.IsEmployee);
 
-        if (!ManagerCookie.IsUserLoggedIn() || !ManagerCookie.IsAdministrator && _objectViewModels == adminPageTemplatedControlViewModel) OpenPage(workUserPageTemplatedControlViewModel);
-        if (!ManagerCookie.IsUserLoggedIn() || (!ManagerCookie.IsMaster || !ManagerCookie.IsEmployee) && _objectViewModels == workUserPageTemplatedControlViewModel) mainWindowViewModel?.ShowAuthorization();
+        if (!ManagerCookie.IsUserLoggedIn() || !ManagerCookie.IsAdministrator && _objectViewModels == adminPageUserControlViewModel) OpenPage(workUserPageUserControlViewModel);
+        if (!ManagerCookie.IsUserLoggedIn() || (!ManagerCookie.IsMaster || !ManagerCookie.IsEmployee) && _objectViewModels == workUserPageUserControlViewModel) mainWindowViewModel?.ShowAuthorization();
     }
 }
