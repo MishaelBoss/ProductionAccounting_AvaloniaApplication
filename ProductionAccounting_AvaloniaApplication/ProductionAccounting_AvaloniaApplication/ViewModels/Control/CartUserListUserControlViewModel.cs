@@ -1,9 +1,13 @@
-﻿using ProductionAccounting_AvaloniaApplication.Scripts;
+﻿using Npgsql;
+using ProductionAccounting_AvaloniaApplication.Scripts;
 using ReactiveUI;
+using System;
+using System.ComponentModel;
+using System.Threading.Tasks;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
-public class CartUserListUserControlViewModel : ViewModelBase
+public class CartUserListUserControlViewModel : ViewModelBase, INotifyPropertyChanged
 {
     private double _userID = 0;
     public double UserID
@@ -49,9 +53,54 @@ public class CartUserListUserControlViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _dateJoined, value);
     }
 
+    private bool? _isActive;
+    public bool IsActive 
+    {
+        get => _isActive ?? false;
+        set
+        {
+            if (_isActive != value) 
+            { 
+                _isActive = value;
+                OnPropertyChanged(nameof(IsActive));
+                _ = ChangeActiveUserAsync();
+            }
+        }
+    }
+
+    public bool IsVisibleToggleButtonActiveUser
+        => ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsAdministrator;
+
     public bool IsVisibleButtonEdit 
-        => ManagerCookie.IsAdministrator;
+        => ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsAdministrator;
 
     public bool IsVisibleButtonDelete
-        => ManagerCookie.IsAdministrator;
+        => ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsAdministrator;
+
+    private async Task ChangeActiveUserAsync() {
+        try
+        {
+            string sqlUserTypes = "UPDATE public.user SET is_active = @is_active WHERE id = @id";
+
+            using (var connection = new NpgsqlConnection(Arguments.connection))
+            {
+                await connection.OpenAsync();
+
+                using (var command = new NpgsqlCommand(sqlUserTypes, connection))
+                {
+                    command.Parameters.AddWithValue("@id", UserID);
+                    command.Parameters.AddWithValue("@is_active", IsActive);
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Loges.LoggingProcess(level: LogLevel.WARNING, ex: ex);
+        }
+    }
+
+    public new event PropertyChangedEventHandler? PropertyChanged;
+    protected void OnPropertyChanged(string propertyName)
+        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }

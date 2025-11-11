@@ -56,7 +56,7 @@ public class UserLibraryUserControlViewModel : ViewModelBase, INotifyPropertyCha
 
         try
         {
-            string sql = "SELECT * FROM public.\"user\" WHERE middle_name ILIKE @middle_name";
+            string sql = "SELECT * FROM public.\"user\" WHERE middle_name ILIKE @middle_name AND is_active IN (true, false)";
 
             using (var connection = new NpgsqlConnection(Arguments.connection))
             {
@@ -69,13 +69,14 @@ public class UserLibraryUserControlViewModel : ViewModelBase, INotifyPropertyCha
                     {
                         while (await reader.ReadAsync())
                         {
-                            double dbid = reader.GetDouble(0);
-                            string dbpassword = reader.GetString(1);
-                            string dblogin = reader.GetString(6);
-                            string dbusername = reader.GetString(2);
-                            string dbfirst_name = reader.GetString(3);
-                            string dblast_name = reader.GetString(4);
-                            string dbdate_joined = reader.GetDateTime(5).ToString("yyyy-MM-dd");
+                            double dbid = reader.IsDBNull(0) ? 0 : reader.GetDouble(0);
+                            string dbpassword = reader.IsDBNull(1) ? string.Empty : reader.GetString(1);
+                            string dblogin = reader.IsDBNull(6) ? string.Empty : reader.GetString(6);
+                            string dbusername = reader.IsDBNull(2) ? string.Empty : reader.GetString(2);
+                            string dbfirst_name = reader.IsDBNull(3) ? string.Empty : reader.GetString(3);
+                            string dblast_name = reader.IsDBNull(4) ? string.Empty : reader.GetString(4);
+                            string dbdate_joined = reader.IsDBNull(5) ? string.Empty : reader.GetDateTime(5).ToString("yyyy-MM-dd");
+                            bool dbis_active = reader.IsDBNull(10) ? true : reader.GetBoolean(10);
 
                             var userViewModel = new CartUserListUserControlViewModel
                             {
@@ -85,7 +86,8 @@ public class UserLibraryUserControlViewModel : ViewModelBase, INotifyPropertyCha
                                 FirstName = dbfirst_name,
                                 LastName = dblast_name,
                                 Password = dbpassword,
-                                DateJoined = dbdate_joined
+                                DateJoined = dbdate_joined,
+                                IsActive = dbis_active
                             };
 
                             var userControl = new CartUserListUserControl

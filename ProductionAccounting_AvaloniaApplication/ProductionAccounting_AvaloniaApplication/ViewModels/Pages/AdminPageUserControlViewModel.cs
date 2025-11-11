@@ -1,4 +1,5 @@
 ﻿using Avalonia.Controls;
+using CommunityToolkit.Mvvm.Input;
 using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ProductionAccounting_AvaloniaApplication.View.Control;
@@ -6,8 +7,8 @@ using ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 using ProductionAccounting_AvaloniaApplication.Views.Control;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using static ProductionAccounting_AvaloniaApplication.ViewModels.Control.NotFoundUserControlViewModel;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
@@ -20,8 +21,19 @@ public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChang
 
     private readonly AddUsersUserControl _addUsers = new();
     private readonly EditUsersUserControl _editUsers = new();
+    private readonly AddDepartmentUserControl _addDepartment = new();
+    private readonly AddPositionUserControl _addPosition = new();
 
     private List<CartUserListUserControl> userList = [];
+
+    public ICommand OpenAddUsers
+        => new RelayCommand(() => ShowAddUsersUserControl());
+
+    public ICommand OpenDepartmentPageCommand
+        => new RelayCommand(() => ShowAddDepartmentUserControl());
+
+    public ICommand OpenPositionPageCommand
+        => new RelayCommand(() => ShowAddPositionUserControl());
 
     private string _search = string.Empty;
     public string Search
@@ -62,7 +74,7 @@ public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChang
 
         try
         {
-            string sql = "SELECT * FROM public.\"user\" WHERE middle_name ILIKE @middle_name";
+            string sql = "SELECT * FROM public.\"user\" WHERE middle_name ILIKE @middle_name AND is_active IN (true, false)";
 
             using (var connection = new NpgsqlConnection(Arguments.connection))
             {
@@ -75,13 +87,14 @@ public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChang
                     {
                         while (await reader.ReadAsync())
                         {
-                            double dbid = reader.GetDouble(0);
-                            string dbpassword = reader.GetString(1);
-                            string dblogin = reader.GetString(6);
-                            string dbusername = reader.GetString(2);
-                            string dbfirst_name = reader.GetString(3);
-                            string dblast_name = reader.GetString(4);
-                            string dbdate_joined = reader.GetDateTime(5).ToString("yyyy-MM-dd");
+                            double dbid = reader.IsDBNull(0) ? 0 : reader.GetDouble(0);
+                            string dbpassword = reader.IsDBNull(1) ? string.Empty : reader.GetString(1);
+                            string dblogin = reader.IsDBNull(6) ? string.Empty : reader.GetString(6);
+                            string dbusername = reader.IsDBNull(2) ? string.Empty : reader.GetString(2);
+                            string dbfirst_name = reader.IsDBNull(3) ? string.Empty : reader.GetString(3);
+                            string dblast_name = reader.IsDBNull(4) ? string.Empty : reader.GetString(4);
+                            string dbdate_joined = reader.IsDBNull(5) ? string.Empty : reader.GetDateTime(5).ToString("yyyy-MM-dd");
+                            bool dbis_active = reader.IsDBNull(10) ? true : reader.GetBoolean(10);
 
                             var userViewModel = new CartUserListUserControlViewModel
                             {
@@ -91,7 +104,8 @@ public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChang
                                 FirstName = dbfirst_name,
                                 LastName = dblast_name,
                                 Password = dbpassword,
-                                DateJoined = dbdate_joined
+                                DateJoined = dbdate_joined,
+                                IsActive = dbis_active,
                             };
 
                             var userControl = new CartUserListUserControl
@@ -162,6 +176,60 @@ public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChang
         {
             Content.Children.Clear();
             if (_addUsers.Parent == Content) Content.Children.Remove(_addUsers);
+        }
+    }
+
+    public void ShowAddDepartmentUserControl()
+    {
+        if (Content != null)
+        {
+            if (Content.Children.Contains(_addDepartment))
+            {
+                _addDepartment.RefreshDataAsync();
+                return;
+            }
+
+            if (_addDepartment.Parent is Panel currentParent) currentParent.Children.Remove(_addDepartment);
+            Content.Children.Clear();
+            Content.Children.Add(_addDepartment);
+
+            _addDepartment.RefreshDataAsync();
+        }
+    }
+
+    public void CloseAddDepartmentUserControl()
+    {
+        if (Content != null)
+        {
+            Content.Children.Clear();
+            if (_addDepartment.Parent == Content) Content.Children.Remove(_addDepartment);
+        }
+    }
+
+    public void ShowAddPositionUserControl()
+    {
+        if (Content != null)
+        {
+            if (Content.Children.Contains(_addPosition))
+            {
+                _addPosition.RefreshDataAsync();
+                return;
+            }
+
+            if (_addPosition.Parent is Panel currentParent) currentParent.Children.Remove(_addPosition);
+            Content.Children.Clear();
+            Content.Children.Add(_addPosition);
+
+            _addPosition.RefreshDataAsync();
+        }
+    }
+
+    public void CloseAddPositionUserControl()
+    {
+        if (Content != null)
+        {
+            Content.Children.Clear();
+            if (_addPosition.Parent == Content) Content.Children.Remove(_addPosition);
         }
     }
 

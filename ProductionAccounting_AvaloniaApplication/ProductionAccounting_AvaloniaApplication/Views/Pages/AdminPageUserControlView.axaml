@@ -34,12 +34,35 @@
 							Orientation="Horizontal"
 							HorizontalAlignment="Center"
 							Margin="10,0,0,0">
-					<Button Width="32"
+
+					<Button HorizontalAlignment="Right"
+							VerticalAlignment="Top"
+							Width="32"
 							Height="32"
-							Click="OpenAddUsers_Click"
-							ToolTip.Tip="Добавить пользователя">
+							ToolTip.Tip="Список">
 						<Image Source="/Assets/add-64.png"/>
+						<Button.Flyout>
+							<Flyout Placement="Bottom">
+								<ListBox>
+									<Button Command="{Binding OpenAddUsers}"
+											VerticalAlignment="Stretch"
+											HorizontalAlignment="Stretch"
+											Content="Add user"/>
+
+									<Button Command="{Binding OpenDepartmentPageCommand}"
+											VerticalAlignment="Stretch"
+											HorizontalAlignment="Stretch"
+											Content="Add workshop/department"/>
+
+									<Button Command="{Binding ShowAddPositionUserControl}"
+											VerticalAlignment="Stretch"
+											HorizontalAlignment="Stretch"
+											Content="Add a position"/>
+								</ListBox>
+							</Flyout>
+						</Button.Flyout>
 					</Button>
+
 					<Button Margin="10,0,0,0"
 							Width="32"
 							Height="32"
@@ -47,6 +70,7 @@
 							ToolTip.Tip="Скачать список">
 						<Image Source="/Assets/download-cloud-64.png"/>
 					</Button>
+
 					<Button Margin="10,0,0,0"
 							Width="32"
 							Height="32"

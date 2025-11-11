@@ -1,0 +1,42 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Style Selector="Button.Button">
+      <Setter Property="Width" Value="34"/>
+      <Setter Property="Height" Value="34"/>
+      <Setter Property="CornerRadius" Value="6"/>
+      <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+
+    <Style Selector="Button.Button > Image">
+      <Setter Property="Width" Value="18"/>
+      <Setter Property="Height" Value="18"/>
+    </Style>
+
+    <Style Selector="ToggleButton.ToggleButton">
+      <Setter Property="Width" Value="34"/>
+      <Setter Property="Height" Value="34"/>
+      <Setter Property="CornerRadius" Value="6"/>
+      <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+
+    <Style Selector="ToggleButton.ToggleButton > Image">
+      <Setter Property="Width" Value="18"/>
+      <Setter Property="Height" Value="18"/>
+    </Style>
+
+    <Style Selector="ToggleButton Image.toggle-on">
+      <Setter Property="IsVisible" Value="False"/>
+    </Style>
+
+    <Style Selector="ToggleButton:checked Image.toggle-on">
+      <Setter Property="IsVisible" Value="True"/>
+    </Style>
+
+    <Style Selector="ToggleButton Image.toggle-off">
+      <Setter Property="IsVisible" Value="True"/>
+    </Style>
+
+    <Style Selector="ToggleButton:checked Image.toggle-off">
+      <Setter Property="IsVisible" Value="False"/>
+    </Style>
+</Styles>

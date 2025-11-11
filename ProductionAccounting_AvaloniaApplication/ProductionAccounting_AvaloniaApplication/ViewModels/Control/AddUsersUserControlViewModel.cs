@@ -40,6 +40,50 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
         }
     }
 
+    private ObservableCollection<ComboBoxTypeDepartmentUser> _comboBoxItemsDepartments = [];
+    public ObservableCollection<ComboBoxTypeDepartmentUser> ComboBoxItemsDepartments
+    {
+        get => _comboBoxItemsDepartments;
+        set => this.RaiseAndSetIfChanged(ref _comboBoxItemsDepartments, value);
+    }
+
+    private ComboBoxTypeDepartmentUser? _selectedComboBoxItemDepartment;
+    public ComboBoxTypeDepartmentUser? SelectedComboBoxItemDepartment
+    {
+        get => _selectedComboBoxItemDepartment;
+        set
+        {
+            if (_selectedComboBoxItemDepartment != value)
+            {
+                _selectedComboBoxItemDepartment = value;
+                OnPropertyChanged(nameof(SelectedComboBoxItemDepartment));
+                OnPropertyChanged(nameof(IsActiveConfirmButton));
+            }
+        }
+    }
+
+    private ObservableCollection<ComboBoxTypePositionUser> _comboBoxItemsPositions = [];
+    public ObservableCollection<ComboBoxTypePositionUser> ComboBoxItemsPositions
+    {
+        get => _comboBoxItemsPositions;
+        set => this.RaiseAndSetIfChanged(ref _comboBoxItemsPositions, value);
+    }
+
+    private ComboBoxTypePositionUser? _selectedComboBoxItemPosition;
+    public ComboBoxTypePositionUser? SelectedComboBoxItemPosition
+    {
+        get => _selectedComboBoxItemPosition;
+        set
+        {
+            if (_selectedComboBoxItemPosition != value)
+            {
+                _selectedComboBoxItemPosition = value;
+                OnPropertyChanged(nameof(SelectedComboBoxItemPosition));
+                OnPropertyChanged(nameof(IsActiveConfirmButton));
+            }
+        }
+    }
+
     private string _login = string.Empty;
     public string Login
     {
@@ -115,8 +159,38 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
         }
     }
 
+    private string _email = string.Empty;
+    public string Email
+    {
+        get => _email;
+        set
+        {
+            if (_email != value)
+            {
+                _email = value;
+                OnPropertyChanged(nameof(Email));
+            }
+        }
+    }
+
+    private string _phone = string.Empty;
+    public string Phone
+    {
+        get => _phone;
+        set
+        {
+            if (_phone != value)
+            {
+                _phone = value;
+                OnPropertyChanged(nameof(Phone));
+            }
+        }
+    }
+
     public bool IsActiveConfirmButton
-        => SelectedComboBoxItem != null
+        => SelectedComboBoxItem != null 
+        && SelectedComboBoxItemDepartment != null 
+        && SelectedComboBoxItemPosition != null
         && !string.IsNullOrEmpty(Login)
         && !string.IsNullOrEmpty(MiddleName) 
         && !string.IsNullOrEmpty(FirstUsername) 
@@ -127,25 +201,54 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
     {
         try
         {
-            string sql = "SELECT * FROM public.user_type";
+            string sqlUserTypes = "SELECT id, type_user FROM public.user_type";
+            string sqlDepartments = "SELECT id, type FROM public.departments";
+            string sqlPositions = "SELECT id, type FROM public.positions";
 
             using (var connection = new NpgsqlConnection(Arguments.connection))
             {
                 await connection.OpenAsync();
-                using (var command = new NpgsqlCommand(sql, connection))
+
+                using (var command = new NpgsqlCommand(sqlUserTypes, connection))
                 using (var reader = await command.ExecuteReaderAsync())
                 {
                     while (await reader.ReadAsync())
                     {
-                        ComboBoxItems.Add(new ComboBoxTypeRolsUser(reader.GetDouble(0), reader.GetString(1)));
+                        ComboBoxItems.Add(new ComboBoxTypeRolsUser(
+                            reader.GetDouble(0),
+                            reader.GetString(1)
+                        ));
+                    }
+                }
+
+                using (var command = new NpgsqlCommand(sqlDepartments, connection))
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        ComboBoxItemsDepartments.Add(new ComboBoxTypeDepartmentUser(
+                            reader.GetDouble(0),
+                            reader.GetString(1)
+                        ));
+                    }
+                }
+
+                using (var command = new NpgsqlCommand(sqlPositions, connection))
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        ComboBoxItemsPositions.Add(new ComboBoxTypePositionUser(
+                            reader.GetDouble(0),
+                            reader.GetString(1)
+                        ));
                     }
                 }
             }
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(level: LogLevel.WARNING,
-                ex: ex);
+            Loges.LoggingProcess(level: LogLevel.WARNING, ex: ex);
         }
     }
 
@@ -153,7 +256,8 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
     {
         try
         {
-            if (string.IsNullOrEmpty(Login) || string.IsNullOrEmpty(FirstUsername) || string.IsNullOrEmpty(LastUsername) || string.IsNullOrEmpty(MiddleName) || SelectedComboBoxItem == null)
+            if (string.IsNullOrEmpty(Login) || string.IsNullOrEmpty(FirstUsername) || string.IsNullOrEmpty(LastUsername) || string.IsNullOrEmpty(MiddleName) 
+                || SelectedComboBoxItem == null || SelectedComboBoxItemDepartment == null || SelectedComboBoxItemPosition == null)
             {
                 Messageerror = "Не все поля заполнены";
                 return false;
@@ -161,8 +265,8 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
 
             try
             {
-                string sql = "INSERT INTO public.user (login, password, first_name, last_name, middle_name, base_salary) " +
-                             "VALUES (@login, @password, @first_name, @last_name, @middle_name, @base_salary) RETURNING id";
+                string sql = "INSERT INTO public.user (login, password, first_name, last_name, middle_name, base_salary, email, phone) " +
+                             "VALUES (@login, @password, @first_name, @last_name, @middle_name, @base_salary, @email, @phone) RETURNING id";
 
                 using (var connection = new NpgsqlConnection(Arguments.connection))
                 {
@@ -184,16 +288,34 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
                             command.Parameters.AddWithValue("@last_name", LastUsername);
                             command.Parameters.AddWithValue("@middle_name", MiddleName);
                             command.Parameters.AddWithValue("@base_salary", BaseSalary);
+                            command.Parameters.AddWithValue("@email", Email);
+                            command.Parameters.AddWithValue("@phone", Phone);
 
-                            var equipmentId = command.ExecuteScalar();
-                            if (equipmentId == null) return false;
+                            var userId = command.ExecuteScalar();
+                            if (userId == null) return false;
 
                             string sql2 = "INSERT INTO public.user_to_user_type (user_id, user_type_id) VALUES (@user_id, @user_type_id)";
                             using (var commandRel = new NpgsqlCommand(sql2, connection))
                             {
-                                commandRel.Parameters.AddWithValue("@user_id", equipmentId);
+                                commandRel.Parameters.AddWithValue("@user_id", userId);
                                 commandRel.Parameters.AddWithValue("@user_type_id", SelectedComboBoxItem?.Id ?? 0);
                                 commandRel.ExecuteNonQuery();
+                            }
+
+                            string sql3 = "INSERT INTO public.user_to_departments (user_id, department_id) VALUES (@user_id, @department_id)";
+                            using (var commandDepartment = new NpgsqlCommand(sql3, connection))
+                            {
+                                commandDepartment.Parameters.AddWithValue("@user_id", userId);
+                                commandDepartment.Parameters.AddWithValue("@department_id", SelectedComboBoxItemDepartment?.Id ?? 0);
+                                commandDepartment.ExecuteNonQuery();
+                            }
+
+                            string sql4 = "INSERT INTO public.user_to_position (user_id, position_id) VALUES (@user_id, @position_id)";
+                            using (var commandPosition = new NpgsqlCommand(sql4, connection))
+                            {
+                                commandPosition.Parameters.AddWithValue("@user_id", userId);
+                                commandPosition.Parameters.AddWithValue("@position_id", SelectedComboBoxItemPosition?.Id ?? 0);
+                                commandPosition.ExecuteNonQuery();
                             }
 
                             if (!string.IsNullOrEmpty(randomString))

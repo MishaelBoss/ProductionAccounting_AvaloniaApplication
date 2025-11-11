@@ -65,7 +65,7 @@ public class ManagerCookie
 
                 try
                 {
-                    string sql1 = "SELECT id, login, first_name, last_name, middle_name FROM public.\"user\" WHERE id = @id";
+                    string sql1 = "SELECT id, login, first_name, last_name, middle_name FROM public.\"user\" WHERE id = @id AND is_active = true";
                     using (var command = new NpgsqlCommand(sql1, connection))
                     {
                         command.Parameters.AddWithValue("@id", data.Id);

@@ -7,6 +7,10 @@
              mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="80"
              x:Class="ProductionAccounting_AvaloniaApplication.Views.Control.CartUserListUserControl">
 
+	<UserControl.Styles>
+        <StyleInclude Source="/Styles/Controls/CartUserListStyles.axaml"/>
+    </UserControl.Styles>
+
     <Border CornerRadius="12"
             Background="LightGray"
             BorderBrush="#E1E5E9"
@@ -23,6 +27,7 @@
                     Background="#4A90E2"
                     Margin="0,0,15,0"
                     VerticalAlignment="Center">
+
 				<TextBlock Text="{Binding Login}"
                            Foreground="White"
                            FontSize="16"
@@ -61,42 +66,36 @@
 						Spacing="6"
 						VerticalAlignment="Center">
 
+				<ToggleButton	Classes="ToggleButton" 
+								IsChecked="{Binding IsActive}"
+								IsVisible="{Binding IsVisibleToggleButtonActiveUser}">
+					<Panel>
+						<Image Classes="toggle-on" Source="/Assets/toggle-on-64.png"/>
+						<Image Classes="toggle-off" Source="/Assets/toggle-off-64.png"/>
+					</Panel>
+				 </ToggleButton>
+
 				<Button Click="OpenProfileUser_Click"
-						Width="34"
-						Height="34"
-						CornerRadius="6"
+						Classes="Button"
 						Background="#4A90E2"
-						BorderThickness="0"
 						ToolTip.Tip="Просмотр профиля">
-					<Image Source="/Assets/find-user-64.png"
-						   Width="18"
-						   Height="18"/>
+					<Image Source="/Assets/find-user-64.png"/>
 				</Button>
 
 				<Button Click="EditUser_Click"
-						Width="34"
-						Height="34"
-						CornerRadius="6"
+						Classes="Button"
 						Background="#34C759"
-						BorderThickness="0"
 						IsVisible="{Binding IsVisibleButtonEdit}"
 						ToolTip.Tip="Редактировать пользователя">
-					<Image Source="/Assets/edit-user-64.png"
-						   Width="18"
-						   Height="18"/>
+					<Image Source="/Assets/edit-user-64.png"/>
 				</Button>
 
 				<Button Click="OpenWindowsConfirmDeleteUser_Click"
-						Width="34"
-						Height="34"
-						CornerRadius="6"
+						Classes="Button"
 						Background="#FF3B30"
-						BorderThickness="0"
 						IsVisible="{Binding IsVisibleButtonDelete}"
 						ToolTip.Tip="Удалить пользователя">
-					<Image Source="/Assets/remove-64.png"
-						   Width="18"
-						   Height="18"/>
+					<Image Source="/Assets/remove-64.png"/>
 				</Button>
 			</StackPanel>
 		</Grid>

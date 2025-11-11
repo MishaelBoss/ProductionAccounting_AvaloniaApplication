@@ -1,5 +1,4 @@
-﻿using MsBox.Avalonia;
-using Npgsql;
+﻿using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ReactiveUI;
 using System.Threading.Tasks;
@@ -34,6 +33,41 @@ public class ProfileUserUserControlViewModel : ViewModelBase
     {
         get => _middleName;
         set => this.RaiseAndSetIfChanged(ref _middleName, value);
+    }
+
+    private string _position = string.Empty;
+    public string Position
+    {
+        get => _position;
+        set => this.RaiseAndSetIfChanged(ref _position, value);
+    }
+
+    private string _status = string.Empty;
+    public string Status
+    {
+        get => _status;
+        set => this.RaiseAndSetIfChanged(ref _status, value);
+    }
+
+    private string _department = string.Empty;
+    public string Department
+    {
+        get => _department;
+        set => this.RaiseAndSetIfChanged(ref _department, value);
+    }
+
+    private string _email = string.Empty;
+    public string Email
+    {
+        get => _email;
+        set => this.RaiseAndSetIfChanged(ref _email, value);
+    }
+
+    private string _phone = string.Empty;
+    public string Phone
+    {
+        get => _phone;
+        set => this.RaiseAndSetIfChanged(ref _phone, value);
     }
 
     public async Task LoadDateAsync() 
