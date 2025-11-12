@@ -44,6 +44,10 @@ public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChang
     public ICommand OpenPositionPageCommand
         => new RelayCommand(() => ShowAddPositionUserControl());
 
+    public ICommand ResetFiltersCommand 
+        => new RelayCommand(() => ResetFilters());
+
+
     private bool _isProfileView = false;
     public bool IsProfileView
     {
@@ -311,6 +315,76 @@ public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChang
         }
     }
 
+    private bool _filterByRole = false;
+    public bool FilterByRole
+    {
+        get => _filterByRole;
+        set
+        {
+            if (_filterByRole != value)
+            {
+                _filterByRole = value;
+                OnPropertyChanged(nameof(FilterByRole));
+            }
+        }
+    }
+
+    private bool _filterByDepartment = false;
+    public bool FilterByDepartment
+    {
+        get => _filterByDepartment;
+        set
+        {
+            if (_filterByDepartment != value)
+            {
+                _filterByDepartment = value;
+                OnPropertyChanged(nameof(FilterByDepartment));
+            }
+        }
+    }
+
+    private bool _filterByPosition = false;
+    public bool FilterByPosition
+    {
+        get => _filterByPosition;
+        set
+        {
+            if (_filterByPosition != value)
+            {
+                _filterByPosition = value;
+                OnPropertyChanged(nameof(FilterByPosition));
+            }
+        }
+    }
+
+    private bool _showActiveUsers = true;
+    public bool ShowActiveUsers
+    {
+        get => _showActiveUsers;
+        set
+        {
+            if (_showActiveUsers != value)
+            {
+                _showActiveUsers = value;
+                OnPropertyChanged(nameof(ShowActiveUsers));
+            }
+        }
+    }
+
+    private bool _showInactiveUsers = true;
+    public bool ShowInactiveUsers
+    {
+        get => _showInactiveUsers;
+        set
+        {
+            if (_showInactiveUsers != value)
+            {
+                _showInactiveUsers = value;
+                OnPropertyChanged(nameof(ShowInactiveUsers));
+            }
+        }
+    }
+
     private async void PerformSearchListUsers()
     {
         if (string.IsNullOrWhiteSpace(Search))
@@ -449,6 +523,19 @@ public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChang
                 "Connection or request error",
                 ex: ex);
         }
+    }
+
+    private void ResetFilters()
+    {
+        FilterByRole = false;
+        FilterByDepartment = false;
+        FilterByPosition = false;
+        ShowActiveUsers = true;
+        ShowInactiveUsers = true;
+        SelectedComboBoxItem = null;
+        SelectedComboBoxItemDepartment = null;
+        SelectedComboBoxItemPosition = null;
+        Search = string.Empty;
     }
 
     public async void InitDateUserAsync(double userID)
