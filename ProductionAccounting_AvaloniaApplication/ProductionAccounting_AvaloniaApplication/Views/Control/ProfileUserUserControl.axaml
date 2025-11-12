@@ -21,26 +21,65 @@
 
 					<StackPanel Orientation="Horizontal"
 								Spacing="4">
-						<TextBlock Margin="0 5">Login:</TextBlock>
-						<TextBlock Margin="0 5" Text="{Binding Login}"/>
+						<TextBlock	Margin="0 5">Login:</TextBlock>
+						<TextBlock	Margin="0 5" 
+									Text="{Binding Login}"/>
 					</StackPanel>
 
 					<StackPanel Orientation="Horizontal"
 								Spacing="4">
-						<TextBlock Margin="0 5">First name:</TextBlock>
-						<TextBlock Margin="0 5" Text="{Binding FirstName}"/>
+						<TextBlock	Margin="0 5">First name:</TextBlock>
+						<TextBlock	Margin="0 5" 
+									Text="{Binding FirstName}"/>
 					</StackPanel>
 
 					<StackPanel Orientation="Horizontal"
 								Spacing="4">
-						<TextBlock Margin="0 5">Last name:</TextBlock>
-						<TextBlock Margin="0 5" Text="{Binding LastName}"/>
+						<TextBlock	Margin="0 5">Last name:</TextBlock>
+						<TextBlock	Margin="0 5" 
+									Text="{Binding LastName}"/>
 					</StackPanel>
 
 					<StackPanel Orientation="Horizontal"
 								Spacing="4">
-						<TextBlock Margin="0 5">Middle name:</TextBlock>
-						<TextBlock Margin="0 5" Text="{Binding MiddleName}"/>
+						<TextBlock	Margin="0 5">Middle name:</TextBlock>
+						<TextBlock	Margin="0 5" 
+									Text="{Binding MiddleName}"/>
+					</StackPanel>
+
+					<StackPanel Orientation="Horizontal"
+								Spacing="4">
+						<TextBlock	Margin="0 5">Employee:</TextBlock>
+						<TextBlock	Margin="0 5"	
+									Text="{Binding Employee}"/>
+					</StackPanel>
+
+					<StackPanel Orientation="Horizontal"
+								Spacing="4">
+						<TextBlock	Margin="0 5">Position:</TextBlock>
+						<TextBlock	Margin="0 5" 
+									Text="{Binding Position}"/>
+					</StackPanel>
+
+					<StackPanel Orientation="Horizontal"
+								Spacing="4">
+						<TextBlock	Margin="0 5">Department:</TextBlock>
+						<TextBlock	Margin="0 5" 
+									Text="{Binding Department}"/>
+					</StackPanel>
+
+					<StackPanel Orientation="Horizontal"
+								Spacing="4">
+						<TextBlock	Margin="0 5">Email:</TextBlock>
+						<TextBlock	Margin="0 5" 
+									Text="{Binding Email}"/>
+					</StackPanel>
+
+					<StackPanel Orientation="Horizontal"
+								Spacing="4">
+						<TextBlock	Margin="0 5">Phone:</TextBlock>
+						<TextBlock	Margin="0 5" 
+									Text="{Binding Phone}"/>
 					</StackPanel>
 					
 					<StackPanel Orientation="Vertical"

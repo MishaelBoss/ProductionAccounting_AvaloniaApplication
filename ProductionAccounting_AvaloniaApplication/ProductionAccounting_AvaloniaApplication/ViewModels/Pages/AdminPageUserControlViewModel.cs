@@ -240,11 +240,17 @@ public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChang
             var editViewModel = new EditUsersUserControlViewModel(userID);
             _editUsers.DataContext = editViewModel;
 
-            if (Content.Children.Contains(_editUsers)) return;
+            if (Content.Children.Contains(_editUsers)) 
+            {
+                _ = _editUsers.RefreshDataAsync();
+                return;
+            }
 
             if (_editUsers.Parent is Panel currentParent) currentParent.Children.Remove(_editUsers);
             Content.Children.Clear();
             Content.Children.Add(_editUsers);
+
+            _ = _editUsers.RefreshDataAsync();
         }
     }
 

@@ -15,8 +15,6 @@ public class EditUsersUserControlViewModel : ViewModelBase, INotifyPropertyChang
     public EditUsersUserControlViewModel(double userID)
     {
         UserID = userID;
-        _ = LoadUserDataAsync();
-        _ = LoadListTypeToComboBoxAsync();
     }
 
     private string _messageerror = string.Empty;
@@ -49,6 +47,50 @@ public class EditUsersUserControlViewModel : ViewModelBase, INotifyPropertyChang
             {
                 _selectedComboBoxItem = value;
                 OnPropertyChanged(nameof(SelectedComboBoxItem));
+                OnPropertyChanged(nameof(IsActiveConfirmButton));
+            }
+        }
+    }
+
+    private ObservableCollection<ComboBoxTypeDepartmentUser> _comboBoxItemsDepartments = [];
+    public ObservableCollection<ComboBoxTypeDepartmentUser> ComboBoxItemsDepartments
+    {
+        get => _comboBoxItemsDepartments;
+        set => this.RaiseAndSetIfChanged(ref _comboBoxItemsDepartments, value);
+    }
+
+    private ComboBoxTypeDepartmentUser? _selectedComboBoxItemDepartment;
+    public ComboBoxTypeDepartmentUser? SelectedComboBoxItemDepartment
+    {
+        get => _selectedComboBoxItemDepartment;
+        set
+        {
+            if (_selectedComboBoxItemDepartment != value)
+            {
+                _selectedComboBoxItemDepartment = value;
+                OnPropertyChanged(nameof(SelectedComboBoxItemDepartment));
+                OnPropertyChanged(nameof(IsActiveConfirmButton));
+            }
+        }
+    }
+
+    private ObservableCollection<ComboBoxTypePositionUser> _comboBoxItemsPositions = [];
+    public ObservableCollection<ComboBoxTypePositionUser> ComboBoxItemsPositions
+    {
+        get => _comboBoxItemsPositions;
+        set => this.RaiseAndSetIfChanged(ref _comboBoxItemsPositions, value);
+    }
+
+    private ComboBoxTypePositionUser? _selectedComboBoxItemPosition;
+    public ComboBoxTypePositionUser? SelectedComboBoxItemPosition
+    {
+        get => _selectedComboBoxItemPosition;
+        set
+        {
+            if (_selectedComboBoxItemPosition != value)
+            {
+                _selectedComboBoxItemPosition = value;
+                OnPropertyChanged(nameof(SelectedComboBoxItemPosition));
                 OnPropertyChanged(nameof(IsActiveConfirmButton));
             }
         }
@@ -131,55 +173,88 @@ public class EditUsersUserControlViewModel : ViewModelBase, INotifyPropertyChang
 
     public bool IsActiveConfirmButton
         => SelectedComboBoxItem != null
+        && SelectedComboBoxItemDepartment != null
+        && SelectedComboBoxItemPosition != null
         && !string.IsNullOrEmpty(Login)
         && !string.IsNullOrEmpty(FirstUsername)
         && !string.IsNullOrEmpty(LastUsername) 
         && !string.IsNullOrEmpty(MiddleName)
         && BaseSalary > 0;
 
-    private async Task LoadListTypeToComboBoxAsync()
+    public async Task LoadListTypeToComboBoxAsync()
     {
         try
         {
-            string sql = "SELECT * FROM public.user_type";
+            string sqlUserTypes = "SELECT id, type_user FROM public.user_type";
+            string sqlDepartments = "SELECT id, type FROM public.departments";
+            string sqlPositions = "SELECT id, type FROM public.positions";
 
             using (var connection = new NpgsqlConnection(Arguments.connection))
             {
                 await connection.OpenAsync();
-                using (var command = new NpgsqlCommand(sql, connection))
+
+                using (var command = new NpgsqlCommand(sqlUserTypes, connection))
                 using (var reader = await command.ExecuteReaderAsync())
                 {
                     while (await reader.ReadAsync())
                     {
-                        ComboBoxItems.Add(new ComboBoxTypeRolsUser(reader.GetDouble(0), reader.GetString(1)));
+                        ComboBoxItems.Add(new ComboBoxTypeRolsUser(reader.GetDouble(0),reader.GetString(1)));
+                    }
+                }
+
+                using (var command = new NpgsqlCommand(sqlDepartments, connection))
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        ComboBoxItemsDepartments.Add(new ComboBoxTypeDepartmentUser(reader.GetDouble(0),reader.GetString(1)));
+                    }
+                }
+
+                using (var command = new NpgsqlCommand(sqlPositions, connection))
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        ComboBoxItemsPositions.Add(new ComboBoxTypePositionUser(reader.GetDouble(0),reader.GetString(1)));
                     }
                 }
             }
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(level: LogLevel.WARNING,
+            Loges.LoggingProcess(level: LogLevel.WARNING, 
                 ex: ex);
         }
     }
 
-    private async Task LoadUserDataAsync()
+    public async Task LoadUserDataAsync()
     {
         try
         {
             string sql = @"
-                        SELECT 
-                            u.first_name, 
-                            u.last_name, 
-                            u.middle_name,
-                            u.login, 
-                            u.base_salary,
-                            ut.id as user_type_id,
-                            ut.type_user
-                        FROM public.""user"" u
-                        LEFT JOIN public.user_to_user_type utu ON u.id = utu.user_id
-                        LEFT JOIN public.user_type ut ON utu.user_type_id = ut.id
-                        WHERE u.id = @userID";
+                SELECT 
+                    u.first_name, 
+                    u.last_name, 
+                    u.middle_name,
+                    u.login, 
+                    u.base_salary,
+                    ut.id as user_type_id,
+                    ut.type_user,
+                    d.id as department_id,
+                    d.name as department_name,
+                    p.id as position_id,
+                    p.name as position_name
+                FROM public.""user"" u
+                LEFT JOIN public.user_to_user_type utu ON u.id = utu.user_id
+                LEFT JOIN public.user_type ut ON utu.user_type_id = ut.id
+
+                LEFT JOIN public.user_to_departments utd ON u.id = utd.user_id
+                LEFT JOIN public.departments d ON utd.department_id = d.id
+
+                LEFT JOIN public.user_to_position utp ON u.id = utp.user_id
+                LEFT JOIN public.positions p ON utp.position_id = p.id
+                WHERE u.id = @userID";
 
             using (var connection = new NpgsqlConnection(Arguments.connection))
             {
@@ -192,16 +267,23 @@ public class EditUsersUserControlViewModel : ViewModelBase, INotifyPropertyChang
                     {
                         if (await reader.ReadAsync())
                         {
-                            MiddleName = reader.GetString(0);
-                            FirstUsername = reader.GetString(1);
-                            LastUsername = reader.GetString(2);
-                            Login = reader.GetString(3);
-                            BaseSalary = reader.GetDecimal(4);
+                            FirstUsername = reader.IsDBNull(0) ? string.Empty : reader.GetString(0);
+                            LastUsername = reader.IsDBNull(1) ? string.Empty : reader.GetString(1);
+                            MiddleName = reader.IsDBNull(2) ? string.Empty : reader.GetString(2);
+                            Login = reader.IsDBNull(3) ? string.Empty : reader.GetString(3);
+                            BaseSalary = reader.IsDBNull(4) ? 0 : reader.GetDecimal(4);
 
-                            var userTypeId = reader.GetDouble(5);
-                            var userTypeName = reader.GetString(6);
+                            var userTypeId = reader.IsDBNull(5) ? 0 : reader.GetDouble(5);
+                            var departmentId = reader.IsDBNull(7) ? 0 : reader.GetDouble(7);
+                            var positionId = reader.IsDBNull(9) ? 0 : reader.GetDouble(9);
 
                             SelectedComboBoxItem = ComboBoxItems.FirstOrDefault(x => x.Id == userTypeId);
+                            SelectedComboBoxItemDepartment = ComboBoxItemsDepartments.FirstOrDefault(x => x.Id == departmentId);
+                            SelectedComboBoxItemPosition = ComboBoxItemsPositions.FirstOrDefault(x => x.Id == positionId);
+                        }
+                        else
+                        {
+                            Messageerror = "Пользователь не найден";
                         }
                     }
                 }
@@ -262,14 +344,16 @@ public class EditUsersUserControlViewModel : ViewModelBase, INotifyPropertyChang
             }
             catch (Exception ex)
             {
-                Loges.LoggingProcess(level: LogLevel.WARNING, ex: ex);
+                Loges.LoggingProcess(level: LogLevel.WARNING, 
+                    ex: ex);
                 Messageerror = $"Ошибка обновления: {ex.Message}";
                 return false;
             }
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(level: LogLevel.WARNING, ex: ex);
+            Loges.LoggingProcess(level: LogLevel.WARNING, 
+                ex: ex);
             Messageerror = "Неизвестная ошибка";
             return false;
         }

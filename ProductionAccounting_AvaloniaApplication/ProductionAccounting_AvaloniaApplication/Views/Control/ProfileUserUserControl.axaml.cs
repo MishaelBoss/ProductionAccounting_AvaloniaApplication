@@ -39,5 +39,6 @@ public partial class ProfileUserUserControl : UserControl
     {
         if (DataContext is not ProfileUserUserControlViewModel viewModel) return;
         await viewModel.LoadDateAsync();
+        await viewModel.LoadListTypeToComboBoxAsync();
     }
 }

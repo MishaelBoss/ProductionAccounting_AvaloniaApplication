@@ -28,28 +28,82 @@
 					<TextBox Watermark="Enter Middle name" Text="{Binding MiddleName}"/>
 					<TextBlock Margin="0 5">Base salary:</TextBlock>
 					<TextBox Watermark="Enter base salary" Text="{Binding BaseSalary}"/>
-					<DockPanel HorizontalAlignment="Center">
-						<ComboBox Margin="3"
-								  Width="95"
-								  MinHeight="15"
-								  Height="27"
-								  DockPanel.Dock="Right"
-								  FontSize="12"
-								  ItemsSource="{Binding ComboBoxItems}"
-								  SelectedItem="{Binding SelectedComboBoxItem}">
-							<ComboBox.Styles>
-								<Style Selector="ComboBoxItem">
-									<Setter Property="Padding" Value="5, 0"/>
-									<Setter Property="Height" Value="20"/>
-									<Setter Property="MinHeight" Value="12"/>
-									<Setter Property="Foreground" Value="White"/>
-								</Style>
-							</ComboBox.Styles>
-						</ComboBox>
-						<TextBlock Text="Звание"
-								   VerticalAlignment="Center"
-								   HorizontalAlignment="Right"/>
-					</DockPanel>
+
+					<StackPanel Orientation="Horizontal" 
+								HorizontalAlignment="Center"
+								Spacing="5">
+
+						<DockPanel HorizontalAlignment="Center">
+							<ComboBox Margin="3"
+									  Width="95"
+									  MinHeight="15"
+									  Height="27"
+									  DockPanel.Dock="Right"
+									  FontSize="12"
+									  ItemsSource="{Binding ComboBoxItems}"
+									  SelectedItem="{Binding SelectedComboBoxItem}">
+								<ComboBox.Styles>
+									<Style Selector="ComboBoxItem">
+										<Setter Property="Padding" Value="5, 0"/>
+										<Setter Property="Height" Value="20"/>
+										<Setter Property="MinHeight" Value="12"/>
+										<Setter Property="Foreground" Value="White"/>
+									</Style>
+								</ComboBox.Styles>
+							</ComboBox>
+							<TextBlock Text="Ranks"
+									   VerticalAlignment="Center"
+									   HorizontalAlignment="Right"/>
+						</DockPanel>
+
+						<DockPanel HorizontalAlignment="Center">
+							<ComboBox Margin="3"
+									  Width="95"
+									  MinHeight="15"
+									  Height="27"
+									  DockPanel.Dock="Right"
+									  FontSize="12"
+									  ItemsSource="{Binding ComboBoxItemsDepartments}"
+									  SelectedItem="{Binding SelectedComboBoxItemDepartment}">
+								<ComboBox.Styles>
+									<Style Selector="ComboBoxItem">
+										<Setter Property="Padding" Value="5, 0"/>
+										<Setter Property="Height" Value="20"/>
+										<Setter Property="MinHeight" Value="12"/>
+										<Setter Property="Foreground" Value="White"/>
+									</Style>
+								</ComboBox.Styles>
+							</ComboBox>
+							<TextBlock Text="Department"
+									   VerticalAlignment="Center"
+									   HorizontalAlignment="Right"/>
+						</DockPanel>
+
+						<DockPanel HorizontalAlignment="Center">
+							<ComboBox Margin="3"
+									  Width="95"
+									  MinHeight="15"
+									  Height="27"
+									  DockPanel.Dock="Right"
+									  FontSize="12"
+									  ItemsSource="{Binding ComboBoxItemsPositions}"
+									  SelectedItem="{Binding SelectedComboBoxItemPosition}">
+								<ComboBox.Styles>
+									<Style Selector="ComboBoxItem">
+										<Setter Property="Padding" Value="5, 0"/>
+										<Setter Property="Height" Value="20"/>
+										<Setter Property="MinHeight" Value="12"/>
+										<Setter Property="Foreground" Value="White"/>
+									</Style>
+								</ComboBox.Styles>
+							</ComboBox>
+							<TextBlock Text="Position"
+									   VerticalAlignment="Center"
+									   HorizontalAlignment="Right"/>
+						</DockPanel>
+						
+					</StackPanel>
+
 					<StackPanel Orientation="Vertical"
 								VerticalAlignment="Center"
 								HorizontalAlignment="Center"

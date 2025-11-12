@@ -1,6 +1,7 @@
 ﻿using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ReactiveUI;
+using System;
 using System.Threading.Tasks;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
@@ -42,11 +43,11 @@ public class ProfileUserUserControlViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _position, value);
     }
 
-    private string _status = string.Empty;
-    public string Status
+    private string _employee = string.Empty;
+    public string Employee
     {
-        get => _status;
-        set => this.RaiseAndSetIfChanged(ref _status, value);
+        get => _employee;
+        set => this.RaiseAndSetIfChanged(ref _employee, value);
     }
 
     private string _department = string.Empty;
@@ -70,13 +71,59 @@ public class ProfileUserUserControlViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _phone, value);
     }
 
-    public async Task LoadDateAsync() 
+    public async Task LoadListTypeToComboBoxAsync()
     {
-        if (!ManagerCookie.IsUserLoggedIn()) return;
+        if (!ManagerCookie.IsUserLoggedIn() && ManagerCookie.GetIdUser != 0) return;
 
         try
         {
-            string sql = @"SELECT login, first_name, last_name, middle_name FROM public.""user"" WHERE id = @id";
+            string sql = @"
+            SELECT 
+                ut.type_user,
+                d.type as department,
+                p.type as position
+            FROM public.user_to_user_type utt
+            LEFT JOIN public.user_type ut ON utt.user_type_id = ut.id
+            LEFT JOIN public.user_to_departments ud ON ud.user_id = utt.user_id
+            LEFT JOIN public.departments d ON ud.department_id = d.id
+            LEFT JOIN public.user_to_position up ON up.user_id = utt.user_id
+            LEFT JOIN public.positions p ON up.position_id = p.id
+            WHERE utt.user_id = @userID";
+
+            using (var connection = new NpgsqlConnection(Arguments.connection))
+            {
+                await connection.OpenAsync();
+
+                using (var command = new NpgsqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@userID", ManagerCookie.GetIdUser ?? 0);
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        if (await reader.ReadAsync())
+                        {
+                            //UserType = reader.IsDBNull(0) ? "none" : reader.GetString(0);
+                            Department = reader.IsDBNull(1) ? "none" : reader.GetString(1);
+                            Position = reader.IsDBNull(2) ? "none" : reader.GetString(2);
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Loges.LoggingProcess(level: LogLevel.WARNING, 
+                ex: ex);
+        }
+    }
+
+    public async Task LoadDateAsync() 
+    {
+        if (!ManagerCookie.IsUserLoggedIn() && ManagerCookie.GetIdUser != 0) return;
+
+        try
+        {
+            string sql = @"SELECT login, first_name, last_name, middle_name, email, phone, employee_id FROM public.""user"" WHERE id = @id";
 
             using (var connection = new NpgsqlConnection(Arguments.connection))
             {
@@ -88,11 +135,14 @@ public class ProfileUserUserControlViewModel : ViewModelBase
                     using (var reader = await command.ExecuteReaderAsync())
                     {
                         while (await reader.ReadAsync())
-                        {
-                            Login = reader.IsDBNull(0) ? string.Empty : reader.GetString(0);
-                            FirstName = reader.IsDBNull(1) ? string.Empty : reader.GetString(1);
-                            LastName = reader.IsDBNull(2) ? string.Empty : reader.GetString(2);
-                            MiddleName = reader.IsDBNull(3) ? string.Empty : reader.GetString(3);
+                        {   
+                            Login = reader.IsDBNull(0) ? "none" : reader.GetString(0);
+                            FirstName = reader.IsDBNull(1) ? "none" : reader.GetString(1);
+                            LastName = reader.IsDBNull(2) ? "none" : reader.GetString(2);
+                            MiddleName = reader.IsDBNull(3) ? "none" : reader.GetString(3);
+                            Email = reader.IsDBNull(4) ? "none" : reader.GetString(4);
+                            Phone = reader.IsDBNull(5) ? "none" : reader.GetString(5);
+                            Employee = reader.IsDBNull(6) ? "none" : reader.GetString(6);
                         }
                     }
                 }

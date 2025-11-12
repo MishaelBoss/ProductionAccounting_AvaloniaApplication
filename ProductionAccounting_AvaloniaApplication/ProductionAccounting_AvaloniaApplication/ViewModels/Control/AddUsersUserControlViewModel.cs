@@ -248,7 +248,8 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(level: LogLevel.WARNING, ex: ex);
+            Loges.LoggingProcess(level: LogLevel.WARNING, 
+                ex: ex);
         }
     }
 

@@ -32,15 +32,29 @@ public class ConfirmDeleteUserWindowViewModel : ViewModelBase
                 {
                     int rowsAffected = 0;
 
-                    string sql1 = @"DELETE FROM public.""user_to_user_type"" WHERE user_id = @id";
+                    string sql1 = "DELETE FROM public.user_to_user_type WHERE user_id = @id";
                     using (var command1 = new NpgsqlCommand(sql1, connection))
                     {
                         command1.Parameters.AddWithValue("@id", UserID);
                         rowsAffected += command1.ExecuteNonQuery();
                     }
 
-                    string sql2 = @"DELETE FROM public.""user"" WHERE id = @id";
-                    using (var command2 = new NpgsqlCommand(sql2, connection))
+                    string sql2 = "DELETE FROM public.user_to_departments WHERE user_id = @id";
+                    using (var command1 = new NpgsqlCommand(sql2, connection))
+                    {
+                        command1.Parameters.AddWithValue("@id", UserID);
+                        rowsAffected += command1.ExecuteNonQuery();
+                    }
+
+                    string sql3 = "DELETE FROM public.user_to_position WHERE user_id = @id";
+                    using (var command1 = new NpgsqlCommand(sql3, connection))
+                    {
+                        command1.Parameters.AddWithValue("@id", UserID);
+                        rowsAffected += command1.ExecuteNonQuery();
+                    }
+
+                    string sql4 = "DELETE FROM public.user WHERE id = @id";
+                    using (var command2 = new NpgsqlCommand(sql4, connection))
                     {
                         command2.Parameters.AddWithValue("@id", UserID);
                         rowsAffected += command2.ExecuteNonQuery();
