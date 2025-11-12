@@ -21,16 +21,89 @@
 			<Grid Grid.Row="0"
 				  HorizontalAlignment="Center"
 				  VerticalAlignment="Top"
-				  ColumnDefinitions="Auto, Auto">
+				  ColumnDefinitions="Auto, Auto, Auto">
 
 				<TextBox Grid.Column="0"
 						 Width="200"
-						 Watermark="Поиск"
+						 Watermark="пїЅпїЅпїЅпїЅпїЅ"
 						 Classes="Search"
 						 HorizontalAlignment="Center"
 						 Text="{Binding Search}"/>
 
-				<StackPanel Grid.Column="1"
+				<StackPanel 	Grid.Column="1" 					Orientation="Horizontal"
+								Spacing="5">
+
+						<DockPanel HorizontalAlignment="Center">
+							<ComboBox Margin="3"
+									  Width="95"
+									  MinHeight="15"
+									  Height="27"
+									  DockPanel.Dock="Right"
+									  FontSize="12"
+									  ItemsSource="{Binding ComboBoxItems}"
+									  SelectedItem="{Binding SelectedComboBoxItem}">
+								<ComboBox.Styles>
+									<Style Selector="ComboBoxItem">
+										<Setter Property="Padding" Value="5, 0"/>
+										<Setter Property="Height" Value="20"/>
+										<Setter Property="MinHeight" Value="12"/>
+										<Setter Property="Foreground" Value="White"/>
+									</Style>
+								</ComboBox.Styles>
+							</ComboBox>
+							<TextBlock Text="Ranks"
+									   VerticalAlignment="Center"
+									   HorizontalAlignment="Right"/>
+						</DockPanel>
+
+						<DockPanel HorizontalAlignment="Center">
+							<ComboBox Margin="3"
+									  Width="95"
+									  MinHeight="15"
+									  Height="27"
+									  DockPanel.Dock="Right"
+									  FontSize="12"
+									  ItemsSource="{Binding ComboBoxItemsDepartments}"
+									  SelectedItem="{Binding SelectedComboBoxItemDepartment}">
+								<ComboBox.Styles>
+									<Style Selector="ComboBoxItem">
+										<Setter Property="Padding" Value="5, 0"/>
+										<Setter Property="Height" Value="20"/>
+										<Setter Property="MinHeight" Value="12"/>
+										<Setter Property="Foreground" Value="White"/>
+									</Style>
+								</ComboBox.Styles>
+							</ComboBox>
+							<TextBlock Text="Department"
+									   VerticalAlignment="Center"
+									   HorizontalAlignment="Right"/>
+						</DockPanel>
+
+						<DockPanel HorizontalAlignment="Center">
+							<ComboBox Margin="3"
+									  Width="95"
+									  MinHeight="15"
+									  Height="27"
+									  DockPanel.Dock="Right"
+									  FontSize="12"
+									  ItemsSource="{Binding ComboBoxItemsPositions}"
+									  SelectedItem="{Binding SelectedComboBoxItemPosition}">
+								<ComboBox.Styles>
+									<Style Selector="ComboBoxItem">
+										<Setter Property="Padding" Value="5, 0"/>
+										<Setter Property="Height" Value="20"/>
+										<Setter Property="MinHeight" Value="12"/>
+										<Setter Property="Foreground" Value="White"/>
+									</Style>
+								</ComboBox.Styles>
+							</ComboBox>
+							<TextBlock Text="Position"
+									   VerticalAlignment="Center"
+									   HorizontalAlignment="Right"/>
+						</DockPanel>
+				</StackPanel>
+
+				<StackPanel Grid.Column="3"
 							Orientation="Horizontal"
 							HorizontalAlignment="Center"
 							Margin="10,0,0,0">
@@ -39,7 +112,7 @@
 							VerticalAlignment="Top"
 							Width="32"
 							Height="32"
-							ToolTip.Tip="Список">
+							ToolTip.Tip="пїЅпїЅпїЅпїЅпїЅпїЅ">
 						<Image Source="/Assets/add-64.png"/>
 						<Button.Flyout>
 							<Flyout Placement="Bottom">
@@ -67,7 +140,7 @@
 							Width="32"
 							Height="32"
 							Click="DownloadCloud_Click"
-							ToolTip.Tip="Скачать список">
+							ToolTip.Tip="пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ">
 						<Image Source="/Assets/download-cloud-64.png"/>
 					</Button>
 
@@ -75,7 +148,7 @@
 							Width="32"
 							Height="32"
 							Click="ReturnList_Click"
-							ToolTip.Tip="Обновить список">
+							ToolTip.Tip="пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ">
 						<Image Source="/Assets/return-64.png"/>
 					</Button>
 				</StackPanel>
@@ -99,7 +172,7 @@
 					</ScrollViewer>
 				</Grid>
 
-				<!--<Grid Grid.Column="1"
+				<Grid Grid.Column="1"
 					  Margin="5,10,0,10"
 					  Width="400"
 					  HorizontalAlignment="Stretch"
@@ -113,22 +186,29 @@
 						<StackPanel Orientation="Vertical">
 							<StackPanel Orientation="Horizontal"
 										HorizontalAlignment="Center">
-								<Label Content="{Binding UserUsername}"/>
-								<Label Content="{Binding UserFirstName}"/>
-								<Label Content="{Binding UserLastName}"/>
+								<TextBlock Text="{Binding Login}"/>
+								<TextBlock Text="{Binding FirstName}"/>
+								<TextBlock Text="{Binding LastName}"/>
+								<TextBlock Text="{Binding MiddleName}"/>
 							</StackPanel>
 							<StackPanel Orientation="Horizontal"
-										HorizontalAlignment="Center">
-								<Label Content="{Binding UserID}"/>
-								<Label Content="{Binding UserEmail}"/>
-								<Label Content="{Binding UserPassword}"/>
+										HorizontalAlignment="Center"
+										Spacing="5">
+									<TextBlock Text="{Binding ID}"/>
+									<TextBlock Text="{Binding Email}"/>
+									<TextBlock Text="{Binding Password}"/>
+									<TextBlock Text="{Binding IsActive}"/>
+									<TextBlock Text="{Binding UserType}"/>
+									<TextBlock Text="{Binding Department}"/>
+									<TextBlock Text="{Binding Employee}"/>
+									<TextBlock Text="{Binding Position}"/>
 							</StackPanel>
 							<StackPanel Name="HomeUserContent"
 										Orientation="Vertical"
 										Margin="0,10,0,0"/>
 						</StackPanel>
 					</ScrollViewer>
-				</Grid> -->
+				</Grid>
 			</Grid>
 		</Grid>
 	</Grid>

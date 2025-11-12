@@ -78,17 +78,17 @@ public class ProfileUserUserControlViewModel : ViewModelBase
         try
         {
             string sql = @"
-            SELECT 
-                ut.type_user,
-                d.type as department,
-                p.type as position
-            FROM public.user_to_user_type utt
-            LEFT JOIN public.user_type ut ON utt.user_type_id = ut.id
-            LEFT JOIN public.user_to_departments ud ON ud.user_id = utt.user_id
-            LEFT JOIN public.departments d ON ud.department_id = d.id
-            LEFT JOIN public.user_to_position up ON up.user_id = utt.user_id
-            LEFT JOIN public.positions p ON up.position_id = p.id
-            WHERE utt.user_id = @userID";
+                        SELECT 
+                            ut.type_user,
+                            d.type as department,
+                            p.type as position
+                        FROM public.user_to_user_type utt
+                        LEFT JOIN public.user_type ut ON utt.user_type_id = ut.id
+                        LEFT JOIN public.user_to_departments ud ON ud.user_id = utt.user_id
+                        LEFT JOIN public.departments d ON ud.department_id = d.id
+                        LEFT JOIN public.user_to_position up ON up.user_id = utt.user_id
+                        LEFT JOIN public.positions p ON up.position_id = p.id
+                        WHERE utt.user_id = @userID";
 
             using (var connection = new NpgsqlConnection(Arguments.connection))
             {

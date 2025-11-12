@@ -1,11 +1,15 @@
 ﻿using Avalonia.Controls;
 using CommunityToolkit.Mvvm.Input;
 using Npgsql;
+using ProductionAccounting_AvaloniaApplication.Models;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ProductionAccounting_AvaloniaApplication.View.Control;
 using ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 using ProductionAccounting_AvaloniaApplication.Views.Control;
+using ReactiveUI;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -15,6 +19,11 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
 
 public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChanged
 {
+    public AdminPageUserControlViewModel()
+    {
+        _ = LoadListTypeToComboBoxAsync();
+    }
+
     public StackPanel? HomeMainContent { get; set; } = null;
     public StackPanel? HomeUserContent { get; set; } = null;
     public Grid? Content { get; set; } = null;
@@ -35,6 +44,195 @@ public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChang
     public ICommand OpenPositionPageCommand
         => new RelayCommand(() => ShowAddPositionUserControl());
 
+    private bool _isProfileView = false;
+    public bool IsProfileView
+    {
+        get => _isProfileView;
+        set
+        {
+            if (_isProfileView != value)
+            {
+                _isProfileView = value;
+                OnPropertyChanged(nameof(IsProfileView));
+            }
+        }
+    }
+
+    private double _userID = 0;
+    public double UserID
+    {
+        get => _userID;
+        set => this.RaiseAndSetIfChanged(ref _userID, value);
+    }
+
+    private string _login = string.Empty;
+    public string Login
+    {
+        get => _login;
+        set
+        {
+            if (_login != value)
+            {
+                _login = value;
+                OnPropertyChanged(nameof(Login));
+            }
+        }
+    }
+
+    private string _firstName = string.Empty;
+    public string FirstName
+    {
+        get => _firstName;
+        set
+        {
+            if (_firstName != value)
+            {
+                _firstName = value;
+                OnPropertyChanged(nameof(FirstName));
+            }
+        }
+    }
+
+    private string _lastName = string.Empty;
+    public string LastName
+    {
+        get => _lastName;
+        set
+        {
+            if (_lastName != value)
+            {
+                _lastName = value;
+                OnPropertyChanged(nameof(LastName));
+            }
+        }
+    }
+
+    private string _middleName = string.Empty;
+    public string MiddleName
+    {
+        get => _middleName;
+        set
+        {
+            if (_middleName != value)
+            {
+                _middleName = value;
+                OnPropertyChanged(nameof(MiddleName));
+            }
+        }
+    }
+
+    private string _position = string.Empty;
+    public string Position
+    {
+        get => _position;
+        set
+        {
+            if (_position != value)
+            {
+                _position = value;
+                OnPropertyChanged(nameof(Position));
+            }
+        }
+    }
+
+    private string _employee = string.Empty;
+    public string Employee
+    {
+        get => _employee;
+        set
+        {
+            if (_employee != value)
+            {
+                _employee = value;
+                OnPropertyChanged(nameof(Employee));
+            }
+        }
+    }
+
+    private string _department = string.Empty;
+    public string Department
+    {
+        get => _department;
+        set
+        {
+            if (_department != value)
+            {
+                _department = value;
+                OnPropertyChanged(nameof(Department));
+            }
+        }
+    }
+
+    private string _userType = string.Empty;
+    public string UserType
+    {
+        get => _userType;
+        set
+        {
+            if (_userType != value)
+            {
+                _userType = value;
+                OnPropertyChanged(nameof(UserType));
+            }
+        }
+    }
+
+    private string _email = string.Empty;
+    public string Email
+    {
+        get => _email;
+        set
+        {
+            if (_email != value)
+            {
+                _email = value;
+                OnPropertyChanged(nameof(Email));
+            }
+        }
+    }
+
+    private string _phone = string.Empty;
+    public string Phone
+    {
+        get => _phone;
+        set
+        {
+            if (_phone != value)
+            {
+                _phone = value;
+                OnPropertyChanged(nameof(Phone));
+            }
+        }
+    }
+
+    private string _password = string.Empty;
+    public string Password
+    {
+        get => _password;
+        set
+        {
+            if (_password != value)
+            {
+                _password = value;
+                OnPropertyChanged(nameof(Password));
+            }
+        }
+    }
+    
+    private string _isActive = string.Empty;
+    public string IsActive
+    {
+        get => _isActive;
+        set
+        {
+            if (_isActive != value)
+            {
+                _isActive = value;
+                OnPropertyChanged(nameof(IsActive));
+            }
+        }
+    }
+
     private string _search = string.Empty;
     public string Search
     {
@@ -46,6 +244,69 @@ public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChang
                 _search = value;
                 OnPropertyChanged(nameof(Search));
                 PerformSearchListUsers();
+            }
+        }
+    }
+
+    private ObservableCollection<ComboBoxTypeRolsUser> _comboBoxItems = [];
+    public ObservableCollection<ComboBoxTypeRolsUser> ComboBoxItems
+    {
+        get => _comboBoxItems;
+        set => this.RaiseAndSetIfChanged(ref _comboBoxItems, value);
+    }
+
+    private ComboBoxTypeRolsUser? _selectedComboBoxItem;
+    public ComboBoxTypeRolsUser? SelectedComboBoxItem
+    {
+        get => _selectedComboBoxItem;
+        set
+        {
+            if (_selectedComboBoxItem != value)
+            {
+                _selectedComboBoxItem = value;
+                OnPropertyChanged(nameof(SelectedComboBoxItem));
+            }
+        }
+    }
+
+    private ObservableCollection<ComboBoxTypeDepartmentUser> _comboBoxItemsDepartments = [];
+    public ObservableCollection<ComboBoxTypeDepartmentUser> ComboBoxItemsDepartments
+    {
+        get => _comboBoxItemsDepartments;
+        set => this.RaiseAndSetIfChanged(ref _comboBoxItemsDepartments, value);
+    }
+
+    private ComboBoxTypeDepartmentUser? _selectedComboBoxItemDepartment;
+    public ComboBoxTypeDepartmentUser? SelectedComboBoxItemDepartment
+    {
+        get => _selectedComboBoxItemDepartment;
+        set
+        {
+            if (_selectedComboBoxItemDepartment != value)
+            {
+                _selectedComboBoxItemDepartment = value;
+                OnPropertyChanged(nameof(SelectedComboBoxItemDepartment));
+            }
+        }
+    }
+
+    private ObservableCollection<ComboBoxTypePositionUser> _comboBoxItemsPositions = [];
+    public ObservableCollection<ComboBoxTypePositionUser> ComboBoxItemsPositions
+    {
+        get => _comboBoxItemsPositions;
+        set => this.RaiseAndSetIfChanged(ref _comboBoxItemsPositions, value);
+    }
+
+    private ComboBoxTypePositionUser? _selectedComboBoxItemPosition;
+    public ComboBoxTypePositionUser? SelectedComboBoxItemPosition
+    {
+        get => _selectedComboBoxItemPosition;
+        set
+        {
+            if (_selectedComboBoxItemPosition != value)
+            {
+                _selectedComboBoxItemPosition = value;
+                OnPropertyChanged(nameof(SelectedComboBoxItemPosition));
             }
         }
     }
@@ -66,6 +327,62 @@ public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChang
         await SearchUsersAsync("%");
     }
 
+    public async Task LoadListTypeToComboBoxAsync()
+    {
+        try
+        {
+            string sqlUserTypes = "SELECT id, type_user FROM public.user_type";
+            string sqlDepartments = "SELECT id, type FROM public.departments";
+            string sqlPositions = "SELECT id, type FROM public.positions";
+
+            using (var connection = new NpgsqlConnection(Arguments.connection))
+            {
+                await connection.OpenAsync();
+
+                using (var command = new NpgsqlCommand(sqlUserTypes, connection))
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        ComboBoxItems.Add(new ComboBoxTypeRolsUser(
+                            reader.GetDouble(0),
+                            reader.GetString(1)
+                        ));
+                    }
+                }
+
+                using (var command = new NpgsqlCommand(sqlDepartments, connection))
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        ComboBoxItemsDepartments.Add(new ComboBoxTypeDepartmentUser(
+                            reader.GetDouble(0),
+                            reader.GetString(1)
+                        ));
+                    }
+                }
+
+                using (var command = new NpgsqlCommand(sqlPositions, connection))
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        ComboBoxItemsPositions.Add(new ComboBoxTypePositionUser(
+                            reader.GetDouble(0),
+                            reader.GetString(1)
+                        ));
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Loges.LoggingProcess(level: LogLevel.WARNING, 
+                ex: ex);
+        }
+    }
+
     private async Task SearchUsersAsync(string search)
     {
         if (!ManagerCookie.IsUserLoggedIn() && !ManagerCookie.IsAdministrator) return;
@@ -74,14 +391,14 @@ public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChang
 
         try
         {
-            string sql = "SELECT * FROM public.\"user\" WHERE middle_name ILIKE @middle_name AND is_active IN (true, false)";
+            string sql = "SELECT * FROM public.\"user\" WHERE login ILIKE @login AND is_active IN (true, false)";
 
             using (var connection = new NpgsqlConnection(Arguments.connection))
             {
                 await connection.OpenAsync();
                 using (var command = new NpgsqlCommand(sql, connection))
                 {
-                    command.Parameters.AddWithValue("@middle_name", search);
+                    command.Parameters.AddWithValue("@login", search);
 
                     using (var reader = await command.ExecuteReaderAsync())
                     {
@@ -130,6 +447,100 @@ public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChang
 
             Loges.LoggingProcess(LogLevel.CRITICAL,
                 "Connection or request error",
+                ex: ex);
+        }
+    }
+
+    public async void InitDateUserAsync(double userID)
+    {
+        await LoadDateAsync(userID);
+        await LoadListTypeToComboBoxAsync(userID);
+    }
+
+    public async Task LoadDateAsync(double userID)
+    {
+        if (!ManagerCookie.IsUserLoggedIn()) return;
+
+        try
+        {
+            string sql = @"SELECT login, first_name, last_name, middle_name, email, phone, employee_id, is_active, password, id FROM public.""user"" WHERE id = @id";
+
+            using (var connection = new NpgsqlConnection(Arguments.connection))
+            {
+                await connection.OpenAsync();
+                using (var command = new NpgsqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@id", userID);
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        if(await reader.ReadAsync())
+                        {
+                            Login = reader.IsDBNull(0) ? "none" : reader.GetString(0);
+                            FirstName = reader.IsDBNull(1) ? "none" : reader.GetString(1);
+                            LastName = reader.IsDBNull(2) ? "none" : reader.GetString(2);
+                            MiddleName = reader.IsDBNull(3) ? "none" : reader.GetString(3);
+                            Email = reader.IsDBNull(4) ? "none" : reader.GetString(4);
+                            Phone = reader.IsDBNull(5) ? "none" : reader.GetString(5);
+                            Employee = reader.IsDBNull(6) ? "none" : reader.GetString(6);
+                            IsActive = reader.IsDBNull(7) ? "none" : reader.GetBoolean(7).ToString();
+                            Password = reader.IsDBNull(8) ? "none" : reader.GetString(8);
+                            UserID = reader.IsDBNull(9) ? 0 : reader.GetDouble(9);
+                        }
+                    }
+                }
+            }
+        }
+        catch (NpgsqlException ex)
+        {
+            Loges.LoggingProcess(LogLevel.CRITICAL,
+                "Connection or request error",
+                ex: ex);
+        }
+    }
+    
+    public async Task LoadListTypeToComboBoxAsync(double userID)
+    {
+        if (!ManagerCookie.IsUserLoggedIn()) return;
+
+        try
+        {
+            string sql = @"
+                        SELECT 
+                            ut.type_user,
+                            d.type as department,
+                            p.type as position
+                        FROM public.user_to_user_type utt
+                        LEFT JOIN public.user_type ut ON utt.user_type_id = ut.id
+                        LEFT JOIN public.user_to_departments ud ON ud.user_id = utt.user_id
+                        LEFT JOIN public.departments d ON ud.department_id = d.id
+                        LEFT JOIN public.user_to_position up ON up.user_id = utt.user_id
+                        LEFT JOIN public.positions p ON up.position_id = p.id
+                        WHERE utt.user_id = @userID";
+
+            using (var connection = new NpgsqlConnection(Arguments.connection))
+            {
+                await connection.OpenAsync();
+
+                using (var command = new NpgsqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@userID", userID);
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        if (await reader.ReadAsync())
+                        {
+                            UserType = reader.IsDBNull(0) ? "none" : reader.GetString(0);
+                            Department = reader.IsDBNull(1) ? "none" : reader.GetString(1);
+                            Position = reader.IsDBNull(2) ? "none" : reader.GetString(2);
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Loges.LoggingProcess(level: LogLevel.WARNING,
                 ex: ex);
         }
     }

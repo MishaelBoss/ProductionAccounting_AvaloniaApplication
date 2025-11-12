@@ -15,8 +15,13 @@ public partial class CartUserListUserControl : UserControl
         DataContext = new CartUserListUserControlViewModel();
     }
 
-    private void OpenProfileUser_Click(object? sender, RoutedEventArgs e) 
-    { 
+    private void OpenProfileUser_Click(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not CartUserListUserControlViewModel viewModel) return;
+
+        var parentAdminViewModel = this.FindAncestorOfType<UserControl>()?.DataContext as AdminPageUserControlViewModel;
+        parentAdminViewModel?.IsProfileView = parentAdminViewModel.IsProfileView ? false : true;
+        parentAdminViewModel?.InitDateUserAsync(viewModel.UserID);
     }
 
     private void EditUser_Click(object? sender, RoutedEventArgs e)
