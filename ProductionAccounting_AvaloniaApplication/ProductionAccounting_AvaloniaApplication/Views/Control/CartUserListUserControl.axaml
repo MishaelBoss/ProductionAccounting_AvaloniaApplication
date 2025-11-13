@@ -18,7 +18,7 @@
             Margin="5">
 
 		<Grid Margin="15"
-			  ColumnDefinitions="Auto, *, Auto">
+			  ColumnDefinitions="Auto, *, Auto, Auto">
 
 			<Border Grid.Column="0"
                     Width="45"
@@ -61,7 +61,23 @@
                            TextTrimming="CharacterEllipsis"/>
 			</StackPanel>
 
-			<StackPanel Grid.Column="2"
+			<Border Classes="BorderPassword"
+					Grid.Column="1">
+				<Grid ColumnDefinitions="*, Auto">
+					<TextBlock	Text="{Binding Password}" 
+								VerticalAlignment="Center"/>
+
+					<Button Grid.Column="1"
+							Command="{Binding CopyPasswordCommand}"
+							Classes="Button"
+							Background="#4A90E2"
+							ToolTip.Tip="Просмотр профиля">
+					<Image Source="/Assets/copy-64.png"/>
+				</Button>
+				</Grid>
+			</Border>
+
+			<StackPanel Grid.Column="3"
 						Orientation="Horizontal"
 						Spacing="6"
 						VerticalAlignment="Center">

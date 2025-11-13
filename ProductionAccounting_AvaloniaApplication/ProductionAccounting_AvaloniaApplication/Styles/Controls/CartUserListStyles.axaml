@@ -12,6 +12,15 @@
       <Setter Property="Height" Value="18"/>
     </Style>
 
+    <Style Selector="Border.BorderPassword">
+        <Setter Property="Height" Value="34"/>
+        <Setter Property="BorderThickness" Value="2"/>
+        <Setter Property="Background" Value="#A7B3BE"/>
+        <Setter Property="ClipToBounds" Value="True"/>
+        <Setter Property="CornerRadius" Value="22,10,10,22"/>
+        <Setter Property="HorizontalAlignment" Value="Right"/>
+    </Style>
+
     <Style Selector="ToggleButton.ToggleButton">
       <Setter Property="Width" Value="34"/>
       <Setter Property="Height" Value="34"/>

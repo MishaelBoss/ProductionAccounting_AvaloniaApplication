@@ -1,14 +1,19 @@
-﻿using Npgsql;
+﻿using CommunityToolkit.Mvvm.Input;
+using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ReactiveUI;
 using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class CartUserListUserControlViewModel : ViewModelBase, INotifyPropertyChanged
 {
+    public ICommand CopyPasswordCommand
+        => new RelayCommand(() => TextCopy.ClipboardService.SetText(Password));
+
     private double _userID = 0;
     public double UserID
     {

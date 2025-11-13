@@ -44,6 +44,7 @@
     <PackageReference Include="Newtonsoft.Json.Bson" Version="1.0.3" />
     <PackageReference Include="Npgsql" Version="9.0.4" />
     <PackageReference Include="ReactiveUI" Version="22.2.1" />
+    <PackageReference Include="TextCopy" Version="6.2.1" />
   </ItemGroup>
 
   <ItemGroup>
