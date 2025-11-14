@@ -34,6 +34,7 @@ public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChang
     private readonly AddPositionUserControl _addPosition = new();
 
     private List<CartUserListUserControl> userList = [];
+    private List<double> filteredUserIds = [];
 
     public ICommand OpenAddUsers
         => new RelayCommand(() => ShowAddUsersUserControl());
@@ -269,6 +270,7 @@ public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChang
             {
                 _selectedComboBoxItem = value;
                 OnPropertyChanged(nameof(SelectedComboBoxItem));
+                _ = ApplyFilters();
             }
         }
     }
@@ -290,6 +292,7 @@ public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChang
             {
                 _selectedComboBoxItemDepartment = value;
                 OnPropertyChanged(nameof(SelectedComboBoxItemDepartment));
+                _ = ApplyFilters();
             }
         }
     }
@@ -311,6 +314,7 @@ public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChang
             {
                 _selectedComboBoxItemPosition = value;
                 OnPropertyChanged(nameof(SelectedComboBoxItemPosition));
+                _ = ApplyFilters();
             }
         }
     }
@@ -325,6 +329,7 @@ public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChang
             {
                 _filterByRole = value;
                 OnPropertyChanged(nameof(FilterByRole));
+                _ = ApplyFilters();
             }
         }
     }
@@ -339,6 +344,7 @@ public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChang
             {
                 _filterByDepartment = value;
                 OnPropertyChanged(nameof(FilterByDepartment));
+                _ = ApplyFilters();
             }
         }
     }
@@ -353,6 +359,7 @@ public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChang
             {
                 _filterByPosition = value;
                 OnPropertyChanged(nameof(FilterByPosition));
+                _ = ApplyFilters();
             }
         }
     }
@@ -367,6 +374,7 @@ public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChang
             {
                 _showActiveUsers = value;
                 OnPropertyChanged(nameof(ShowActiveUsers));
+                _ = ApplyFilters();
             }
         }
     }
@@ -381,24 +389,133 @@ public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChang
             {
                 _showInactiveUsers = value;
                 OnPropertyChanged(nameof(ShowInactiveUsers));
+                _ = ApplyFilters();
             }
         }
     }
 
     private async void PerformSearchListUsers()
     {
-        if (string.IsNullOrWhiteSpace(Search))
-        {
-            GetListUsers();
-            return;
-        }
-
-        await SearchUsersAsync($"%{Search}%");
+        await ApplyFilters();
     }
 
     public async void GetListUsers()
     {
-        await SearchUsersAsync("%");
+        Search = string.Empty;
+        await ApplyFilters();
+    }
+
+    private async Task ApplyFilters()
+    {
+        try
+        {
+            filteredUserIds = await GetFilteredUserIdsAsync();
+
+            if (filteredUserIds.Count > 0)
+            {
+                await SearchUsersAsync(filteredUserIds);
+            }
+            else
+            {
+                ClearResults();
+                ShowErrorUserControl(ErrorLevel.NotFound);
+            }
+        }
+        catch (Exception ex)
+        {
+            Loges.LoggingProcess(level: LogLevel.ERROR,
+                message: "Error applying filters",
+                ex: ex);
+
+            ClearResults();
+        }
+    }
+
+    private async Task<List<double>> GetFilteredUserIdsAsync()
+    {
+        var userIds = new List<double>();
+
+        try
+        {
+            using (var connection = new NpgsqlConnection(Arguments.connection))
+            {
+                await connection.OpenAsync();
+
+                var sql = @"
+                        SELECT DISTINCT u.id
+                        FROM public.""user"" u
+                        LEFT JOIN public.user_to_user_type utt ON u.id = utt.user_id
+                        LEFT JOIN public.user_type ut ON utt.user_type_id = ut.id
+                        LEFT JOIN public.user_to_departments ud ON u.id = ud.user_id
+                        LEFT JOIN public.departments d ON ud.department_id = d.id
+                        LEFT JOIN public.user_to_position up ON u.id = up.user_id
+                        LEFT JOIN public.positions p ON up.position_id = p.id
+                        WHERE 1=1";
+
+                var parameters = new List<NpgsqlParameter>();
+
+                if (!ShowActiveUsers || !ShowInactiveUsers)
+                {
+                    if (ShowActiveUsers && !ShowInactiveUsers)
+                    {
+                        sql += " AND u.is_active = true";
+                    }
+                    else if (!ShowActiveUsers && ShowInactiveUsers)
+                    {
+                        sql += " AND u.is_active = false";
+                    }
+                }
+
+                if (!string.IsNullOrWhiteSpace(Search) && Search != "%")
+                {
+                    sql += " AND u.login ILIKE @search";
+                    parameters.Add(new NpgsqlParameter("@search", $"%{Search}%"));
+                }
+
+                if (FilterByRole && SelectedComboBoxItem != null)
+                {
+                    sql += " AND ut.id = @roleId";
+                    parameters.Add(new NpgsqlParameter("@roleId", SelectedComboBoxItem.Id));
+                }
+
+                if (FilterByDepartment && SelectedComboBoxItemDepartment != null)
+                {
+                    sql += " AND d.id = @departmentId";
+                    parameters.Add(new NpgsqlParameter("@departmentId", SelectedComboBoxItemDepartment.Id));
+                }
+
+                if (FilterByPosition && SelectedComboBoxItemPosition != null)
+                {
+                    sql += " AND p.id = @positionId";
+                    parameters.Add(new NpgsqlParameter("@positionId", SelectedComboBoxItemPosition.Id));
+                }
+
+                using (var command = new NpgsqlCommand(sql, connection))
+                {
+                    foreach (var param in parameters)
+                    {
+                        command.Parameters.Add(param);
+                    }
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            if (!reader.IsDBNull(0))
+                            {
+                                userIds.Add(reader.GetDouble(0));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Loges.LoggingProcess(LogLevel.ERROR, "Error getting filtered user IDs", ex: ex);
+        }
+
+        return userIds;
     }
 
     public async Task LoadListTypeToComboBoxAsync()
@@ -457,22 +574,43 @@ public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChang
         }
     }
 
-    private async Task SearchUsersAsync(string search)
+    private async Task SearchUsersAsync(List<double> userIds)
     {
         if (!ManagerCookie.IsUserLoggedIn() && !ManagerCookie.IsAdministrator) return;
+
+        if (userIds.Count == 0)
+        {
+            ClearResults();
+            ShowErrorUserControl(ErrorLevel.NotFound);
+            return;
+        }
 
         ClearResults();
 
         try
         {
-            string sql = "SELECT * FROM public.\"user\" WHERE login ILIKE @login AND is_active IN (true, false)";
+            var parameters = new List<NpgsqlParameter>();
+            var paramNames = new List<string>();
+
+            for (int i = 0; i < userIds.Count; i++)
+            {
+                var paramName = $"@id{i}";
+                paramNames.Add(paramName);
+                parameters.Add(new NpgsqlParameter(paramName, userIds[i]));
+            }
+        
+            string sql = @$"SELECT * FROM public.""user"" WHERE id IN ({string.Join(", ", paramNames)})";
 
             using (var connection = new NpgsqlConnection(Arguments.connection))
             {
                 await connection.OpenAsync();
                 using (var command = new NpgsqlCommand(sql, connection))
                 {
-                    command.Parameters.AddWithValue("@login", search);
+
+                    foreach (var param in parameters)
+                    {
+                        command.Parameters.Add(param);
+                    }
 
                     using (var reader = await command.ExecuteReaderAsync())
                     {
@@ -521,6 +659,13 @@ public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChang
 
             Loges.LoggingProcess(LogLevel.CRITICAL,
                 "Connection or request error",
+                ex: ex);
+        }
+        catch (Exception ex)
+        {
+            ClearResults();
+            Loges.LoggingProcess(LogLevel.ERROR,
+                "Error loading users by IDs",
                 ex: ex);
         }
     }
@@ -779,3 +924,4 @@ public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChang
     protected void OnPropertyChanged(string propertyName)
         => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }
+ 
