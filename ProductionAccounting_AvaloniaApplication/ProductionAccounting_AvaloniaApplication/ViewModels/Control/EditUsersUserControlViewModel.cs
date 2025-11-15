@@ -171,6 +171,34 @@ public class EditUsersUserControlViewModel : ViewModelBase, INotifyPropertyChang
         }
     }
 
+/*    private string _email = string.Empty;
+    public string Email
+    {
+        get => _email;
+        set
+        {
+            if (_email != value)
+            {
+                _email = value;
+                OnPropertyChanged(nameof(Email));
+            }
+        }
+    }
+
+    private string _phone = string.Empty;
+    public string Phone
+    {
+        get => _phone;
+        set
+        {
+            if (_phone != value)
+            {
+                _phone = value;
+                OnPropertyChanged(nameof(Phone));
+            }
+        }
+    }*/
+
     public bool IsActiveConfirmButton
         => SelectedComboBoxItem != null
         && SelectedComboBoxItemDepartment != null
@@ -232,34 +260,13 @@ public class EditUsersUserControlViewModel : ViewModelBase, INotifyPropertyChang
     {
         try
         {
-            string sql = @"
-                SELECT 
-                    u.first_name, 
-                    u.last_name, 
-                    u.middle_name,
-                    u.login, 
-                    u.base_salary,
-                    ut.id as user_type_id,
-                    ut.type_user,
-                    d.id as department_id,
-                    d.name as department_name,
-                    p.id as position_id,
-                    p.name as position_name
-                FROM public.""user"" u
-                LEFT JOIN public.user_to_user_type utu ON u.id = utu.user_id
-                LEFT JOIN public.user_type ut ON utu.user_type_id = ut.id
-
-                LEFT JOIN public.user_to_departments utd ON u.id = utd.user_id
-                LEFT JOIN public.departments d ON utd.department_id = d.id
-
-                LEFT JOIN public.user_to_position utp ON u.id = utp.user_id
-                LEFT JOIN public.positions p ON utp.position_id = p.id
-                WHERE u.id = @userID";
+            string userSql = @"SELECT first_name, last_name, middle_name, login, base_salary FROM public.""user"" WHERE id = @userID";
 
             using (var connection = new NpgsqlConnection(Arguments.connection))
             {
                 await connection.OpenAsync();
-                using (var command = new NpgsqlCommand(sql, connection))
+
+                using (var command = new NpgsqlCommand(userSql, connection))
                 {
                     command.Parameters.AddWithValue("@userID", UserID);
 
@@ -272,27 +279,70 @@ public class EditUsersUserControlViewModel : ViewModelBase, INotifyPropertyChang
                             MiddleName = reader.IsDBNull(2) ? string.Empty : reader.GetString(2);
                             Login = reader.IsDBNull(3) ? string.Empty : reader.GetString(3);
                             BaseSalary = reader.IsDBNull(4) ? 0 : reader.GetDecimal(4);
-
-                            var userTypeId = reader.IsDBNull(5) ? 0 : reader.GetDouble(5);
-                            var departmentId = reader.IsDBNull(7) ? 0 : reader.GetDouble(7);
-                            var positionId = reader.IsDBNull(9) ? 0 : reader.GetDouble(9);
-
-                            SelectedComboBoxItem = ComboBoxItems.FirstOrDefault(x => x.Id == userTypeId);
-                            SelectedComboBoxItemDepartment = ComboBoxItemsDepartments.FirstOrDefault(x => x.Id == departmentId);
-                            SelectedComboBoxItemPosition = ComboBoxItemsPositions.FirstOrDefault(x => x.Id == positionId);
                         }
                         else
                         {
                             Messageerror = "Пользователь не найден";
+                            return;
                         }
                     }
                 }
+
+                await TrySetSelectedItemsAsync(connection);
             }
         }
         catch (Exception ex)
         {
             Loges.LoggingProcess(level: LogLevel.WARNING, ex: ex);
-            Messageerror = "Ошибка загрузки данных пользователя";
+            Messageerror = $"Ошибка загрузки данных: {ex.Message}";
+        }
+    }
+
+    private async Task TrySetSelectedItemsAsync(NpgsqlConnection connection)
+    {
+        try
+        {
+            string userTypeSql = "SELECT user_type_id FROM public.user_to_user_type WHERE user_id = @userID LIMIT 1";
+            using (var command = new NpgsqlCommand(userTypeSql, connection))
+            {
+                command.Parameters.AddWithValue("@userID", UserID);
+                var result = await command.ExecuteScalarAsync();
+                if (result != null)
+                {
+                    var userTypeId = Convert.ToDouble(result);
+                    SelectedComboBoxItem = ComboBoxItems.FirstOrDefault(x => x.Id == userTypeId);
+                }
+            }
+
+            string departmentSql = "SELECT department_id FROM public.user_to_departments WHERE user_id = @userID LIMIT 1";
+            using (var command = new NpgsqlCommand(departmentSql, connection))
+            {
+                command.Parameters.AddWithValue("@userID", UserID);
+                var result = await command.ExecuteScalarAsync();
+                if (result != null)
+                {
+                    var departmentId = Convert.ToDouble(result);
+                    SelectedComboBoxItemDepartment = ComboBoxItemsDepartments.FirstOrDefault(x => x.Id == departmentId);
+                }
+            }
+
+            string positionSql = "SELECT position_id FROM public.user_to_position WHERE user_id = @userID LIMIT 1";
+            using (var command = new NpgsqlCommand(positionSql, connection))
+            {
+                command.Parameters.AddWithValue("@userID", UserID);
+                var result = await command.ExecuteScalarAsync();
+                if (result != null)
+                {
+                    var positionId = Convert.ToDouble(result);
+                    SelectedComboBoxItemPosition = ComboBoxItemsPositions.FirstOrDefault(x => x.Id == positionId);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Loges.LoggingProcess(level: LogLevel.WARNING,
+                message: "Could not load user relations",
+                ex: ex);
         }
     }
 

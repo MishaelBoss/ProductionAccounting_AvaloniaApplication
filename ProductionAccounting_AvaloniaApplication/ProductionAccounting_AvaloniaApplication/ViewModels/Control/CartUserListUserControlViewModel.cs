@@ -28,10 +28,10 @@ public class CartUserListUserControlViewModel : ViewModelBase, INotifyPropertyCh
         set => this.RaiseAndSetIfChanged(ref _login, value);
     }
 
-    private string _userName = string.Empty;
-    public string UserName {
-        get => _userName;
-        set => this.RaiseAndSetIfChanged(ref _userName, value);
+    private string _middleName = string.Empty;
+    public string MiddleName {
+        get => _middleName;
+        set => this.RaiseAndSetIfChanged(ref _middleName, value);
     }
 
     private string _password = string.Empty;

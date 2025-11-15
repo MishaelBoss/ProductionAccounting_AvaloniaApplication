@@ -4,7 +4,7 @@ using Avalonia.VisualTree;
 using ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 using ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
 
-namespace ProductionAccounting_AvaloniaApplication;
+namespace ProductionAccounting_AvaloniaApplication.Views.Control;
 
 public partial class AddPositionUserControl : UserControl
 {

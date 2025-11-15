@@ -82,7 +82,7 @@ public class UserLibraryUserControlViewModel : ViewModelBase, INotifyPropertyCha
                             {
                                 UserID = dbid,
                                 Login = dblogin,
-                                UserName = dbusername,
+                                MiddleName = dbusername,
                                 FirstName = dbfirst_name,
                                 LastName = dblast_name,
                                 Password = dbpassword,

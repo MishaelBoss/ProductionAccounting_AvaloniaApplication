@@ -14,6 +14,7 @@
 
     <Style Selector="Border.BorderPassword">
         <Setter Property="Height" Value="34"/>
+        <Setter Property="MaxWidth" Value="200"/>
         <Setter Property="BorderThickness" Value="2"/>
         <Setter Property="Background" Value="#A7B3BE"/>
         <Setter Property="ClipToBounds" Value="True"/>

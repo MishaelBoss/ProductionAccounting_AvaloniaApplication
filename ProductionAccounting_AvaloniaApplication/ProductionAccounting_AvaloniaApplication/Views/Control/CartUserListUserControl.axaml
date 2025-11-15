@@ -39,7 +39,7 @@
 			<StackPanel Grid.Column="1"
                         VerticalAlignment="Center"
                         Margin="0,0,15,0">
-				<TextBlock Text="{Binding UserName}"
+				<TextBlock Text="{Binding Login}"
                            Foreground="#2C3E50"
                            FontSize="14"
                            FontWeight="SemiBold"

@@ -619,9 +619,9 @@ public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChang
                             double dbid = reader.IsDBNull(0) ? 0 : reader.GetDouble(0);
                             string dbpassword = reader.IsDBNull(1) ? string.Empty : reader.GetString(1);
                             string dblogin = reader.IsDBNull(6) ? string.Empty : reader.GetString(6);
-                            string dbusername = reader.IsDBNull(2) ? string.Empty : reader.GetString(2);
-                            string dbfirst_name = reader.IsDBNull(3) ? string.Empty : reader.GetString(3);
-                            string dblast_name = reader.IsDBNull(4) ? string.Empty : reader.GetString(4);
+                            string dbmiddleName = reader.IsDBNull(4) ? string.Empty : reader.GetString(4);
+                            string dbfirst_name = reader.IsDBNull(2) ? string.Empty : reader.GetString(2);
+                            string dblast_name = reader.IsDBNull(3) ? string.Empty : reader.GetString(2);
                             string dbdate_joined = reader.IsDBNull(5) ? string.Empty : reader.GetDateTime(5).ToString("yyyy-MM-dd");
                             bool dbis_active = reader.IsDBNull(10) ? true : reader.GetBoolean(10);
 
@@ -629,7 +629,7 @@ public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChang
                             {
                                 UserID = dbid,
                                 Login = dblogin,
-                                UserName = dbusername,
+                                MiddleName = dbmiddleName,
                                 FirstName = dbfirst_name,
                                 LastName = dblast_name,
                                 Password = dbpassword,

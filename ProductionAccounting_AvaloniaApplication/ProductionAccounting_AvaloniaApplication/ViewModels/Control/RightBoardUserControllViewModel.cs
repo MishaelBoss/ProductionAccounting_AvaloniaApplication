@@ -88,7 +88,7 @@ public class RightBoardUserControlViewModel : ViewModelBase
         IsVisibleAdminPanelButton = ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsAdministrator;
         IsVisibleWorkUserButton = ManagerCookie.IsUserLoggedIn() && (ManagerCookie.IsMaster || ManagerCookie.IsEmployee);
 
-        if (!ManagerCookie.IsUserLoggedIn() || !ManagerCookie.IsAdministrator && _objectViewModels == adminPageUserControlViewModel) OpenPage(workUserPageUserControlViewModel);
+        if (!ManagerCookie.IsUserLoggedIn() || !ManagerCookie.IsAdministrator && _objectViewModels == adminPageUserControlViewModel) OpenPage(mainWindowViewModel);
         if (!ManagerCookie.IsUserLoggedIn() || (!ManagerCookie.IsMaster || !ManagerCookie.IsEmployee) && _objectViewModels == workUserPageUserControlViewModel) mainWindowViewModel?.ShowAuthorization();
     }
 }
