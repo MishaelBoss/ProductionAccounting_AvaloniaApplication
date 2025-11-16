@@ -48,15 +48,26 @@
 											HorizontalAlignment="Stretch"
 											Content="Add user"/>
 
-									<Button Command="{Binding OpenDepartmentPageCommand}"
+									<Button Command="{Binding OpenDepartmentCommand}"
 											VerticalAlignment="Stretch"
 											HorizontalAlignment="Stretch"
 											Content="Add workshop/department"/>
 
-									<Button Command="{Binding ShowAddPositionUserControl}"
+									<Button Command="{Binding OpenPositionCommand}"
 											VerticalAlignment="Stretch"
 											HorizontalAlignment="Stretch"
 											Content="Add a position"/>
+
+                                    
+									<Button Command="{Binding AddOperationCommand}"
+											VerticalAlignment="Stretch"
+											HorizontalAlignment="Stretch"
+											Content="Add a operation"/>
+
+                                    <Button Command="{Binding AddProductCommand}"
+											VerticalAlignment="Stretch"
+											HorizontalAlignment="Stretch"
+											Content="Add a product"/>
 								</ListBox>
 							</Flyout>
 						</Button.Flyout>

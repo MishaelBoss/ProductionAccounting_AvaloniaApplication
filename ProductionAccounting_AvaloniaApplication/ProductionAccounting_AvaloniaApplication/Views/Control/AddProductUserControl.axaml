@@ -2,7 +2,78 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:ProductionAccounting_AvaloniaApplication.ViewModels.Control"
+             x:DataType="vm:AddProductUserControlViewModel"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="ProductionAccounting_AvaloniaApplication.Views.Control.AddProductUserControl">
-  Welcome to Avalonia!
+
+    <Grid>
+		<Border Background="#000000" Opacity="0.5"/>
+		
+		<Border VerticalAlignment="Center" 
+				HorizontalAlignment="Center" 
+				Width="400" 
+				Height="600" 
+				Background="Gray" 
+				CornerRadius="12">
+			<Grid>
+				<StackPanel Margin="20">
+					<TextBlock	Margin="0 5" 
+								HorizontalAlignment="Center" 
+								Text="{Binding Messageerror}" />
+
+					<TextBlock	Margin="0 5">Name operation:</TextBlock>
+					<TextBox	Text="{Binding ProductName}" 
+								Watermark="Enter name operation"/>
+
+					<TextBlock	Margin="0 5">Article:</TextBlock>
+					<TextBox	Text="{Binding ProductArticle}" 
+								Watermark="Enter article"/>
+
+					<TextBlock	Margin="0 5">Description:</TextBlock>
+					<TextBox	Text="{Binding ProductDescription}" 
+								Watermark="Enter description"/>
+
+					<TextBlock	Margin="0 5">Price per unit:</TextBlock>
+					<TextBox	Text="{Binding ProductPricePerUnit}" 
+								Watermark="Enter price per unit"/>
+
+					<TextBlock	Margin="0 5">Price per kg:</TextBlock>
+					<TextBox	Text="{Binding ProductPricePerKg}" 
+								Watermark="Enter price per kg"/>
+
+					<TextBlock	Margin="0 5">Mark:</TextBlock>
+					<TextBox	Text="{Binding ProductMark}" 
+								Watermark="Enter mark"/>
+
+					<TextBlock	Margin="0 5">Coefficient:</TextBlock>
+					<TextBox	Text="{Binding ProductCoefficient}" 
+								Watermark="Enter coefficient"/>
+
+					<TextBlock	Margin="0 5">Units:</TextBlock>
+					<ComboBox	ItemsSource="{Binding AvailableUnits}" 
+								SelectedItem="{Binding SelectedUnit}" 
+								Width="100" 
+								PlaceholderText="≈д.изм"/>
+
+					<StackPanel Orientation="Vertical"
+								VerticalAlignment="Center"
+								HorizontalAlignment="Center"
+								Spacing="10">
+
+						<Button Classes="ButtonLogin"
+								
+								Click="Confirm_Click"
+								Content="Confirm"/>
+
+						<Button Click="Cancel_Click"
+								Content="Cancel"
+								HorizontalAlignment="Center"
+								Background="Transparent"/>
+					</StackPanel>
+				</StackPanel>
+			</Grid>
+		</Border>
+	</Grid>
+
 </UserControl>

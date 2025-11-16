@@ -2,7 +2,70 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             xmlns:vm="using:ProductionAccounting_AvaloniaApplication.ViewModels.Control"
+             x:DataType="vm:AddOperationUserControlViewModel"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="750"
              x:Class="ProductionAccounting_AvaloniaApplication.Views.Control.AddOperationUserControl">
-  Welcome to Avalonia!
+	
+	<Grid>
+		<Border Background="#000000" Opacity="0.5"/>
+		
+		<Border VerticalAlignment="Center" 
+				HorizontalAlignment="Center" 
+				Width="400" 
+				Height="500" 
+				Background="Gray" 
+				CornerRadius="12">
+			<Grid>
+				<StackPanel Margin="20">
+					<TextBlock	Margin="0 5" 
+								HorizontalAlignment="Center" 
+								Text="{Binding Messageerror}" />
+
+					<TextBlock	Margin="0 5">Name operation:</TextBlock>
+					<TextBox	Text="{Binding OperationName}" 
+								Watermark="Enter name operation"/>
+
+					<TextBlock	Margin="0 5">Price:</TextBlock>
+					<TextBox	Text="{Binding OperationPrice}" 
+								Watermark="Enter price"/>
+
+					<TextBlock	Margin="0 5">Code:</TextBlock>
+					<TextBox	Text="{Binding OperationCode}" 
+								Watermark="Enter code"/>
+
+					<TextBlock	Margin="0 5">Time:</TextBlock>
+					<TextBox	Text="{Binding OperationTime}" 
+								Watermark="Enter time"/>
+
+					<TextBlock	Margin="0 5">Description:</TextBlock>
+					<TextBox	Text="{Binding OperationDescription}" 
+								Watermark="Enter description"/>
+
+					<TextBlock	Margin="0 5">Units:</TextBlock>
+					<ComboBox	ItemsSource="{Binding AvailableUnits}" 
+								SelectedItem="{Binding SelectedUnit}" 
+								Width="100" 
+								PlaceholderText="≈д.изм"/>
+
+					<StackPanel Orientation="Vertical"
+								VerticalAlignment="Center"
+								HorizontalAlignment="Center"
+								Spacing="10">
+
+						<Button Classes="ButtonLogin"
+								
+								Click="Confirm_Click"
+								Content="Confirm"/>
+
+						<Button Click="Cancel_Click"
+								Content="Cancel"
+								HorizontalAlignment="Center"
+								Background="Transparent"/>
+					</StackPanel>
+				</StackPanel>
+			</Grid>
+		</Border>
+	</Grid>
+
 </UserControl>

@@ -32,6 +32,8 @@ public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChang
     private readonly EditUsersUserControl _editUsers = new();
     private readonly AddDepartmentUserControl _addDepartment = new();
     private readonly AddPositionUserControl _addPosition = new();
+    private readonly AddOperationUserControl _addOperation = new();
+    private readonly AddProductUserControl _addProduct = new();
 
     private List<CartUserListUserControl> userList = [];
     private List<double> filteredUserIds = [];
@@ -39,11 +41,17 @@ public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChang
     public ICommand OpenAddUsers
         => new RelayCommand(() => ShowAddUsersUserControl());
 
-    public ICommand OpenDepartmentPageCommand
+    public ICommand OpenDepartmentCommand
         => new RelayCommand(() => ShowAddDepartmentUserControl());
 
-    public ICommand OpenPositionPageCommand
+    public ICommand OpenPositionCommand
         => new RelayCommand(() => ShowAddPositionUserControl());
+
+    public ICommand AddOperationCommand
+        => new RelayCommand(() => ShowOperationUsersUserControl());
+
+    public ICommand AddProductCommand
+        => new RelayCommand(() => ShowProductUsersUserControl());
 
     public ICommand ResetFiltersCommand 
         => new RelayCommand(() => ResetFilters());
@@ -917,6 +925,60 @@ public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChang
 
             HomeMainContent.Children.Clear();
             HomeMainContent.Children.Add(notFoundUserControl);
+        }
+    }
+
+    public void ShowOperationUsersUserControl()
+    {
+        if (Content != null)
+        {
+            if (Content.Children.Contains(_addOperation))
+            {
+                _ = _addOperation.RefreshDataAsync();
+                return;
+            }
+
+            if (_addOperation.Parent is Panel currentParent) currentParent.Children.Remove(_addOperation);
+            Content.Children.Clear();
+            Content.Children.Add(_addOperation);
+
+            _ = _addOperation.RefreshDataAsync();
+        }
+    }
+
+    public void CloseOperationUsersUserControl()
+    {
+        if (Content != null)
+        {
+            Content.Children.Clear();
+            if (_addOperation.Parent == Content) Content.Children.Remove(_addOperation);
+        }
+    }
+
+    public void ShowProductUsersUserControl()
+    {
+        if (Content != null)
+        {
+            if (Content.Children.Contains(_addProduct))
+            {
+                _ = _addProduct.RefreshDataAsync();
+                return;
+            }
+
+            if (_addProduct.Parent is Panel currentParent) currentParent.Children.Remove(_addProduct);
+            Content.Children.Clear();
+            Content.Children.Add(_addProduct);
+
+            _ = _addProduct.RefreshDataAsync();
+        }
+    }
+
+    public void CloseProductUsersUserControl()
+    {
+        if (Content != null)
+        {
+            Content.Children.Clear();
+            if (_addProduct.Parent == Content) Content.Children.Remove(_addProduct);
         }
     }
 

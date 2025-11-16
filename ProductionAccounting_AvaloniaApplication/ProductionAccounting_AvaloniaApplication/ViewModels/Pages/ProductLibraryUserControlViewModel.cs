@@ -54,9 +54,9 @@ public class ProductLibraryUserControlViewModel : ViewModelBase, INotifyProperty
 
         ClearResults();
 
-        try
+        try 
         {
-            string sql = "SELECT * FROM public.\"product\" WHERE name ILIKE @name OR article ILIKE @article";
+            string sql = "SELECT id, name, article, price_per_unit, unit, coefficient FROM public.product WHERE name ILIKE @name OR article ILIKE @article";
 
             using (var connection = new NpgsqlConnection(Arguments.connection))
             {
@@ -70,21 +70,14 @@ public class ProductLibraryUserControlViewModel : ViewModelBase, INotifyProperty
                     {
                         while (await reader.ReadAsync())
                         {
-                            double dbid = reader.IsDBNull(0) ? 0 : reader.GetDouble(0);
-                            string dbname = reader.IsDBNull(1) ? string.Empty : reader.GetString(1);
-                            string dbarticle = reader.IsDBNull(2) ? string.Empty : reader.GetString(2);
-                            string dbpricePerUnit = reader.IsDBNull(4) ? string.Empty : reader.GetDecimal(4).ToString();
-                            string dbunit = reader.IsDBNull(6) ? string.Empty : reader.GetString(6);
-                            string dbcoefficient = reader.IsDBNull(12) ? string.Empty : reader.GetInt32(12).ToString();
-
                             var viewModel = new CartProductUserControlViewModel
                             {
-                                ProductID = dbid,
-                                Name = dbname,
-                                Article = dbarticle,
-                                PricePerUnit = dbpricePerUnit,
-                                Unit = dbunit,
-                                Coefficient = dbcoefficient
+                                ProductID = reader.IsDBNull(0) ? 0 : reader.GetDouble(0),
+                                Name = reader.IsDBNull(1) ? string.Empty : reader.GetString(1),
+                                Article = reader.IsDBNull(2) ? string.Empty : reader.GetString(2),
+                                PricePerUnit = reader.IsDBNull(3) ? string.Empty : reader.GetDecimal(3).ToString(),
+                                Unit = reader.IsDBNull(4) ? string.Empty : reader.GetString(4),
+                                Coefficient = reader.IsDBNull(5) ? string.Empty : reader.GetDecimal(5).ToString()
                             };
 
                             var userControl = new CartProductUserControl
