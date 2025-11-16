@@ -1,0 +1,189 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:ProductionAccounting_AvaloniaApplication.ViewModels.Control"
+             x:DataType="vm:TabUsersListUserControlViewModel"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ProductionAccounting_AvaloniaApplication.Views.Control.TabUsersListUserControl">
+
+    <Grid>
+		<Grid Margin="10" 
+              RowDefinitions="Auto, Auto, *">
+
+             <Grid Grid.Row="0" 
+                   HorizontalAlignment="Center" 
+                   VerticalAlignment="Top" 
+                   ColumnDefinitions="Auto, Auto">
+
+                 <TextBox Width="200"
+                          Watermark="Поиск"
+                          Classes="Search"
+                          HorizontalAlignment="Center"
+                          Text="{Binding Search}"/>
+
+            <StackPanel Grid.Column="1"
+		  				Orientation="Horizontal"
+		  				HorizontalAlignment="Center"
+		  				Margin="10,0,0,0">
+
+		  		<Button Margin="10,0,0,0"
+		  				Width="32"
+		  				Height="32"
+		  				Click="DownloadCloud_Click"
+		  				ToolTip.Tip="������� ������">
+		  			<Image Source="/Assets/download-cloud-64.png"/>
+		  		</Button>
+
+		  		<Button Margin="10,0,0,0"
+		  				Width="32"
+		  				Height="32"
+		  				Click="ReturnList_Click"
+		  				ToolTip.Tip="�������� ������">
+		  			<Image Source="/Assets/return-64.png"/>
+		  		</Button>
+            </StackPanel>
+            </Grid>
+             <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="15" Margin="0,10,0,10" HorizontalAlignment="Center">
+                 
+                 <StackPanel Orientation="Horizontal" Spacing="5">
+                     <CheckBox IsChecked="{Binding FilterByRole}" 
+                               VerticalAlignment="Center"/>
+                     <ComboBox Width="120" Height="27" FontSize="12"
+                               ItemsSource="{Binding ComboBoxItems}"
+                               SelectedItem="{Binding SelectedComboBoxItem}"
+                               IsEnabled="{Binding FilterByRole}">
+                         <ComboBox.Styles>
+                             <Style Selector="ComboBoxItem">
+                                 <Setter Property="Padding" 
+                                         Value="5, 0"/>
+                                 <Setter Property="Height" 
+                                         Value="20"/>
+                                 <Setter Property="MinHeight" 
+                                         Value="12"/>
+                                 <Setter Property="Foreground" 
+                                         Value="White"/>
+                             </Style>
+                         </ComboBox.Styles>
+                     </ComboBox>
+                 </StackPanel>
+
+                 <StackPanel Orientation="Horizontal" Spacing="5">
+                     <CheckBox IsChecked="{Binding FilterByDepartment}" 
+                               VerticalAlignment="Center"/>
+                     <ComboBox Width="120" Height="27" FontSize="12"
+                               ItemsSource="{Binding ComboBoxItemsDepartments}"
+                               SelectedItem="{Binding SelectedComboBoxItemDepartment}"
+                               IsEnabled="{Binding FilterByDepartment}">
+                         <ComboBox.Styles>
+                             <Style Selector="ComboBoxItem">
+                                 <Setter Property="Padding" 
+                                         Value="5, 0"/>
+                                 <Setter Property="Height" 
+                                         Value="20"/>
+                                 <Setter Property="MinHeight" 
+                                         Value="12"/>
+                                 <Setter Property="Foreground" 
+                                         Value="White"/>
+                             </Style>
+                         </ComboBox.Styles>
+                     </ComboBox>
+                 </StackPanel>
+
+                 <StackPanel Orientation="Horizontal" 
+                             Spacing="5">
+                     <CheckBox IsChecked="{Binding FilterByPosition}" 
+                               VerticalAlignment="Center"/>
+                     <ComboBox Width="120" Height="27" FontSize="12"
+                               ItemsSource="{Binding ComboBoxItemsPositions}"
+                               SelectedItem="{Binding SelectedComboBoxItemPosition}"
+                               IsEnabled="{Binding FilterByPosition}">
+                         <ComboBox.Styles>
+                             <Style Selector="ComboBoxItem">
+                                 <Setter Property="Padding" 
+                                         Value="5, 0"/>
+                                 <Setter Property="Height" 
+                                         Value="20"/>
+                                 <Setter Property="MinHeight" 
+                                         Value="12"/>
+                                 <Setter Property="Foreground" 
+                                         Value="White"/>
+                             </Style>
+                         </ComboBox.Styles>
+                     </ComboBox>
+                 </StackPanel>
+
+                 <StackPanel Orientation="Horizontal" 
+                             Spacing="10">
+                     <CheckBox Content="Активные" 
+                               IsChecked="{Binding ShowActiveUsers}"/>
+                     <CheckBox Content="Неактивные" 
+                               IsChecked="{Binding ShowInactiveUsers}"/>
+                 </StackPanel>
+
+                 <Button Content="Сбросить" 
+                         Command="{Binding ResetFiltersCommand}" 
+                         Height="27" 
+                         Width="90"/>
+             </StackPanel>
+
+             <Grid Grid.Row="2"
+                   HorizontalAlignment="Stretch"
+                   VerticalAlignment="Stretch"
+                   ColumnDefinitions="*, Auto">
+
+                 <Grid Grid.Column="0"
+                       Margin="0,10,5,10"
+                       HorizontalAlignment="Stretch"
+                       VerticalAlignment="Stretch">
+                     <Border Background="White"
+                             Opacity="0.5"
+                             CornerRadius="5"/>
+                     <ScrollViewer Margin="10">
+                         <StackPanel Name="HomeMainContent"
+                                     Orientation="Vertical"/>
+                     </ScrollViewer>
+                 </Grid>
+
+                 <Grid Grid.Column="1"
+                       Margin="5,10,0,10"
+                       Width="400"
+                       HorizontalAlignment="Stretch"
+                       VerticalAlignment="Stretch"
+                       IsVisible="{Binding IsProfileView}">
+                     <Border Background="White"
+                             Opacity="0.5"
+                             CornerRadius="5"
+                             ClipToBounds="True"/>
+                     <ScrollViewer Margin="10">
+                         <StackPanel Orientation="Vertical">
+                             <StackPanel Orientation="Horizontal"
+                                         HorizontalAlignment="Center">
+                                 <TextBlock Text="{Binding Login}"/>
+                                 <TextBlock Text="{Binding FirstName}"/>
+                                 <TextBlock Text="{Binding LastName}"/>
+                                 <TextBlock Text="{Binding MiddleName}"/>
+                             </StackPanel>
+                             <StackPanel Orientation="Horizontal"
+                                         HorizontalAlignment="Center"
+                                         Spacing="5">
+                                     <TextBlock Text="{Binding ID}"/>
+                                     <TextBlock Text="{Binding Email}"/>
+                                     <TextBlock Text="{Binding Password}"/>
+                                     <TextBlock Text="{Binding IsActive}"/>
+                                     <TextBlock Text="{Binding UserType}"/>
+                                     <TextBlock Text="{Binding Department}"/>
+                                     <TextBlock Text="{Binding Employee}"/>
+                                     <TextBlock Text="{Binding Position}"/>
+                             </StackPanel>
+                             <StackPanel Name="HomeUserContent"
+                                         Orientation="Vertical"
+                                         Margin="0,10,0,0"/>
+                         </StackPanel>
+                     </ScrollViewer>
+                 </Grid>
+             </Grid>
+        </Grid>
+    </Grid>
+
+</UserControl>

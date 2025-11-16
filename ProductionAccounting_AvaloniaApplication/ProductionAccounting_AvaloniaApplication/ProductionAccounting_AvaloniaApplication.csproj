@@ -48,6 +48,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Views\Control\TabUsersListUserControl.axaml.cs">
+      <DependentUpon>TabUsersListUserControl.axaml</DependentUpon>
+    </Compile>
     <Compile Update="Views\Pages\AdminPageUserControlView.axaml.cs">
       <DependentUpon>AdminPageUserControlView.axaml</DependentUpon>
     </Compile>

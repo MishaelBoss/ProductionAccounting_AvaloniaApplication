@@ -62,7 +62,8 @@
 			</StackPanel>
 
 			<Border Classes="BorderPassword"
-					Grid.Column="1">
+					Grid.Column="1"
+					IsVisible="{Binding IsAdministrator}">
 				<Grid ColumnDefinitions="*, Auto">
 					<TextBlock	Text="{Binding Password}" 
 								VerticalAlignment="Center"/>
@@ -84,7 +85,7 @@
 
 				<ToggleButton	Classes="ToggleButton" 
 								IsChecked="{Binding IsActive}"
-								IsVisible="{Binding IsVisibleToggleButtonActiveUser}">
+								IsVisible="{Binding IsAdministrator}">
 					<Panel>
 						<Image Classes="toggle-on" Source="/Assets/toggle-on-64.png"/>
 						<Image Classes="toggle-off" Source="/Assets/toggle-off-64.png"/>
@@ -94,6 +95,7 @@
 				<Button Click="OpenProfileUser_Click"
 						Classes="Button"
 						Background="#4A90E2"
+						IsVisible="{Binding IsAdministrator}"
 						ToolTip.Tip="Просмотр профиля">
 					<Image Source="/Assets/find-user-64.png"/>
 				</Button>
@@ -101,7 +103,7 @@
 				<Button Click="EditUser_Click"
 						Classes="Button"
 						Background="#34C759"
-						IsVisible="{Binding IsVisibleButtonEdit}"
+						IsVisible="{Binding IsAdministrator}"
 						ToolTip.Tip="Редактировать пользователя">
 					<Image Source="/Assets/edit-user-64.png"/>
 				</Button>
@@ -109,7 +111,7 @@
 				<Button Click="OpenWindowsConfirmDeleteUser_Click"
 						Classes="Button"
 						Background="#FF3B30"
-						IsVisible="{Binding IsVisibleButtonDelete}"
+						IsVisible="{Binding IsAdministrator}"
 						ToolTip.Tip="Удалить пользователя">
 					<Image Source="/Assets/remove-64.png"/>
 				</Button>

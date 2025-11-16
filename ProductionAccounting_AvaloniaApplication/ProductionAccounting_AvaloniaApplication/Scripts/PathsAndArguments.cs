@@ -120,9 +120,14 @@ class Paths
         return Path.Combine(directory, $"{name}.{extension}");
     }
 
-    public static string DestinationPathDB(string name)
+    public static string DestinationPathDB(params string[] paths)
     {
-        if (!Directory.Exists(Path.Combine(DB, name))) Directory.CreateDirectory(Path.Combine(DB, $"{name}"));
-        return Path.Combine(DB, name);
+        string[] allPaths = new string[paths.Length + 1];
+        allPaths[0] = DB;
+        Array.Copy(paths, 0, allPaths, 1, paths.Length);
+        string fullPath = Path.Combine(allPaths);
+        Directory.CreateDirectory(fullPath);
+
+        return fullPath;
     }
 }

@@ -60,6 +60,6 @@ public class CartProductUserControlViewModel : ViewModelBase
             set => this.RaiseAndSetIfChanged(ref _selectedUnit, value);
         }*/
 
-    public bool IsVisibleButtonDelete 
-        => ManagerCookie.IsAdministrator;
+    public bool IsAdministrator
+        => ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsAdministrator;
 }

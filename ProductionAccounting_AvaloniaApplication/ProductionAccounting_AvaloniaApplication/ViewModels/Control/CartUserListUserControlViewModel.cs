@@ -73,13 +73,7 @@ public class CartUserListUserControlViewModel : ViewModelBase, INotifyPropertyCh
         }
     }
 
-    public bool IsVisibleToggleButtonActiveUser
-        => ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsAdministrator;
-
-    public bool IsVisibleButtonEdit 
-        => ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsAdministrator;
-
-    public bool IsVisibleButtonDelete
+    public bool IsAdministrator
         => ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsAdministrator;
 
     private async Task ChangeActiveUserAsync() {

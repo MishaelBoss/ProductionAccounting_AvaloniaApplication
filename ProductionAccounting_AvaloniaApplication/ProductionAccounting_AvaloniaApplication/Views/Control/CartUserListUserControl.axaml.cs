@@ -19,7 +19,7 @@ public partial class CartUserListUserControl : UserControl
     {
         if (DataContext is not CartUserListUserControlViewModel viewModel) return;
 
-        var parentAdminViewModel = this.FindAncestorOfType<UserControl>()?.DataContext as AdminPageUserControlViewModel;
+        var parentAdminViewModel = this.FindAncestorOfType<UserControl>()?.DataContext as TabUsersListUserControlViewModel;
         parentAdminViewModel?.IsProfileView = parentAdminViewModel.IsProfileView ? false : true;
         parentAdminViewModel?.InitDateUserAsync(viewModel.UserID);
     }
