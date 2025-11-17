@@ -8,6 +8,13 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class ProfileUserUserControlViewModel : ViewModelBase
 {
+    private string _employeeName = string.Empty;
+    public string EmployeeName 
+    {
+        get => _employeeName;
+        set => this.RaiseAndSetIfChanged(ref _employeeName, value);
+    }
+
     private string _login = string.Empty;
     public string Login
     {
@@ -135,7 +142,7 @@ public class ProfileUserUserControlViewModel : ViewModelBase
                     using (var reader = await command.ExecuteReaderAsync())
                     {
                         while (await reader.ReadAsync())
-                        {   
+                        {
                             Login = reader.IsDBNull(0) ? "none" : reader.GetString(0);
                             FirstName = reader.IsDBNull(1) ? "none" : reader.GetString(1);
                             LastName = reader.IsDBNull(2) ? "none" : reader.GetString(2);
@@ -143,6 +150,8 @@ public class ProfileUserUserControlViewModel : ViewModelBase
                             Email = reader.IsDBNull(4) ? "none" : reader.GetString(4);
                             Phone = reader.IsDBNull(5) ? "none" : reader.GetString(5);
                             Employee = reader.IsDBNull(6) ? "none" : reader.GetString(6);
+
+                            EmployeeName = $"{FirstName} {LastName} {MiddleName}";
                         }
                     }
                 }

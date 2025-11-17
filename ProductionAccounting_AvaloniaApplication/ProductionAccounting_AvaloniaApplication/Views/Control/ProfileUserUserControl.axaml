@@ -28,23 +28,9 @@
 
 					<StackPanel Orientation="Horizontal"
 								Spacing="4">
-						<TextBlock	Margin="0 5">First name:</TextBlock>
+						<TextBlock	Margin="0 5">Employee name:</TextBlock>
 						<TextBlock	Margin="0 5" 
-									Text="{Binding FirstName}"/>
-					</StackPanel>
-
-					<StackPanel Orientation="Horizontal"
-								Spacing="4">
-						<TextBlock	Margin="0 5">Last name:</TextBlock>
-						<TextBlock	Margin="0 5" 
-									Text="{Binding LastName}"/>
-					</StackPanel>
-
-					<StackPanel Orientation="Horizontal"
-								Spacing="4">
-						<TextBlock	Margin="0 5">Middle name:</TextBlock>
-						<TextBlock	Margin="0 5" 
-									Text="{Binding MiddleName}"/>
+									Text="{Binding EmployeeName}"/>
 					</StackPanel>
 
 					<StackPanel Orientation="Horizontal"
