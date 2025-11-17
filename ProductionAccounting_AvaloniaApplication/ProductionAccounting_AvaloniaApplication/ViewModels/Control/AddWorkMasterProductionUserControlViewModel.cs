@@ -12,11 +12,32 @@ using System.Windows.Input;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
-public class AddWorkUserControlViewModel : ViewModelBase, INotifyPropertyChanging
+public class AddWorkMasterProductionUserControlViewModel : ViewModelBase, INotifyPropertyChanging
 {
-    public AddWorkUserControlViewModel() 
-    {
+    public AddWorkMasterProductionUserControlViewModel() 
+    { 
         SelectedShift = Shifts.FirstOrDefault();
+    }
+
+    private ObservableCollection<ComboBoxUserAddWork> _comboBoxUsers = [];
+    public ObservableCollection<ComboBoxUserAddWork> ComboBoxUsers
+    {
+        get => _comboBoxUsers;
+        set => this.RaiseAndSetIfChanged(ref _comboBoxUsers, value);
+    }
+
+    private ComboBoxUserAddWork? _selectedUser;
+    public ComboBoxUserAddWork? SelectedUser
+    {
+        get => _selectedUser;
+        set
+        {
+            if (_selectedUser != value)
+            {
+                _selectedUser = value;
+                OnPropertyChanged(nameof(SelectedUser));
+            }
+        }
     }
 
     private DateTimeOffset _selectedDate = new(DateTime.UtcNow);
@@ -148,6 +169,7 @@ public class AddWorkUserControlViewModel : ViewModelBase, INotifyPropertyChangin
         {
             var sqlProducts = @"SELECT id, name, article, mark, coefficient, price_per_unit, price_per_kg, unit FROM public.product WHERE is_active = true ORDER BY name";
             string sqlOperations = @"SELECT id, name, price, unit FROM public.operation WHERE is_active = true ORDER BY name";
+            string sqlUsers = @"SELECT id, first_name, last_name, middle_name, login FROM public.user WHERE is_active = true ORDER BY login";
 
             using (var connection = new NpgsqlConnection(Arguments.connection))
             {
@@ -184,6 +206,21 @@ public class AddWorkUserControlViewModel : ViewModelBase, INotifyPropertyChangin
                         ));
                     }
                 }
+
+                using (var command = new NpgsqlCommand(sqlUsers, connection))
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        ComboBoxUsers.Add(new ComboBoxUserAddWork(
+                            reader.GetDouble(0),
+                            reader.GetString(1),
+                            reader.GetString(2),
+                            reader.GetString(3),
+                            reader.GetString(4)
+                        ));
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -197,12 +234,12 @@ public class AddWorkUserControlViewModel : ViewModelBase, INotifyPropertyChangin
     {
         try
         {
-            if (ManagerCookie.IsUserLoggedIn() && SelectedProduct == null || Quantity == 0 || SelectedOperation == null || SelectedShift == null) return false;
+            if (!ManagerCookie.IsUserLoggedIn() || SelectedProduct == null || Quantity == 0 || SelectedOperation == null || SelectedUser == null || SelectedShift == null) return false;
 
             try
             {
-                string sql = @"INSERT INTO public.production (user_id, product_id, operation_id, quantity, production_date, shift, amount, notes)" +
-                            "VALUES (@user_id, @product_id, @operation_id, @quantity, @production_date, @shift, @amount, @notes)";
+                string sql = @"INSERT INTO public.production (user_id, product_id, operation_id, quantity, production_date, shift, amount, notes, created_by, status)" +
+                            "VALUES (@user_id, @product_id, @operation_id, @quantity, @production_date, @shift, @amount, @notes, @created_by, @status)";
 
                 using (var connection = new NpgsqlConnection(Arguments.connection))
                 {
@@ -211,7 +248,7 @@ public class AddWorkUserControlViewModel : ViewModelBase, INotifyPropertyChangin
                     {
                         try
                         {
-                            command.Parameters.AddWithValue("@user_id", ManagerCookie.GetIdUser);
+                            command.Parameters.AddWithValue("@user_id", SelectedUser.Id);
                             command.Parameters.AddWithValue("@product_id", (int)SelectedProduct.Id);
                             command.Parameters.AddWithValue("@operation_id", (int)SelectedOperation.Id);
                             command.Parameters.AddWithValue("@quantity", Quantity);
@@ -219,6 +256,8 @@ public class AddWorkUserControlViewModel : ViewModelBase, INotifyPropertyChangin
                             command.Parameters.AddWithValue("@shift", SelectedShift.Id);
                             command.Parameters.AddWithValue("@amount", CalculatedAmount);
                             command.Parameters.AddWithValue("@notes", Description ?? "");
+                            command.Parameters.AddWithValue("@created_by", ManagerCookie.GetIdUser);
+                            command.Parameters.AddWithValue("@status", "completed");
 
                             command.ExecuteNonQuery();
                             return true;
@@ -247,8 +286,9 @@ public class AddWorkUserControlViewModel : ViewModelBase, INotifyPropertyChangin
         }
     }
 
-    public void ClearForm() 
+    public void ClearForm()
     {
+        SelectedUser = null;
         SelectedProduct = null;
         SelectedOperation = null;
         SelectedDate = new DateTimeOffset(DateTime.UtcNow);

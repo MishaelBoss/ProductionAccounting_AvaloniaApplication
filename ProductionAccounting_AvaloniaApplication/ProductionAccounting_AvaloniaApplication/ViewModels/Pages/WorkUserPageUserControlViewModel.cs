@@ -14,6 +14,7 @@ public class WorkUserPageUserControlViewModel : ViewModelBase, INotifyPropertyCh
     public Grid? ContentCenter = null;
 
     private readonly AddWorkUserControl _addWork = new();
+    private readonly AddWorkMasterProductionUserControl _addWorkMaster = new();
 
     public WorkUserPageUserControlViewModel() 
     {
@@ -22,7 +23,10 @@ public class WorkUserPageUserControlViewModel : ViewModelBase, INotifyPropertyCh
     }
 
     public ICommand AddWorkCommand
-        => new RelayCommand(() => ShowAddWorkUserControl());
+        => new RelayCommand(() => {
+            if (ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsEmployee) ShowAddWorkUserControl();
+            if (ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsManager || ManagerCookie.IsAdministrator) ShowAddWorkMasterUserControl();
+        });
 
     public ICommand ViewWorkHistoryCommand
         => new RelayCommand(() => MessageBoxManager.GetMessageBoxStandard("", "").ShowWindowAsync());
@@ -60,6 +64,33 @@ public class WorkUserPageUserControlViewModel : ViewModelBase, INotifyPropertyCh
         {
             ContentCenter.Children.Clear();
             if (_addWork.Parent == ContentCenter) ContentCenter.Children.Remove(_addWork);
+        }
+    }
+
+    public void ShowAddWorkMasterUserControl()
+    {
+        if (ContentCenter != null)
+        {
+            if (ContentCenter.Children.Contains(_addWorkMaster))
+            {
+                _ = _addWorkMaster.RefreshDataAsync();
+                return;
+            }
+
+            if (_addWorkMaster.Parent is Panel currentParent) currentParent.Children.Remove(_addWorkMaster);
+            ContentCenter.Children.Clear();
+            ContentCenter.Children.Add(_addWorkMaster);
+
+            _ = _addWorkMaster.RefreshDataAsync();
+        }
+    }
+
+    public void CloseAddWorkMasterUserControl()
+    {
+        if (ContentCenter != null)
+        {
+            ContentCenter.Children.Clear();
+            if (_addWorkMaster.Parent == ContentCenter) ContentCenter.Children.Remove(_addWorkMaster);
         }
     }
 }
