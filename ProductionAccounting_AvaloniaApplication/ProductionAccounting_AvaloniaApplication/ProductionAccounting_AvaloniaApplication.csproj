@@ -57,5 +57,8 @@
     <Compile Update="Views\Pages\ProductLibraryUserControlView.axaml.cs">
       <DependentUpon>ProductLibraryUserControlView.axaml</DependentUpon>
     </Compile>
+    <Compile Update="Views\Pages\TimesheetUserControlPageView.axaml.cs">
+      <DependentUpon>TimesheetUserControlPageView.axaml</DependentUpon>
+    </Compile>
   </ItemGroup>
 </Project>

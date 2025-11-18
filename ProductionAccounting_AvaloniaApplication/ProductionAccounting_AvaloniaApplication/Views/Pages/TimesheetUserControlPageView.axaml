@@ -1,0 +1,181 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ProductionAccounting_AvaloniaApplication.Views.Pages.TimesheetUserControlPageView">
+<Grid Margin="10" 
+      RowDefinitions="Auto, Auto, Auto, *">
+    
+        <Border Grid.Row="1" 
+                Background="#f8f9fa" 
+                CornerRadius="5" 
+                Padding="15" 
+                Margin="0,10,0,10">
+            <StackPanel Orientation="Horizontal" 
+                        Spacing="15" 
+                        HorizontalAlignment="Center">
+                
+                <StackPanel Orientation="Horizontal" 
+                            Spacing="10">
+                    <TextBlock Text="Месяц:" 
+                               VerticalAlignment="Center" 
+                               FontWeight="SemiBold"/>
+                    <DatePicker SelectedDate="{Binding SelectedMonth}" />
+                </StackPanel>
+                
+                <Button Content="Обновить данные" 
+                        Command="{Binding LoadDataCommand}"
+                        Padding="15,5"/>
+                
+                <Button Content="Массовое редактирование" 
+                        Command="{Binding ToggleMassEditPanelCommand}"
+                        Background="#17a2b8" 
+                        Foreground="White"
+                        Padding="15,5"/>
+                
+                <Button Content="Сформировать отчет" 
+                        Command="{Binding GenerateReportCommand}"
+                        Background="#28a745" Foreground="White"
+                        Padding="15,5"/>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="2" 
+                Background="#e8f5e8" 
+                CornerRadius="5" 
+                Padding="15" 
+                Margin="0,0,0,10"
+                IsVisible="{Binding ShowMassEditPanel}">
+            <StackPanel Spacing="10">
+                <TextBlock Text="Массовое редактирование"
+                           FontWeight="Bold"/>
+                
+                <StackPanel Orientation="Horizontal" 
+                            Spacing="15">
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="Статус" 
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,5"/>
+                        <ComboBox ItemsSource="{Binding Statuses}" 
+                                  SelectedItem="{Binding SelectedMassStatus}"
+                                  Width="150"/>
+                    </StackPanel>
+                    
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="Начальная дата" 
+                                   FontWeight="SemiBold" 
+                                   Margin="0,0,0,5"/>
+                        <DatePicker SelectedDate="{Binding MassEditStartDate}" 
+                                    Width="120"/>
+                    </StackPanel>
+                    
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="Конечная дата"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,5"/>
+                        <DatePicker SelectedDate="{Binding MassEditEndDate}"
+                                    Width="120"/>
+                    </StackPanel>
+                    
+                    <Button Content="Применить" 
+                            Command="{Binding ApplyMassEditCommand}"
+                            Background="#007bff" Foreground="White"
+                            VerticalAlignment="Bottom"
+                            Padding="15,5"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Row="3" ColumnDefinitions="*, 400" ColumnSpacing="10">
+            
+            <Border Grid.Column="0" Background="White" CornerRadius="5" Padding="15">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="Табель рабочего времени" FontWeight="Bold"/>
+                    
+                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding TimesheetRecords}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="#f8f9fa" CornerRadius="3" Padding="10" Margin="0,0,0,5">
+                                        <Grid ColumnDefinitions="150, 100, 80, 80, *, Auto">
+                                            <TextBlock Grid.Column="0" Text="{Binding UserFullName}" 
+                                                       FontWeight="SemiBold"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding WorkDate, StringFormat='{}{0:dd.MM.yyyy}'}" 
+                                                       Margin="10,0,0,0"/>
+                                            
+                                            <ComboBox Grid.Column="2" 
+                                                      ItemsSource="{Binding DataContext.Statuses, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                      SelectedValue="{Binding Status}"
+                                                      Width="60"
+                                                      Margin="10,0,0,0">
+                                                <ComboBox.Styles>
+                                                    <Style Selector="ComboBox">
+                                                        <Setter Property="Background" Value="{Binding Status}"/>
+                                                        <Setter Property="Foreground" Value="White"/>
+                                                        <Setter Property="FontWeight" Value="Bold"/>
+                                                    </Style>
+                                                </ComboBox.Styles>
+                                            </ComboBox>
+                                            
+                                            <TextBox Grid.Column="3" 
+                                                     Text="{Binding HoursWorked}"
+                                                     Width="60"
+                                                     Margin="10,0,0,0"
+                                                     IsVisible="{Binding Status}"/>
+                                            
+                                            <TextBox Grid.Column="4" 
+                                                     Text="{Binding Notes}"
+                                                     Watermark="Примечание"
+                                                     Margin="10,0,0,0"/>
+                                            
+                                            <Button Grid.Column="5" 
+                                                    Content="💾"
+                                                    Command="{Binding DataContext.SaveRecordCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    Background="Transparent" BorderThickness="0"
+                                                    ToolTip.Tip="Сохранить"
+                                                    Margin="10,0,0,0"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </StackPanel>
+            </Border>
+            
+            <Border Grid.Column="1" Background="White" CornerRadius="5" Padding="15">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="Сводка за месяц" FontWeight="Bold"/>
+                    
+                    <ScrollViewer MaxHeight="500">
+                        <ItemsControl ItemsSource="{Binding TimesheetSummary}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="#e8f5e8" CornerRadius="3" Padding="10" Margin="0,0,0,5">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding UserName}" FontWeight="SemiBold"/>
+                                            <Grid Margin="0,5,0,0" ColumnDefinitions="*, *">
+                                                <StackPanel Grid.Column="0">
+                                                    <TextBlock Text="{Binding WorkingDays, StringFormat='{}Явок: {0}'}" FontSize="11"/>
+                                                    <TextBlock Text="{Binding AbsenceDays, StringFormat='{}Неявок: {0}'}" FontSize="11"/>
+                                                    <TextBlock Text="{Binding VacationDays, StringFormat='{}Отпуск: {0}'}" FontSize="11"/>
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="1">
+                                                    <TextBlock Text="{Binding SickDays, StringFormat='{}Больничных: {0}'}" FontSize="11"/>
+                                                    <TextBlock Text="{Binding WeekendDays, StringFormat='{}Выходных: {0}'}" FontSize="11"/>
+                                                    <TextBlock Text="{Binding TotalHours, StringFormat='{}Часов: {0}'}" FontSize="11" FontWeight="Bold"/>
+                                                </StackPanel>
+                                            </Grid>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+
+</UserControl>
