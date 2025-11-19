@@ -20,7 +20,8 @@
                             Spacing="10">
                     <TextBlock Text="Месяц:" 
                                VerticalAlignment="Center" 
-                               FontWeight="SemiBold"/>
+                               FontWeight="SemiBold"
+                               Foreground="Black"/>
                     <DatePicker SelectedDate="{Binding SelectedMonth}" />
                 </StackPanel>
                 
@@ -49,13 +50,15 @@
                 IsVisible="{Binding ShowMassEditPanel}">
             <StackPanel Spacing="10">
                 <TextBlock Text="Массовое редактирование"
-                           FontWeight="Bold"/>
+                           FontWeight="Bold"
+                           Foreground="Black"/>
                 
                 <StackPanel Orientation="Horizontal" 
                             Spacing="15">
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="Статус" 
                                    FontWeight="SemiBold"
+                                   Foreground="Black"
                                    Margin="0,0,0,5"/>
                         <ComboBox ItemsSource="{Binding Statuses}" 
                                   SelectedItem="{Binding SelectedMassStatus}"
@@ -65,6 +68,7 @@
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="Начальная дата" 
                                    FontWeight="SemiBold" 
+                                   Foreground="Black"
                                    Margin="0,0,0,5"/>
                         <DatePicker SelectedDate="{Binding MassEditStartDate}" 
                                     Width="120"/>
@@ -73,6 +77,7 @@
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="Конечная дата"
                                    FontWeight="SemiBold"
+                                   Foreground="Black"
                                    Margin="0,0,0,5"/>
                         <DatePicker SelectedDate="{Binding MassEditEndDate}"
                                     Width="120"/>
@@ -91,7 +96,9 @@
             
             <Border Grid.Column="0" Background="White" CornerRadius="5" Padding="15">
                 <StackPanel Spacing="10">
-                    <TextBlock Text="Табель рабочего времени" FontWeight="Bold"/>
+                    <TextBlock Text="Табель рабочего времени" 
+                               FontWeight="Bold"
+                               Foreground="Black"/>
                     
                     <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                         <ItemsControl ItemsSource="{Binding TimesheetRecords}">
@@ -105,7 +112,7 @@
                                                        Margin="10,0,0,0"/>
                                             
                                             <ComboBox Grid.Column="2" 
-                                                      ItemsSource="{Binding DataContext.Statuses, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                      ItemsSource="{Binding Statuses, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                       SelectedValue="{Binding Status}"
                                                       Width="60"
                                                       Margin="10,0,0,0">
@@ -131,7 +138,7 @@
                                             
                                             <Button Grid.Column="5" 
                                                     Content="💾"
-                                                    Command="{Binding DataContext.SaveRecordCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    Command="{Binding SaveRecordCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                     Background="Transparent" BorderThickness="0"
                                                     ToolTip.Tip="Сохранить"
                                                     Margin="10,0,0,0"/>
@@ -146,7 +153,9 @@
             
             <Border Grid.Column="1" Background="White" CornerRadius="5" Padding="15">
                 <StackPanel Spacing="10">
-                    <TextBlock Text="Сводка за месяц" FontWeight="Bold"/>
+                    <TextBlock Text="Сводка за месяц"
+                               FontWeight="Bold"
+                               Foreground="Black"/>
                     
                     <ScrollViewer MaxHeight="500">
                         <ItemsControl ItemsSource="{Binding TimesheetSummary}">
