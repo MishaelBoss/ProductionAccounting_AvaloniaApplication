@@ -6,16 +6,20 @@
 			 x:DataType="vm:WorkUserPageUserControlViewModel"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="750"
              x:Class="ProductionAccounting_AvaloniaApplication.Views.Pages.WorkUserPageUserControlView">
+
         <ScrollViewer>
             <Grid Margin="20" 
                   Name="ContentCenter" 
-                  RowDefinitions="Auto,Auto,Auto,Auto,*">
+                  RowDefinitions="Auto,0,Auto,Auto,*">
             
             <Border Grid.Row="0" 
                     Background="White" 
                     BorderBrush="#E0E0E0" 
                     BorderThickness="1" 
                     CornerRadius="8" 
+                    Opacity="0.5"/>
+
+            <Border Grid.Row="0" 
                     Padding="20" 
                     Margin="0,0,0,20">
                 <Grid ColumnDefinitions="*,Auto">
@@ -70,24 +74,23 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
 
-            <TextBlock Grid.Row="2" 
-                       Text="Основные функции"
-                       FontSize="18"
-                       FontWeight="SemiBold" 
-                       Margin="0,0,0,15"
-                       Foreground="#2C3E50"/>
-
             <Grid Grid.Row="3" 
                   ColumnDefinitions="*,*" 
                   RowDefinitions="*" 
                   Margin="0,0,0,20">
-                
+
                 <Border Grid.Row="0" 
                         Grid.Column="0" 
                         Background="White" 
                         BorderBrush="#E0E0E0" 
                         BorderThickness="1" 
                         CornerRadius="8" 
+                        Opacity="0.5"
+                        Padding="20" 
+                        Margin="0,0,10,0"/>
+                
+                <Border Grid.Row="0" 
+                        Grid.Column="0" 
                         Padding="20" 
                         Margin="0,0,10,0">
                     <StackPanel Spacing="15">
@@ -106,7 +109,8 @@
                             <TextBlock Text="Внести работу" 
                                        FontSize="16" 
                                        FontWeight="SemiBold" 
-                                       VerticalAlignment="Center"/>
+                                       VerticalAlignment="Center"
+                                       Foreground="Black"/>
                         </StackPanel>
                         <TextBlock Text="Добавить информацию о выполненной работе за сегодня" 
                                    FontSize="12" 
@@ -123,10 +127,16 @@
 
                 <Border Grid.Row="0" 
                         Grid.Column="1" 
-                        Background="White"
+                        Background="White" 
                         BorderBrush="#E0E0E0" 
-                        BorderThickness="1"
-                        CornerRadius="8"
+                        BorderThickness="1" 
+                        CornerRadius="8" 
+                        Opacity="0.5"
+                        Padding="20" 
+                        Margin="0,0,10,0"/>
+
+                <Border Grid.Row="0" 
+                        Grid.Column="1" 
                         Padding="20" 
                         Margin="10,0,0,0">
                     <StackPanel Spacing="15">
@@ -141,10 +151,11 @@
                                            HorizontalAlignment="Center" 
                                            VerticalAlignment="Center"/>
                             </Border>
-                            <TextBlock Text="Мои работы" 
+                            <TextBlock Text="Мои работы"
                                        FontSize="16"
                                        FontWeight="SemiBold" 
-                                       VerticalAlignment="Center"/>
+                                       VerticalAlignment="Center"
+                                       Foreground="Black"/>
                         </StackPanel>
                         <TextBlock Text="Просмотр и редактирование внесенных работ за разные периоды" 
                                    FontSize="12" 
@@ -161,10 +172,13 @@
             </Grid>
 
             <Border Grid.Row="4" 
-                    Background="White"
+                    Background="White" 
                     BorderBrush="#E0E0E0" 
-                    BorderThickness="1"
+                    BorderThickness="1" 
                     CornerRadius="8" 
+                    Opacity="0.5"/>
+
+            <Border Grid.Row="4" 
                     Padding="20">
                 <StackPanel Spacing="15">
                     <TextBlock Text="Сегодняшние работы" 
@@ -222,4 +236,5 @@
             </Border>
         </Grid>
     </ScrollViewer>
+
 </UserControl>

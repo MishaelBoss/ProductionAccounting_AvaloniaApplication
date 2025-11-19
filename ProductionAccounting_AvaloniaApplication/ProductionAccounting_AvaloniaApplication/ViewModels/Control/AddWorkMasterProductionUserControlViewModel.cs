@@ -40,7 +40,7 @@ public class AddWorkMasterProductionUserControlViewModel : ViewModelBase, INotif
         }
     }
 
-    private DateTimeOffset _selectedDate = new(DateTime.UtcNow);
+    private DateTimeOffset _selectedDate = new (DateTime.UtcNow);
     public DateTimeOffset SelectedDate
     {
         get => _selectedDate;

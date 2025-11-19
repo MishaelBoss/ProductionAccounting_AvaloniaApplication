@@ -7,88 +7,134 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="ProductionAccounting_AvaloniaApplication.Views.Control.ProfileUserUserControl">
 
-	<Grid>
-		<Border Background="#000000" Opacity="0.5"/>
-		
-		<Border VerticalAlignment="Center" 
-				HorizontalAlignment="Center" 
-				Width="400" 
-				Height="400" 
-				Background="Gray" 
-				CornerRadius="12">
-			<Grid>
-				<StackPanel Margin="20">
+    <Border Background="#1E1E1E"
+            CornerRadius="20"
+            BoxShadow="0 10 30 0 #80000000"
+            Width="420"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Padding="30">
 
-					<StackPanel Orientation="Horizontal"
-								Spacing="4">
-						<TextBlock	Margin="0 5">Login:</TextBlock>
-						<TextBlock	Margin="0 5" 
-									Text="{Binding Login}"/>
-					</StackPanel>
+        <Grid RowDefinitions="Auto, Auto, *">
 
-					<StackPanel Orientation="Horizontal"
-								Spacing="4">
-						<TextBlock	Margin="0 5">Employee name:</TextBlock>
-						<TextBlock	Margin="0 5" 
-									Text="{Binding EmployeeName}"/>
-					</StackPanel>
+            <StackPanel Grid.Row="0"
+                        HorizontalAlignment="Center"
+                        Spacing="12">
+                <Border Width="100" Height="100"
+                        CornerRadius="50"
+                        Background="#3A3A3D"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                    <TextBlock Text="{Binding Login}"
+                               FontSize="32"
+                               FontWeight="SemiBold"
+                               Foreground="#FFFFFF"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                </Border>
 
-					<StackPanel Orientation="Horizontal"
-								Spacing="4">
-						<TextBlock	Margin="0 5">Employee:</TextBlock>
-						<TextBlock	Margin="0 5"	
-									Text="{Binding Employee}"/>
-					</StackPanel>
+                <TextBlock Text="{Binding EmployeeName}"
+                           FontSize="24"
+                           FontWeight="SemiBold"
+                           Foreground="White"
+                           HorizontalAlignment="Center"/>
+                <TextBlock Text="{Binding Position}"
+                           FontSize="14"
+                           Foreground="#BBBBBB"
+                           HorizontalAlignment="Center"/>
+            </StackPanel>
 
-					<StackPanel Orientation="Horizontal"
-								Spacing="4">
-						<TextBlock	Margin="0 5">Position:</TextBlock>
-						<TextBlock	Margin="0 5" 
-									Text="{Binding Position}"/>
-					</StackPanel>
+            <ItemsControl Grid.Row="1" 
+                          Margin="0,30,0,20">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Spacing="14"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
 
-					<StackPanel Orientation="Horizontal"
-								Spacing="4">
-						<TextBlock	Margin="0 5">Department:</TextBlock>
-						<TextBlock	Margin="0 5" 
-									Text="{Binding Department}"/>
-					</StackPanel>
+                <Border Background="#2D2D30"
+                        CornerRadius="10"
+                        Padding="14">
+                    <Grid ColumnDefinitions="Auto,*">
+                        <PathIcon Data="{StaticResource PersonRegular}"
+                                  Foreground="#AAAAAA"
+                                  Width="20"/>
+                        <TextBlock Grid.Column="1" 
+                                   Margin="12,0,0,0" 
+                                   Text="{Binding Employee}" 
+                                   Foreground="White"/>
+                    </Grid>
+                </Border>
 
-					<StackPanel Orientation="Horizontal"
-								Spacing="4">
-						<TextBlock	Margin="0 5">Email:</TextBlock>
-						<TextBlock	Margin="0 5" 
-									Text="{Binding Email}"/>
-					</StackPanel>
+                <Border Background="#2D2D30" 
+                        CornerRadius="10"
+                        Padding="14">
+                    <Grid ColumnDefinitions="Auto,*">
+                        <PathIcon Data="{StaticResource BuildingRegular}"
+                                  Foreground="#AAAAAA"
+                                  Width="20"/>
+                        <TextBlock Grid.Column="1"
+                                   Margin="12,0,0,0" 
+                                   Text="{Binding Department}"
+                                   Foreground="White"/>
+                    </Grid>
+                </Border>
 
-					<StackPanel Orientation="Horizontal"
-								Spacing="4">
-						<TextBlock	Margin="0 5">Phone:</TextBlock>
-						<TextBlock	Margin="0 5" 
-									Text="{Binding Phone}"/>
-					</StackPanel>
-					
-					<StackPanel Orientation="Vertical"
-								VerticalAlignment="Center"
-								HorizontalAlignment="Center"
-								Spacing="10">
+                <Border Background="#2D2D30" 
+                        CornerRadius="10" 
+                        Padding="14">
+                    <Grid ColumnDefinitions="Auto,*">
+                        <PathIcon Data="{StaticResource MailRegular}"
+                                  Foreground="#AAAAAA"
+                                  Width="20"/>
+                        <TextBlock Grid.Column="1"
+                                   Margin="12,0,0,0" 
+                                   Text="{Binding Email}"
+                                   Foreground="White"/>
+                    </Grid>
+                </Border>
 
-						<Button Classes="ButtonLogin"
-								Click="Edit_Click"
-								Content="Edit user"/>
+                <Border Background="#2D2D30"
+                        CornerRadius="10" 
+                        Padding="14">
+                    <Grid ColumnDefinitions="Auto,*">
+                        <PathIcon Data="{StaticResource PhoneRegular}"
+                                  Foreground="#AAAAAA" 
+                                  Width="20"/>
+                        <TextBlock Grid.Column="1" 
+                                   Margin="12,0,0,0" 
+                                   Text="{Binding Phone}"
+                                   Foreground="White"/>
+                    </Grid>
+                </Border>
+            </ItemsControl>
 
-						<Button Click="Logout_Click"
-								Content="Logout"
-								HorizontalAlignment="Center"/>
 
-						<Button Classes="ButtonLogin"
-								Click="Cancel_Click"
-								Content="Cancel"
-								Background="Transparent"/>
+            <StackPanel Grid.Row="2" 
+                        Spacing="12" 
+                        Margin="0,10,0,0">
 
-					</StackPanel>
-				</StackPanel>
-			</Grid>
-		</Border>
-	</Grid>
+                <Button Content="logout"
+                        VerticalContentAlignment="Center"
+                        HorizontalContentAlignment="Center"
+                        Click="Logout_Click"
+                        HorizontalAlignment="Stretch"
+                        Height="44"
+                        Background="Transparent"
+                        BorderBrush="#555555"
+                        Foreground="White"/>
+
+                <Button Content="Cancel"
+                        VerticalContentAlignment="Center"
+                        HorizontalContentAlignment="Center"
+                        Click="Cancel_Click"
+                        HorizontalAlignment="Stretch"
+                        Height="44"
+                        Background="Transparent"
+                        BorderBrush="#555555"
+                        Foreground="White"/>
+
+            </StackPanel>
+        </Grid>
+    </Border>
 </UserControl>

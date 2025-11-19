@@ -18,4 +18,8 @@ public partial class WorkUserPageUserControlView : UserControl
         if (DataContext is not WorkUserPageUserControlViewModel viewModel) return;
         viewModel.ContentCenter = ContentCenter;
     }
+
+    private void Border_ActualThemeVariantChanged(object? sender, System.EventArgs e)
+    {
+    }
 }
