@@ -584,7 +584,7 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
                 parameters.Add(new NpgsqlParameter(paramName, userIds[i]));
             }
 
-            string sql = @$"SELECT * FROM public.""user"" WHERE id IN ({string.Join(", ", paramNames)})";
+            string sql = @$"SELECT * FROM public.""user"" WHERE id IN ({string.Join(", ", paramNames)}) AND id NOT IN ({ManagerCookie.GetIdUser})";
 
             using (var connection = new NpgsqlConnection(Arguments.connection))
             {
