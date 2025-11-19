@@ -118,8 +118,9 @@
                                    TextWrapping="Wrap"/>
                         <Button Content="Перейти к вводу" 
                                 Command="{Binding AddWorkCommand}"
-                                Background="#27AE60" 
-                                Foreground="White" 
+                                VerticalContentAlignment="Center"
+                                HorizontalContentAlignment="Center"
+                                Foreground="Black" 
                                 Height="40"
                                 FontWeight="SemiBold"/>
                     </StackPanel>
@@ -163,8 +164,9 @@
                                    TextWrapping="Wrap"/>
                         <Button Content="История работ"
                                 Command="{Binding ViewWorkHistoryCommand}"
-                                Background="#2980B9" 
-                                Foreground="White" 
+                                VerticalContentAlignment="Center"
+                                HorizontalContentAlignment="Center"
+                                Foreground="Black" 
                                 Height="40"
                                 FontWeight="SemiBold"/>
                     </StackPanel>
