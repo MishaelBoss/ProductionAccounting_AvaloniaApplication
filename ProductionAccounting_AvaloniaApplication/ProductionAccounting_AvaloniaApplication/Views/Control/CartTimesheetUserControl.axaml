@@ -1,0 +1,61 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			xmlns:vm="using:ProductionAccounting_AvaloniaApplication.ViewModels.Control"
+			 x:DataType="vm:CartTimesheetUserControlViewModel"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="80"
+             x:Class="ProductionAccounting_AvaloniaApplication.CartTimesheetUserControl">
+
+	<Border CornerRadius="12"
+            Background="LightGray"
+            BorderBrush="#E1E5E9"
+            BorderThickness="1"
+            Margin="5">
+
+		<Grid Margin="15"
+			  ColumnDefinitions="Auto, *">
+
+			<Border Grid.Column="0"
+					Width="44"
+					Height="44"
+					CornerRadius="10"
+					Background="Gray"
+					Margin="0,0,16,0">
+				<Image Source="/Assets/message-64.png"
+					   Width="22"
+					   Height="22"/>
+			</Border>
+
+			<StackPanel Grid.Column="1"
+                        VerticalAlignment="Center"
+                        Margin="0,0,15,0">
+				<TextBlock	Text="{Binding Status}"
+							Foreground="#1A1D21"
+							FontSize="16"
+							FontWeight="SemiBold"
+							Margin="0,0,0,4"/>
+
+				<TextBlock	Text="{Binding Notes}"
+							Foreground="#6B7280"
+							FontSize="13"
+							FontWeight="Medium"
+							Margin="0,0,0,8"/>
+				
+				<TextBlock	Text="{Binding HoursWorked}"
+							Foreground="#6B7280"
+							FontSize="13"
+							FontWeight="Medium"
+							Margin="0,0,0,8"/>
+
+				<TextBlock	Text="{Binding WorkDate, StringFormat='{}{0:dddd, dd MMMM yyyy}'}"
+							Foreground="#6B7280"
+							FontSize="10"
+							FontWeight="Medium"
+							Margin="0,0,0,8"/>
+				
+			</StackPanel>
+		</Grid>
+	</Border>
+
+</UserControl>

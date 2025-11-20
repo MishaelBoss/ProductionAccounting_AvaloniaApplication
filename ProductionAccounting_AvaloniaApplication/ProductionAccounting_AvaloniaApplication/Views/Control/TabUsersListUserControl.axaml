@@ -167,7 +167,7 @@
                              <StackPanel Orientation="Horizontal"
                                          HorizontalAlignment="Center"
                                          Spacing="5">
-                                     <TextBlock Text="{Binding ID}"/>
+                                     <TextBlock Text="{Binding UserID}"/>
                                      <TextBlock Text="{Binding Email}"/>
                                      <TextBlock Text="{Binding Password}"/>
                                      <TextBlock Text="{Binding IsActive}"/>

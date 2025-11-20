@@ -16,6 +16,7 @@ public partial class TabUsersListUserControl : UserControl
     private void OnLoaded(object? sender, RoutedEventArgs e)
     {
         if (DataContext is not TabUsersListUserControlViewModel viewModel) return;
+        viewModel.HomeUserContent = HomeUserContent;
         viewModel.HomeMainContent = HomeMainContent;
         viewModel.GetListUsers();
     }

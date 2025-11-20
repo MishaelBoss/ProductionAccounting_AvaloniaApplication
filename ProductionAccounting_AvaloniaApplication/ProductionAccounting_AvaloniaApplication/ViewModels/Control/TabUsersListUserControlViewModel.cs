@@ -1,5 +1,6 @@
 ﻿using Avalonia.Controls;
 using CommunityToolkit.Mvvm.Input;
+using MsBox.Avalonia;
 using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Models;
 using ProductionAccounting_AvaloniaApplication.Scripts;
@@ -29,6 +30,7 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
     public StackPanel? HomeUserContent { get; set; } = null;
 
     private List<CartUserListUserControl> userList = [];
+    private List<CartTimesheetUserControl> timesheetList = [];
     private List<double> filteredUserIds = [];
 
     public ICommand ResetFiltersCommand
@@ -670,14 +672,15 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
 
     public async void InitDateUserAsync(double userID)
     {
+        if (!ManagerCookie.IsUserLoggedIn()) return;
+
         await LoadDateAsync(userID);
         await LoadListTypeToComboBoxAsync(userID);
+        await LoadTimesheet(userID);
     }
 
     public async Task LoadDateAsync(double userID)
     {
-        if (!ManagerCookie.IsUserLoggedIn()) return;
-
         try
         {
             string sql = @"SELECT login, first_name, last_name, middle_name, email, phone, employee_id, is_active, password, id FROM public.""user"" WHERE id = @id";
@@ -718,8 +721,6 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
 
     public async Task LoadListTypeToComboBoxAsync(double userID)
     {
-        if (!ManagerCookie.IsUserLoggedIn()) return;
-
         try
         {
             string sql = @"
@@ -754,6 +755,54 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
                     }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Loges.LoggingProcess(level: LogLevel.WARNING,
+                ex: ex);
+        }
+    }
+
+    private async Task LoadTimesheet(double userID) 
+    {
+        ClearResultsUserProfile();
+
+        try
+        {
+            string sql = @"SELECT status, notes, hours_worked, work_date FROM public.timesheet WHERE user_id = @userID";
+
+            using (var connection = new NpgsqlConnection(Arguments.connection))
+            {
+                await connection.OpenAsync();
+
+                using (var command = new NpgsqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@userID", userID);
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            var viewModel = new CartTimesheetUserControlViewModel()
+                            {
+                                Status = reader.IsDBNull(0) ? string.Empty : reader.GetString(0),
+                                Notes = reader.IsDBNull(1) ? string.Empty : reader.GetString(1),
+                                HoursWorked = reader.GetDecimal(2),
+                                WorkDate = reader.GetDateTime(3)
+                            };
+
+                            var cartUser = new CartTimesheetUserControl()
+                            {
+                                DataContext = viewModel
+                            };
+
+                            timesheetList.Add(cartUser);
+                        }
+                    }
+                }
+            }
+
+            UpdateUIUserProfile();
         }
         catch (Exception ex)
         {
@@ -831,6 +880,12 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
         UpdateUI();
     }
 
+    private void ClearResultsUserProfile()
+    {
+        timesheetList.Clear();
+        UpdateUIUserProfile();
+    }
+
     private void UpdateUI()
     {
         if (HomeMainContent != null)
@@ -839,6 +894,18 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
             foreach (CartUserListUserControl item in userList)
             {
                 HomeMainContent.Children.Add(item);
+            }
+        }
+    }
+
+    private void UpdateUIUserProfile()
+    {
+        if (HomeUserContent != null)
+        {
+            HomeUserContent.Children.Clear();
+            foreach (CartTimesheetUserControl item in timesheetList)
+            {
+                HomeUserContent.Children.Add(item);
             }
         }
     }

@@ -43,27 +43,29 @@
                         
                         <StackPanel Orientation="Horizontal" 
                                     Spacing="15">
-                            <StackPanel Orientation="Vertical" 
-                                        Width="180">
-                                <TextBlock Text="Дата *" 
-                                           FontWeight="SemiBold" 
-                                           Foreground="#555" 
-                                           Margin="0,0,0,5"/>
-                                <DatePicker SelectedDate="{Binding SelectedDate}" 
-                                            FontSize="14" 
-                                            Height="40"/>
-                            </StackPanel>
+                                <StackPanel Orientation="Vertical" 
+                                            Width="180">
+                                    <TextBlock Text="Дата *" 
+                                               FontWeight="SemiBold" 
+                                               Foreground="#555" 
+                                               Margin="0,0,0,5"/>
+                                    <DatePicker SelectedDate="{Binding SelectedDate}" 
+                                                FontSize="14" 
+                                                Height="40"
+                                                Width="300"/>
+                                </StackPanel>
                             
-                            <StackPanel Orientation="Vertical" 
-                                        Width="150">
-                                <TextBlock Text="Статус *" 
-                                           FontWeight="SemiBold" 
-                                           Foreground="#555" 
-                                           Margin="0,0,0,5"/>
-                                <ComboBox ItemsSource="{Binding Statuses}" 
-                                          SelectedItem="{Binding SelectedSingleStatus}"
-                                          FontSize="14" Height="40"/>
-                            </StackPanel>
+                                <StackPanel Orientation="Vertical" 
+                                            Width="150">
+                                    <TextBlock Text="Статус *" 
+                                               FontWeight="SemiBold" 
+                                               Foreground="#555" 
+                                               Margin="0,0,0,5"/>
+                                    <ComboBox ItemsSource="{Binding Statuses}" 
+                                              SelectedItem="{Binding SelectedSingleStatus}"
+                                              FontSize="14" 
+                                              Height="40"/>
+                                </StackPanel>
                         </StackPanel>
                         
                         <StackPanel Orientation="Vertical" 
@@ -126,7 +128,8 @@
                                            Margin="0,0,0,5"/>
                                 <DatePicker SelectedDate="{Binding MassEditStartDate}" 
                                              FontSize="14"
-                                             Height="40"/>
+                                             Height="40"
+                                             Width="300"/>
                             </StackPanel>
                             
                             <StackPanel Orientation="Vertical"
@@ -137,7 +140,8 @@
                                            Margin="0,0,0,5"/>
                                 <DatePicker SelectedDate="{Binding MassEditEndDate}" 
                                             FontSize="14"
-                                            Height="40"/>
+                                            Height="40"
+                                            Width="300"/>
                             </StackPanel>
                         </StackPanel>
                         
