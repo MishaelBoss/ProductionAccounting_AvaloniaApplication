@@ -24,12 +24,6 @@ public partial class EditUsersUserControl : UserControl
         }
     }
 
-    private void Cancel_Click(object? sender, RoutedEventArgs e)
-    {
-        var parent = this.FindAncestorOfType<UserControl>()?.DataContext as AdminPageUserControlViewModel;
-        parent?.CloseAddUsersUserControl();
-    }
-
     public async Task RefreshDataAsync()
     {
         if (DataContext is not EditUsersUserControlViewModel viewModel) return;

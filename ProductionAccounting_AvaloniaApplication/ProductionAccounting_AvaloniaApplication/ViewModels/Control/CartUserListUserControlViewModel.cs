@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ReactiveUI;
@@ -13,6 +14,9 @@ public class CartUserListUserControlViewModel : ViewModelBase, INotifyPropertyCh
 {
     public ICommand CopyPasswordCommand
         => new RelayCommand(() => TextCopy.ClipboardService.SetText(Password));
+
+    public ICommand EditCommand
+        => new RelayCommand(() => {WeakReferenceMessenger.Default.Send(new OpenEditStatusMessage(true, _userID)); });
 
     private double _userID = 0;
     public double UserID

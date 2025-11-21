@@ -1,5 +1,7 @@
 ﻿using Avalonia.Controls;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using ProductionAccounting_AvaloniaApplication.Scripts;
 using ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 using ProductionAccounting_AvaloniaApplication.Views.Control;
 using System.ComponentModel;
@@ -7,8 +9,19 @@ using System.Windows.Input;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
 
-public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChanged
+public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChanged, IRecipient<OpenEditStatusMessage>
 {
+    public AdminPageUserControlViewModel()
+    {
+        WeakReferenceMessenger.Default.Register(this);
+    }
+    
+    public void Receive(OpenEditStatusMessage message)
+    {
+        if (message.ShouldOpen) ShowEditUsersUserControl(message.UserId);
+        else CloseEditUsersUserControl();
+    }
+
     public Grid? Content { get; set; } = null;
 
     private readonly AddUsersUserControl _addUsers = new();
@@ -202,4 +215,3 @@ public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChang
     protected void OnPropertyChanged(string propertyName)
         => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }
- 

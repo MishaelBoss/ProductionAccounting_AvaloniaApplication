@@ -72,7 +72,7 @@
 							Command="{Binding CopyPasswordCommand}"
 							Classes="Button"
 							Background="#4A90E2"
-							ToolTip.Tip="Просмотр профиля">
+							ToolTip.Tip="пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ">
 					<Image Source="/Assets/copy-64.png"/>
 				</Button>
 				</Grid>
@@ -96,15 +96,15 @@
 						Classes="Button"
 						Background="#4A90E2"
 						IsVisible="{Binding IsAdministrator}"
-						ToolTip.Tip="Просмотр профиля">
+						ToolTip.Tip="пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ">
 					<Image Source="/Assets/find-user-64.png"/>
 				</Button>
 
-				<Button Click="EditUser_Click"
+				<Button Command="{Binding EditCommand}"
 						Classes="Button"
 						Background="#34C759"
 						IsVisible="{Binding IsAdministrator}"
-						ToolTip.Tip="Редактировать пользователя">
+						ToolTip.Tip="пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ">
 					<Image Source="/Assets/edit-user-64.png"/>
 				</Button>
 
@@ -112,7 +112,7 @@
 						Classes="Button"
 						Background="#FF3B30"
 						IsVisible="{Binding IsAdministrator}"
-						ToolTip.Tip="Удалить пользователя">
+						ToolTip.Tip="пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ">
 					<Image Source="/Assets/remove-64.png"/>
 				</Button>
 			</StackPanel>

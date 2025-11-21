@@ -111,10 +111,10 @@
 						<Button Classes="ButtonLogin"
 								IsEnabled="{Binding IsActiveConfirmButton}"
 								Click="Confirm_Click"
-								Content="Добавить нового пользователя"/>
+								Content="пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ"/>
 
-						<Button Click="Cancel_Click"
-								Content="Отмена"
+						<Button Command="{Binding CancelCommand}"
+								Content="пїЅпїЅпїЅпїЅпїЅпїЅ"
 								HorizontalAlignment="Center"
 								Background="Transparent"/>
 					</StackPanel>

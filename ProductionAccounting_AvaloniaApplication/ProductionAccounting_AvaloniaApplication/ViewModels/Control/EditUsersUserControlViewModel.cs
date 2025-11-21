@@ -1,4 +1,6 @@
-﻿using Npgsql;
+﻿using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Models;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ReactiveUI;
@@ -7,11 +9,15 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class EditUsersUserControlViewModel : ViewModelBase, INotifyPropertyChanged
 {
+    public ICommand CancelCommand
+        => new RelayCommand(() => {WeakReferenceMessenger.Default.Send(new OpenEditStatusMessage(false)); });
+    
     public EditUsersUserControlViewModel(double userID)
     {
         UserID = userID;
