@@ -1,7 +1,9 @@
-﻿using CommunityToolkit.Mvvm.Input;
+﻿using Avalonia.Controls;
+using CommunityToolkit.Mvvm.Input;
 using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Models;
 using ProductionAccounting_AvaloniaApplication.Scripts;
+using ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
@@ -23,6 +25,10 @@ public class TimesheetUserControlPageViewModel : ViewModelBase, INotifyPropertyC
         _ = LoadListUsersAsync();
     }
 
+    public Panel? CartTimesheet { get; set; } = null;
+
+    private List<CartTimesheetUserControl> timesheetList = [];
+
     private DateTimeOffset _selectedDate = new (DateTime.Today);
     public DateTimeOffset SelectedDate
     {
@@ -30,15 +36,15 @@ public class TimesheetUserControlPageViewModel : ViewModelBase, INotifyPropertyC
         set => this.RaiseAndSetIfChanged(ref _selectedDate, value);
     }
 
-    private TimesheetStatus _selectedSingleStatus;
-    public TimesheetStatus SelectedSingleStatus
+    private TimesheetStatus? _selectedSingleStatus;
+    public TimesheetStatus? SelectedSingleStatus
     {
         get => _selectedSingleStatus;
         set => this.RaiseAndSetIfChanged(ref _selectedSingleStatus, value);
     }
 
-    private ComboBoxUserAddWork _selectedSingleUser;
-    public ComboBoxUserAddWork SelectedSingleUser
+    private ComboBoxUserAddWork? _selectedSingleUser;
+    public ComboBoxUserAddWork? SelectedSingleUser
     {
         get => _selectedSingleUser;
         set => this.RaiseAndSetIfChanged(ref _selectedSingleUser, value);
@@ -81,8 +87,8 @@ public class TimesheetUserControlPageViewModel : ViewModelBase, INotifyPropertyC
         new TimesheetStatus { Code = "В", Name = "Выходной", Description = "Выходной день", Color = "#6c757d" }
     ];
 
-    private TimesheetStatus _selectedMassStatus;
-    public TimesheetStatus SelectedMassStatus
+    private TimesheetStatus? _selectedMassStatus;
+    public TimesheetStatus? SelectedMassStatus
     {
         get => _selectedMassStatus;
         set => this.RaiseAndSetIfChanged(ref _selectedMassStatus, value);
@@ -146,10 +152,10 @@ public class TimesheetUserControlPageViewModel : ViewModelBase, INotifyPropertyC
     }
 
     public ICommand ApplyMassEditCommand
-        => new RelayCommand(async () => await ApplyMassEditAsync());
+        => new RelayCommand(async () => { await ApplyMassEditAsync(); await LoadTimesheet(); });
 
     public ICommand SaveSingleRecordCommand
-        => new RelayCommand(async () => await SaveSingleRecordAsync());
+        => new RelayCommand(async () => { await SaveSingleRecordAsync(); await LoadTimesheet(); });
 
     public async Task LoadListUsersAsync()
     {
@@ -217,7 +223,9 @@ public class TimesheetUserControlPageViewModel : ViewModelBase, INotifyPropertyC
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(LogLevel.ERROR, ex: ex, message: "Ошибка сохранения единичной записи табеля");
+            Loges.LoggingProcess(LogLevel.ERROR, 
+                ex: ex, 
+                message: "Ошибка сохранения единичной записи табеля");
         }
     }
 
@@ -293,6 +301,71 @@ public class TimesheetUserControlPageViewModel : ViewModelBase, INotifyPropertyC
         SingleNotes = string.Empty;
     }
 
+    public async Task LoadTimesheet()
+    {
+        ClearResults();
+
+        try
+        {
+            string sql = "SELECT t.status, t.notes, t.hours_worked,t.user_id, u.login as user_login FROM public.timesheet t LEFT JOIN public.user u ON t.user_id = u.id WHERE t.work_date = @work_date";
+
+            using (var connection = new NpgsqlConnection(Arguments.connection))
+            {
+                await connection.OpenAsync();
+
+                using (var command = new NpgsqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@work_date", DateTime.Today);
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            var viewModel = new CartTimesheetUserControlViewModel()
+                            {
+                                Status = reader.IsDBNull(0) ? string.Empty : reader.GetString(0),
+                                Notes = reader.IsDBNull(1) ? string.Empty : reader.GetString(1),
+                                HoursWorked = reader.GetDecimal(2),
+                                Login = reader.IsDBNull(4) ? string.Empty : reader.GetString(4)
+                            };
+
+                            var cartUser = new CartTimesheetUserControl()
+                            {
+                                DataContext = viewModel
+                            };
+
+                            timesheetList.Add(cartUser);
+                        }
+                    }
+                }
+            }
+
+            UpdateUI();
+        }
+        catch (Exception ex)
+        {
+            Loges.LoggingProcess(level: LogLevel.WARNING,
+                ex: ex);
+        }
+    }
+
+    private void ClearResults()
+    {
+        timesheetList.Clear();
+        UpdateUI();
+    }
+
+    private void UpdateUI()
+    {
+        if (CartTimesheet != null)
+        {
+            CartTimesheet.Children.Clear();
+            foreach (CartTimesheetUserControl item in timesheetList)
+            {
+                CartTimesheet.Children.Add(item);
+            }
+        }
+    }
 
     public new event PropertyChangedEventHandler? PropertyChanged;
     protected void OnPropertyChanged(string propertyName)

@@ -10,4 +10,8 @@ public partial class CartTimesheetUserControl : UserControl
         InitializeComponent();
         DataContext = new CartTimesheetUserControlViewModel();
     }
+
+    private void TextBlock_ActualThemeVariantChanged(object? sender, System.EventArgs e)
+    {
+    }
 }

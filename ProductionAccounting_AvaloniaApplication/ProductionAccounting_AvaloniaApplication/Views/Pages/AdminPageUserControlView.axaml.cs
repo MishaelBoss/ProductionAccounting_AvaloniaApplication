@@ -19,16 +19,6 @@ public partial class AdminPageUserControlView : UserControl
         viewModel.Content = Content;
     }
 
-    private void DownloadCloud_Click(object? sender, RoutedEventArgs e)
-    {
-
-    }
-
-    private void ReturnList_Click(object? sender, RoutedEventArgs e)
-    {
-
-    }
-
     private void UserControl_ActualThemeVariantChanged(object? sender, System.EventArgs e)
     {
     }

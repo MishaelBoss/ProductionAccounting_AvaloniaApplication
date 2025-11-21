@@ -8,10 +8,10 @@
              x:Class="ProductionAccounting_AvaloniaApplication.Views.Pages.TimesheetUserControlPageView">
 
     <Grid Margin="15" 
-          RowDefinitions="Auto, Auto, *">
+          RowDefinitions="Auto, 20, Auto">
 
-        <Grid Grid.Row="2" 
-              ColumnDefinitions="*, *" 
+        <Grid Grid.Row="0"
+              ColumnDefinitions="*, *"
               ColumnSpacing="20">
             
             <Border Grid.Column="0" 
@@ -182,6 +182,27 @@
                                 BorderThickness="0"
                                 Margin="0,10,0,0"/>
                     </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+    
+        <Grid Grid.Row="2">
+			<Border Background="White" 
+                    BorderBrush="#E0E0E0" 
+                    BorderThickness="1" 
+                    CornerRadius="8" 
+                    Opacity="0.5"/>
+
+            <Border Padding="20">
+                <StackPanel Spacing="15">
+                    <TextBlock Text="Сегодняшние отчеты" 
+                               FontSize="16"
+                               FontWeight="SemiBold" 
+                               Foreground="#2C3E50"/>
+
+                    <ScrollViewer>
+						<StackPanel Name="CartTimesheet"/>
+                    </ScrollViewer>
                 </StackPanel>
             </Border>
         </Grid>

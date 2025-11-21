@@ -5,6 +5,13 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class CartTimesheetUserControlViewModel : ViewModelBase
 {
+    private string _login = string.Empty;
+    public string Login 
+    {
+        get => _login;
+        set => this.RaiseAndSetIfChanged(ref _login, value);
+    }
+
     private string _status = string.Empty;
     public string Status 
     {
@@ -26,10 +33,13 @@ public class CartTimesheetUserControlViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _hoursWorked, value);
     }
 
-    private DateTimeOffset _workDate;
-    public DateTimeOffset WorkDate
+    private DateTimeOffset? _workDate;
+    public DateTimeOffset? WorkDate
     {
         get => _workDate;
         set => this.RaiseAndSetIfChanged(ref _workDate, value);
     }
+
+    public bool IsVisibleWorkDate 
+        => WorkDate != null;
 }
