@@ -1,0 +1,33 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:ProductionAccounting_AvaloniaApplication.ViewModels.Control"
+             x:DataType="vm:WorkUserControlViewModel"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="850"
+             x:Class="ProductionAccounting_AvaloniaApplication.Views.Control.WorkUserControl">
+
+    <Grid>
+        <Border Grid.Row="4" 
+                Background="White" 
+                BorderBrush="#E0E0E0" 
+                BorderThickness="1" 
+                CornerRadius="8" 
+                Opacity="0.5"/>
+
+        <Border Grid.Row="4" 
+                Padding="20">
+            <StackPanel Spacing="15">
+                <TextBlock Text="Сегодняшние работы" 
+                           FontSize="16"
+                           FontWeight="SemiBold" 
+                           Foreground="#2C3E50"/>
+                
+                <ScrollViewer>
+                    <StackPanel Name="CartTasks"/>
+                </ScrollViewer>
+            </StackPanel>
+        </Border>
+    </Grid>
+
+</UserControl>

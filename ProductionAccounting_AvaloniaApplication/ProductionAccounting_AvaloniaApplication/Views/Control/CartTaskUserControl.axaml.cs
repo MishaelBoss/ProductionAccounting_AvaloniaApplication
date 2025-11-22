@@ -3,11 +3,11 @@ using ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 namespace ProductionAccounting_AvaloniaApplication;
 
-public partial class InfoItemUserControl : UserControl
+public partial class CartTaskUserControl : UserControl
 {
-    public InfoItemUserControl()
+    public CartTaskUserControl()
     {
         InitializeComponent();
-        DataContext = new InfoItemUserControlViewModel();
+        DataContext = new CartTaskUserControlViewModel();
     }
 }

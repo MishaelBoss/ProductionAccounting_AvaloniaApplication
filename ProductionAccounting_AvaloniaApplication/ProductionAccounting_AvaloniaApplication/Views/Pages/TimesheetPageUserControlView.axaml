@@ -3,9 +3,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:ProductionAccounting_AvaloniaApplication.ViewModels.Pages"
-             x:DataType="vm:TimesheetUserControlPageViewModel"
+             x:DataType="vm:TimesheetPageUserControlViewModel"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="850"
-             x:Class="ProductionAccounting_AvaloniaApplication.Views.Pages.TimesheetUserControlPageView">
+             x:Class="ProductionAccounting_AvaloniaApplication.Views.Pages.TimesheetPageUserControlView">
 
     <Grid Margin="15" 
           RowDefinitions="Auto, 20, Auto">
@@ -68,8 +68,7 @@
                                 </StackPanel>
                         </StackPanel>
                         
-                        <StackPanel Orientation="Vertical" 
-                                    IsVisible="{Binding SelectedSingleStatus.Code}">
+                        <StackPanel Orientation="Vertical">
                             <TextBlock Text="Отработано часов" 
                                        FontWeight="SemiBold" 
                                        Foreground="#555" 
@@ -155,8 +154,7 @@
                                       FontSize="14" Height="40"/>
                         </StackPanel>
                         
-                        <StackPanel Orientation="Vertical" 
-                                    IsVisible="{Binding SelectedMassStatus.Code}">
+                        <StackPanel Orientation="Vertical">
                             <TextBlock Text="Часов в день" 
                                        FontWeight="SemiBold" 
                                        Foreground="#555" 

@@ -15,9 +15,9 @@ using System.Windows.Input;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
 
-public class TimesheetUserControlPageViewModel : ViewModelBase, INotifyPropertyChanging
+public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyChanging
 {
-    public TimesheetUserControlPageViewModel() 
+    public TimesheetPageUserControlViewModel() 
     {
         SelectedMassStatus = Statuses[0];
         SelectedSingleStatus = Statuses[0];
@@ -152,10 +152,10 @@ public class TimesheetUserControlPageViewModel : ViewModelBase, INotifyPropertyC
     }
 
     public ICommand ApplyMassEditCommand
-        => new RelayCommand(async () => { await ApplyMassEditAsync(); await LoadTimesheet(); });
+        => new RelayCommand(async () => { await ApplyMassEditAsync(); await LoadTimesheetAsync(); });
 
     public ICommand SaveSingleRecordCommand
-        => new RelayCommand(async () => { await SaveSingleRecordAsync(); await LoadTimesheet(); });
+        => new RelayCommand(async () => { await SaveSingleRecordAsync(); await LoadTimesheetAsync(); });
 
     public async Task LoadListUsersAsync()
     {
@@ -213,7 +213,7 @@ public class TimesheetUserControlPageViewModel : ViewModelBase, INotifyPropertyC
                     command.Parameters.AddWithValue("@status", SelectedSingleStatus.Code);
                     command.Parameters.AddWithValue("@hoursWorked", SelectedSingleStatus.Code == "Я" ? SingleHours : 0);
                     command.Parameters.AddWithValue("@notes", SingleNotes ?? "");
-                    command.Parameters.AddWithValue("@createdBy", ManagerCookie.GetIdUser);
+                    command.Parameters.AddWithValue("@createdBy", ManagerCookie.GetIdUser ?? 0);
 
                     int result = await command.ExecuteNonQueryAsync();
 
@@ -271,7 +271,7 @@ public class TimesheetUserControlPageViewModel : ViewModelBase, INotifyPropertyC
                     command.Parameters.AddWithValue("@status", SelectedMassStatus.Code);
                     command.Parameters.AddWithValue("@hoursWorked", SelectedMassStatus.Code == "Я" ? MassEditHours : 0m);
                     command.Parameters.AddWithValue("@notes", $"Массовое добавление: {SelectedMassStatus.Name}");
-                    command.Parameters.AddWithValue("@createdBy", ManagerCookie.GetIdUser);
+                    command.Parameters.AddWithValue("@createdBy", ManagerCookie.GetIdUser ?? 0);
 
                     int affected = await command.ExecuteNonQueryAsync();
                     if (affected > 0) totalInserted++;
@@ -301,13 +301,13 @@ public class TimesheetUserControlPageViewModel : ViewModelBase, INotifyPropertyC
         SingleNotes = string.Empty;
     }
 
-    public async Task LoadTimesheet()
+    public async Task LoadTimesheetAsync()
     {
         ClearResults();
 
         try
         {
-            string sql = "SELECT t.status, t.notes, t.hours_worked,t.user_id, u.login as user_login FROM public.timesheet t LEFT JOIN public.user u ON t.user_id = u.id WHERE t.work_date = @work_date";
+            string sql = "SELECT t.status, t.notes, t.hours_worked,t.user_id, u.login as user_login FROM public.timesheet t LEFT JOIN public.user u ON t.user_id = u.id WHERE t.work_date = CURRENT_DATE";
 
             using (var connection = new NpgsqlConnection(Arguments.connection))
             {
@@ -315,8 +315,6 @@ public class TimesheetUserControlPageViewModel : ViewModelBase, INotifyPropertyC
 
                 using (var command = new NpgsqlCommand(sql, connection))
                 {
-                    command.Parameters.AddWithValue("@work_date", DateTime.Today);
-
                     using (var reader = await command.ExecuteReaderAsync())
                     {
                         while (await reader.ReadAsync())

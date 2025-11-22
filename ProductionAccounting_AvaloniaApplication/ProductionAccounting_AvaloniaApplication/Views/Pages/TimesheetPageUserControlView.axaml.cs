@@ -4,19 +4,19 @@ using ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
 
 namespace ProductionAccounting_AvaloniaApplication.Views.Pages;
 
-public partial class TimesheetUserControlPageView : UserControl
+public partial class TimesheetPageUserControlView : UserControl
 {
-    public TimesheetUserControlPageView()
+    public TimesheetPageUserControlView()
     {
         InitializeComponent();
-        DataContext = new TimesheetUserControlPageViewModel();
+        DataContext = new TimesheetPageUserControlViewModel();
         Loaded += OnLoaded;
     }
 
     private async void OnLoaded(object? sender, RoutedEventArgs e) 
     {
-        if (DataContext is not TimesheetUserControlPageViewModel viewModel) return;
+        if (DataContext is not TimesheetPageUserControlViewModel viewModel) return;
         viewModel.CartTimesheet = CartTimesheet;
-        await viewModel.LoadTimesheet();
+        await viewModel.LoadTimesheetAsync();
     }
 }

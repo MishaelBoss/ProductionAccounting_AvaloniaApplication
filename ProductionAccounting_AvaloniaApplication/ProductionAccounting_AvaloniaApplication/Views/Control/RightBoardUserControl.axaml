@@ -74,7 +74,7 @@
                             <Label Grid.Column="1" Content="Timesheet"/>
                         </Grid>
                     </Button>
-                    
+
                     <Button Classes="Button"
                             IsVisible="{Binding IsVisibleWorkUserButton}"
                             Command="{Binding OpenWorkUserPageCommand}">

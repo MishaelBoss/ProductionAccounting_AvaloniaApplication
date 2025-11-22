@@ -9,14 +9,14 @@ using System.Windows.Input;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
 
-public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChanged, IRecipient<OpenEditStatusMessage>
+public class AdminPageUserControlViewModel : ViewModelBase, INotifyPropertyChanged, IRecipient<OpenOrCloseStatusMessage>
 {
     public AdminPageUserControlViewModel()
     {
         WeakReferenceMessenger.Default.Register(this);
     }
     
-    public void Receive(OpenEditStatusMessage message)
+    public void Receive(OpenOrCloseStatusMessage message)
     {
         if (message.ShouldOpen) ShowEditUsersUserControl(message.UserId);
         else CloseEditUsersUserControl();

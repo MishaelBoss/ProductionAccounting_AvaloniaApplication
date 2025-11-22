@@ -48,17 +48,41 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Views\Control\WorkUserControl.axaml.cs">
+      <DependentUpon>WorkUserControl.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Control\WorkMasterUserControl.axaml.cs">
+      <DependentUpon>WorkMasterUserControl.axaml</DependentUpon>
+    </Compile>
     <Compile Update="Views\Control\TabUsersListUserControl.axaml.cs">
       <DependentUpon>TabUsersListUserControl.axaml</DependentUpon>
     </Compile>
     <Compile Update="Views\Pages\AdminPageUserControlView.axaml.cs">
       <DependentUpon>AdminPageUserControlView.axaml</DependentUpon>
     </Compile>
-    <Compile Update="Views\Pages\ProductLibraryUserControlView.axaml.cs">
-      <DependentUpon>ProductLibraryUserControlView.axaml</DependentUpon>
+    <Compile Update="Views\Pages\OrdersPageUserControlView.axaml.cs">
+      <DependentUpon>OrdersPageUserControlView.axaml</DependentUpon>
     </Compile>
-    <Compile Update="Views\Pages\TimesheetUserControlPageView.axaml.cs">
-      <DependentUpon>TimesheetUserControlPageView.axaml</DependentUpon>
+    <Compile Update="Views\Pages\ProductLibraryPageUserControlView.axaml.cs">
+      <DependentUpon>ProductLibraryPageUserControlView.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Pages\ReferenceBooksPageUserControlView.axaml.cs">
+      <DependentUpon>ReferenceBooksPageUserControlView.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Pages\ReportsAndAnalyticsPageUserControlView.axaml.cs">
+      <DependentUpon>ReportsAndAnalyticsPageUserControlView.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Pages\ShipmentsPageUserControlView.axaml.cs">
+      <DependentUpon>ShipmentsPageUserControlView.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Pages\TimesheetPageUserControlView.axaml.cs">
+      <DependentUpon>TimesheetPageUserControlView.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Pages\UserLibraryPageUserControlView.axaml.cs">
+      <DependentUpon>UserLibraryPageUserControlView.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Pages\WorkPageUserControlView.axaml.cs">
+      <DependentUpon>WorkPageUserControlView.axaml</DependentUpon>
     </Compile>
   </ItemGroup>
 </Project>

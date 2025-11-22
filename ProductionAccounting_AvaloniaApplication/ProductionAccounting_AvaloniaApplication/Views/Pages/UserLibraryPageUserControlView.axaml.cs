@@ -3,11 +3,11 @@ using ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
 
 namespace ProductionAccounting_AvaloniaApplication.Views.Pages;
 
-public partial class ProductLibraryUserControlView : UserControl
+public partial class UserLibraryPageUserControlView : UserControl
 {
-    public ProductLibraryUserControlView()
+    public UserLibraryPageUserControlView()
     {
         InitializeComponent();
-        DataContext = new ProductLibraryUserControlViewModel();
+        DataContext = new UserLibraryPageUserControlViewModel();
     }
 }
