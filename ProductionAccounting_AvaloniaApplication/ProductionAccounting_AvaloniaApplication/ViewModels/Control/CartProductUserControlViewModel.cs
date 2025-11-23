@@ -47,19 +47,6 @@ public class CartProductUserControlViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _coefficient, value);
     }
 
-    /*    public List<string> AvailableUnits { get; } = new List<string>
-        {
-            "кг",
-            "еденица"
-        };
-
-        private string _selectedUnit = string.Empty;
-        public string SelectedUnit
-        {
-            get => _selectedUnit;
-            set => this.RaiseAndSetIfChanged(ref _selectedUnit, value);
-        }*/
-
     public bool IsAdministrator
         => ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsAdministrator;
 }
