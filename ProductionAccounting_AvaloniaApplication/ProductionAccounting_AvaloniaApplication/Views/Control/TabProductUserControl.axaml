@@ -81,41 +81,6 @@
                                      Orientation="Vertical"/>
                      </ScrollViewer>
                  </Grid>
-
-                 <Grid Grid.Column="1"
-                       Margin="5,10,0,10"
-                       Width="400"
-                       HorizontalAlignment="Stretch"
-                       VerticalAlignment="Stretch"
-                       IsVisible="{Binding IsProductView}">
-                     <Border Background="White"
-                             Opacity="0.5"
-                             CornerRadius="5"
-                             ClipToBounds="True"/>
-                     <ScrollViewer Margin="10">
-                         <StackPanel Orientation="Vertical">
-                             <StackPanel Orientation="Horizontal"
-                                         HorizontalAlignment="Center">
-                                 <TextBlock Text="{Binding Login}"/>
-                                 <TextBlock Text="{Binding FirstName}"/>
-                                 <TextBlock Text="{Binding LastName}"/>
-                                 <TextBlock Text="{Binding MiddleName}"/>
-                             </StackPanel>
-                             <StackPanel Orientation="Horizontal"
-                                         HorizontalAlignment="Center"
-                                         Spacing="5">
-                                     <TextBlock Text="{Binding ID}"/>
-                                     <TextBlock Text="{Binding Email}"/>
-                                     <TextBlock Text="{Binding Password}"/>
-                                     <TextBlock Text="{Binding IsActive}"/>
-                                     <TextBlock Text="{Binding UserType}"/>
-                                     <TextBlock Text="{Binding Department}"/>
-                                     <TextBlock Text="{Binding Employee}"/>
-                                     <TextBlock Text="{Binding Position}"/>
-                             </StackPanel>
-                         </StackPanel>
-                     </ScrollViewer>
-                 </Grid>
              </Grid>
         </Grid>
     </Grid>

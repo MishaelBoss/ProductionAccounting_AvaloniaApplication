@@ -24,7 +24,7 @@ public class TabProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
 
     public ICommand ResetFiltersCommand
         => new RelayCommand(() => ResetFilters());
-
+/*
     private bool _isProductView = false;
     public bool IsProductView
     {
@@ -37,7 +37,7 @@ public class TabProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
                 OnPropertyChanged(nameof(IsProductView));
             }
         }
-    }
+    }*/
 
     private string _search = string.Empty;
     public string Search

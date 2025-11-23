@@ -17,15 +17,8 @@ public partial class TabUsersListUserControl : UserControl
     {
         if (DataContext is not TabUsersListUserControlViewModel viewModel) return;
         viewModel.HomeMainContent = HomeMainContent;
-        viewModel.TableUserContent = TableUserContent;
-        viewModel.TasksUserContent = TasksUserContent;
+        viewModel.ProfileContent = ProfileContent;
         viewModel.GetListUsers();
-    }
-
-    private void DownloadCloud_Click(object? sender, RoutedEventArgs e)
-    {
-        if (DataContext is not TabUsersListUserControlViewModel viewModel) return;
-        _ = viewModel.DownloadListAsync();
     }
 
     private void ReturnList_Click(object? sender, RoutedEventArgs e)

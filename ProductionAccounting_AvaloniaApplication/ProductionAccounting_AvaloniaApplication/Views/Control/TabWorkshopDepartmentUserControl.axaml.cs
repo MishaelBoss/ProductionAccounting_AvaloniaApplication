@@ -20,12 +20,6 @@ public partial class TabWorkshopDepartmentUserControl : UserControl
         viewModel.GetList();
     }
 
-    private void DownloadCloud_Click(object? sender, RoutedEventArgs e)
-    {
-        if (DataContext is not TabWorkshopDepartmentUserControlViewModel viewModel) return;
-        _ = viewModel.DownloadListAsync();
-    }
-
     private void ReturnList_Click(object? sender, RoutedEventArgs e)
     {
         if (DataContext is not TabWorkshopDepartmentUserControlViewModel viewModel) return;

@@ -92,7 +92,7 @@
 					</Panel>
 				 </ToggleButton>
 
-				<Button Click="OpenProfileUser_Click"
+				<Button Command="{Binding ViewCommand}"
 						Classes="Button"
 						Background="#4A90E2"
 						IsVisible="{Binding IsAdministrator}"

@@ -18,6 +18,9 @@ public class CartUserListUserControlViewModel : ViewModelBase, INotifyPropertyCh
     public ICommand EditCommand
         => new RelayCommand(() => {WeakReferenceMessenger.Default.Send(new OpenOrCloseStatusMessage(true, _userID)); });
 
+    public ICommand ViewCommand
+        => new RelayCommand(() => { WeakReferenceMessenger.Default.Send(new OpenOrCloseProfileUserStatusMessage(true, _userID)); });
+
     private double _userID = 0;
     public double UserID
     {

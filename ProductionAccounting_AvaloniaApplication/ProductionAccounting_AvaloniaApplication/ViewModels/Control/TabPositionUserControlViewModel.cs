@@ -1,4 +1,5 @@
 ﻿using Avalonia.Controls;
+using CommunityToolkit.Mvvm.Input;
 using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ProductionAccounting_AvaloniaApplication.View.Control;
@@ -8,6 +9,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using static ProductionAccounting_AvaloniaApplication.ViewModels.Control.NotFoundUserControlViewModel;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
@@ -18,6 +20,9 @@ public class TabPositionUserControlViewModel : ViewModelBase
 
     private List<CartPositionUserControl> positionList = [];
     private List<double> filteredPositionIds = [];
+
+    public ICommand DownloadAsyncCommand
+        => new RelayCommand(async () => { await DownloadListAsync(); });
 
     private string _search = string.Empty;
     public string Search

@@ -20,12 +20,6 @@ public partial class TabOperationUserControl : UserControl
         viewModel.GetList();
     }
 
-    private void DownloadCloud_Click(object? sender, RoutedEventArgs e)
-    {
-        if (DataContext is not TabOperationUserControlViewModel viewModel) return;
-        _ = viewModel.DownloadListAsync();
-    }
-
     private void ReturnList_Click(object? sender, RoutedEventArgs e)
     {
         if (DataContext is not TabOperationUserControlViewModel viewModel) return;

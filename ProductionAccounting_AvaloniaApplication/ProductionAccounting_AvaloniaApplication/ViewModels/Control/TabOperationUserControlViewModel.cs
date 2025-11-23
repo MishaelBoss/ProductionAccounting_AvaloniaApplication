@@ -24,19 +24,23 @@ public class TabOperationUserControlViewModel : ViewModelBase, INotifyPropertyCh
     public ICommand ResetFiltersCommand
         => new RelayCommand(() => ResetFilters());
 
-    private bool _isOperationView = false;
-    public bool IsOperationView
-    {
-        get => _isOperationView;
-        set
+    public ICommand DownloadAsyncCommand
+        => new RelayCommand(async () => { await DownloadListAsync(); });
+
+    /*
+        private bool _isOperationView = false;
+        public bool IsOperationView
         {
-            if (_isOperationView != value)
+            get => _isOperationView;
+            set
             {
-                _isOperationView = value;
-                OnPropertyChanged(nameof(IsOperationView));
+                if (_isOperationView != value)
+                {
+                    _isOperationView = value;
+                    OnPropertyChanged(nameof(IsOperationView));
+                }
             }
-        }
-    }
+        }*/
 
     private string _search = string.Empty;
     public string Search
