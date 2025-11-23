@@ -57,7 +57,7 @@ public class TabPositionUserControlViewModel : ViewModelBase
             }
             else
             {
-                ClearResults();
+                StackPanelHelper.ClearAndRefreshStackPanel<CartPositionUserControl>(HomeMainContent, positionList);
                 ShowErrorUserControl(ErrorLevel.NotFound);
             }
         }
@@ -67,7 +67,7 @@ public class TabPositionUserControlViewModel : ViewModelBase
                 message: "Error applying filters",
                 ex: ex);
 
-            ClearResults();
+            StackPanelHelper.ClearAndRefreshStackPanel<CartPositionUserControl>(HomeMainContent, positionList);
         }
     }
 
@@ -125,12 +125,12 @@ public class TabPositionUserControlViewModel : ViewModelBase
 
         if (userIds.Count == 0)
         {
-            ClearResults();
+            StackPanelHelper.ClearAndRefreshStackPanel<CartPositionUserControl>(HomeMainContent, positionList);
             ShowErrorUserControl(ErrorLevel.NotFound);
             return;
         }
 
-        ClearResults();
+        StackPanelHelper.ClearAndRefreshStackPanel<CartPositionUserControl>(HomeMainContent, positionList);
 
         try
         {
@@ -178,13 +178,13 @@ public class TabPositionUserControlViewModel : ViewModelBase
                 }
             }
 
-            UpdateUI();
+            StackPanelHelper.RefreshStackPanelContent<CartPositionUserControl>(HomeMainContent, positionList);
 
             if (positionList.Count == 0) ShowErrorUserControl(ErrorLevel.NotFound);
         }
         catch (NpgsqlException ex)
         {
-            ClearResults();
+            StackPanelHelper.ClearAndRefreshStackPanel<CartPositionUserControl>(HomeMainContent, positionList);
             ShowErrorUserControl(ErrorLevel.NoConnectToDB);
 
             Loges.LoggingProcess(LogLevel.CRITICAL,
@@ -193,7 +193,7 @@ public class TabPositionUserControlViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            ClearResults();
+            StackPanelHelper.ClearAndRefreshStackPanel<CartPositionUserControl>(HomeMainContent, positionList);
             Loges.LoggingProcess(LogLevel.ERROR,
                 "Error loading positions by IDs",
                 ex: ex);
@@ -260,24 +260,6 @@ public class TabPositionUserControlViewModel : ViewModelBase
             Loges.LoggingProcess(LogLevel.ERROR,
                 "Connection or request error",
                 ex: ex);
-        }
-    }
-
-    private void ClearResults()
-    {
-        positionList.Clear();
-        UpdateUI();
-    }
-
-    private void UpdateUI()
-    {
-        if (HomeMainContent != null)
-        {
-            HomeMainContent.Children.Clear();
-            foreach (CartPositionUserControl item in positionList)
-            {
-                HomeMainContent.Children.Add(item);
-            }
         }
     }
 

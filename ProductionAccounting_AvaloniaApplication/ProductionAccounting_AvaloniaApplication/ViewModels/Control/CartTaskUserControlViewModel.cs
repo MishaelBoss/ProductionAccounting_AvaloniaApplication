@@ -11,6 +11,13 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class CartTaskUserControlViewModel : ViewModelBase
 {
+    private bool _isWork;
+    public bool IsWork
+    {
+        get => _isWork;
+        set => this.RaiseAndSetIfChanged(ref _isWork, value);
+    }
+
     private double _productionId;
     public double ProductionId
     {

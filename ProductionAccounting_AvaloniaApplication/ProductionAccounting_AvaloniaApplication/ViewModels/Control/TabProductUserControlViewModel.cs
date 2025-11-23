@@ -107,7 +107,7 @@ public class TabProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
             }
             else
             {
-                ClearResults();
+                StackPanelHelper.ClearAndRefreshStackPanel<CartProductUserControl>(HomeMainContent, productList);
                 ShowErrorUserControl(ErrorLevel.NotFound);
             }
         }
@@ -117,7 +117,7 @@ public class TabProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
                 message: "Error applying filters",
                 ex: ex);
 
-            ClearResults();
+            StackPanelHelper.ClearAndRefreshStackPanel<CartProductUserControl>(HomeMainContent, productList);
         }
     }
 
@@ -187,12 +187,12 @@ public class TabProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
 
         if (userIds.Count == 0)
         {
-            ClearResults();
+            StackPanelHelper.ClearAndRefreshStackPanel<CartProductUserControl>(HomeMainContent, productList);
             ShowErrorUserControl(ErrorLevel.NotFound);
             return;
         }
 
-        ClearResults();
+        StackPanelHelper.ClearAndRefreshStackPanel<CartProductUserControl>(HomeMainContent, productList);
 
         try
         {
@@ -244,22 +244,21 @@ public class TabProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
                 }
             }
 
-            UpdateUI();
+            StackPanelHelper.RefreshStackPanelContent<CartProductUserControl>(HomeMainContent, productList);
 
             if (productList.Count == 0) ShowErrorUserControl(ErrorLevel.NotFound);
         }
         catch (NpgsqlException ex)
         {
-            ClearResults();
+            StackPanelHelper.ClearAndRefreshStackPanel<CartProductUserControl>(HomeMainContent, productList);
             ShowErrorUserControl(ErrorLevel.NoConnectToDB);
-
             Loges.LoggingProcess(LogLevel.CRITICAL,
                 "Connection or request error",
                 ex: ex);
         }
         catch (Exception ex)
         {
-            ClearResults();
+            StackPanelHelper.ClearAndRefreshStackPanel<CartProductUserControl>(HomeMainContent, productList);
             Loges.LoggingProcess(LogLevel.ERROR,
                 "Error loading users by IDs",
                 ex: ex);
@@ -334,24 +333,6 @@ public class TabProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
         ShowActive = true;
         ShowInactive = true;
         Search = string.Empty;
-    }
-
-    private void ClearResults()
-    {
-        productList.Clear();
-        UpdateUI();
-    }
-
-    private void UpdateUI()
-    {
-        if (HomeMainContent != null)
-        {
-            HomeMainContent.Children.Clear();
-            foreach (CartProductUserControl item in productList)
-            {
-                HomeMainContent.Children.Add(item);
-            }
-        }
     }
 
     private void ShowErrorUserControl(ErrorLevel level)

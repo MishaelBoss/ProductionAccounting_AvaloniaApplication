@@ -50,7 +50,7 @@
 							FontWeight="Medium"
 							Margin="0,0,0,8"/>
 
-				<TextBlock	Text="{Binding CreatedAt, StringFormat='{}Сегодня: {0:dddd, dd MMMM yyyy}'}"
+				<TextBlock	Text="{Binding CreatedAt, StringFormat='{}{0:dddd, dd MMMM yyyy}'}"
 							Foreground="#6B7280"
 							FontSize="13"
 							FontWeight="Medium"
@@ -82,7 +82,8 @@
 			<StackPanel Grid.Column="2" 
 						Orientation="Horizontal"
 						VerticalAlignment="Center" 
-						Spacing="6">
+						Spacing="6"
+						IsVisible="{Binding IsWork}">
 
 				<TextBlock Text="{Binding Amount}"
 						   FontSize="18" 

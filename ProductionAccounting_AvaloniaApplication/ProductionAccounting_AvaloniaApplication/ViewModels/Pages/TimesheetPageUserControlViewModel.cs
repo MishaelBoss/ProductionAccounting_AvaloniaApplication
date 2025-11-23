@@ -25,7 +25,7 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
         _ = LoadListUsersAsync();
     }
 
-    public Panel? CartTimesheet { get; set; } = null;
+    public StackPanel? CartTimesheet { get; set; } = null;
 
     private List<CartTimesheetUserControl> timesheetList = [];
 
@@ -303,7 +303,7 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
 
     public async Task LoadTimesheetAsync()
     {
-        ClearResults();
+        StackPanelHelper.ClearAndRefreshStackPanel<CartTimesheetUserControl>(CartTimesheet, timesheetList);
 
         try
         {
@@ -338,30 +338,12 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
                 }
             }
 
-            UpdateUI();
+            StackPanelHelper.RefreshStackPanelContent<CartTimesheetUserControl>(CartTimesheet, timesheetList);
         }
         catch (Exception ex)
         {
             Loges.LoggingProcess(level: LogLevel.WARNING,
                 ex: ex);
-        }
-    }
-
-    private void ClearResults()
-    {
-        timesheetList.Clear();
-        UpdateUI();
-    }
-
-    private void UpdateUI()
-    {
-        if (CartTimesheet != null)
-        {
-            CartTimesheet.Children.Clear();
-            foreach (CartTimesheetUserControl item in timesheetList)
-            {
-                CartTimesheet.Children.Add(item);
-            }
         }
     }
 

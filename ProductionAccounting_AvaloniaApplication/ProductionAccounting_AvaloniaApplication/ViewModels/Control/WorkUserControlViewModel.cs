@@ -14,13 +14,13 @@ public class WorkUserControlViewModel : ViewModelBase, INotifyPropertyChanging
     {
     }
 
-    public Panel? CartTasks { get; set; } = null;
+    public StackPanel? CartTasks { get; set; } = null;
 
     private List<CartTaskUserControl> tasksList = [];
 
     public async Task LoadTodayAsync()
     {
-        ClearResults();
+        StackPanelHelper.ClearAndRefreshStackPanel<CartTaskUserControl>(CartTasks, tasksList);
 
         try
         {
@@ -55,6 +55,7 @@ public class WorkUserControlViewModel : ViewModelBase, INotifyPropertyChanging
                         {
                             var viewModel = new CartTaskUserControlViewModel()
                             {
+                                IsWork = true,
                                 ProductionId = reader.GetDouble(0),
                                 Quantity = reader.GetDecimal(1),
                                 Amount = reader.GetDecimal(2),
@@ -77,30 +78,12 @@ public class WorkUserControlViewModel : ViewModelBase, INotifyPropertyChanging
                 }
             }
 
-            UpdateUI();
+            StackPanelHelper.RefreshStackPanelContent<CartTaskUserControl>(CartTasks, tasksList);
         }
         catch (Exception ex)
         {
             Loges.LoggingProcess(level: LogLevel.WARNING,
                 ex: ex);
-        }
-    }
-
-    private void ClearResults()
-    {
-        tasksList.Clear();
-        UpdateUI();
-    }
-
-    private void UpdateUI()
-    {
-        if (CartTasks != null)
-        {
-            CartTasks.Children.Clear();
-            foreach (CartTaskUserControl item in tasksList)
-            {
-                CartTasks.Children.Add(item);
-            }
         }
     }
 

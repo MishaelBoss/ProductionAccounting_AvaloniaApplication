@@ -1,6 +1,5 @@
 ﻿using Avalonia.Controls;
 using CommunityToolkit.Mvvm.Input;
-using MsBox.Avalonia;
 using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Models;
 using ProductionAccounting_AvaloniaApplication.Scripts;
@@ -27,10 +26,12 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
     }
 
     public StackPanel? HomeMainContent { get; set; } = null;
-    public StackPanel? HomeUserContent { get; set; } = null;
+    public StackPanel? TableUserContent { get; set; } = null;
+    public StackPanel? TasksUserContent { get; set; } = null;
 
     private List<CartUserListUserControl> userList = [];
     private List<CartTimesheetUserControl> timesheetList = [];
+    private List<CartTaskUserControl> tasksList = [];
     private List<double> filteredUserIds = [];
 
     public ICommand ResetFiltersCommand
@@ -404,7 +405,7 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
             }
             else
             {
-                ClearResults();
+                StackPanelHelper.ClearAndRefreshStackPanel<CartUserListUserControl>(HomeMainContent, userList);
                 ShowErrorUserControl(ErrorLevel.NotFound);
             }
         }
@@ -414,7 +415,7 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
                 message: "Error applying filters",
                 ex: ex);
 
-            ClearResults();
+            StackPanelHelper.ClearAndRefreshStackPanel<CartUserListUserControl>(HomeMainContent, userList);
         }
     }
 
@@ -567,12 +568,12 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
 
         if (userIds.Count == 0)
         {
-            ClearResults();
+            StackPanelHelper.ClearAndRefreshStackPanel<CartUserListUserControl>(HomeMainContent, userList);
             ShowErrorUserControl(ErrorLevel.NotFound);
             return;
         }
 
-        ClearResults();
+        StackPanelHelper.ClearAndRefreshStackPanel<CartUserListUserControl>(HomeMainContent, userList);
 
         try
         {
@@ -635,13 +636,13 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
                 }
             }
 
-            UpdateUI();
+            StackPanelHelper.RefreshStackPanelContent<CartUserListUserControl>(HomeMainContent, userList);
 
             if (userList.Count == 0) ShowErrorUserControl(ErrorLevel.NotFound);
         }
         catch (NpgsqlException ex)
         {
-            ClearResults();
+            StackPanelHelper.ClearAndRefreshStackPanel<CartUserListUserControl>(HomeMainContent, userList);
             ShowErrorUserControl(ErrorLevel.NoConnectToDB);
 
             Loges.LoggingProcess(LogLevel.CRITICAL,
@@ -650,7 +651,7 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
         }
         catch (Exception ex)
         {
-            ClearResults();
+            StackPanelHelper.ClearAndRefreshStackPanel<CartUserListUserControl>(HomeMainContent, userList);
             Loges.LoggingProcess(LogLevel.ERROR,
                 "Error loading users by IDs",
                 ex: ex);
@@ -677,6 +678,7 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
         await LoadDateAsync(userID);
         await LoadListTypeToComboBoxAsync(userID);
         await LoadTimesheet(userID);
+        await LoadTask(userID);
     }
 
     public async Task LoadDateAsync(double userID)
@@ -765,7 +767,7 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
 
     private async Task LoadTimesheet(double userID) 
     {
-        ClearResultsUserProfile();
+        StackPanelHelper.ClearAndRefreshStackPanel<CartTimesheetUserControl>(TableUserContent, timesheetList);
 
         try
         {
@@ -802,7 +804,75 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
                 }
             }
 
-            UpdateUIUserProfile();
+            StackPanelHelper.RefreshStackPanelContent<CartTimesheetUserControl>(TableUserContent, timesheetList);
+        }
+        catch (Exception ex)
+        {
+            Loges.LoggingProcess(level: LogLevel.WARNING,
+                ex: ex);
+        }
+    }
+
+    private async Task LoadTask(double userID)
+    {
+        StackPanelHelper.ClearAndRefreshStackPanel<CartTaskUserControl>(TasksUserContent, tasksList);
+
+        try
+        {
+            var sql = @"
+                SELECT 
+                    p.id,
+                    p.quantity, 
+                    p.amount, 
+                    p.notes, 
+                    p.created_at, 
+                    p.status,
+                    pr.name AS product_name, pr.unit,
+                    COALESCE(o.name, '—') AS operation_name
+                FROM public.production p
+                JOIN public.product pr ON pr.id = p.product_id
+                LEFT JOIN public.operation o ON o.id = p.operation_id
+                WHERE p.user_id = @user_id 
+                ORDER BY p.created_at DESC";
+
+            using (var connection = new NpgsqlConnection(Arguments.connection))
+            {
+                await connection.OpenAsync();
+
+                using (var command = new NpgsqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@user_id", userID);
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            var viewModel = new CartTaskUserControlViewModel()
+                            {
+                                IsWork = false,
+                                ProductionId = reader.GetDouble(0),
+                                Quantity = reader.GetDecimal(1),
+                                Amount = reader.GetDecimal(2),
+                                Notes = reader.IsDBNull(3) ? string.Empty : reader.GetString(3),
+                                CreatedAt = reader.GetDateTime(4),
+                                Status = reader.GetString(5),
+                                ProductName = reader.GetString(6),
+                                Unit = reader.GetString(7),
+                                OperationName = reader.GetString(8)
+                            };
+
+                            var cartUser = new CartTaskUserControl()
+                            {
+                                DataContext = viewModel
+                            };
+
+                            tasksList.Add(cartUser);
+                        }
+                    }
+                }
+            }
+
+            StackPanelHelper.RefreshStackPanelContent<CartTaskUserControl>(TasksUserContent, tasksList);
         }
         catch (Exception ex)
         {
@@ -871,42 +941,6 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
             Loges.LoggingProcess(LogLevel.ERROR,
                 "Connection or request error",
                 ex: ex);
-        }
-    }
-
-    private void ClearResults()
-    {
-        userList.Clear();
-        UpdateUI();
-    }
-
-    private void ClearResultsUserProfile()
-    {
-        timesheetList.Clear();
-        UpdateUIUserProfile();
-    }
-
-    private void UpdateUI()
-    {
-        if (HomeMainContent != null)
-        {
-            HomeMainContent.Children.Clear();
-            foreach (CartUserListUserControl item in userList)
-            {
-                HomeMainContent.Children.Add(item);
-            }
-        }
-    }
-
-    private void UpdateUIUserProfile()
-    {
-        if (HomeUserContent != null)
-        {
-            HomeUserContent.Children.Clear();
-            foreach (CartTimesheetUserControl item in timesheetList)
-            {
-                HomeUserContent.Children.Add(item);
-            }
         }
     }
 

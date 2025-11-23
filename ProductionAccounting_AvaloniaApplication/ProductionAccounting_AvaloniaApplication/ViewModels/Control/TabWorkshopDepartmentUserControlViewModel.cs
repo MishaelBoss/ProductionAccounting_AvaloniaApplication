@@ -57,7 +57,7 @@ public class TabWorkshopDepartmentUserControlViewModel : ViewModelBase
             }
             else
             {
-                ClearResults();
+                StackPanelHelper.ClearAndRefreshStackPanel<CartWorkshopDepartmentUserControl>(HomeMainContent, workshopDepartmentList);
                 ShowErrorUserControl(ErrorLevel.NotFound);
             }
         }
@@ -67,7 +67,7 @@ public class TabWorkshopDepartmentUserControlViewModel : ViewModelBase
                 message: "Error applying filters",
                 ex: ex);
 
-            ClearResults();
+            StackPanelHelper.ClearAndRefreshStackPanel<CartWorkshopDepartmentUserControl>(HomeMainContent, workshopDepartmentList);
         }
     }
 
@@ -125,12 +125,12 @@ public class TabWorkshopDepartmentUserControlViewModel : ViewModelBase
 
         if (userIds.Count == 0)
         {
-            ClearResults();
+            StackPanelHelper.ClearAndRefreshStackPanel<CartWorkshopDepartmentUserControl>(HomeMainContent, workshopDepartmentList);
             ShowErrorUserControl(ErrorLevel.NotFound);
             return;
         }
 
-        ClearResults();
+        StackPanelHelper.ClearAndRefreshStackPanel<CartWorkshopDepartmentUserControl>(HomeMainContent, workshopDepartmentList);
 
         try
         {
@@ -178,13 +178,13 @@ public class TabWorkshopDepartmentUserControlViewModel : ViewModelBase
                 }
             }
 
-            UpdateUI();
+            StackPanelHelper.RefreshStackPanelContent<CartWorkshopDepartmentUserControl>(HomeMainContent, workshopDepartmentList);
 
             if (workshopDepartmentList.Count == 0) ShowErrorUserControl(ErrorLevel.NotFound);
         }
         catch (NpgsqlException ex)
         {
-            ClearResults();
+            StackPanelHelper.ClearAndRefreshStackPanel<CartWorkshopDepartmentUserControl>(HomeMainContent, workshopDepartmentList);
             ShowErrorUserControl(ErrorLevel.NoConnectToDB);
 
             Loges.LoggingProcess(LogLevel.CRITICAL,
@@ -193,7 +193,7 @@ public class TabWorkshopDepartmentUserControlViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            ClearResults();
+            StackPanelHelper.ClearAndRefreshStackPanel<CartWorkshopDepartmentUserControl>(HomeMainContent, workshopDepartmentList);
             Loges.LoggingProcess(LogLevel.ERROR,
                 "Error loading departments by IDs",
                 ex: ex);
@@ -260,24 +260,6 @@ public class TabWorkshopDepartmentUserControlViewModel : ViewModelBase
             Loges.LoggingProcess(LogLevel.ERROR,
                 "Connection or request error",
                 ex: ex);
-        }
-    }
-
-    private void ClearResults()
-    {
-        workshopDepartmentList.Clear();
-        UpdateUI();
-    }
-
-    private void UpdateUI()
-    {
-        if (HomeMainContent != null)
-        {
-            HomeMainContent.Children.Clear();
-            foreach (CartWorkshopDepartmentUserControl item in workshopDepartmentList)
-            {
-                HomeMainContent.Children.Add(item);
-            }
         }
     }
 

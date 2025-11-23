@@ -94,6 +94,13 @@ public class TabOperationUserControlViewModel : ViewModelBase, INotifyPropertyCh
         await ApplyFilters();
     }
 
+    private void ResetFilters()
+    {
+        ShowActive = true;
+        ShowInactive = true;
+        Search = string.Empty;
+    }
+
     private async Task ApplyFilters()
     {
         try
@@ -106,7 +113,7 @@ public class TabOperationUserControlViewModel : ViewModelBase, INotifyPropertyCh
             }
             else
             {
-                ClearResults();
+                StackPanelHelper.ClearAndRefreshStackPanel<CartOperationUserControl>(HomeMainContent, operationList);
                 ShowErrorUserControl(ErrorLevel.NotFound);
             }
         }
@@ -116,7 +123,7 @@ public class TabOperationUserControlViewModel : ViewModelBase, INotifyPropertyCh
                 message: "Error applying filters",
                 ex: ex);
 
-            ClearResults();
+            StackPanelHelper.ClearAndRefreshStackPanel<CartOperationUserControl>(HomeMainContent, operationList);
         }
     }
 
@@ -186,12 +193,12 @@ public class TabOperationUserControlViewModel : ViewModelBase, INotifyPropertyCh
 
         if (userIds.Count == 0)
         {
-            ClearResults();
+            StackPanelHelper.ClearAndRefreshStackPanel<CartOperationUserControl>(HomeMainContent, operationList);
             ShowErrorUserControl(ErrorLevel.NotFound);
             return;
         }
 
-        ClearResults();
+        StackPanelHelper.ClearAndRefreshStackPanel<CartOperationUserControl>(HomeMainContent, operationList);
 
         try
         {
@@ -242,13 +249,13 @@ public class TabOperationUserControlViewModel : ViewModelBase, INotifyPropertyCh
                 }
             }
 
-            UpdateUI();
+            StackPanelHelper.RefreshStackPanelContent<CartOperationUserControl>(HomeMainContent, operationList);
 
             if (operationList.Count == 0) ShowErrorUserControl(ErrorLevel.NotFound);
         }
         catch (NpgsqlException ex)
         {
-            ClearResults();
+            StackPanelHelper.ClearAndRefreshStackPanel<CartOperationUserControl>(HomeMainContent, operationList);
             ShowErrorUserControl(ErrorLevel.NoConnectToDB);
 
             Loges.LoggingProcess(LogLevel.CRITICAL,
@@ -257,7 +264,7 @@ public class TabOperationUserControlViewModel : ViewModelBase, INotifyPropertyCh
         }
         catch (Exception ex)
         {
-            ClearResults();
+            StackPanelHelper.ClearAndRefreshStackPanel<CartOperationUserControl>(HomeMainContent, operationList);
             Loges.LoggingProcess(LogLevel.ERROR,
                 "Error loading users by IDs",
                 ex: ex);
@@ -324,31 +331,6 @@ public class TabOperationUserControlViewModel : ViewModelBase, INotifyPropertyCh
             Loges.LoggingProcess(LogLevel.ERROR,
                 "Connection or request error",
                 ex: ex);
-        }
-    }
-
-    private void ResetFilters()
-    {
-        ShowActive = true;
-        ShowInactive = true;
-        Search = string.Empty;
-    }
-
-    private void ClearResults()
-    {
-        operationList.Clear();
-        UpdateUI();
-    }
-
-    private void UpdateUI()
-    {
-        if (HomeMainContent != null)
-        {
-            HomeMainContent.Children.Clear();
-            foreach (CartOperationUserControl item in operationList)
-            {
-                HomeMainContent.Children.Add(item);
-            }
         }
     }
 
