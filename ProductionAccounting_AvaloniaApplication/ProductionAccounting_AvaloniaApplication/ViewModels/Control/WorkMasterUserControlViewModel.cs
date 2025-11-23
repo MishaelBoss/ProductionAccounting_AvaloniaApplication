@@ -1,5 +1,4 @@
 ﻿using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.Messaging;
 using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Models;
 using ProductionAccounting_AvaloniaApplication.Scripts;
@@ -141,10 +140,10 @@ public class WorkMasterUserControlViewModel : ViewModelBase, INotifyPropertyChan
     }
 
     public ICommand ClearFormCommand
-        => new RelayCommand(() => ClearForm());
+        => new RelayCommand(ClearForm);
 
     public ICommand ConfirmCommand
-        => new RelayCommand(() => { WeakReferenceMessenger.Default.Send(new OpenOrCloseStatusMessage(false)); });
+        => new RelayCommand(async () => { await SaveAsync(); ClearForm(); });
 
     public decimal CalculatedAmount
     {
@@ -246,11 +245,11 @@ public class WorkMasterUserControlViewModel : ViewModelBase, INotifyPropertyChan
             try
             {
                 string sql = @"INSERT INTO public.production (user_id, product_id, operation_id, quantity, production_date, shift, amount, notes, created_by, status)" +
-                            "VALUES (@user_id, @product_id, @operation_id, @quantity, @production_date, @shift, @amount, @notes, @created_by, @status) ON CONFLICT DO NOTHING";
+                            "VALUES (@user_id, @product_id, @operation_id, @quantity, @production_date, @shift, @amount, @notes, @created_by, @status)";
 
                 using (var connection = new NpgsqlConnection(Arguments.connection))
                 {
-                    connection.Open();
+                    await connection.OpenAsync();
                     using (var command = new NpgsqlCommand(sql, connection))
                     {
                         try
@@ -266,7 +265,9 @@ public class WorkMasterUserControlViewModel : ViewModelBase, INotifyPropertyChan
                             command.Parameters.AddWithValue("@created_by", ManagerCookie.GetIdUser ?? 0);
                             command.Parameters.AddWithValue("@status", "issued");
 
-                            command.ExecuteNonQuery();
+                            await command.ExecuteNonQueryAsync();
+
+                            ClearForm();
                         }
                         catch (Exception ex)
                         {
