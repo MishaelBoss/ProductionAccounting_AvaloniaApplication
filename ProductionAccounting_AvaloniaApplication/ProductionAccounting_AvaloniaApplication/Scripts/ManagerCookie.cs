@@ -1,5 +1,4 @@
-﻿using MsBox.Avalonia;
-using Npgsql;
+﻿using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Models;
 using System;
 using System.IO;

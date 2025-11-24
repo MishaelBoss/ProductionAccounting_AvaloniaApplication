@@ -89,6 +89,19 @@
                     </Button>
 
                     <Button Classes="Button"
+                            IsVisible="{Binding IsVisibleWorkUserButton}"
+                            Command="{Binding OpenShipmentsUserPageCommand}">
+                        <Grid ColumnDefinitions="24,*" 
+                              Classes="GridButtonButton">
+                            <Image Source="/Assets/home-64.png" 
+                                   Width="21" 
+                                   Height="21" 
+                                   Stretch="Uniform"/>
+                            <Label Grid.Column="1" Content="Shipments"/>
+                        </Grid>
+                    </Button>
+
+                    <Button Classes="Button"
                             Command="{Binding OpenAuthorizationCommand}">
                         <Grid ColumnDefinitions="24,*" 
                               Classes="GridButtonButton">

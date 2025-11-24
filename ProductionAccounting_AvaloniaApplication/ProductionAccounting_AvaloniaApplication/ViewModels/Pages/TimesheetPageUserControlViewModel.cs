@@ -191,7 +191,8 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(level: LogLevel.WARNING, ex: ex);
+            Loges.LoggingProcess(level: LogLevel.WARNING, 
+                ex: ex);
         }
     }
 

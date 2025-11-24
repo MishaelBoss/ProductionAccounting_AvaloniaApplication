@@ -25,6 +25,7 @@ public class RightBoardUserControlViewModel : ViewModelBase
     private readonly WorkPageUserControlViewModel workUserPageUserControlViewModel = new();
     private readonly SettingsPageUserControlViewModel settingsPageUserControlViewModel = new();
     private readonly TimesheetPageUserControlViewModel timesheetUserControlPageViewModel = new();
+    private readonly ShipmentsPageUserControlViewModel shipmentsPageUserControlViewModel = new();
 
     public ICommand OpenAdminPanelPageCommand
         => new RelayCommand(() => OpenPage(adminPageUserControlViewModel));
@@ -40,7 +41,10 @@ public class RightBoardUserControlViewModel : ViewModelBase
 
     public ICommand OpenWorkUserPageCommand
         => new RelayCommand(() => OpenPage(workUserPageUserControlViewModel));
-        
+
+    public ICommand OpenShipmentsUserPageCommand
+       => new RelayCommand(() => OpenPage(shipmentsPageUserControlViewModel));
+
     public ICommand OpenSettingsUserPageCommand 
         => new RelayCommand(() => OpenPage(settingsPageUserControlViewModel));
 
