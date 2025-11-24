@@ -13,14 +13,14 @@ public partial class ProfileViewUserControl : UserControl
         Loaded += OnLoaded;
     }
 
-    private async void OnLoaded(object? sender, RoutedEventArgs e) 
+    private void OnLoaded(object? sender, RoutedEventArgs e) 
     {
         if (DataContext is not ProfileViewUserControlViewModel viewModel) return;
         viewModel.TableUserContent = TableUserContent;
         viewModel.TasksUserContent = TasksUserContent;
     }
 
-    public async void RefreshDataAsync(double userID) 
+    public void RefreshDataAsync(double userID) 
     {
         if (DataContext is not ProfileViewUserControlViewModel viewModel) return;
         viewModel.UserID = userID;
