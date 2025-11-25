@@ -19,16 +19,4 @@ public partial class TabProductUserControl : UserControl
         viewModel.HomeMainContent = HomeMainContent;
         viewModel.GetList();
     }
-
-    private void DownloadCloud_Click(object? sender, RoutedEventArgs e)
-    {
-        if (DataContext is not TabProductUserControlViewModel viewModel) return;
-        _ = viewModel.DownloadListAsync();
-    }
-
-    private void ReturnList_Click(object? sender, RoutedEventArgs e)
-    {
-        if (DataContext is not TabProductUserControlViewModel viewModel) return;
-        viewModel.GetList();
-    }
 }

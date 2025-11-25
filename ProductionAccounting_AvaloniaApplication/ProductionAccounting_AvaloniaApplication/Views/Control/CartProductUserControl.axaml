@@ -86,8 +86,7 @@
 						Spacing="6"
 						VerticalAlignment="Center">
 
-				<Button Click="View_Click"
-						Width="34"
+				<Button Width="34"
 						Height="34"
 						CornerRadius="6"
 						Background="#4A90E2"
@@ -99,7 +98,7 @@
 						   Height="18"/>
 				</Button>
 
-				<Button Click="Delete_Click"
+				<Button Command="{Binding DeleteCommand}"
 						Width="34"
 						Height="34"
 						CornerRadius="6"

@@ -1,5 +1,6 @@
 ﻿using Avalonia.Controls;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ProductionAccounting_AvaloniaApplication.View.Control;
@@ -14,8 +15,18 @@ using static ProductionAccounting_AvaloniaApplication.ViewModels.Control.NotFoun
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
-public class TabOperationUserControlViewModel : ViewModelBase, INotifyPropertyChanged
+public class TabOperationUserControlViewModel : ViewModelBase, INotifyPropertyChanged, IRecipient<RefreshOperationListMessage>
 {
+    public TabOperationUserControlViewModel()
+    {
+        WeakReferenceMessenger.Default.Register<RefreshOperationListMessage>(this);
+    }
+
+    public void Receive(RefreshOperationListMessage message)
+    {
+        GetList();
+    }
+
     public StackPanel? HomeMainContent { get; set; } = null;
 
     private List<CartOperationUserControl> operationList = [];
@@ -25,7 +36,10 @@ public class TabOperationUserControlViewModel : ViewModelBase, INotifyPropertyCh
         => new RelayCommand(() => ResetFilters());
 
     public ICommand DownloadAsyncCommand
-        => new RelayCommand(async () => { await DownloadListAsync(); });
+        => new RelayCommand(async () => await DownloadListAsync());
+
+    public ICommand RefreshAsyncCommand
+        => new RelayCommand(() => GetList());
 
     /*
         private bool _isOperationView = false;

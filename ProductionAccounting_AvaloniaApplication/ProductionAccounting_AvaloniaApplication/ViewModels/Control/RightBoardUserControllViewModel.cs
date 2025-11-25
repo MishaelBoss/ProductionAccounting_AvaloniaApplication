@@ -43,7 +43,7 @@ public class RightBoardUserControlViewModel : ViewModelBase
         => new RelayCommand(() => OpenPage(workUserPageUserControlViewModel));
 
     public ICommand OpenShipmentsUserPageCommand
-       => new RelayCommand(() => OpenPage(shipmentsPageUserControlViewModel));
+        => new RelayCommand(() => OpenPage(shipmentsPageUserControlViewModel));
 
     public ICommand OpenSettingsUserPageCommand 
         => new RelayCommand(() => OpenPage(settingsPageUserControlViewModel));

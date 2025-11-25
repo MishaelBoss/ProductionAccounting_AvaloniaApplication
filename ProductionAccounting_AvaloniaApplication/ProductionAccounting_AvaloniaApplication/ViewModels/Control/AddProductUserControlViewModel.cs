@@ -1,14 +1,31 @@
-﻿using Npgsql;
+﻿using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class AddProductUserControlViewModel : ViewModelBase, INotifyPropertyChanged
 {
+    public ICommand CancelCommand
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseAddProductStatusMessage(false)) );
+
+    public ICommand ConfirmCommand
+        => new RelayCommand(async () => 
+        { 
+            if ( await SaveAsync() ) 
+            { 
+                WeakReferenceMessenger.Default.Send(new RefreshProductListMessage());
+                WeakReferenceMessenger.Default.Send(new OpenOrCloseAddProductStatusMessage(false));
+            } 
+        });
+        
     private string _messageerror = string.Empty;
     public string Messageerror
     {
@@ -151,7 +168,7 @@ public class AddProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
         && ProductCoefficient != 0
         && !string.IsNullOrEmpty(ProductMark);
 
-    public bool Upload()
+    public async Task<bool> SaveAsync()
     {
         try
         {
@@ -163,7 +180,7 @@ public class AddProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
                             "VALUES (@name, @article, @desc, @priceUnit, @priceKg, @unit, @categoryId, @mark, @coefficient)";
                 using (var connection = new NpgsqlConnection(Arguments.connection))
                 {
-                    connection.Open();
+                    await connection.OpenAsync();
                     using (var command = new NpgsqlCommand(sql, connection))
                     {
                         try
@@ -178,7 +195,7 @@ public class AddProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
                             command.Parameters.AddWithValue("@mark", ProductMark?.Trim() ?? "");
                             command.Parameters.AddWithValue("@coefficient", ProductCoefficient);
 
-                            command.ExecuteNonQuery();
+                            await command.ExecuteNonQueryAsync();
                             return true;
                         }
                         catch (Exception ex)

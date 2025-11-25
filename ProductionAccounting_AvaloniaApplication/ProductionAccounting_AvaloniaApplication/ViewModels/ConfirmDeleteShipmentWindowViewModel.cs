@@ -71,14 +71,14 @@ public class ConfirmDeleteShipmentWindowViewModel : ViewModelBase
         {
             using (var connection = new NpgsqlConnection(Arguments.connection))
             {
-                connection.Open();
+                await connection.OpenAsync();
                 try
                 {
                     string sql = "DELETE FROM public.shipments WHERE id = @id";
                     using (var command = new NpgsqlCommand(sql, connection))
                     {
                         command.Parameters.AddWithValue("@id", Id);
-                        var rows = command.ExecuteNonQuery();
+                        var rows = await command.ExecuteNonQueryAsync();
 
                         if(rows > 0) 
                         {

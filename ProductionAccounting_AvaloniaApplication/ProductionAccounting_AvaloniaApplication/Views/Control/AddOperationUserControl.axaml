@@ -46,7 +46,7 @@
 					<ComboBox	ItemsSource="{Binding AvailableUnits}" 
 								SelectedItem="{Binding SelectedUnit}" 
 								Width="100" 
-								PlaceholderText="Ед.изм"/>
+								PlaceholderText="пїЅпїЅ.пїЅпїЅпїЅ"/>
 
 					<StackPanel Orientation="Vertical"
 								VerticalAlignment="Center"
@@ -54,11 +54,11 @@
 								Spacing="10">
 
 						<Button Classes="ButtonLogin"
-								
-								Click="Confirm_Click"
+								IsEnabled="{Binding IsActiveConfirmButton}"
+								Command="{Binding ConfirmCommand}"
 								Content="Confirm"/>
 
-						<Button Click="Cancel_Click"
+						<Button Command="{Binding CancelCommand}"
 								Content="Cancel"
 								HorizontalAlignment="Center"
 								Background="Transparent"/>

@@ -1,13 +1,30 @@
-﻿using Npgsql;
+﻿using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ReactiveUI;
 using System;
 using System.ComponentModel;
+using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class AddDepartmentUserControlViewModel : ViewModelBase, INotifyPropertyChanged
 {
+    public ICommand CancelCommand
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseAddDepartmentStatusMessage(false)) );
+
+    public ICommand ConfirmCommand
+        => new RelayCommand(async () => 
+        { 
+            if ( await SaveAsync() ) 
+            { 
+                WeakReferenceMessenger.Default.Send(new RefreshDepartmentListMessage());
+                WeakReferenceMessenger.Default.Send(new OpenOrCloseAddDepartmentStatusMessage(false));
+            } 
+        });
+
     private string _messageerror = string.Empty;
     public string Messageerror
     {
@@ -33,7 +50,7 @@ public class AddDepartmentUserControlViewModel : ViewModelBase, INotifyPropertyC
     public bool IsActiveConfirmButton 
         => !string.IsNullOrEmpty(Department);
 
-    public bool Upload() {
+    public async Task<bool> SaveAsync() {
         try
         {
             if (string.IsNullOrEmpty(Department))
@@ -48,13 +65,13 @@ public class AddDepartmentUserControlViewModel : ViewModelBase, INotifyPropertyC
 
                 using (var connection = new NpgsqlConnection(Arguments.connection))
                 {
-                    connection.Open();
+                    await connection.OpenAsync();
                     using (var command = new NpgsqlCommand(sql, connection))
                     {
                         try
                         {
                             command.Parameters.AddWithValue("@type", Department);
-                            command.ExecuteNonQuery();
+                            await command.ExecuteNonQueryAsync();
 
                             return true;
                         }

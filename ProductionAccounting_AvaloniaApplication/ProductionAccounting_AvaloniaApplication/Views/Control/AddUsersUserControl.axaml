@@ -120,12 +120,13 @@
 								VerticalAlignment="Center"
 								HorizontalAlignment="Center"
 								Spacing="10">
+
 						<Button Classes="ButtonLogin"
 								IsEnabled="{Binding IsActiveConfirmButton}"
-								Click="Confirm_Click"
+								Command="{Binding ConfirmCommand}"
 								Content="Add new user"/>
 
-						<Button Click="Cancel_Click"
+						<Button Command="{Binding CancelCommand}"
 								Content="Cancel"
 								HorizontalAlignment="Center"
 								Background="Transparent"/>

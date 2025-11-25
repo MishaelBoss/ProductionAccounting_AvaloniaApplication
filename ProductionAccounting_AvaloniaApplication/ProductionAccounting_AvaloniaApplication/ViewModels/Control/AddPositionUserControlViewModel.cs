@@ -1,13 +1,30 @@
-﻿using Npgsql;
+﻿using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ReactiveUI;
 using System;
 using System.ComponentModel;
+using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class AddPositionUserControlViewModel : ViewModelBase, INotifyPropertyChanged
 {
+    public ICommand CancelCommand
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseAddPositionStatusMessage(false)) );
+
+    public ICommand ConfirmCommand
+        => new RelayCommand(async () => 
+        { 
+            if ( await SaveAsync() ) 
+            { 
+                WeakReferenceMessenger.Default.Send(new RefreshPositionListMessage());
+                WeakReferenceMessenger.Default.Send(new OpenOrCloseAddPositionStatusMessage(false));
+            } 
+        });
+        
     private string _messageerror = string.Empty;
     public string Messageerror
     {
@@ -33,7 +50,7 @@ public class AddPositionUserControlViewModel : ViewModelBase, INotifyPropertyCha
     public bool IsActiveConfirmButton
         => !string.IsNullOrEmpty(Position);
 
-    public bool Upload()
+    public async Task<bool> SaveAsync()
     {
         try
         {
@@ -49,13 +66,13 @@ public class AddPositionUserControlViewModel : ViewModelBase, INotifyPropertyCha
 
                 using (var connection = new NpgsqlConnection(Arguments.connection))
                 {
-                    connection.Open();
+                    await connection.OpenAsync();
                     using (var command = new NpgsqlCommand(sql, connection))
                     {
                         try
                         {
                             command.Parameters.AddWithValue("@type", Position);
-                            command.ExecuteNonQuery();
+                            await command.ExecuteNonQueryAsync();
 
                             return true;
                         }

@@ -13,9 +13,6 @@
 	</Design.DataContext>
 
     <Grid>
-        <Grid Name="Content" 
-              ZIndex="1"/>
-
 		<Grid	Margin="10" 
 				RowDefinitions="Auto, Auto, *" 
 				ZIndex="2">

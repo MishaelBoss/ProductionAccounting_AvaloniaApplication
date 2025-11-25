@@ -1,14 +1,31 @@
-﻿using Npgsql;
+﻿using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class AddOperationUserControlViewModel : ViewModelBase
 {
+    public ICommand CancelCommand
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseAddOperationStatusMessage(false)) );
+
+    public ICommand ConfirmCommand
+        => new RelayCommand(async () => 
+        { 
+            if ( await SaveAsync() ) 
+            { 
+                WeakReferenceMessenger.Default.Send(new RefreshOperationListMessage());
+                WeakReferenceMessenger.Default.Send(new OpenOrCloseAddOperationStatusMessage(false));
+            } 
+        });
+        
     private string _messageerror = string.Empty;
     public string Messageerror
     {
@@ -120,7 +137,7 @@ public class AddOperationUserControlViewModel : ViewModelBase
         && OperationTime != 0
         && !string.IsNullOrEmpty(OperationDescription);
 
-    public bool Upload()
+    public async Task<bool> SaveAsync()
     {
         try
         {
@@ -132,7 +149,7 @@ public class AddOperationUserControlViewModel : ViewModelBase
                         "VALUES (@name, @operation_code, @price, @unit, @time_required, @description)";
                 using (var connection = new NpgsqlConnection(Arguments.connection))
                 {
-                    connection.Open();
+                    await connection.OpenAsync();
                     using (var command = new NpgsqlCommand(sql, connection))
                     {
                         try
@@ -144,7 +161,7 @@ public class AddOperationUserControlViewModel : ViewModelBase
                             command.Parameters.AddWithValue("@time_required", OperationTime);
                             command.Parameters.AddWithValue("@description", OperationDescription);
 
-                            command.ExecuteNonQuery();
+                            await command.ExecuteNonQueryAsync();
                             return true;
                         }
                         catch (Exception ex)

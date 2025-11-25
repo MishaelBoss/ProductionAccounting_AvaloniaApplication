@@ -1,5 +1,6 @@
 ﻿using Avalonia.Controls;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ProductionAccounting_AvaloniaApplication.View.Control;
@@ -14,15 +15,28 @@ using static ProductionAccounting_AvaloniaApplication.ViewModels.Control.NotFoun
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
-public class TabWorkshopDepartmentUserControlViewModel : ViewModelBase
+public class TabWorkshopDepartmentUserControlViewModel : ViewModelBase, IRecipient<RefreshDepartmentListMessage>
 {
+    public TabWorkshopDepartmentUserControlViewModel()
+    {
+        WeakReferenceMessenger.Default.Register<RefreshDepartmentListMessage>(this);
+    }
+
+    public void Receive(RefreshDepartmentListMessage message)
+    {
+        GetList();
+    }
+
     public StackPanel? HomeMainContent { get; set; } = null;
 
     private List<CartWorkshopDepartmentUserControl> workshopDepartmentList = [];
     private List<double> filteredWorkshopDepartmentIds = [];
 
     public ICommand DownloadAsyncCommand
-        => new RelayCommand(async () => { await DownloadListAsync(); });
+        => new RelayCommand(async () => await DownloadListAsync());
+
+    public ICommand RefreshAsyncCommand
+        => new RelayCommand(() => GetList());
 
     private string _search = string.Empty;
     public string Search

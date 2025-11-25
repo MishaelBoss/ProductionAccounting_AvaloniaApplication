@@ -1,13 +1,37 @@
-﻿using MsBox.Avalonia;
+﻿using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using MsBox.Avalonia;
 using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ReactiveUI;
 using System;
+using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels;
 
 public class ConfirmDeleteWorkshopDepartmentWindowViewModel : ViewModelBase
 {
+    private ConfirmDeleteWorkshopDepartmentWindow? window { get; set; } = null;
+
+    public void SetWindow(ConfirmDeleteWorkshopDepartmentWindow _window)
+    {
+        window = _window;
+    }
+
+    public ICommand CancelCommand
+        => new RelayCommand(() => window?.Close());
+
+    public ICommand DeleteCommand
+        => new RelayCommand(async () => 
+        { 
+            if ( await DeleteAsync() ) 
+            { 
+                WeakReferenceMessenger.Default.Send(new RefreshDepartmentListMessage());
+                window?.Close();
+            } 
+        });
+
     private double _id = 0;
     public double Id
     {
@@ -22,20 +46,20 @@ public class ConfirmDeleteWorkshopDepartmentWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _type, value);
     }
 
-    public bool Delete()
+    private async Task<bool> DeleteAsync()
     {
         try
         {
             using (var connection = new NpgsqlConnection(Arguments.connection))
             {
-                connection.Open();
+                await connection.OpenAsync();
                 try
                 {
                     string sql1 = "DELETE FROM public.departments WHERE id = @id";
                     using (var command1 = new NpgsqlCommand(sql1, connection))
                     {
                         command1.Parameters.AddWithValue("@id", Id);
-                        command1.ExecuteNonQuery();
+                        await command1.ExecuteNonQueryAsync();
                     }
 
                     Loges.LoggingProcess(level: LogLevel.INFO,
@@ -45,7 +69,7 @@ public class ConfirmDeleteWorkshopDepartmentWindowViewModel : ViewModelBase
                 }
                 catch (Exception ex)
                 {
-                    MessageBoxManager.GetMessageBoxStandard("Message", "Удалите записи связанные сним").ShowWindowAsync();
+                    await MessageBoxManager.GetMessageBoxStandard("Message", "Удалите записи связанные сним").ShowWindowAsync();
 
                     Loges.LoggingProcess(level: LogLevel.ERROR,
                         ex: ex);

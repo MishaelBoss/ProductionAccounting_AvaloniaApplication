@@ -30,16 +30,16 @@
 		  		<Button Margin="10,0,0,0"
 		  				Width="32"
 		  				Height="32"
-		  				Click="DownloadCloud_Click"
+		  				Command="{Binding DownloadAsyncCommand}"
 		  				ToolTip.Tip="������� ������">
 		  			<Image Source="/Assets/download-cloud-64.png"/>
 		  		</Button>
 
 		  		<Button Margin="10,0,0,0"
-		  				Width="32"
-		  				Height="32"
-		  				Click="ReturnList_Click"
-		  				ToolTip.Tip="�������� ������">
+                  Width="32"
+                  Height="32"
+                  Command="{Binding RefreshAsyncCommand}"
+                  ToolTip.Tip="�������� ������">
 		  			<Image Source="/Assets/return-64.png"/>
 		  		</Button>
             </StackPanel>

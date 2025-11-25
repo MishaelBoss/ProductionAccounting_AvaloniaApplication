@@ -1,10 +1,32 @@
-﻿using ProductionAccounting_AvaloniaApplication.Scripts;
+﻿using System.Windows.Input;
+using CommunityToolkit.Mvvm.Input;
+using ProductionAccounting_AvaloniaApplication.Scripts;
+using ProductionAccounting_AvaloniaApplication.Views;
 using ReactiveUI;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class CartProductUserControlViewModel : ViewModelBase
 {
+    public ICommand DeleteCommand
+        => new RelayCommand(() =>
+        {
+            var confirmDeleteViewModel = new ConfirmDeleteProductWindowViewModel()
+            {
+                Id = ProductID,
+                Name = Name,
+            };
+
+            var confirmDeleteWindows = new ConfirmDeleteProductWindow()
+            {
+                DataContext = confirmDeleteViewModel,
+            };
+
+            confirmDeleteViewModel.SetWindow(confirmDeleteWindows);
+
+            confirmDeleteWindows.Show();
+        });
+
     private double _productID = 0;
     public double ProductID 
     {

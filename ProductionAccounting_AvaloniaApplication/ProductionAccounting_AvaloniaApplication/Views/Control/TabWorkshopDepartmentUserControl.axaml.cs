@@ -19,10 +19,4 @@ public partial class TabWorkshopDepartmentUserControl : UserControl
         viewModel.HomeMainContent = HomeMainContent;
         viewModel.GetList();
     }
-
-    private void ReturnList_Click(object? sender, RoutedEventArgs e)
-    {
-        if (DataContext is not TabWorkshopDepartmentUserControlViewModel viewModel) return;
-        viewModel.GetList();
-    }
 }

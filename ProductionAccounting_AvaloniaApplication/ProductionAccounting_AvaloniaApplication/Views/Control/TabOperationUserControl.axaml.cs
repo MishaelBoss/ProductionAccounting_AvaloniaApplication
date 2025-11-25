@@ -19,10 +19,4 @@ public partial class TabOperationUserControl : UserControl
         viewModel.HomeMainContent = HomeMainContent;
         viewModel.GetList();
     }
-
-    private void ReturnList_Click(object? sender, RoutedEventArgs e)
-    {
-        if (DataContext is not TabOperationUserControlViewModel viewModel) return;
-        viewModel.GetList();
-    }
 }

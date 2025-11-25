@@ -17,6 +17,16 @@ public class EditUsersUserControlViewModel : ViewModelBase, INotifyPropertyChang
 {
     public ICommand CancelCommand
         => new RelayCommand(() => {WeakReferenceMessenger.Default.Send(new OpenOrCloseStatusMessage(false)); });
+
+    public ICommand ConfirmCommand
+        => new RelayCommand(async () => 
+        { 
+            if ( await SaveAsync() ) 
+            { 
+                WeakReferenceMessenger.Default.Send(new RefreshUserListMessage());
+                WeakReferenceMessenger.Default.Send(new OpenOrCloseStatusMessage(false));
+            } 
+        });
     
     public EditUsersUserControlViewModel(double userID)
     {
@@ -352,7 +362,7 @@ public class EditUsersUserControlViewModel : ViewModelBase, INotifyPropertyChang
         }
     }
 
-    public bool Upload()
+    public async Task<bool> SaveAsync()
     {
         try
         {
@@ -366,7 +376,7 @@ public class EditUsersUserControlViewModel : ViewModelBase, INotifyPropertyChang
             {
                 using (var connection = new NpgsqlConnection(Arguments.connection))
                 {
-                    connection.Open();
+                    await connection.OpenAsync();
 
                     string sql = "UPDATE public.\"user\" SET login = @newLogin, middle_name = @newMiddleName, first_name = @newFirstName, last_name = @newLastName, base_salary = @newBaseSalary WHERE id = @userID";
                     using (var command = new NpgsqlCommand(sql, connection))
@@ -377,14 +387,14 @@ public class EditUsersUserControlViewModel : ViewModelBase, INotifyPropertyChang
                         command.Parameters.AddWithValue("@newLastName", LastUsername);
                         command.Parameters.AddWithValue("@newMiddleName", MiddleName);
                         command.Parameters.AddWithValue("@newBaseSalary", BaseSalary);
-                        command.ExecuteNonQuery();
+                        await command.ExecuteNonQueryAsync();
                     }
 
                     string deleteSql = "DELETE FROM public.user_to_user_type WHERE user_id = @userID";
                     using (var deleteCommand = new NpgsqlCommand(deleteSql, connection))
                     {
                         deleteCommand.Parameters.AddWithValue("@userID", UserID);
-                        deleteCommand.ExecuteNonQuery();
+                        await deleteCommand.ExecuteNonQueryAsync();
                     }
 
                     string insertSql = "INSERT INTO public.user_to_user_type (user_id, user_type_id) VALUES (@userID, @userTypeID)";
@@ -392,7 +402,7 @@ public class EditUsersUserControlViewModel : ViewModelBase, INotifyPropertyChang
                     {
                         insertCommand.Parameters.AddWithValue("@userID", UserID);
                         insertCommand.Parameters.AddWithValue("@userTypeID", SelectedComboBoxItem.Id);
-                        insertCommand.ExecuteNonQuery();
+                        await insertCommand.ExecuteNonQueryAsync();
                     }
 
                     return true;

@@ -110,7 +110,7 @@
 								Spacing="10">
 						<Button Classes="ButtonLogin"
 								IsEnabled="{Binding IsActiveConfirmButton}"
-								Click="Confirm_Click"
+								Command="{Binding ConfirmCommand}"
 								Content="�������� ������ ������������"/>
 
 						<Button Command="{Binding CancelCommand}"

@@ -1,4 +1,6 @@
-﻿using Npgsql;
+﻿using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Models;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ReactiveUI;
@@ -6,11 +8,25 @@ using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChanged
 {
+    public ICommand CancelCommand
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseAddUserStatusMessage(false)) );
+
+    public ICommand ConfirmCommand
+        => new RelayCommand(async () => 
+        { 
+            if ( await SaveAsync() ) 
+            { 
+                WeakReferenceMessenger.Default.Send(new RefreshUserListMessage());
+                WeakReferenceMessenger.Default.Send(new OpenOrCloseAddUserStatusMessage(false));
+            } 
+        });
+
     private string _messageerror = string.Empty;
     public string Messageerror
     {
@@ -253,7 +269,7 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
         }
     }
 
-    public bool Upload() 
+    public async Task<bool> SaveAsync() 
     {
         try
         {
@@ -271,7 +287,7 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
 
                 using (var connection = new NpgsqlConnection(Arguments.connection))
                 {
-                    connection.Open();
+                    await connection.OpenAsync();
                     using (var command = new NpgsqlCommand(sql, connection)) {
                         try
                         {
@@ -292,7 +308,7 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
                             command.Parameters.AddWithValue("@email", Email);
                             command.Parameters.AddWithValue("@phone", Phone);
 
-                            var userId = command.ExecuteScalar();
+                            var userId = await command.ExecuteScalarAsync();
                             if (userId == null) return false;
 
                             string sql2 = "INSERT INTO public.user_to_user_type (user_id, user_type_id) VALUES (@user_id, @user_type_id)";
@@ -300,7 +316,7 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
                             {
                                 commandRel.Parameters.AddWithValue("@user_id", userId);
                                 commandRel.Parameters.AddWithValue("@user_type_id", SelectedComboBoxItem?.Id ?? 0);
-                                commandRel.ExecuteNonQuery();
+                                await commandRel.ExecuteNonQueryAsync();
                             }
 
                             string sql3 = "INSERT INTO public.user_to_departments (user_id, department_id) VALUES (@user_id, @department_id)";
@@ -308,7 +324,7 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
                             {
                                 commandDepartment.Parameters.AddWithValue("@user_id", userId);
                                 commandDepartment.Parameters.AddWithValue("@department_id", SelectedComboBoxItemDepartment?.Id ?? 0);
-                                commandDepartment.ExecuteNonQuery();
+                                await commandDepartment.ExecuteNonQueryAsync();
                             }
 
                             string sql4 = "INSERT INTO public.user_to_position (user_id, position_id) VALUES (@user_id, @position_id)";
@@ -316,7 +332,7 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
                             {
                                 commandPosition.Parameters.AddWithValue("@user_id", userId);
                                 commandPosition.Parameters.AddWithValue("@position_id", SelectedComboBoxItemPosition?.Id ?? 0);
-                                commandPosition.ExecuteNonQuery();
+                                await commandPosition.ExecuteNonQueryAsync();
                             }
 
                             if (!string.IsNullOrEmpty(randomString))

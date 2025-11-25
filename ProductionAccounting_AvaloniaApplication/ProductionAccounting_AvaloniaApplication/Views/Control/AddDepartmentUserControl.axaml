@@ -29,10 +29,10 @@
 
 						<Button Classes="ButtonLogin"
 								IsEnabled="{Binding IsActiveConfirmButton}"
-								Click="Confirm_Click"
+								Command="{Binding ConfirmCommand}"
 								Content="Confirm"/>
 
-						<Button Click="Cancel_Click"
+						<Button Command="{Binding CancelCommand}"
 								Content="Cancel"
 								HorizontalAlignment="Center"
 								Background="Transparent"/>

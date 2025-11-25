@@ -35,6 +35,8 @@ public class CartUserListUserControlViewModel : ViewModelBase, INotifyPropertyCh
                 DataContext = confirmDeleteUserViewModel,
             };
 
+            confirmDeleteUserViewModel.SetWindow(confirmDeleteUserWindows);
+
             confirmDeleteUserWindows.Show();
         });
 

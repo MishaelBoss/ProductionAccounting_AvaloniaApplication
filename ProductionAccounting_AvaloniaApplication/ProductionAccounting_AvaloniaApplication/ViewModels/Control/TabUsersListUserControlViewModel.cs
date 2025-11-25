@@ -19,11 +19,12 @@ using static ProductionAccounting_AvaloniaApplication.ViewModels.Control.NotFoun
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
-public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyChanged, IRecipient<OpenOrCloseProfileUserStatusMessage>
+public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyChanged, IRecipient<OpenOrCloseProfileUserStatusMessage>, IRecipient<RefreshUserListMessage>
 {
     public TabUsersListUserControlViewModel()
     {
-        WeakReferenceMessenger.Default.Register(this);
+        WeakReferenceMessenger.Default.Register<OpenOrCloseProfileUserStatusMessage>(this);
+        WeakReferenceMessenger.Default.Register<RefreshUserListMessage>(this);
 
         _ = LoadListTypeToComboBoxAsync();
     }
@@ -42,6 +43,11 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
         }
     }
 
+    public void Receive(RefreshUserListMessage message)
+    {
+        GetListUsers();
+    }
+
     public StackPanel? HomeMainContent { get; set; } = null;
     public Grid? ProfileContent { get; set; } = null;
 
@@ -54,7 +60,7 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
         => new RelayCommand(() => ResetFilters());
 
     public ICommand DownloadAsyncCommand
-        => new RelayCommand(async () => { await DownloadListAsync(); });
+        => new RelayCommand(async () => await DownloadListAsync());
 
     private bool _isProfileView = false;
     public bool IsProfileView
