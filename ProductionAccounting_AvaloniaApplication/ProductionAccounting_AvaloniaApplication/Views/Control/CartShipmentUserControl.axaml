@@ -13,106 +13,115 @@
             BorderThickness="1"
             Margin="5">
 
-		<Grid Margin="15"
-			  ColumnDefinitions="Auto, *, Auto">
+        <Grid Margin="15"
+              ColumnDefinitions="Auto, *, Auto">
 
-			<Border Grid.Column="0"
-					Width="44"
-					Height="44"
-					CornerRadius="10"
-					Background="Gray"
-					Margin="0,0,16,0">
-				<Image Source="/Assets/product-64.png"
-					   Width="22"
-					   Height="22"/>
-			</Border>
+            <Border Grid.Column="0"
+                    Width="44"
+                    Height="44"
+                    CornerRadius="10"
+                    Background="Gray"
+                    Margin="0,0,16,0">
+                <Image Source="/Assets/product-64.png"
+                       Width="22"
+                       Height="22"/>
+            </Border>
 
-			<StackPanel Grid.Column="1"
+            <StackPanel Grid.Column="1"
                         VerticalAlignment="Center"
                         Margin="0,0,15,0">
-				<TextBlock	Text="{Binding Name}"
-							Foreground="#1A1D21"
-							FontSize="16"
-							FontWeight="SemiBold"
-							Margin="0,0,0,4"/>
 
-				<TextBlock	Text="{Binding Article}"
-							Foreground="#6B7280"
-							FontSize="13"
-							FontWeight="Medium"
-							Margin="0,0,0,8"/>
+                <TextBlock Text="{Binding OrderNumber}"
+                           Foreground="#1A1D21"
+                           FontSize="16"
+                           FontWeight="SemiBold"
+                           Margin="0,0,0,4"/>
 
-				<StackPanel Orientation="Horizontal" 
-							Spacing="16">
-					<StackPanel Orientation="Horizontal" 
-								Spacing="4">
+                <TextBlock Text="{Binding CustomerName}"
+                           Foreground="#6B7280"
+                           FontSize="13"
+                           FontWeight="Medium"
+                           Margin="0,0,0,8"/>
 
-						<TextBlock Text="{Binding PricePerUnit, StringFormat='{}{0:N2}'}"
-								   Foreground="#059669"
-								   FontSize="14"
-								   FontWeight="SemiBold"/>
-						<TextBlock Text="₽"
-								   Foreground="#059669"
-								   FontSize="12"
-								   FontWeight="SemiBold"
-								   VerticalAlignment="Bottom"/>
-					</StackPanel>
+                <StackPanel Orientation="Horizontal" 
+                            Spacing="16">
 
-					<Border Background="#F3F4F6"
-							CornerRadius="6"
-							Padding="6,2">
-						<TextBlock Text="{Binding Unit}"
-								   Foreground="#374151"
-								   FontSize="11"
-								   FontWeight="Medium"/>
-					</Border>
+                    <!-- Вес отгруженный -->
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <TextBlock Text="{Binding ShippedWeight, StringFormat='{}{0:F3}'}"
+                                   Foreground="#059669"
+                                   FontSize="14"
+                                   FontWeight="SemiBold"/>
+                        <TextBlock Text="т"
+                                   Foreground="#059669"
+                                   FontSize="12"
+                                   FontWeight="SemiBold"
+                                   VerticalAlignment="Bottom"/>
+                    </StackPanel>
 
-					<StackPanel Orientation="Horizontal" 
-								Spacing="4">
-						<TextBlock Text="Коэф:"
-								   Foreground="#6B7280"
-								   FontSize="11"/>
-						<TextBlock Text="{Binding Coefficient, StringFormat='{}{0:N2}'}"
-								   Foreground="#1A1D21"
-								   FontSize="11"
-								   FontWeight="SemiBold"/>
-					</StackPanel>
-				</StackPanel>
-				
-			</StackPanel>
+                    <Border Background="#F3F4F6"
+                            CornerRadius="6"
+                            Padding="6,2">
+                        <TextBlock Text="отгрузка"
+                                   Foreground="#374151"
+                                   FontSize="11"
+                                   FontWeight="Medium"/>
+                    </Border>
 
-			<StackPanel Grid.Column="2"
-						Orientation="Horizontal"
-						Spacing="6"
-						VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <TextBlock Text="Кол-во:"
+                                   Foreground="#6B7280"
+                                   FontSize="11"/>
+                        <TextBlock Text="{Binding ShippedQuantity, StringFormat='{}{0:F2}'}"
+                                   Foreground="#1A1D21"
+                                   FontSize="11"
+                                   FontWeight="SemiBold"/>
+                    </StackPanel>
+                </StackPanel>
 
-				<Button Command="{Binding ChangeStatusCommand}"
-						Width="34"
-						Height="34"
-						CornerRadius="6"
-						Background="#FF3B30"
-						BorderThickness="0"
-						IsVisible="{Binding IsAdministrator}"
-						ToolTip.Tip="Поменять статус">
-					<Image Source="/Assets/remove-64.png"
-						   Width="18"
-						   Height="18"/>
-				</Button>
+                <TextBlock Text="{Binding ShipmentDate, StringFormat='dd.MM.yyyy'}"
+                           Foreground="#6B7280"
+                           FontSize="12"
+                           Margin="0,8,0,0"/>
 
-				<Button Command="{Binding DeleteCommand}"
-						Width="34"
-						Height="34"
-						CornerRadius="6"
-						Background="#FF3B30"
-						BorderThickness="0"
-						IsVisible="{Binding IsAdministrator}"
-						ToolTip.Tip="Удалить">
-					<Image Source="/Assets/remove-64.png"
-						   Width="18"
-						   Height="18"/>
-				</Button>
-			</StackPanel>
-		</Grid>
-	</Border>
+                <TextBlock Text="{Binding Notes}"
+                           Foreground="#8B8B8B"
+                           FontSize="11"
+                           FontStyle="Italic"
+                           TextWrapping="Wrap"
+                           MaxWidth="400"
+                           IsVisible="{Binding !!Notes}"/>
+            </StackPanel>
+
+            <StackPanel Grid.Column="2"
+                        Orientation="Horizontal"
+                        Spacing="6"
+                        VerticalAlignment="Center">
+
+                <Button Command="{Binding ChangeStatusCommand}"
+                        Padding="12,6"
+                        CornerRadius="6"
+                        Content="{Binding StatusDisplay}"
+                        Background="{Binding ButtonColor}"
+                        BorderThickness="0"
+                        IsVisible="{Binding IsAdministrator}"
+                        ToolTip.Tip="Изменить статус">
+                </Button>
+
+                <Button Command="{Binding DeleteCommand}"
+                        Width="34"
+                        Height="34"
+                        CornerRadius="6"
+                        Background="#FF3B30"
+                        BorderThickness="0"
+                        IsVisible="{Binding IsAdministrator}"
+                        ToolTip.Tip="Удалить отгрузку">
+                    <Image Source="/Assets/remove-64.png"
+                           Width="18"
+                           Height="18"/>
+                </Button>
+            </StackPanel>
+        </Grid>
+    </Border>
 
 </UserControl>

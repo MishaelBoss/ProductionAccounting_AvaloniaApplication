@@ -1,0 +1,75 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:vm="using:ProductionAccounting_AvaloniaApplication.ViewModels"
+        x:DataType="vm:ConfirmDeleteShipmentWindowViewModel"
+        mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="200"
+        MaxWidth="400" MaxHeight="200"
+        x:Class="ProductionAccounting_AvaloniaApplication.Views.ConfirmDeleteShipmentWindow"
+		ExtendClientAreaToDecorationsHint="True"
+		WindowStartupLocation="CenterScreen"
+        Title="ConfirmDeleteShipmentWindow">
+
+  <Border	Background="#2C3E50" 
+  			CornerRadius="12"
+			Margin="10"
+			PointerPressed="TopBorder">
+
+        <Grid 	Margin="20"
+				RowDefinitions="Auto, Auto, *" 
+				ColumnDefinitions="*">
+
+            <TextBlock Grid.Row="0"
+                       Text="Удалить отгрузку?"
+                       FontSize="18"
+                       FontWeight="Bold"
+                       Foreground="#E74C3C"
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,12"/>
+
+            <StackPanel Grid.Row="1"
+						Spacing="8">
+                <TextBlock Text="{Binding OrderNumber, StringFormat='Заказ №{0}'}"
+                           FontSize="16"
+                           FontWeight="SemiBold"
+                           Foreground="White"/>
+
+                <TextBlock Text="{Binding Name}"
+                           FontSize="14"
+                           Foreground="#ECF0F1"
+                           Opacity="0.9"/>
+
+                <TextBlock Text="{Binding ShipmentDate, StringFormat='Дата отгрузки: {0:dd.MM.yyyy}'}"
+                           FontSize="13"
+                           Foreground="#BDC3C7"/>
+            </StackPanel>
+
+            <StackPanel Grid.Row="2"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Bottom"
+                        Spacing="12"
+                        Margin="0,20,0,10">
+
+                <Button Content="Отмена"
+                        Command="{Binding CancelCommand}"
+                        Width="110"
+                        Height="38"
+                        Background="#95A5A6"
+                        Foreground="White"
+                        CornerRadius="8"/>
+
+                <Button Content="Удалить"
+                        Command="{Binding DeleteCommand}"
+                        Width="110"
+                        Height="38"
+                        Background="#E74C3C"
+                        Foreground="White"
+                        CornerRadius="8"
+                        FontWeight="SemiBold"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+
+</Window>

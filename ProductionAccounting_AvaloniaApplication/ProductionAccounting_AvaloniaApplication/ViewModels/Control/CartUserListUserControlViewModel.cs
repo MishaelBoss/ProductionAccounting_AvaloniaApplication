@@ -21,6 +21,23 @@ public class CartUserListUserControlViewModel : ViewModelBase, INotifyPropertyCh
     public ICommand ViewCommand
         => new RelayCommand(() => { WeakReferenceMessenger.Default.Send(new OpenOrCloseProfileUserStatusMessage(true, _userID)); });
 
+    public ICommand DeleteCommand
+        => new RelayCommand(() =>
+        {
+            var confirmDeleteUserViewModel = new ConfirmDeleteUserWindowViewModel()
+            {
+                UserID = UserID,
+                Login = Login,
+            };
+
+            var confirmDeleteUserWindows = new ConfirmDeleteUserWindow()
+            {
+                DataContext = confirmDeleteUserViewModel,
+            };
+
+            confirmDeleteUserWindows.Show();
+        });
+
     private double _userID = 0;
     public double UserID
     {

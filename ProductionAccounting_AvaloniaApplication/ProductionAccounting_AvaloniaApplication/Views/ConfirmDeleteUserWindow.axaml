@@ -51,7 +51,7 @@
 							Content="Cancel"/>
 				</Button>
 
-				<Button Click="Confirm_Click"
+				<Button Command="{Binding ConfirmCommand}"
 						Width="100"
 						Height="34"
 						CornerRadius="6"

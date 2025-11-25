@@ -1,7 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using ProductionAccounting_AvaloniaApplication.ViewModels;
 
 namespace ProductionAccounting_AvaloniaApplication;
 
@@ -11,12 +10,6 @@ public partial class ConfirmDeleteUserWindow : Window
     {
         InitializeComponent();
         DataContext = this;
-    }
-
-    private void Confirm_Click(object? sender, RoutedEventArgs e)
-    {
-        if (DataContext is not ConfirmDeleteUserWindowViewModel viewModel) return;
-        if (viewModel.Delete()) Close();
     }
 
     private void Cancel_Click(object? sender, RoutedEventArgs e)

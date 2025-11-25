@@ -1,7 +1,10 @@
-﻿using Npgsql;
+﻿using CommunityToolkit.Mvvm.Input;
+using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ReactiveUI;
 using System;
+using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels;
 
@@ -21,7 +24,10 @@ public class ConfirmDeleteUserWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _login, value);
     }
 
-    public bool Delete()
+    public ICommand ConfirmCommand
+        => new RelayCommand(async () => {  await Delete(); });
+
+    private async Task<bool> Delete()
     {
         try
         {

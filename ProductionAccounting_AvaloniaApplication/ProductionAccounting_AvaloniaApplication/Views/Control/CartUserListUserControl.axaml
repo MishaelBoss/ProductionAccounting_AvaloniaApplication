@@ -108,7 +108,7 @@
 					<Image Source="/Assets/edit-user-64.png"/>
 				</Button>
 
-				<Button Click="OpenWindowsConfirmDeleteUser_Click"
+				<Button Command="{Binding DeleteCommand}"
 						Classes="Button"
 						Background="#FF3B30"
 						IsVisible="{Binding IsAdministrator}"

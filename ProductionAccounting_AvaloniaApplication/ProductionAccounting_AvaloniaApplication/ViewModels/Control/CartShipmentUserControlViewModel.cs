@@ -2,7 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
-using ProductionAccounting_AvaloniaApplication.Views.Control;
+using ProductionAccounting_AvaloniaApplication.Views;
 using ReactiveUI;
 using System;
 using System.Threading.Tasks;
@@ -17,7 +17,25 @@ public class CartShipmentUserControlViewModel : ViewModelBase
         => new RelayCommand(async () => await ChangeStatus());
 
     public ICommand DeleteCommand
-        => new RelayCommand(() => { });
+        => new RelayCommand(() =>
+        {
+            var viewModel = new ConfirmDeleteShipmentWindowViewModel
+            {
+                Id = Id,
+                Name = CustomerName ?? "Заказ без названия",
+                OrderNumber = OrderNubmer ?? string.Empty,
+                ShipmentDate = ShipmentDate
+            };
+
+            var window = new ConfirmDeleteShipmentWindow
+            {
+                DataContext = viewModel
+            };
+
+            viewModel.SetWindow(window);  
+
+            window.Show();
+        });
 
     private double _id;
     public double Id 
@@ -98,30 +116,28 @@ public class CartShipmentUserControlViewModel : ViewModelBase
 
     public string StatusDisplay => Status switch
     {
-        "issued" => "Ожидает подтверждения",
-        "completed" => "Сдано",
-        "rejected" => "Отменено",
-        _ => "—"
+        "formed" => "Сформирована",
+        "confirmed" => "Подтверждена",
+        "shipped" => "Отгружена",
+        _ => "Неизвестно"
     };
 
     public Brush ButtonColor => Status switch
     {
-        "issued" => new SolidColorBrush(Colors.Orange),
-        "completed" => new SolidColorBrush(Colors.LimeGreen),
-        "rejected" => new SolidColorBrush(Colors.Crimson),
+        "formed" => new SolidColorBrush(Color.Parse("#FFA500")),
+        "confirmed" => new SolidColorBrush(Color.Parse("#007AFF")),
+        "shipped" => new SolidColorBrush(Color.Parse("#34C759")),
         _ => new SolidColorBrush(Colors.Gray)
     };
-
-    public string ButtonText => Status == "completed" ? "Переоткрыть" : "Сдать работу";
-
-    public bool CanConfirm => Status != "completed";
 
     public bool IsAdministrator
         => ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsAdministrator;
 
     private async Task ChangeStatus() 
     {
-        var newStatus = Status == "completed" ? "issued" : "completed";
+        if(!IsAdministrator) return;
+
+        var newStatus = Status == "formed" ? "confirmed" : "shipped";
 
         try
         {
@@ -132,7 +148,7 @@ public class CartShipmentUserControlViewModel : ViewModelBase
                 await connection.OpenAsync();
                 using (var command = new NpgsqlCommand(sql, connection))
                 {
-                    command.Parameters.AddWithValue("@status", newStatus);
+                    command.Parameters.AddWithValue("@newStatus", newStatus);
                     command.Parameters.AddWithValue("@id", Id);
                     await command.ExecuteNonQueryAsync();
 
@@ -144,7 +160,7 @@ public class CartShipmentUserControlViewModel : ViewModelBase
         catch (Exception ex) 
         {
             Loges.LoggingProcess(level: LogLevel.WARNING,
-               ex: ex);
+                ex: ex);
         }
     }
 
@@ -152,7 +168,5 @@ public class CartShipmentUserControlViewModel : ViewModelBase
     {
         this.RaisePropertyChanged(nameof(StatusDisplay));
         this.RaisePropertyChanged(nameof(ButtonColor));
-        this.RaisePropertyChanged(nameof(ButtonText));
-        this.RaisePropertyChanged(nameof(CanConfirm));
     }
 }

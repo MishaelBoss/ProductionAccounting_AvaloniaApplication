@@ -1,4 +1,6 @@
 ﻿using Avalonia.Controls;
+using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ProductionAccounting_AvaloniaApplication.ViewModels.Control;
@@ -6,18 +8,46 @@ using ProductionAccounting_AvaloniaApplication.Views.Control;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
 
-public class ShipmentsPageUserControlViewModel : ViewModelBase
+public class ShipmentsPageUserControlViewModel : ViewModelBase, IRecipient<OpenOrCloseStatusMessage>, IRecipient<RefreshShipmentListMessage>
 {
+    public ShipmentsPageUserControlViewModel()
+    {
+        WeakReferenceMessenger.Default.Register<OpenOrCloseStatusMessage>(this);
+        WeakReferenceMessenger.Default.Register<RefreshShipmentListMessage>(this);
+    }
+
+    public void Receive(OpenOrCloseStatusMessage message)
+    {
+        if (message.ShouldOpen) ShowAddShipmentUsersUserControl();
+        else CloseAddShipmentUsersUserControl();
+    }
+
+    public void Receive(RefreshShipmentListMessage message)
+    {
+        _ = LoadShipmentsAsync();
+    }
+
     public Grid? Content { get; set; } = null;
     public StackPanel? CartShipment { get; set; } = null;
 
     private List<CartShipmentUserControl> shipmentsList = [];
 
+    private readonly AddShipmentUserControl _addShipment = new();
+
+    public ICommand OpenAddShipmentCommand
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseStatusMessage(true)));
+
+    public ICommand RefreshCommand
+        => new RelayCommand(async () => await LoadShipmentsAsync());
+
     public async Task LoadShipmentsAsync() 
     {
+        StackPanelHelper.ClearAndRefreshStackPanel<CartShipmentUserControl>(CartShipment, shipmentsList);
+
         try
         {
             var sql = @"
@@ -70,11 +100,40 @@ public class ShipmentsPageUserControlViewModel : ViewModelBase
                     }
                 }
             }
+
+            StackPanelHelper.RefreshStackPanelContent<CartShipmentUserControl>(CartShipment, shipmentsList);
         }
         catch (Exception ex)
         {
             Loges.LoggingProcess(level: LogLevel.WARNING,
                 ex: ex);
+        }
+    }
+
+    public void ShowAddShipmentUsersUserControl()
+    {
+        if (Content != null)
+        {
+            if (Content.Children.Contains(_addShipment))
+            {
+                _addShipment.RefreshDataAsync();
+                return;
+            }
+
+            if (_addShipment.Parent is Panel currentParent) currentParent.Children.Remove(_addShipment);
+            Content.Children.Clear();
+            Content.Children.Add(_addShipment);
+
+            _addShipment.RefreshDataAsync();
+        }
+    }
+
+    public void CloseAddShipmentUsersUserControl()
+    {
+        if (Content != null)
+        {
+            Content.Children.Clear();
+            if (_addShipment.Parent == Content) Content.Children.Remove(_addShipment);
         }
     }
 }

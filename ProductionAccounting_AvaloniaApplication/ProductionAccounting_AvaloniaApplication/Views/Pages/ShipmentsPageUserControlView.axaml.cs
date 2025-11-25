@@ -10,6 +10,7 @@ public partial class ShipmentsPageUserControlView : UserControl
     {
         InitializeComponent();
         DataContext = new ShipmentsPageUserControlViewModel();
+        Loaded += OnLoaded;
     }
 
     private async void OnLoaded(object? sender, RoutedEventArgs e) 

@@ -8,18 +8,18 @@
              x:Class="ProductionAccounting_AvaloniaApplication.Views.Pages.ShipmentsPageUserControlView">
 
     <Grid>
-        <Grid Name="Content" 
-              ZIndex="1"/>
+      <Grid Name="Content" 
+            ZIndex="1"/>
 
-		<Grid Margin="10" 
-              RowDefinitions="Auto, Auto, *">
+		  <Grid Margin="10" 
+            RowDefinitions="Auto, Auto, *">
 
-             <Grid Grid.Row="0" 
-                   HorizontalAlignment="Center" 
-                   VerticalAlignment="Top" 
-                   ColumnDefinitions="Auto, Auto">
+            <Grid Grid.Row="0" 
+                  HorizontalAlignment="Center" 
+                  VerticalAlignment="Top" 
+                  ColumnDefinitions="Auto, Auto">
 
-                 <TextBox Width="200"
+                <TextBox  Width="200"
                           Watermark="Поиск"
                           Classes="Search"
                           HorizontalAlignment="Center"/>
@@ -29,10 +29,11 @@
 		  				HorizontalAlignment="Center"
 		  				Margin="10,0,0,0">
 
-                <Button Margin="10,0,0,0"
-		  				Width="32"
-		  				Height="32"
-		  				ToolTip.Tip="Add">
+          <Button Margin="10,0,0,0"
+                  Command="{Binding OpenAddShipmentCommand}}"
+                  Width="32"
+                  Height="32"
+                  ToolTip.Tip="Add">
 		  			<Image Source="/Assets/add-64.png"/>
 		  		</Button>
 
@@ -43,10 +44,11 @@
 		  			<Image Source="/Assets/download-cloud-64.png"/>
 		  		</Button>
 
-		  		<Button Margin="10,0,0,0"
-		  				Width="32"
-		  				Height="32"
-		  				ToolTip.Tip="�������� ������">
+		  		<Button Command="{Binding RefreshCommand}"
+                  Margin="10,0,0,0"
+                  Width="32"
+                  Height="32"
+                  ToolTip.Tip="�������� ������">
 		  			<Image Source="/Assets/return-64.png"/>
 		  		</Button>
             </StackPanel>
