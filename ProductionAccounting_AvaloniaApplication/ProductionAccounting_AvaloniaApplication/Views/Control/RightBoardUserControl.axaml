@@ -38,6 +38,19 @@
                         </Grid>
                     </Button>
 
+                    <Button Classes="Button" 
+                            IsVisible="{Binding IsVisibleAdminPanelButton}"
+                            Command="{Binding OpenProductsManagerUserPageCommand}">
+                        <Grid ColumnDefinitions="24,*" 
+                              Classes="GridButtonButton">
+                            <Image Source="/Assets/administrator-64.png" 
+                                   Width="21" 
+                                   Height="21" 
+                                   Stretch="Uniform"/>
+                            <Label Grid.Column="1" Classes="LabelButtonButton" Content="Admin panel"/>
+                        </Grid>
+                    </Button>
+
                     <Button Classes="Button"
                             Command="{Binding OpenProductLibraryPageCommand}">
 						<Grid ColumnDefinitions="24,*"

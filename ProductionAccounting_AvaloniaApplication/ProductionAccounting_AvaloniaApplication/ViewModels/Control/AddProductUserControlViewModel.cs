@@ -170,6 +170,8 @@ public class AddProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
 
     public async Task<bool> SaveAsync()
     {
+        if(!ManagerCookie.IsUserLoggedIn() && !ManagerCookie.IsManager || !ManagerCookie.IsAdministrator) return false;
+
         try
         {
             if (string.IsNullOrEmpty(ProductName) || string.IsNullOrEmpty(ProductArticle) || string.IsNullOrEmpty(ProductDescription) || string.IsNullOrEmpty(ProductMark) || ProductPricePerUnit == 0 || ProductPricePerKg == 0 || SelectedUnit == null || ProductCoefficient == 0) return false;
