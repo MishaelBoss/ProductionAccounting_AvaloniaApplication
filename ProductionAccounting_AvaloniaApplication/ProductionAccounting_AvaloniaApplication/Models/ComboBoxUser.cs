@@ -2,7 +2,7 @@
 
 namespace ProductionAccounting_AvaloniaApplication.Models;
 
-public class ComboBoxUserAddWork(double id, string firstName, string lastName, string MiddleName, string login) : IComboBoxUserAddWork
+public class ComboBoxUser(double id, string firstName, string lastName, string MiddleName, string login) : IComboBoxUser
 {
     public double Id { get; set; } = id;
     public string FirstName { get; set; } = firstName;

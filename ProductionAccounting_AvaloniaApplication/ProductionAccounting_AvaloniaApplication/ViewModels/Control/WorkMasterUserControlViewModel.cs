@@ -1,20 +1,22 @@
-﻿using CommunityToolkit.Mvvm.Input;
+﻿using Avalonia.Controls;
 using Npgsql;
-using ProductionAccounting_AvaloniaApplication.Models;
 using ProductionAccounting_AvaloniaApplication.Scripts;
-using ReactiveUI;
+using ProductionAccounting_AvaloniaApplication.View.Control;
+using ProductionAccounting_AvaloniaApplication.Views.Control;
 using System;
-using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Input;
+using static ProductionAccounting_AvaloniaApplication.ViewModels.Control.NotFoundUserControlViewModel;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class WorkMasterUserControlViewModel : ViewModelBase, INotifyPropertyChanging
 {
-    public WorkMasterUserControlViewModel() 
+    public StackPanel? CartTasks { get; set; } = null;
+    private List<CartProductUserControl> productList = [];
+
+    /*public WorkMasterUserControlViewModel() 
     {
         _ = LoadListComboBoxAsync();
 
@@ -309,6 +311,96 @@ public class WorkMasterUserControlViewModel : ViewModelBase, INotifyPropertyChan
         this.RaisePropertyChanged(nameof(HasSelectedProduct));
         this.RaisePropertyChanged(nameof(SelectedProductCoefficient));
         this.RaisePropertyChanged(nameof(CalculationFormula));
+    }*/
+
+    public async Task LoadTasksAsync()
+    {
+        StackPanelHelper.ClearAndRefreshStackPanel<CartProductUserControl>(CartTasks, productList);
+
+        try
+        {
+            string sql = @"
+                    SELECT 
+                        pt.id,
+                        pt.product_id,
+                        p.name,
+                        COALESCE(p.mark, '') AS mark,
+                        p.article,
+                        p.unit,
+                        p.price_per_unit,
+                        p.coefficient,
+                        COALESCE(pt.status, 'new') AS status,
+                        pt.created_at
+                    FROM public.product_tasks pt
+                    JOIN public.product p ON p.id = pt.product_id
+                    WHERE COALESCE(pt.status, 'new') IN ('new', 'in_progress')
+                      AND p.is_active = true
+                    ORDER BY pt.created_at DESC";
+
+            using (var connection = new NpgsqlConnection(Arguments.connection))
+            {
+                await connection.OpenAsync();
+                using (var command = new NpgsqlCommand(sql, connection)) 
+                {
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            var viewModel = new CartProductUserControlViewModel()
+                            {
+                                Id = reader.GetDouble(0),
+                                ProductId = reader.GetDouble(1),
+                                Name = reader.GetString(2),
+                                Mark = reader.GetString(3),
+                                Article = reader.GetString(4),
+                                Unit = reader.GetString(5),
+                                PricePerUnit = reader.GetInt32(6),
+                                Coefficient = reader.GetInt32(7),
+                                Status = reader.GetString(8),
+                                CreatedAt = reader.GetDateTime(9)
+                            };
+
+                            var userControl = new CartProductUserControl()
+                            {
+                                DataContext = viewModel,
+                            };
+
+                            productList.Add(userControl);
+                        }
+                    }
+                }
+            }
+
+            StackPanelHelper.RefreshStackPanelContent<CartProductUserControl>(CartTasks, productList);
+
+            if (productList.Count == 0) ShowErrorUserControl(ErrorLevel.NotFound);
+        }
+        catch (NpgsqlException ex)
+        {
+            StackPanelHelper.ClearAndRefreshStackPanel<CartProductUserControl>(CartTasks, productList);
+            ShowErrorUserControl(ErrorLevel.NoConnectToDB);
+            Loges.LoggingProcess(LogLevel.CRITICAL, "Error connect to DB", ex: ex);
+        }
+        catch (Exception ex)
+        {
+            StackPanelHelper.ClearAndRefreshStackPanel<CartProductUserControl>(CartTasks, productList);
+            Loges.LoggingProcess(LogLevel.WARNING, 
+                ex: ex);
+        }
+    }
+
+    private void ShowErrorUserControl(ErrorLevel level)
+    {
+        if (CartTasks != null)
+        {
+            var notFoundUserControlViewModel = new NotFoundUserControlViewModel(level);
+            var notFoundUserControl = new NotFoundUserControl { DataContext = notFoundUserControlViewModel };
+
+            if (CartTasks.Children.Contains(notFoundUserControl)) return;
+
+            CartTasks.Children.Clear();
+            CartTasks.Children.Add(notFoundUserControl);
+        }
     }
 
     public new event PropertyChangedEventHandler? PropertyChanged;

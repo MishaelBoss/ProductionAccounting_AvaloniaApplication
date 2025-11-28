@@ -4,144 +4,29 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:ProductionAccounting_AvaloniaApplication.ViewModels.Control"
              x:DataType="vm:WorkMasterUserControlViewModel"
-             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="200"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="850"
              x:Class="ProductionAccounting_AvaloniaApplication.Views.Control.WorkMasterUserControl">
 
     <Grid>
-        <Border Grid.Row="0" 
+        <Border Grid.Row="4" 
                 Background="White" 
                 BorderBrush="#E0E0E0" 
                 BorderThickness="1" 
                 CornerRadius="8" 
                 Opacity="0.5"/>
 
-        <Border Grid.Row="0"
-                Padding="10"
-                Margin="0,0,0,10">
-
-            <Grid ColumnDefinitions="*, *, *, *" 
-                  RowDefinitions="Auto, Auto, Auto, Auto">
+        <Border Grid.Row="4" 
+                Padding="20">
+            <StackPanel Spacing="15">
+                <TextBlock Text="Работы" 
+                           FontSize="16"
+                           FontWeight="SemiBold" 
+                           Foreground="#2C3E50"/>
                 
-                <StackPanel Grid.Row="0" 
-                            Grid.Column="0" 
-                            Orientation="Vertical" 
-                            Margin="0,0,10,10">
-                    <TextBlock Text="Дата" 
-                               FontWeight="Bold"
-                               Foreground="Black"
-                               Margin="0,0,0,5"/>
-                    <DatePicker SelectedDate="{Binding SelectedDate}"/>
-                </StackPanel>
-                
-                <StackPanel Grid.Row="0" 
-                            Grid.Column="1" 
-                            Orientation="Vertical" 
-                            Margin="0,0,10,10">
-                    <TextBlock Text="Смена" 
-                               FontWeight="Bold" 
-                               Foreground="Black"
-                               Margin="0,0,0,5"/>
-                    <ComboBox ItemsSource="{Binding Shifts}"
-                              SelectedItem="{Binding SelectedShift}"/>
-                </StackPanel>
-                
-                <StackPanel Grid.Row="0" 
-                            Grid.Column="2" 
-                            Orientation="Vertical" 
-                            Margin="0,0,0,10">
-                    <TextBlock Text="Количество" 
-                               FontWeight="Bold" 
-                               Foreground="Black"
-                               Margin="0,0,0,5"/>
-                    <TextBox Text="{Binding Quantity}" 
-                             Watermark="0.0"/>
-                </StackPanel>
-
-                <StackPanel Grid.Row="1" 
-                            Grid.Column="0" 
-                            Orientation="Vertical">
-                    <TextBlock Text="Сотрудник *" 
-                               FontWeight="SemiBold" 
-                               Foreground="Black"
-                               Margin="0,0,0,5"/>
-                    <ComboBox ItemsSource="{Binding ComboBoxUsers}" 
-                              SelectedItem="{Binding SelectedUser}"
-                              DisplayMemberBinding="{Binding FullName}"/>
-                </StackPanel>
-                
-                <StackPanel Grid.Row="1" 
-                            Grid.Column="1" 
-                            Orientation="Vertical" 
-                            Margin="0,0,10,10">
-                    <TextBlock Text="Продукт/Марка" 
-                               FontWeight="Bold" 
-                               Foreground="Black"
-                               Margin="0,0,0,5"/>
-                    <ComboBox ItemsSource="{Binding ComboBoxProducts}" 
-                              SelectedItem="{Binding SelectedProduct}"/>
-                </StackPanel>
-                
-                <StackPanel Grid.Row="1" 
-                            Grid.Column="2" 
-                            Orientation="Vertical" 
-                            Margin="0,0,10,10">
-                    <TextBlock Text="Операция" 
-                               FontWeight="Bold" 
-                               Foreground="Black"
-                               Margin="0,0,0,5"/>
-                    <ComboBox ItemsSource="{Binding ComboBoxOperations}"
-                              SelectedItem="{Binding SelectedOperation}"/>
-                </StackPanel>
-                
-                <StackPanel Grid.Row="0" 
-                            Grid.Column="3" 
-                            Orientation="Vertical" 
-                            Margin="0,0,0,10">
-                    <TextBlock Text="Сумма" 
-                               FontWeight="Bold" 
-                               Foreground="Black"
-                               Margin="0,0,0,5"/>
-                    <TextBlock Text="{Binding CalculatedAmount, StringFormat='{}{0:C2}'}" 
-                               FontSize="16" 
-                               FontWeight="Bold"
-                               Foreground="Green"/>
-                </StackPanel>
-                
-                <StackPanel Grid.Row="2" 
-                            Grid.Column="0" 
-                            Grid.ColumnSpan="2" 
-                            Orientation="Vertical" 
-                            Margin="0,0,10,10">
-                    <TextBlock Text="Примечание" 
-                               FontWeight="Bold" 
-                               Foreground="Black"
-                               Margin="0,0,0,5"/>
-                    <TextBox Text="{Binding Description}"
-                             Watermark="Дополнительная информация"/>
-                </StackPanel>
-                
-                <StackPanel Grid.Row="2" 
-                            Grid.Column="2" 
-                            Orientation="Vertical"
-                            Margin="0,0,0,10">
-                    <TextBlock Text="Действия" 
-                               FontWeight="Bold" 
-                               Foreground="Black"
-                               Margin="0,0,0,5"/>
-                    <StackPanel Orientation="Horizontal"
-                                Spacing="10">
-                        <Button Content="Очистить" 
-                                Command="{Binding ClearFormCommand}" 
-                                Background="LightGray" 
-                                Width="80"/>
-                        <Button Content="Сохранить" 
-                                Command="{Binding ConfirmCommand}"
-                                Background="#007ACC"
-                                Foreground="White"
-                                Width="80"/>
-                    </StackPanel>
-                </StackPanel>
-            </Grid>
+                <ScrollViewer>
+                    <StackPanel Name="CartTasks"/>
+                </ScrollViewer>
+            </StackPanel>
         </Border>
     </Grid>
 

@@ -1,6 +1,7 @@
 ﻿using Avalonia.Controls;
 using CommunityToolkit.Mvvm.Messaging;
 using ProductionAccounting_AvaloniaApplication.Scripts;
+using ProductionAccounting_AvaloniaApplication.View.Control;
 using ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 using ProductionAccounting_AvaloniaApplication.Views.Control;
 using ReactiveUI;
@@ -8,7 +9,7 @@ using System;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels
 {
-    public class MainWindowViewModel : ViewModelBase, IRecipient<OpenOrCloseAddUserStatusMessage>, IRecipient<OpenOrCloseStatusMessage>, IRecipient<OpenOrCloseAddDepartmentStatusMessage>, IRecipient<OpenOrCloseAddOperationStatusMessage>, IRecipient<OpenOrCloseAddProductStatusMessage>, IRecipient<OpenOrCloseAddPositionStatusMessage>
+    public class MainWindowViewModel : ViewModelBase, IRecipient<OpenOrCloseAddUserStatusMessage>, IRecipient<OpenOrCloseStatusMessage>, IRecipient<OpenOrCloseAddDepartmentStatusMessage>, IRecipient<OpenOrCloseAddOperationStatusMessage>, IRecipient<OpenOrCloseAddProductStatusMessage>, IRecipient<OpenOrCloseAddPositionStatusMessage>, IRecipient<OpenOrCloseTaskDateilStatusMessage>
     {
         public event Action? LoginStatusChanged;
 
@@ -18,6 +19,7 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
         private readonly AddPositionUserControl _addPosition = new();
         private readonly AddOperationUserControl _addOperation = new();
         private readonly AddProductUserControl _addProduct = new();
+        private readonly TaskDetailUserControl _taskDetail = new();
 
         public Grid? ContentCenter = null;
 
@@ -36,12 +38,7 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
         {
             RightBoardUserControlViewModel = new RightBoardUserControlViewModel(this);
 
-            WeakReferenceMessenger.Default.Register<OpenOrCloseStatusMessage>(this);
-            WeakReferenceMessenger.Default.Register<OpenOrCloseAddUserStatusMessage>(this);
-            WeakReferenceMessenger.Default.Register<OpenOrCloseAddDepartmentStatusMessage>(this);
-            WeakReferenceMessenger.Default.Register<OpenOrCloseAddOperationStatusMessage>(this);
-            WeakReferenceMessenger.Default.Register<OpenOrCloseAddProductStatusMessage>(this);
-            WeakReferenceMessenger.Default.Register<OpenOrCloseAddPositionStatusMessage>(this);
+            WeakReferenceMessenger.Default.RegisterAll(this);
         }
 
         public void Receive(OpenOrCloseStatusMessage message)
@@ -78,6 +75,12 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
         {
             if (message.ShouldOpen) ShowAddUsersUserControl();
             else CloseAddUsersUserControl();
+        }
+
+        public void Receive(OpenOrCloseTaskDateilStatusMessage message)
+        {
+            if (message.ShouldOpen) ShowTaskDetailUserControl(message.TaskId);
+            else CloseTaskDetailUserControl();
         }
 
         public void NotifyLoginStatusChanged()
@@ -299,6 +302,31 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
             {
                 ContentCenter.Children.Clear();
                 if (_addProduct.Parent == ContentCenter) ContentCenter.Children.Remove(_addProduct);
+            }
+        }
+
+        public void ShowTaskDetailUserControl(double _taskId)
+        {
+            if (ContentCenter != null)
+            {
+                var viewModel = new TaskDetailUserControlViewModel(_taskId);
+                var userControl = new TaskDetailUserControl { DataContext = viewModel };
+
+                if (ContentCenter.Children.Contains(userControl)) return;
+
+                ContentCenter.Children.Clear();
+                ContentCenter.Children.Add(userControl);
+
+                //_addProduct.RefreshData();
+            }
+        }
+
+        public void CloseTaskDetailUserControl()
+        {
+            if (ContentCenter != null)
+            {
+                ContentCenter.Children.Clear();
+                if (_taskDetail.Parent == ContentCenter) ContentCenter.Children.Remove(_taskDetail);
             }
         }
     }

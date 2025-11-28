@@ -43,8 +43,8 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
         set => this.RaiseAndSetIfChanged(ref _selectedSingleStatus, value);
     }
 
-    private ComboBoxUserAddWork? _selectedSingleUser;
-    public ComboBoxUserAddWork? SelectedSingleUser
+    private ComboBoxUser? _selectedSingleUser;
+    public ComboBoxUser? SelectedSingleUser
     {
         get => _selectedSingleUser;
         set => this.RaiseAndSetIfChanged(ref _selectedSingleUser, value);
@@ -94,15 +94,15 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
         set => this.RaiseAndSetIfChanged(ref _selectedMassStatus, value);
     }
 
-    private ObservableCollection<ComboBoxUserAddWork> _comboBoxUsers = [];
-    public ObservableCollection<ComboBoxUserAddWork> ComboBoxUsers
+    private ObservableCollection<ComboBoxUser> _comboBoxUsers = [];
+    public ObservableCollection<ComboBoxUser> ComboBoxUsers
     {
         get => _comboBoxUsers;
         set => this.RaiseAndSetIfChanged(ref _comboBoxUsers, value);
     }
 
-    private ComboBoxUserAddWork? _userSelectionStates;
-    public ComboBoxUserAddWork? UserSelectionStates
+    private ComboBoxUser? _userSelectionStates;
+    public ComboBoxUser? UserSelectionStates
     {
         get => _userSelectionStates;
         set
@@ -174,7 +174,7 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
                 {
                     while (await reader.ReadAsync())
                     {
-                        var user = new ComboBoxUserAddWork(
+                        var user = new ComboBoxUser(
                             reader.GetDouble(0),
                             reader.GetString(1),
                             reader.GetString(2),
@@ -234,7 +234,7 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
     {
         if (SelectedMassStatus == null) return;
 
-        var usersToProcess = ApplyToAllUsers ? ComboBoxUsers.ToList() : (SelectedSingleUser != null ? new List<ComboBoxUserAddWork> { SelectedSingleUser } : new());
+        var usersToProcess = ApplyToAllUsers ? ComboBoxUsers.ToList() : (SelectedSingleUser != null ? new List<ComboBoxUser> { SelectedSingleUser } : new());
 
         if (!usersToProcess.Any()) return;
 

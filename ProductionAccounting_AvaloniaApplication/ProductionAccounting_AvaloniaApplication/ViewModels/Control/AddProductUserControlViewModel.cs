@@ -179,7 +179,7 @@ public class AddProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
             try
             {
                 string sql = "INSERT INTO public.product (name, article, description, price_per_unit, price_per_kg, unit, category_id, mark, coefficient)" +
-                            "VALUES (@name, @article, @desc, @priceUnit, @priceKg, @unit, @categoryId, @mark, @coefficient)";
+                            "VALUES (@name, @article, @desc, @priceUnit, @priceKg, @unit, @categoryId, @mark, @coefficient) RETURNING id";
                 using (var connection = new NpgsqlConnection(Arguments.connection))
                 {
                     await connection.OpenAsync();
@@ -197,7 +197,14 @@ public class AddProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
                             command.Parameters.AddWithValue("@mark", ProductMark?.Trim() ?? "");
                             command.Parameters.AddWithValue("@coefficient", ProductCoefficient);
 
-                            await command.ExecuteNonQueryAsync();
+                            var result = await command.ExecuteScalarAsync();
+
+                            if (result == null || result == DBNull.Value) return false;
+
+                            double newProductId = Convert.ToDouble(result);
+
+                            await CreateTaskForMasterAsync(newProductId);
+
                             return true;
                         }
                         catch (Exception ex)
@@ -221,6 +228,30 @@ public class AddProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
             Loges.LoggingProcess(level: LogLevel.WARNING,
                 ex: ex);
             return false;
+        }
+    }
+
+    private async Task CreateTaskForMasterAsync(double productId)
+    {
+        try
+        {
+            string sql = "INSERT INTO public.product_tasks (product_id, status, created_by) VALUES (@pid, 'new', @created_by)";
+            using (var connection = new NpgsqlConnection(Arguments.connection))
+            {
+                await connection.OpenAsync();
+                using (var command = new NpgsqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@pid", productId);
+                    command.Parameters.AddWithValue("@created_by", ManagerCookie.GetIdUser ?? 0);
+                    await command.ExecuteNonQueryAsync();
+                }
+            }
+
+            //WeakReferenceMessenger.Default.Send(new NewProductTaskMessage(productId));
+        }
+        catch (Exception ex)
+        {
+            Loges.LoggingProcess(LogLevel.WARNING, ex: ex);
         }
     }
 

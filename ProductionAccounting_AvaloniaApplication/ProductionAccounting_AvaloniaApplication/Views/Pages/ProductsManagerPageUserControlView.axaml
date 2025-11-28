@@ -1,8 +1,39 @@
-<UserControl xmlns="https://github.com/avaloniaui"
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:controls="using:ProductionAccounting_AvaloniaApplication.Views.Control"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:ProductionAccounting_AvaloniaApplication.ViewModels.Pages"
+             x:DataType="vm:ProductsManagerPageUserControlViewModel"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="ProductionAccounting_AvaloniaApplication.Views.Pages.ProductsManagerPageUserControlView">
+
+    <Grid>
+		<Grid	Margin="10" 
+				RowDefinitions="Auto, Auto, *" 
+				ZIndex="2">
+
+			<Grid	Grid.Row="0" 
+					HorizontalAlignment="Right" 
+					VerticalAlignment="Top" 
+					ColumnDefinitions="Auto, Auto">
+				<StackPanel		Grid.Column="1"
+		  						Orientation="Horizontal"
+		  						HorizontalAlignment="Center"
+		  						Margin="10,0,0,0">
+
+		  			<Button Command="{Binding AddProductCommand}"
+							HorizontalAlignment="Right"
+		  					VerticalAlignment="Top"
+		  					Width="32"
+		  					Height="32"
+		  					ToolTip.Tip="Add a product">
+		  				<Image Source="/Assets/add-64.png"/>
+		  			</Button>
+		  		</StackPanel>
+			</Grid>
+		</Grid>
+		<controls:TabProductUserControl />
+    </Grid>
 
 </UserControl>

@@ -1,6 +1,6 @@
 ﻿namespace ProductionAccounting_AvaloniaApplication.Services.Interfaces;
 
-public interface IComboBoxUserAddWork
+public interface IComboBoxUser
 {
     public double Id { get; set; }
     public string FirstName { get; set; }

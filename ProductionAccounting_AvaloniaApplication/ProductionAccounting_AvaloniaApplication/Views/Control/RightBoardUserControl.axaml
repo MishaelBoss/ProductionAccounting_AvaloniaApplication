@@ -47,7 +47,7 @@
                                    Width="21" 
                                    Height="21" 
                                    Stretch="Uniform"/>
-                            <Label Grid.Column="1" Classes="LabelButtonButton" Content="Admin panel"/>
+                            <Label Grid.Column="1" Classes="LabelButtonButton" Content="Manager"/>
                         </Grid>
                     </Button>
 

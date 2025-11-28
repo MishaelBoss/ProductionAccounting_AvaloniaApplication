@@ -10,10 +10,6 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class WorkUserControlViewModel : ViewModelBase, INotifyPropertyChanging
 {
-    public WorkUserControlViewModel() 
-    {
-    }
-
     public StackPanel? CartTasks { get; set; } = null;
 
     private List<CartTaskUserControl> tasksList = [];

@@ -8,10 +8,6 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="500"
              x:Class="ProductionAccounting_AvaloniaApplication.Views.Pages.AdminPageUserControlView">
 
-    <Design.DataContext>
-		<vm:AdminPageUserControlViewModel/>
-	</Design.DataContext>
-
     <Grid>
 		<Grid	Margin="10" 
 				RowDefinitions="Auto, Auto, *" 
@@ -87,4 +83,5 @@
         </TabControl>
         
     </Grid>
+
 </UserControl>

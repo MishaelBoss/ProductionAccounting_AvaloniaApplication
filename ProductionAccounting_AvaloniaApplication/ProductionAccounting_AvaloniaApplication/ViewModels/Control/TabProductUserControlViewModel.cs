@@ -41,20 +41,6 @@ public class TabProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
 
     public ICommand RefreshAsyncCommand
         => new RelayCommand(() => GetList());
-/*
-    private bool _isProductView = false;
-    public bool IsProductView
-    {
-        get => _isProductView;
-        set
-        {
-            if (_isProductView != value)
-            {
-                _isProductView = value;
-                OnPropertyChanged(nameof(IsProductView));
-            }
-        }
-    }*/
 
     private string _search = string.Empty;
     public string Search
@@ -242,12 +228,12 @@ public class TabProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
                         {
                             var viewModel = new CartProductUserControlViewModel
                             {
-                                ProductID = reader.IsDBNull(0) ? 0 : reader.GetDouble(0),
+                                ProductId = reader.IsDBNull(0) ? 0 : reader.GetDouble(0),
                                 Name = reader.IsDBNull(1) ? string.Empty : reader.GetString(1),
                                 Article = reader.IsDBNull(2) ? string.Empty : reader.GetString(2),
-                                PricePerUnit = reader.IsDBNull(3) ? string.Empty : reader.GetDecimal(3).ToString(),
+                                PricePerUnit = reader.IsDBNull(3) ? 0 : reader.GetInt32(3),
                                 Unit = reader.IsDBNull(4) ? string.Empty : reader.GetString(4),
-                                Coefficient = reader.IsDBNull(5) ? string.Empty : reader.GetDecimal(5).ToString()
+                                Coefficient = reader.IsDBNull(5) ? 0 : reader.GetInt32(5)
                             };
 
                             var userControl = new CartProductUserControl

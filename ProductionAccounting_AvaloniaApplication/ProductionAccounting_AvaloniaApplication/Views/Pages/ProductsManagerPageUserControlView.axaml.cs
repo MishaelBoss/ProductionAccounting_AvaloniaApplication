@@ -8,4 +8,8 @@ public partial class ProductsManagerPageUserControlView : UserControl
     {
         InitializeComponent();
     }
+
+    private void Button_ActualThemeVariantChanged(object? sender, System.EventArgs e)
+    {
+    }
 }
