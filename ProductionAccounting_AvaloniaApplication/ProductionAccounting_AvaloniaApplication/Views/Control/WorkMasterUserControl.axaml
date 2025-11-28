@@ -8,15 +8,13 @@
              x:Class="ProductionAccounting_AvaloniaApplication.Views.Control.WorkMasterUserControl">
 
     <Grid>
-        <Border Grid.Row="4" 
-                Background="White" 
+        <Border Background="White" 
                 BorderBrush="#E0E0E0" 
                 BorderThickness="1" 
                 CornerRadius="8" 
                 Opacity="0.5"/>
 
-        <Border Grid.Row="4" 
-                Padding="20">
+        <Border Padding="20">
             <StackPanel Spacing="15">
                 <TextBlock Text="Работы" 
                            FontSize="16"

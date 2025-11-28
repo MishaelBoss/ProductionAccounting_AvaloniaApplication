@@ -5,6 +5,6 @@
              xmlns:vm="using:ProductionAccounting_AvaloniaApplication.ViewModels.Control"
 			 x:DataType="vm:CartSubProductOperationUserControlViewModel"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="ProductionAccounting_AvaloniaApplication.CartSubProductOperationUserControl">
+             x:Class="ProductionAccounting_AvaloniaApplication.Views.Control.CartSubProductOperationUserControl">
   Welcome to Avalonia!
 </UserControl>
