@@ -103,7 +103,9 @@ public class TaskDetailUserControlViewModel : ViewModelBase, INotifyPropertyChan
 
                     await command.ExecuteNonQueryAsync();
 
-                     LoadSubProductAsync();
+                    await LoadSubProductAsync();
+
+                    ClearForm();
                 }
             }
         }
@@ -164,6 +166,13 @@ public class TaskDetailUserControlViewModel : ViewModelBase, INotifyPropertyChan
             ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NoConnectToDB);
             Loges.LoggingProcess(LogLevel.ERROR, ex: ex);
         }
+    }
+
+    private void ClearForm() 
+    {
+        Title = string.Empty;
+        PlannedQuantity = 1;
+        Notes = string.Empty;
     }
 
     public new event PropertyChangedEventHandler? PropertyChanged;
