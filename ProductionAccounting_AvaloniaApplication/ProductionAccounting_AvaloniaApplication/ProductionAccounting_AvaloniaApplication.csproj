@@ -25,7 +25,7 @@
 
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.3.9" />
-    <PackageReference Include="Avalonia.Angle.Windows.Natives" Version="2.2.0.20230930" />
+    <PackageReference Include="Avalonia.Angle.Windows.Natives" Version="2.1.25547.20250602" />
     <PackageReference Include="Avalonia.BuildServices" Version="11.3.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
