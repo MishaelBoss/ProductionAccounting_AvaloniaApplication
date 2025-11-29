@@ -7,7 +7,7 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="850"
              x:Class="ProductionAccounting_AvaloniaApplication.Views.Control.WorkMasterUserControl">
 
-    <Grid>
+    <Grid ColumnDefinitions="*, Auto">
         <Border Background="White" 
                 BorderBrush="#E0E0E0" 
                 BorderThickness="1" 
@@ -26,6 +26,14 @@
                 </ScrollViewer>
             </StackPanel>
         </Border>
+        
+        <Grid   Grid.Column="1"
+                IsVisible="True"
+                Name="ProductContent"
+                Margin="5,10,0,10"
+                Width="400"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"/>
     </Grid>
 
 </UserControl>

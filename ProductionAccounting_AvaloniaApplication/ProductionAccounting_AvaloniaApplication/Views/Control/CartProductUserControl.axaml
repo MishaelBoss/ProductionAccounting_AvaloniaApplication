@@ -86,14 +86,13 @@
 						Spacing="6"
 						VerticalAlignment="Center">
 
-				<Button Command="{Binding OpenTaskDetailCommand}"
+				<Button Command="{Binding OpenPruductViewCommand}"
 						Width="34"
 						Height="34"
 						CornerRadius="6"
 						Background="#4A90E2"
 						BorderThickness="0"
-						IsVisible="{Binding IsAdministrator}"
-						ToolTip.Tip="TaskDetail">
+						ToolTip.Tip="ViewProduct">
 					<Image Source="/Assets/search-list-64.png"
 						   Width="18"
 						   Height="18"/>

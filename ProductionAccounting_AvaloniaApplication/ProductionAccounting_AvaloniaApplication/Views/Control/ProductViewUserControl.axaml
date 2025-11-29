@@ -1,0 +1,59 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:ProductionAccounting_AvaloniaApplication.ViewModels.Control"
+             x:DataType="vm:ProductViewUserControlViewModel"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ProductionAccounting_AvaloniaApplication.Views.Control.ProductViewUserControl">
+
+    <Grid>
+         <Border Background="White"
+                 Opacity="0.5"
+                 CornerRadius="5"
+                 ClipToBounds="True"/>
+         <ScrollViewer Margin="10">
+             <StackPanel Orientation="Vertical">
+                 <StackPanel Orientation="Horizontal"
+                             HorizontalAlignment="Center"
+                             Spacing="5">
+                     <Button HorizontalAlignment="Right"
+		  					VerticalAlignment="Top"
+		  					Width="32"
+		  					Height="32"
+		  					ToolTip.Tip="Adds">
+		  				<Image Source="/Assets/add-64.png"/>
+		  				<Button.Flyout>
+		  					<Flyout Placement="Bottom">
+		  						<ListBox>
+		  							<Button Command="{Binding AddSubProductCommand}"
+		  									VerticalAlignment="Stretch"
+		  									HorizontalAlignment="Stretch"
+		  									Content="Add sub product"/>
+		  						</ListBox>
+		  					</Flyout>
+		  				</Button.Flyout>
+		  			</Button>
+                    <TextBlock Text="{Binding Name}"/>
+                    <TextBlock Text="{Binding StatusDisplay}"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Center"
+                            Spacing="5">
+                        <TextBlock Text="{Binding ProductId}"/>
+                        <TextBlock Text="{Binding Coefficient}"/>
+                        <TextBlock Text="{Binding Mark}"/>
+                        <TextBlock Text="{Binding Notes}"/>
+                </StackPanel>
+                <TabControl Margin="5">
+                   <TabItem Header="SubProduct">
+                                <StackPanel Name="SubProductContent"
+                                            Orientation="Vertical"
+                                            Margin="0,10,0,0"/>
+                   </TabItem>
+                </TabControl>
+             </StackPanel>
+         </ScrollViewer>
+    </Grid>
+
+</UserControl>

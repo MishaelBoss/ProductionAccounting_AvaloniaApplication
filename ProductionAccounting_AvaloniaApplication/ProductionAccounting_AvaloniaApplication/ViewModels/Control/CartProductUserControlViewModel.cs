@@ -29,8 +29,8 @@ public class CartProductUserControlViewModel : ViewModelBase
             confirmDeleteWindows.Show();
         });
 
-    public ICommand OpenTaskDetailCommand 
-        => new RelayCommand(() => { WeakReferenceMessenger.Default.Send(new OpenOrCloseTaskDateilStatusMessage(true, Id)); });
+    public ICommand OpenPruductViewCommand
+        => new RelayCommand(() => { WeakReferenceMessenger.Default.Send(new OpenOrCloseProductViewStatusMessage(true, Id)); });
 
 
     private string _status = "new";
