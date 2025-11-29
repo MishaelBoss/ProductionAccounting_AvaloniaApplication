@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
-using ProductionAccounting_AvaloniaApplication.View.Control;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -77,7 +76,7 @@ public class TabWorkshopDepartmentUserControlViewModel : ViewModelBase, IRecipie
             else
             {
                 StackPanelHelper.ClearAndRefreshStackPanel<CartWorkshopDepartmentUserControl>(HomeMainContent, workshopDepartmentList);
-                ShowErrorUserControl(ErrorLevel.NotFound);
+                ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NotFound);
             }
         }
         catch (Exception ex)
@@ -145,7 +144,7 @@ public class TabWorkshopDepartmentUserControlViewModel : ViewModelBase, IRecipie
         if (userIds.Count == 0)
         {
             StackPanelHelper.ClearAndRefreshStackPanel<CartWorkshopDepartmentUserControl>(HomeMainContent, workshopDepartmentList);
-            ShowErrorUserControl(ErrorLevel.NotFound);
+            ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NotFound);
             return;
         }
 
@@ -199,12 +198,12 @@ public class TabWorkshopDepartmentUserControlViewModel : ViewModelBase, IRecipie
 
             StackPanelHelper.RefreshStackPanelContent<CartWorkshopDepartmentUserControl>(HomeMainContent, workshopDepartmentList);
 
-            if (workshopDepartmentList.Count == 0) ShowErrorUserControl(ErrorLevel.NotFound);
+            if (workshopDepartmentList.Count == 0) ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NotFound);
         }
         catch (NpgsqlException ex)
         {
             StackPanelHelper.ClearAndRefreshStackPanel<CartWorkshopDepartmentUserControl>(HomeMainContent, workshopDepartmentList);
-            ShowErrorUserControl(ErrorLevel.NoConnectToDB);
+            ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NoConnectToDB);
 
             Loges.LoggingProcess(LogLevel.CRITICAL,
                 "Connection or request error",
@@ -279,20 +278,6 @@ public class TabWorkshopDepartmentUserControlViewModel : ViewModelBase, IRecipie
             Loges.LoggingProcess(LogLevel.ERROR,
                 "Connection or request error",
                 ex: ex);
-        }
-    }
-
-    private void ShowErrorUserControl(ErrorLevel level)
-    {
-        if (HomeMainContent != null)
-        {
-            var notFoundUserControlViewModel = new NotFoundUserControlViewModel(level);
-            var notFoundUserControl = new NotFoundUserControl { DataContext = notFoundUserControlViewModel };
-
-            if (HomeMainContent.Children.Contains(notFoundUserControl)) return;
-
-            HomeMainContent.Children.Clear();
-            HomeMainContent.Children.Add(notFoundUserControl);
         }
     }
 

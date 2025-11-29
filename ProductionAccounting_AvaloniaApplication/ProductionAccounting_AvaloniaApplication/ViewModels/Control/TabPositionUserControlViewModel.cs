@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
-using ProductionAccounting_AvaloniaApplication.View.Control;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -77,7 +76,7 @@ public class TabPositionUserControlViewModel : ViewModelBase, IRecipient<Refresh
             else
             {
                 StackPanelHelper.ClearAndRefreshStackPanel<CartPositionUserControl>(HomeMainContent, positionList);
-                ShowErrorUserControl(ErrorLevel.NotFound);
+                ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NotFound);
             }
         }
         catch (Exception ex)
@@ -145,7 +144,7 @@ public class TabPositionUserControlViewModel : ViewModelBase, IRecipient<Refresh
         if (userIds.Count == 0)
         {
             StackPanelHelper.ClearAndRefreshStackPanel<CartPositionUserControl>(HomeMainContent, positionList);
-            ShowErrorUserControl(ErrorLevel.NotFound);
+            ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NotFound);
             return;
         }
 
@@ -199,12 +198,12 @@ public class TabPositionUserControlViewModel : ViewModelBase, IRecipient<Refresh
 
             StackPanelHelper.RefreshStackPanelContent<CartPositionUserControl>(HomeMainContent, positionList);
 
-            if (positionList.Count == 0) ShowErrorUserControl(ErrorLevel.NotFound);
+            if (positionList.Count == 0) ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NotFound);
         }
         catch (NpgsqlException ex)
         {
             StackPanelHelper.ClearAndRefreshStackPanel<CartPositionUserControl>(HomeMainContent, positionList);
-            ShowErrorUserControl(ErrorLevel.NoConnectToDB);
+            ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NoConnectToDB);
 
             Loges.LoggingProcess(LogLevel.CRITICAL,
                 "Connection or request error",
@@ -279,20 +278,6 @@ public class TabPositionUserControlViewModel : ViewModelBase, IRecipient<Refresh
             Loges.LoggingProcess(LogLevel.ERROR,
                 "Connection or request error",
                 ex: ex);
-        }
-    }
-
-    private void ShowErrorUserControl(ErrorLevel level)
-    {
-        if (HomeMainContent != null)
-        {
-            var notFoundUserControlViewModel = new NotFoundUserControlViewModel(level);
-            var notFoundUserControl = new NotFoundUserControl { DataContext = notFoundUserControlViewModel };
-
-            if (HomeMainContent.Children.Contains(notFoundUserControl)) return;
-
-            HomeMainContent.Children.Clear();
-            HomeMainContent.Children.Add(notFoundUserControl);
         }
     }
 

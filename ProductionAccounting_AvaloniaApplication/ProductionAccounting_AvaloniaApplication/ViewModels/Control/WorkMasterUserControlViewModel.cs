@@ -1,7 +1,6 @@
 ﻿using Avalonia.Controls;
 using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
-using ProductionAccounting_AvaloniaApplication.View.Control;
 using ProductionAccounting_AvaloniaApplication.Views.Control;
 using System;
 using System.Collections.Generic;
@@ -373,12 +372,12 @@ public class WorkMasterUserControlViewModel : ViewModelBase, INotifyPropertyChan
 
             StackPanelHelper.RefreshStackPanelContent<CartProductUserControl>(CartTasks, productList);
 
-            if (productList.Count == 0) ShowErrorUserControl(ErrorLevel.NotFound);
+            if (productList.Count == 0) ItemNotFoundException.Show(CartTasks, ErrorLevel.NotFound);
         }
         catch (NpgsqlException ex)
         {
             StackPanelHelper.ClearAndRefreshStackPanel<CartProductUserControl>(CartTasks, productList);
-            ShowErrorUserControl(ErrorLevel.NoConnectToDB);
+            ItemNotFoundException.Show(CartTasks, ErrorLevel.NoConnectToDB);
             Loges.LoggingProcess(LogLevel.CRITICAL, "Error connect to DB", ex: ex);
         }
         catch (Exception ex)
@@ -386,20 +385,6 @@ public class WorkMasterUserControlViewModel : ViewModelBase, INotifyPropertyChan
             StackPanelHelper.ClearAndRefreshStackPanel<CartProductUserControl>(CartTasks, productList);
             Loges.LoggingProcess(LogLevel.WARNING, 
                 ex: ex);
-        }
-    }
-
-    private void ShowErrorUserControl(ErrorLevel level)
-    {
-        if (CartTasks != null)
-        {
-            var notFoundUserControlViewModel = new NotFoundUserControlViewModel(level);
-            var notFoundUserControl = new NotFoundUserControl { DataContext = notFoundUserControlViewModel };
-
-            if (CartTasks.Children.Contains(notFoundUserControl)) return;
-
-            CartTasks.Children.Clear();
-            CartTasks.Children.Add(notFoundUserControl);
         }
     }
 

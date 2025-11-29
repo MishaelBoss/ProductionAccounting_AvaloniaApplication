@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
-using ProductionAccounting_AvaloniaApplication.View.Control;
 using ProductionAccounting_AvaloniaApplication.Views.Control;
 using System;
 using System.Collections.Generic;
@@ -111,7 +110,7 @@ public class TabProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
             else
             {
                 StackPanelHelper.ClearAndRefreshStackPanel<CartProductUserControl>(HomeMainContent, productList);
-                ShowErrorUserControl(ErrorLevel.NotFound);
+                ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NotFound);
             }
         }
         catch (Exception ex)
@@ -191,7 +190,7 @@ public class TabProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
         if (userIds.Count == 0)
         {
             StackPanelHelper.ClearAndRefreshStackPanel<CartProductUserControl>(HomeMainContent, productList);
-            ShowErrorUserControl(ErrorLevel.NotFound);
+            ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NotFound);
             return;
         }
 
@@ -249,12 +248,12 @@ public class TabProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
 
             StackPanelHelper.RefreshStackPanelContent<CartProductUserControl>(HomeMainContent, productList);
 
-            if (productList.Count == 0) ShowErrorUserControl(ErrorLevel.NotFound);
+            if (productList.Count == 0) ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NotFound);
         }
         catch (NpgsqlException ex)
         {
             StackPanelHelper.ClearAndRefreshStackPanel<CartProductUserControl>(HomeMainContent, productList);
-            ShowErrorUserControl(ErrorLevel.NoConnectToDB);
+            ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NoConnectToDB);
             Loges.LoggingProcess(LogLevel.CRITICAL,
                 "Connection or request error",
                 ex: ex);
@@ -336,20 +335,6 @@ public class TabProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
         ShowActive = true;
         ShowInactive = true;
         Search = string.Empty;
-    }
-
-    private void ShowErrorUserControl(ErrorLevel level)
-    {
-        if (HomeMainContent != null)
-        {
-            var notFoundUserControlViewModel = new NotFoundUserControlViewModel(level);
-            var notFoundUserControl = new NotFoundUserControl { DataContext = notFoundUserControlViewModel };
-
-            if (HomeMainContent.Children.Contains(notFoundUserControl)) return;
-
-            HomeMainContent.Children.Clear();
-            HomeMainContent.Children.Add(notFoundUserControl);
-        }
     }
 
     public new event PropertyChangedEventHandler? PropertyChanged;

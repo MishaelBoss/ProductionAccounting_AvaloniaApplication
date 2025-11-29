@@ -1,6 +1,6 @@
 using Avalonia.Controls;
 
-namespace ProductionAccounting_AvaloniaApplication.View.Control;
+namespace ProductionAccounting_AvaloniaApplication.Views.Control;
 
 public partial class NotFoundUserControl : UserControl
 {

@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
-using ProductionAccounting_AvaloniaApplication.View.Control;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -132,7 +131,7 @@ public class TabOperationUserControlViewModel : ViewModelBase, INotifyPropertyCh
             else
             {
                 StackPanelHelper.ClearAndRefreshStackPanel<CartOperationUserControl>(HomeMainContent, operationList);
-                ShowErrorUserControl(ErrorLevel.NotFound);
+                ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NotFound);
             }
         }
         catch (Exception ex)
@@ -212,7 +211,7 @@ public class TabOperationUserControlViewModel : ViewModelBase, INotifyPropertyCh
         if (userIds.Count == 0)
         {
             StackPanelHelper.ClearAndRefreshStackPanel<CartOperationUserControl>(HomeMainContent, operationList);
-            ShowErrorUserControl(ErrorLevel.NotFound);
+            ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NotFound);
             return;
         }
 
@@ -269,12 +268,12 @@ public class TabOperationUserControlViewModel : ViewModelBase, INotifyPropertyCh
 
             StackPanelHelper.RefreshStackPanelContent<CartOperationUserControl>(HomeMainContent, operationList);
 
-            if (operationList.Count == 0) ShowErrorUserControl(ErrorLevel.NotFound);
+            if (operationList.Count == 0) ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NotFound);
         }
         catch (NpgsqlException ex)
         {
             StackPanelHelper.ClearAndRefreshStackPanel<CartOperationUserControl>(HomeMainContent, operationList);
-            ShowErrorUserControl(ErrorLevel.NoConnectToDB);
+            ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NoConnectToDB);
 
             Loges.LoggingProcess(LogLevel.CRITICAL,
                 "Connection or request error",
@@ -349,20 +348,6 @@ public class TabOperationUserControlViewModel : ViewModelBase, INotifyPropertyCh
             Loges.LoggingProcess(LogLevel.ERROR,
                 "Connection or request error",
                 ex: ex);
-        }
-    }
-
-    private void ShowErrorUserControl(ErrorLevel level)
-    {
-        if (HomeMainContent != null)
-        {
-            var notFoundUserControlViewModel = new NotFoundUserControlViewModel(level);
-            var notFoundUserControl = new NotFoundUserControl { DataContext = notFoundUserControlViewModel };
-
-            if (HomeMainContent.Children.Contains(notFoundUserControl)) return;
-
-            HomeMainContent.Children.Clear();
-            HomeMainContent.Children.Add(notFoundUserControl);
         }
     }
 

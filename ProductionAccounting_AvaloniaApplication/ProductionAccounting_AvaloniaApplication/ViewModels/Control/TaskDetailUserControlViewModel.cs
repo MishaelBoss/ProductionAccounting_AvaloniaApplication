@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
-using ProductionAccounting_AvaloniaApplication.View.Control;
+using ProductionAccounting_AvaloniaApplication.Views.Control;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -156,27 +156,13 @@ public class TaskDetailUserControlViewModel : ViewModelBase, INotifyPropertyChan
 
             StackPanelHelper.RefreshStackPanelContent<CartSubProductUserControl>(HomeMainContent, subProductList);
 
-            if (subProductList.Count == 0) ShowErrorUserControl(ErrorLevel.NotFound);
+            if (subProductList.Count == 0) ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NotFound);
         }
         catch (Exception ex)
         {
             StackPanelHelper.ClearAndRefreshStackPanel<CartSubProductUserControl>(HomeMainContent, subProductList);
+            ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NoConnectToDB);
             Loges.LoggingProcess(LogLevel.ERROR, ex: ex);
-        }
-    }
-
-
-    private void ShowErrorUserControl(ErrorLevel level)
-    {
-        if (HomeMainContent != null)
-        {
-            var notFoundUserControlViewModel = new NotFoundUserControlViewModel(level);
-            var notFoundUserControl = new NotFoundUserControl { DataContext = notFoundUserControlViewModel };
-
-            if (HomeMainContent.Children.Contains(notFoundUserControl)) return;
-
-            HomeMainContent.Children.Clear();
-            HomeMainContent.Children.Add(notFoundUserControl);
         }
     }
 

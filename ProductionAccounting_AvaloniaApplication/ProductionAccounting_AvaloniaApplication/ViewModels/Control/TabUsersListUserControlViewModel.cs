@@ -4,7 +4,6 @@ using CommunityToolkit.Mvvm.Messaging;
 using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Models;
 using ProductionAccounting_AvaloniaApplication.Scripts;
-using ProductionAccounting_AvaloniaApplication.View.Control;
 using ProductionAccounting_AvaloniaApplication.Views.Control;
 using ReactiveUI;
 using System;
@@ -256,7 +255,7 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
             else
             {
                 StackPanelHelper.ClearAndRefreshStackPanel<CartUserListUserControl>(HomeMainContent, userList);
-                ShowErrorUserControl(ErrorLevel.NotFound);
+                ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NotFound);
             }
         }
         catch (Exception ex)
@@ -419,7 +418,7 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
         if (userIds.Count == 0)
         {
             StackPanelHelper.ClearAndRefreshStackPanel<CartUserListUserControl>(HomeMainContent, userList);
-            ShowErrorUserControl(ErrorLevel.NotFound);
+            ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NoConnectToDB);
             return;
         }
 
@@ -488,12 +487,12 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
 
             StackPanelHelper.RefreshStackPanelContent<CartUserListUserControl>(HomeMainContent, userList);
 
-            if (userList.Count == 0) ShowErrorUserControl(ErrorLevel.NotFound);
+            if (userList.Count == 0) ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NoConnectToDB);
         }
         catch (NpgsqlException ex)
         {
             StackPanelHelper.ClearAndRefreshStackPanel<CartUserListUserControl>(HomeMainContent, userList);
-            ShowErrorUserControl(ErrorLevel.NoConnectToDB);
+            ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NoConnectToDB);
 
             Loges.LoggingProcess(LogLevel.CRITICAL,
                 "Connection or request error",
@@ -608,20 +607,6 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
         {
             ProfileContent.Children.Clear();
             if (_profileView.Parent == ProfileContent) ProfileContent.Children.Remove(_profileView);
-        }
-    }
-
-    private void ShowErrorUserControl(ErrorLevel level)
-    {
-        if (HomeMainContent != null)
-        {
-            var notFoundUserControlViewModel = new NotFoundUserControlViewModel(level);
-            var notFoundUserControl = new NotFoundUserControl { DataContext = notFoundUserControlViewModel };
-
-            if (HomeMainContent.Children.Contains(notFoundUserControl)) return;
-
-            HomeMainContent.Children.Clear();
-            HomeMainContent.Children.Add(notFoundUserControl);
         }
     }
 
