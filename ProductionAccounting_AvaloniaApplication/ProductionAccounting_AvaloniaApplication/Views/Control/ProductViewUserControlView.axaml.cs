@@ -4,9 +4,9 @@ using ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 namespace ProductionAccounting_AvaloniaApplication.Views.Control;
 
-public partial class ProductViewUserControl : UserControl
+public partial class ProductViewUserControlView : UserControl
 {
-    public ProductViewUserControl()
+    public ProductViewUserControlView()
     {
         InitializeComponent();
         Loaded += OnLoaded;

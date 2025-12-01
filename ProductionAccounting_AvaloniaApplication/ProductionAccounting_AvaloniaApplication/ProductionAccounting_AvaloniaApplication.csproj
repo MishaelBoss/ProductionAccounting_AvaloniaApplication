@@ -48,6 +48,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Views\Control\ProductViewUserControlView.axaml.cs">
+      <DependentUpon>ProductViewUserControlView.axaml</DependentUpon>
+    </Compile>
     <Compile Update="Views\Control\WorkUserControl.axaml.cs">
       <DependentUpon>WorkUserControl.axaml</DependentUpon>
     </Compile>

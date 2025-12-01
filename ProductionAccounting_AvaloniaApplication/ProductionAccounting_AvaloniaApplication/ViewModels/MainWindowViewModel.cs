@@ -2,13 +2,14 @@
 using CommunityToolkit.Mvvm.Messaging;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ProductionAccounting_AvaloniaApplication.ViewModels.Control;
+using ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
 using ProductionAccounting_AvaloniaApplication.Views.Control;
 using ReactiveUI;
 using System;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels
 {
-    public class MainWindowViewModel : ViewModelBase, IRecipient<OpenOrCloseAddUserStatusMessage>, IRecipient<OpenOrCloseStatusMessage>, IRecipient<OpenOrCloseAddDepartmentStatusMessage>, IRecipient<OpenOrCloseAddOperationStatusMessage>, IRecipient<OpenOrCloseAddProductStatusMessage>, IRecipient<OpenOrCloseAddPositionStatusMessage>, IRecipient<OpenOrCloseTaskDateilStatusMessage>
+    public class MainWindowViewModel : ViewModelBase, IRecipient<OpenOrCloseAddUserStatusMessage>, IRecipient<OpenOrCloseStatusMessage>, IRecipient<OpenOrCloseAddDepartmentStatusMessage>, IRecipient<OpenOrCloseAddOperationStatusMessage>, IRecipient<OpenOrCloseAddProductStatusMessage>, IRecipient<OpenOrCloseAddPositionStatusMessage>, IRecipient<OpenOrCloseTaskDateilStatusMessage>, IRecipient<OpenOrCloseProductViewStatusMessage>
     {
         public event Action? LoginStatusChanged;
 
@@ -26,6 +27,8 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
         private readonly AuthorizationUserControl _authorization = new();
         private readonly ProfileUserUserControl _profileUser = new();
 
+        private readonly ViewPageUserControlViewModel viewPageUserControlViewModel = new();
+
         private ViewModelBase? _currentPage;
         public ViewModelBase? CurrentPage
         {
@@ -38,6 +41,22 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
             RightBoardUserControlViewModel = new RightBoardUserControlViewModel(this);
 
             WeakReferenceMessenger.Default.RegisterAll(this);
+        }
+
+        public void Receive(OpenOrCloseProductViewStatusMessage message)
+        {
+            if (message.ShouldOpen)
+            {
+                var productViewModel = new ProductViewUserControlViewModel(message.ProductId);
+
+                viewPageUserControlViewModel.ShowViewModel(productViewModel);
+
+                CurrentPage = viewPageUserControlViewModel;
+            }
+            else
+            {
+                //CloseProfileUserControl();
+            }
         }
 
         public void Receive(OpenOrCloseStatusMessage message)

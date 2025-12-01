@@ -1,5 +1,4 @@
 ﻿using Avalonia.Controls;
-using CommunityToolkit.Mvvm.Messaging;
 using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ProductionAccounting_AvaloniaApplication.Views.Control;
@@ -11,31 +10,9 @@ using static ProductionAccounting_AvaloniaApplication.ViewModels.Control.NotFoun
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
-public class WorkMasterUserControlViewModel : ViewModelBase, INotifyPropertyChanging, IRecipient<OpenOrCloseProductViewStatusMessage>
+public class WorkMasterUserControlViewModel : ViewModelBase, INotifyPropertyChanging
 {
-    public WorkMasterUserControlViewModel()
-    {
-        WeakReferenceMessenger.Default.Register<OpenOrCloseProductViewStatusMessage>(this);
-    }
-
-    public void Receive(OpenOrCloseProductViewStatusMessage message)
-    {
-        if (message.ShouldOpen)
-        {
-            ShowProfileUserControl(message.ProductId);
-            //IsProfileView = true;
-        }
-        else
-        {
-            CloseProfileUserControl();
-            //IsProfileView = false;
-        }
-    }
-
     public StackPanel? CartTasks { get; set; } = null;
-    public Grid? ProductContent { get; set; } = null;
-
-    private readonly ProductViewUserControl _productView = new();
 
     private List<CartProductUserControl> productList = [];
 
@@ -409,31 +386,6 @@ public class WorkMasterUserControlViewModel : ViewModelBase, INotifyPropertyChan
             StackPanelHelper.ClearAndRefreshStackPanel<CartProductUserControl>(CartTasks, productList);
             Loges.LoggingProcess(LogLevel.WARNING, 
                 ex: ex);
-        }
-    }
-
-    public void ShowProfileUserControl(double productId)
-    {
-        if (ProductContent != null)
-        {
-            var userControl = new ProductViewUserControl { DataContext = new ProductViewUserControlViewModel(productId) };
-
-            if (ProductContent.Children.Contains(userControl))
-            {
-                return;
-            }
-
-            if (userControl.Parent is Panel currentParent) currentParent.Children.Remove(userControl);
-            ProductContent.Children.Clear();
-            ProductContent.Children.Add(userControl);
-        }
-    }
-    public void CloseProfileUserControl()
-    {
-        if (ProductContent != null)
-        {
-            ProductContent.Children.Clear();
-            if (_productView.Parent == ProductContent) ProductContent.Children.Remove(_productView);
         }
     }
 

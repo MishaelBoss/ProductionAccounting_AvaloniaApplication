@@ -17,7 +17,6 @@ public partial class WorkMasterUserControl : UserControl
     {
         if (DataContext is not WorkMasterUserControlViewModel viewModel) return;
         viewModel.CartTasks = CartTasks;
-        viewModel.ProductContent = ProductContent;
         await viewModel.LoadTasksAsync();
     }
 
