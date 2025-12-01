@@ -13,7 +13,10 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 public class CartSubProductUserControlViewModel : ViewModelBase
 {
     public ICommand DeleteCommand
-        => new RelayCommand(async () => { if(await DeleteAsync()) WeakReferenceMessenger.Default.Send(new RefreshSubProductListMessage()); });
+        => new RelayCommand(async () => await DeleteAsync());
+
+    public ICommand ViewCommand
+        => new RelayCommand(async () => { WeakReferenceMessenger.Default.Send(new OpenOrCloseSubProductStatusMessage()); });
 
     private double? _id;
     public double? Id
@@ -95,6 +98,8 @@ public class CartSubProductUserControlViewModel : ViewModelBase
 
                     Loges.LoggingProcess(level: LogLevel.INFO,
                         message: $"Deleted position {Id}, Name {Name}");
+
+                    WeakReferenceMessenger.Default.Send(new RefreshSubProductListMessage());
 
                     return true;
                 }

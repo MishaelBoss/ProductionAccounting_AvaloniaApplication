@@ -67,6 +67,19 @@
 						Orientation="Horizontal"
 						Spacing="6"
 						VerticalAlignment="Center">
+				<Button Command="{Binding ViewCommand}"
+						Width="34"
+						Height="34"
+						CornerRadius="6"
+						Background="#4A90E2"
+						BorderThickness="0"
+						IsVisible="{Binding IsAdministrator}"
+						ToolTip.Tip="View">
+					<Image Source="/Assets/search-list-64.png"
+						   Width="18"
+						   Height="18"/>
+				</Button>
+
 				<Button Command="{Binding DeleteCommand}"
 						Width="34"
 						Height="34"

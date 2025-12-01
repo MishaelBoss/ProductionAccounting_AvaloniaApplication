@@ -12,10 +12,14 @@ public partial class ProductViewUserControlView : UserControl
         Loaded += OnLoaded;
     }
 
-    private void OnLoaded(object? sender, RoutedEventArgs e) 
+    private void OnLoaded(object? sender, RoutedEventArgs e)
     {
         if (DataContext is not ProductViewUserControlViewModel viewModel) return;
         viewModel.SubProductContent = SubProductContent;
         _ = viewModel.LoadSubProductAsync();
+    }
+
+    private void Grid_ActualThemeVariantChanged(object? sender, System.EventArgs e)
+    {
     }
 }

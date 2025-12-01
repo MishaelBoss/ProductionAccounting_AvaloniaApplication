@@ -9,7 +9,7 @@ using System;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels
 {
-    public class MainWindowViewModel : ViewModelBase, IRecipient<OpenOrCloseAddUserStatusMessage>, IRecipient<OpenOrCloseStatusMessage>, IRecipient<OpenOrCloseAddDepartmentStatusMessage>, IRecipient<OpenOrCloseAddOperationStatusMessage>, IRecipient<OpenOrCloseAddProductStatusMessage>, IRecipient<OpenOrCloseAddPositionStatusMessage>, IRecipient<OpenOrCloseTaskDateilStatusMessage>, IRecipient<OpenOrCloseProductViewStatusMessage>
+    public class MainWindowViewModel : ViewModelBase, IRecipient<OpenOrCloseAddUserStatusMessage>, IRecipient<OpenOrCloseStatusMessage>, IRecipient<OpenOrCloseAddDepartmentStatusMessage>, IRecipient<OpenOrCloseAddOperationStatusMessage>, IRecipient<OpenOrCloseAddProductStatusMessage>, IRecipient<OpenOrCloseAddPositionStatusMessage>, IRecipient<OpenOrCloseTaskDateilStatusMessage>, IRecipient<OpenOrCloseProductViewStatusMessage>, IRecipient<OpenOrCloseEmployeeAssignmentMasterSubMarkStatusMessage>
     {
         public event Action? LoginStatusChanged;
 
@@ -20,6 +20,7 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
         private readonly AddOperationUserControl _addOperation = new();
         private readonly AddProductUserControl _addProduct = new();
         private readonly TaskDetailUserControl _taskDetail = new();
+        private readonly EmployeeAssignmentMasterSubMarkUserControl _employeeAssignmentMasterSubMarkUserControl = new();
 
         public Grid? ContentCenter = null;
 
@@ -63,6 +64,12 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
         {
             if (message.ShouldOpen) ShowEditUsersUserControl(message.UserId);
             else CloseEditUsersUserControl();
+        }
+
+        public void Receive(OpenOrCloseEmployeeAssignmentMasterSubMarkStatusMessage message)
+        {
+            if (message.ShouldOpen) ShowEmployeeAssignmentMasterSubMarkUserControl(message.ProductId);
+            else CloseEmployeeAssignmentMasterSubMarkUserControl();
         }
 
         public void Receive(OpenOrCloseAddDepartmentStatusMessage message)
@@ -345,6 +352,35 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
             {
                 ContentCenter.Children.Clear();
                 if (_taskDetail.Parent == ContentCenter) ContentCenter.Children.Remove(_taskDetail);
+            }
+        }
+
+        public void ShowEmployeeAssignmentMasterSubMarkUserControl(double productId)
+        {
+            if (ContentCenter != null)
+            {
+                var userControl = new EmployeeAssignmentMasterSubMarkUserControl { DataContext = new EmployeeAssignmentMasterSubMarkUserControlViewModel(productId) };
+
+                if (ContentCenter.Children.Contains(userControl))
+                {
+                    //_addProduct.RefreshData();
+                    return;
+                }
+
+                if (userControl.Parent is Panel currentParent) currentParent.Children.Remove(userControl);
+                ContentCenter.Children.Clear();
+                ContentCenter.Children.Add(userControl);
+
+                //_addProduct.RefreshData();
+            }
+        }
+
+        public void CloseEmployeeAssignmentMasterSubMarkUserControl()
+        {
+            if (ContentCenter != null)
+            {
+                ContentCenter.Children.Clear();
+                if (_employeeAssignmentMasterSubMarkUserControl.Parent == ContentCenter) ContentCenter.Children.Remove(_employeeAssignmentMasterSubMarkUserControl);
             }
         }
     }

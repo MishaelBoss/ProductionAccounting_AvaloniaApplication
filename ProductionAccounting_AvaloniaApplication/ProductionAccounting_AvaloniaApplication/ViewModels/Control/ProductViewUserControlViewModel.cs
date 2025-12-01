@@ -37,6 +37,9 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
     public ICommand AddSubProductCommand
         => new RelayCommand(() => { WeakReferenceMessenger.Default.Send(new OpenOrCloseTaskDateilStatusMessage(true, ProductId)); });
 
+    public ICommand OpenEmployeeAssignmentMasterSubMarkUserControlViewModelCommand
+        => new RelayCommand(() => { WeakReferenceMessenger.Default.Send(new OpenOrCloseEmployeeAssignmentMasterSubMarkStatusMessage(true, ProductId)); });
+
     public double ProductId { get; set; }
 
     private string _status = "new";

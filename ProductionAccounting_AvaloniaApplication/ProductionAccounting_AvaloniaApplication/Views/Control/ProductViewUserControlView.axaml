@@ -7,32 +7,23 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="ProductionAccounting_AvaloniaApplication.Views.Control.ProductViewUserControlView">
 
-    <Grid>
-         <Border Background="White"
-                 Opacity="0.5"
-                 CornerRadius="5"
-                 ClipToBounds="True"/>
-         <ScrollViewer Margin="10">
-             <StackPanel Orientation="Vertical">
-                 <StackPanel Orientation="Horizontal"
-                             HorizontalAlignment="Center"
-                             Spacing="5">
-                     <Button HorizontalAlignment="Right"
+    <Grid ColumnDefinitions="*, Auto">
+        <Border Background="White"
+                Opacity="0.5"
+                CornerRadius="5"
+                ClipToBounds="True"/>
+        <ScrollViewer Margin="10">
+            <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Center"
+                            Spacing="5">
+                    <Button Command="{Binding AddSubProductCommand}"
+							HorizontalAlignment="Right"
 		  					VerticalAlignment="Top"
 		  					Width="32"
 		  					Height="32"
-		  					ToolTip.Tip="Adds">
+		  					ToolTip.Tip="Add a product">
 		  				<Image Source="/Assets/add-64.png"/>
-		  				<Button.Flyout>
-		  					<Flyout Placement="Bottom">
-		  						<ListBox>
-		  							<Button Command="{Binding AddSubProductCommand}"
-		  									VerticalAlignment="Stretch"
-		  									HorizontalAlignment="Stretch"
-		  									Content="Add sub product"/>
-		  						</ListBox>
-		  					</Flyout>
-		  				</Button.Flyout>
 		  			</Button>
                     <TextBlock Text="{Binding Name}"/>
                     <TextBlock Text="{Binding StatusDisplay}"/>
@@ -45,15 +36,50 @@
                         <TextBlock Text="{Binding Mark}"/>
                         <TextBlock Text="{Binding Notes}"/>
                 </StackPanel>
-                <TabControl Margin="5">
-                   <TabItem Header="SubProduct">
-                                <StackPanel Name="SubProductContent"
-                                            Orientation="Vertical"
-                                            Margin="0,10,0,0"/>
-                   </TabItem>
-                </TabControl>
-             </StackPanel>
-         </ScrollViewer>
+                    <StackPanel Name="SubProductContent"
+                                Orientation="Vertical"
+                                Margin="0,10,0,0"/>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Grid   Grid.Column="1"
+                Name="RightSidebar"
+                IsVisible="True"
+                Margin="5,0,0,0"
+                Width="400"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch">
+            <Border Background="White"
+                     Opacity="0.5"
+                     CornerRadius="5"
+                     ClipToBounds="True"/>
+            <Button Command="{Binding OpenEmployeeAssignmentMasterSubMarkUserControlViewModelCommand}"
+							HorizontalAlignment="Right"
+		  					VerticalAlignment="Top"
+		  					Width="32"
+		  					Height="32"
+		  					ToolTip.Tip="Add a product">
+		  				<Image Source="/Assets/add-64.png"/>
+		  			</Button>
+             <ScrollViewer Margin="10">
+                 <StackPanel Orientation="Vertical">
+                     <StackPanel Orientation="Horizontal"
+                                 HorizontalAlignment="Center">
+                        <TextBlock Text="{Binding ProductId}"/>
+                        <TextBlock Text="{Binding ProductName}"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Center"
+                                Spacing="5">
+                            <TextBlock Text="{Binding CreatedAt}"/>
+                            <TextBlock Text="{Binding CreatedBy}"/>
+                            <TextBlock Text="{Binding Notes}"/>
+                            <TextBlock Text="{Binding Mark}"/>
+                            <TextBlock Text="{Binding StatusDisplay}"/>
+                    </StackPanel>
+                 </StackPanel>
+             </ScrollViewer>
+        </Grid>
     </Grid>
 
 </UserControl>
