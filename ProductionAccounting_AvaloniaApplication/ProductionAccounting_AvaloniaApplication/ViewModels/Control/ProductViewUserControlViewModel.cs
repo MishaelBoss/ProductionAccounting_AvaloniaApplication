@@ -14,7 +14,7 @@ using static ProductionAccounting_AvaloniaApplication.ViewModels.Control.NotFoun
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
-public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyChanged, IRecipient<RefreshSubProductListMessage>
+public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyChanged, IRecipient<RefreshSubProductListMessage>, IRecipient<OpenOrCloseSubProductStatusMessage>
 {
     public ProductViewUserControlViewModel(double productId) 
     {
@@ -22,12 +22,17 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
 
         _ = LoadTasksAsync();
 
-        WeakReferenceMessenger.Default.Register<RefreshSubProductListMessage>(this);
+        WeakReferenceMessenger.Default.RegisterAll(this);
     }
 
     public void Receive(RefreshSubProductListMessage message)
     {
         _ = LoadSubProductAsync();
+    }
+
+    public void Receive(OpenOrCloseSubProductStatusMessage message)
+    {
+        _ = LoadSubProductViewAsync(message.SubProductId);
     }
 
     public StackPanel? SubProductContent { get; set; } = null;
@@ -126,6 +131,41 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
     {
         get => _coefficient;
         set => this.RaiseAndSetIfChanged(ref _coefficient, value);
+    }
+
+    private double? _subProductId = 0;
+    public double? SubProductId
+    {
+        get => _subProductId;
+        set => this.RaiseAndSetIfChanged(ref _subProductId, value);
+    }
+
+    private string? _subProductName = string.Empty;
+    public string? SubProductName
+    {
+        get => _subProductName;
+        set => this.RaiseAndSetIfChanged(ref _subProductName, value);
+    }
+
+    private decimal? _subProductPlannedQuantity = 0;
+    public decimal? SubProductPlannedQuantity
+    {
+        get => _subProductPlannedQuantity;
+        set => this.RaiseAndSetIfChanged(ref _subProductPlannedQuantity, value);
+    }
+
+    private decimal? _subProductPlannedWeight = 0;
+    public decimal? SubProductPlannedWeight
+    {
+        get => _subProductPlannedWeight;
+        set => this.RaiseAndSetIfChanged(ref _subProductPlannedWeight, value);
+    }
+
+    private string? _subProductNotes = string.Empty;
+    public string? SubProductNotes
+    {
+        get => _subProductNotes;
+        set => this.RaiseAndSetIfChanged(ref _subProductNotes, value);
     }
 
     public async Task LoadTasksAsync()
@@ -233,6 +273,40 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
         {
             StackPanelHelper.ClearAndRefreshStackPanel<CartSubProductUserControl>(SubProductContent, subProductList);
             ItemNotFoundException.Show(SubProductContent, ErrorLevel.NoConnectToDB);
+            Loges.LoggingProcess(LogLevel.ERROR, ex: ex);
+        }
+    }
+
+    public async Task LoadSubProductViewAsync(double subProductId)
+    {
+        try
+        {
+            string sql = @"SELECT id, name, planned_quantity, planned_weight, notes, created_at FROM public.sub_products WHERE id = @id";
+
+            using (var connection = new NpgsqlConnection(Arguments.connection))
+            {
+                await connection.OpenAsync();
+
+                using (var command = new NpgsqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@id", subProductId);
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        if (await reader.ReadAsync())
+                        {
+                            SubProductId = reader.IsDBNull(0) ? 0 : reader.GetDouble(0);
+                            SubProductName = reader.IsDBNull(1) ? string.Empty : reader.GetString(1);
+                            SubProductPlannedQuantity = reader.IsDBNull(2) ? 0 : reader.GetDecimal(2);
+                            SubProductPlannedWeight = reader.IsDBNull(3) ? 0 : reader.GetDecimal(3);
+                            SubProductNotes = reader.IsDBNull(4) ? string.Empty : reader.GetString(4);
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
             Loges.LoggingProcess(LogLevel.ERROR, ex: ex);
         }
     }

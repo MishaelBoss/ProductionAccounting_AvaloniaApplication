@@ -65,17 +65,15 @@
                  <StackPanel Orientation="Vertical">
                      <StackPanel Orientation="Horizontal"
                                  HorizontalAlignment="Center">
-                        <TextBlock Text="{Binding ProductId}"/>
-                        <TextBlock Text="{Binding ProductName}"/>
+                        <TextBlock Text="{Binding SubProductId}"/>
+                        <TextBlock Text="{Binding SubProductName}"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal"
                                 HorizontalAlignment="Center"
                                 Spacing="5">
-                            <TextBlock Text="{Binding CreatedAt}"/>
-                            <TextBlock Text="{Binding CreatedBy}"/>
-                            <TextBlock Text="{Binding Notes}"/>
-                            <TextBlock Text="{Binding Mark}"/>
-                            <TextBlock Text="{Binding StatusDisplay}"/>
+                            <TextBlock Text="{Binding SubProductPlannedQuantity}"/>
+                            <TextBlock Text="{Binding SubProductPlannedWeight}"/>
+                            <TextBlock Text="{Binding SubProductNotes}"/>
                     </StackPanel>
                  </StackPanel>
              </ScrollViewer>
