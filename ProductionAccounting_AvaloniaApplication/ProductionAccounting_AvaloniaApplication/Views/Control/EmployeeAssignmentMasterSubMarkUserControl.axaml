@@ -28,6 +28,13 @@
                 <ComboBox ItemsSource="{Binding Employees}"
                           SelectedItem="{Binding SelectedEmployee}"
                           DisplayMemberBinding="{Binding FullName}"
+                          PlaceholderText="Выберите подмарку"
+                          FontSize="22"
+                          Height="70"/>
+
+                <ComboBox ItemsSource="{Binding Employees}"
+                          SelectedItem="{Binding SelectedEmployee}"
+                          DisplayMemberBinding="{Binding FullName}"
                           PlaceholderText="Кому поручить"
                           FontSize="22"
                           Height="70"/>
@@ -46,8 +53,7 @@
                         FontWeight="Bold"
                         Height="100"
                         CornerRadius="20"
-                        HorizontalAlignment="Stretch"
-                        IsEnabled="{Binding CanAssign}"/>
+                        HorizontalAlignment="Stretch"/>
             </StackPanel>
         </Border>
     </Grid>
