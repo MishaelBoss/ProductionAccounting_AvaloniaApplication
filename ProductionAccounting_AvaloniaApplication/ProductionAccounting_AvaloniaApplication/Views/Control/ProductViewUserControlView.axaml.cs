@@ -18,8 +18,4 @@ public partial class ProductViewUserControlView : UserControl
         viewModel.SubProductContent = SubProductContent;
         _ = viewModel.LoadSubProductAsync();
     }
-
-    private void Grid_ActualThemeVariantChanged(object? sender, System.EventArgs e)
-    {
-    }
 }

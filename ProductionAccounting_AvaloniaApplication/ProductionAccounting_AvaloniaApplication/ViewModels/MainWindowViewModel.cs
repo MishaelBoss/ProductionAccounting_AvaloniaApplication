@@ -9,7 +9,7 @@ using System;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels
 {
-    public class MainWindowViewModel : ViewModelBase, IRecipient<OpenOrCloseAddUserStatusMessage>, IRecipient<OpenOrCloseStatusMessage>, IRecipient<OpenOrCloseAddDepartmentStatusMessage>, IRecipient<OpenOrCloseAddOperationStatusMessage>, IRecipient<OpenOrCloseAddProductStatusMessage>, IRecipient<OpenOrCloseAddPositionStatusMessage>, IRecipient<OpenOrCloseTaskDateilStatusMessage>, IRecipient<OpenOrCloseProductViewStatusMessage>, IRecipient<OpenOrCloseEmployeeAssignmentMasterSubMarkStatusMessage>
+    public class MainWindowViewModel : ViewModelBase, IRecipient<OpenOrCloseAddUserStatusMessage>, IRecipient<OpenOrCloseStatusMessage>, IRecipient<OpenOrCloseAddDepartmentStatusMessage>, IRecipient<OpenOrCloseAddOperationStatusMessage>, IRecipient<OpenOrCloseAddProductStatusMessage>, IRecipient<OpenOrCloseAddPositionStatusMessage>, IRecipient<OpenOrCloseAddSubProductStatusMessage>, IRecipient<OpenOrCloseProductViewStatusMessage>, IRecipient<OpenOrCloseEmployeeAssignmentMasterSubMarkStatusMessage>
     {
         public event Action? LoginStatusChanged;
 
@@ -19,7 +19,7 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
         private readonly AddPositionUserControl _addPosition = new();
         private readonly AddOperationUserControl _addOperation = new();
         private readonly AddProductUserControl _addProduct = new();
-        private readonly TaskDetailUserControl _taskDetail = new();
+        private readonly AddSubProductUserControl _addSubProduct = new();
         private readonly EmployeeAssignmentMasterSubMarkUserControl _employeeAssignmentMasterSubMarkUserControl = new();
 
         public Grid? ContentCenter = null;
@@ -102,10 +102,10 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
             else CloseAddUsersUserControl();
         }
 
-        public void Receive(OpenOrCloseTaskDateilStatusMessage message)
+        public void Receive(OpenOrCloseAddSubProductStatusMessage message)
         {
-            if (message.ShouldOpen) ShowTaskDetailUserControl(message.TaskId);
-            else CloseTaskDetailUserControl();
+            if (message.ShouldOpen) ShowAddSubProductUserControl(message.TaskId);
+            else CloseAddSubProductUserControl();
         }
 
         public void NotifyLoginStatusChanged()
@@ -332,12 +332,11 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
             }
         }
 
-        public void ShowTaskDetailUserControl(double _taskId)
+        public void ShowAddSubProductUserControl(double _taskId)
         {
             if (ContentCenter != null)
             {
-                var viewModel = new TaskDetailUserControlViewModel(_taskId);
-                var userControl = new TaskDetailUserControl { DataContext = viewModel };
+                var userControl = new AddSubProductUserControl { DataContext = new AddSubProductUserControlViewModel(_taskId) };
 
                 if (ContentCenter.Children.Contains(userControl)) return;
 
@@ -348,12 +347,12 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
             }
         }
 
-        public void CloseTaskDetailUserControl()
+        public void CloseAddSubProductUserControl()
         {
             if (ContentCenter != null)
             {
                 ContentCenter.Children.Clear();
-                if (_taskDetail.Parent == ContentCenter) ContentCenter.Children.Remove(_taskDetail);
+                if (_addSubProduct.Parent == ContentCenter) ContentCenter.Children.Remove(_addSubProduct);
             }
         }
 

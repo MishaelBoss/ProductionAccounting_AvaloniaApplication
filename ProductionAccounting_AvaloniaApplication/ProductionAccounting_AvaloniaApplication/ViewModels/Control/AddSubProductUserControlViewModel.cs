@@ -1,35 +1,29 @@
-﻿using Avalonia.Controls;
-using CommunityToolkit.Mvvm.Input;
+﻿using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
-using ProductionAccounting_AvaloniaApplication.Views.Control;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using static ProductionAccounting_AvaloniaApplication.ViewModels.Control.NotFoundUserControlViewModel;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
-public class TaskDetailUserControlViewModel : ViewModelBase, INotifyPropertyChanged, IRecipient<RefreshSubProductListMessage>
+public class AddSubProductUserControlViewModel : ViewModelBase, INotifyPropertyChanged
 {
-    public TaskDetailUserControlViewModel(double taskId)
+    public AddSubProductUserControlViewModel(double taskId)
     {
         TaskId = taskId;
-
-        WeakReferenceMessenger.Default.Register(this);
     }
 
-    public void Receive(RefreshSubProductListMessage message)
+/*    public void Receive(RefreshSubProductListMessage message)
     {
         _ = LoadSubProductAsync();
-    }
+    }*/
 
-    public StackPanel? HomeMainContent { get; set; } = null;
+/*    public StackPanel? HomeMainContent { get; set; } = null;
 
-    private List<CartSubProductUserControl> subProductList = [];
+    private List<CartSubProductUserControl> subProductList = [];*/
 
     public double TaskId { get; }
 
@@ -84,6 +78,9 @@ public class TaskDetailUserControlViewModel : ViewModelBase, INotifyPropertyChan
     public ICommand SaveCurrentSubProductCommand
         => new RelayCommand(async () => await SaveCurrentSubProductAsync());
 
+    public ICommand CancelCommand
+        => new RelayCommand(async () => WeakReferenceMessenger.Default.Send(new OpenOrCloseAddSubProductStatusMessage(false)));
+
     private async Task SaveCurrentSubProductAsync()
     {
         try
@@ -103,7 +100,9 @@ public class TaskDetailUserControlViewModel : ViewModelBase, INotifyPropertyChan
 
                     await command.ExecuteNonQueryAsync();
 
-                    await LoadSubProductAsync();
+                    //await LoadSubProductAsync();
+
+                    WeakReferenceMessenger.Default.Send(new RefreshSubProductListMessage());
 
                     ClearForm();
                 }
@@ -115,7 +114,7 @@ public class TaskDetailUserControlViewModel : ViewModelBase, INotifyPropertyChan
         }
     }
 
-    public async Task LoadSubProductAsync() 
+    /*public async Task LoadSubProductAsync() 
     {
         StackPanelHelper.ClearAndRefreshStackPanel<CartSubProductUserControl>(HomeMainContent, subProductList);
 
@@ -166,7 +165,7 @@ public class TaskDetailUserControlViewModel : ViewModelBase, INotifyPropertyChan
             ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NoConnectToDB);
             Loges.LoggingProcess(LogLevel.ERROR, ex: ex);
         }
-    }
+    }*/
 
     private void ClearForm() 
     {

@@ -47,7 +47,7 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
     private List<CartSubProductUserControl> subProductList = [];
 
     public ICommand AddSubProductCommand
-        => new RelayCommand(() => { WeakReferenceMessenger.Default.Send(new OpenOrCloseTaskDateilStatusMessage(true, ProductId)); });
+        => new RelayCommand(() => { WeakReferenceMessenger.Default.Send(new OpenOrCloseAddSubProductStatusMessage(true, ProductId)); });
 
     public ICommand OpenEmployeeAssignmentMasterSubMarkUserControlViewModelCommand
         => new RelayCommand(() => { WeakReferenceMessenger.Default.Send(new OpenOrCloseEmployeeAssignmentMasterSubMarkStatusMessage(true, ProductId)); });
