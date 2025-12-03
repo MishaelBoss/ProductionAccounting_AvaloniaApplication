@@ -10,6 +10,12 @@
     <Grid Margin="15" 
           RowDefinitions="Auto, 20, Auto">
 
+        <Calendar   Grid.Row="0" 
+                    SelectionMode="MultipleRange"
+                    ZIndex="1"
+                    Name="CalendarDateTimesheetList"
+                    SelectedDatesChanged="CalendarDateTimesheetList_SelectedDatesChanged"/>
+
         <Grid Grid.Row="0"
               ColumnDefinitions="*, *"
               ColumnSpacing="20">
@@ -193,11 +199,6 @@
 
             <Border Padding="20">
                 <StackPanel Spacing="15">
-                    <TextBlock Text="Сегодняшние отчеты" 
-                               FontSize="16"
-                               FontWeight="SemiBold" 
-                               Foreground="#2C3E50"/>
-
                     <ScrollViewer>
 						<StackPanel Name="CartTimesheet"/>
                     </ScrollViewer>

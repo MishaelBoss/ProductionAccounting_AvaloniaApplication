@@ -152,10 +152,10 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
     }
 
     public ICommand ApplyMassEditCommand
-        => new RelayCommand(async () => { await ApplyMassEditAsync(); await LoadTimesheetAsync(); });
+        => new RelayCommand(async () => { await ApplyMassEditAsync(); LoadDataForRange(MassEditStartDate.DateTime, MassEditEndDate.DateTime); });
 
     public ICommand SaveSingleRecordCommand
-        => new RelayCommand(async () => { await SaveSingleRecordAsync(); await LoadTimesheetAsync(); });
+        => new RelayCommand(async () => { await SaveSingleRecordAsync(); await LoadTimesheetAsync(MassEditStartDate.DateTime, MassEditEndDate.DateTime); });
 
     public async Task LoadListUsersAsync()
     {
@@ -302,13 +302,18 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
         SingleNotes = string.Empty;
     }
 
-    public async Task LoadTimesheetAsync()
+    public void LoadDataForRange(DateTime startDate, DateTime endDate)
+    {
+        _ = LoadTimesheetAsync(startDate, endDate);
+    }
+
+    public async Task LoadTimesheetAsync(DateTime startDate, DateTime endDate)
     {
         StackPanelHelper.ClearAndRefreshStackPanel<CartTimesheetUserControl>(CartTimesheet, timesheetList);
 
         try
         {
-            string sql = "SELECT t.status, t.notes, t.hours_worked,t.user_id, u.login as user_login FROM public.timesheet t LEFT JOIN public.user u ON t.user_id = u.id WHERE t.work_date = CURRENT_DATE";
+            string sql = "SELECT t.status, t.notes, t.hours_worked,t.user_id, u.login as user_login FROM public.timesheet t LEFT JOIN public.user u ON t.user_id = u.id WHERE t.work_date BETWEEN @startDate AND @endDate";
 
             using (var connection = new NpgsqlConnection(Arguments.connection))
             {
@@ -316,6 +321,9 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
 
                 using (var command = new NpgsqlCommand(sql, connection))
                 {
+                    command.Parameters.AddWithValue("@startDate", startDate.Date);
+                    command.Parameters.AddWithValue("@endDate", endDate.Date);
+
                     using (var reader = await command.ExecuteReaderAsync())
                     {
                         while (await reader.ReadAsync())
@@ -337,9 +345,9 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
                         }
                     }
                 }
-            }
 
-            StackPanelHelper.RefreshStackPanelContent<CartTimesheetUserControl>(CartTimesheet, timesheetList);
+                StackPanelHelper.RefreshStackPanelContent<CartTimesheetUserControl>(CartTimesheet, timesheetList);
+            }
         }
         catch (Exception ex)
         {
