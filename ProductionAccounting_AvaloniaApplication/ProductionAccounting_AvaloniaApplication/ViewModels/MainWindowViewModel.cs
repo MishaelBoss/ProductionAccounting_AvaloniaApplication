@@ -80,7 +80,7 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
 
         public void Receive(OpenOrCloseAddOperationStatusMessage message)
         {
-            if (message.ShouldOpen) ShowOperationUsersUserControl();
+            if (message.ShouldOpen) ShowOperationUsersUserControl(message.SubProductId);
             else CloseOperationUsersUserControl();
         }
 
@@ -276,21 +276,23 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
             }
         }
 
-        public void ShowOperationUsersUserControl()
+        public void ShowOperationUsersUserControl(double subProductId)
         {
             if (ContentCenter != null)
             {
-                if (ContentCenter.Children.Contains(_addOperation))
+                var userControl = new AddOperationUserControl() {DataContext = new AddOperationUserControlViewModel(subProductId)};
+
+                if (ContentCenter.Children.Contains(userControl))
                 {
-                    _addOperation.RefreshData();
+                    userControl.RefreshData();
                     return;
                 }
 
-                if (_addOperation.Parent is Panel currentParent) currentParent.Children.Remove(_addOperation);
+                if (userControl.Parent is Panel currentParent) currentParent.Children.Remove(userControl);
                 ContentCenter.Children.Clear();
-                ContentCenter.Children.Add(_addOperation);
+                ContentCenter.Children.Add(userControl);
 
-                _addOperation.RefreshData();
+                userControl.RefreshData();
             }
         }
 

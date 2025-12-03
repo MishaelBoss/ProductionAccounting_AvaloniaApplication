@@ -8,7 +8,6 @@ public partial class AddOperationUserControl : UserControl
     public AddOperationUserControl()
     {
         InitializeComponent();
-        DataContext = new AddOperationUserControlViewModel();
     }
 
     public void RefreshData()

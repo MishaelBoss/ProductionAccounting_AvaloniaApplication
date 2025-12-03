@@ -8,64 +8,79 @@
              x:Class="ProductionAccounting_AvaloniaApplication.Views.Control.AddOperationUserControl">
 	
 	<Grid>
-		<Border Background="#000000" Opacity="0.5"/>
-		
-		<Border VerticalAlignment="Center" 
-				HorizontalAlignment="Center" 
-				Width="400" 
-				Height="500" 
-				Background="Gray" 
-				CornerRadius="12">
-			<Grid>
-				<StackPanel Margin="20">
-					<TextBlock	Margin="0 5" 
-								HorizontalAlignment="Center" 
-								Text="{Binding Messageerror}" />
-
-					<TextBlock	Margin="0 5">Name operation:</TextBlock>
-					<TextBox	Text="{Binding OperationName}" 
-								Watermark="Enter name operation"/>
-
-					<TextBlock	Margin="0 5">Price:</TextBlock>
-					<TextBox	Text="{Binding OperationPrice}" 
-								Watermark="Enter price"/>
-
-					<TextBlock	Margin="0 5">Code:</TextBlock>
-					<TextBox	Text="{Binding OperationCode}" 
-								Watermark="Enter code"/>
-
-					<TextBlock	Margin="0 5">Time:</TextBlock>
-					<TextBox	Text="{Binding OperationTime}" 
-								Watermark="Enter time"/>
-
-					<TextBlock	Margin="0 5">Description:</TextBlock>
-					<TextBox	Text="{Binding OperationDescription}" 
-								Watermark="Enter description"/>
-
-					<TextBlock	Margin="0 5">Units:</TextBlock>
-					<ComboBox	ItemsSource="{Binding AvailableUnits}" 
-								SelectedItem="{Binding SelectedUnit}" 
-								Width="100" 
-								PlaceholderText="��.���"/>
-
-					<StackPanel Orientation="Vertical"
-								VerticalAlignment="Center"
-								HorizontalAlignment="Center"
+        <Border Background="#000000" 
+				Opacity="0.5"/>
+        
+        <Border VerticalAlignment="Center" 
+                HorizontalAlignment="Center" 
+                Width="400" 
+                Height="550"
+                Background="Gray" 
+                CornerRadius="12">
+            <Grid>
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="20" 
 								Spacing="10">
+                        <Border	CornerRadius="5" 
+                                Padding="10">
+                            <TextBlock Text="{Binding Messageerror}" 
+                                       Foreground="Red" 
+                                       TextWrapping="Wrap"
+                                       HorizontalAlignment="Center"/>
+                        </Border>
 
-						<Button Classes="ButtonLogin"
-								IsEnabled="{Binding IsActiveConfirmButton}"
-								Command="{Binding ConfirmCommand}"
-								Content="Confirm"/>
+                        <TextBlock>Название операции:</TextBlock>
+                        <TextBox Text="{Binding OperationName}" 
+                                 Watermark="Введите название операции"/>
 
-						<Button Command="{Binding CancelCommand}"
-								Content="Cancel"
-								HorizontalAlignment="Center"
-								Background="Transparent"/>
-					</StackPanel>
-				</StackPanel>
-			</Grid>
-		</Border>
-	</Grid>
+                        <TextBlock>Цена:</TextBlock>
+                        <TextBox Text="{Binding OperationPrice}" 
+                                 Watermark="Введите цену"/>
+
+                        <TextBlock>Код операции:</TextBlock>
+                        <TextBox Text="{Binding OperationCode}" 
+                                 Watermark="Введите код операции"/>
+
+                        <TextBlock>Время (мин):</TextBlock>
+                        <TextBox Text="{Binding OperationTime}" 
+                                 Watermark="Введите время в минутах"/>
+
+                        <TextBlock>Количество:</TextBlock>
+                        <TextBox Text="{Binding OperationQuantity}" 
+                                 Watermark="1"/>
+
+                        <TextBlock>Описание:</TextBlock>
+                        <TextBox Text="{Binding OperationDescription}" 
+                                 AcceptsReturn="True"
+                                 TextWrapping="Wrap"
+                                 Height="80"
+                                 Watermark="Введите описание операции"/>
+
+                        <TextBlock>Единица измерения:</TextBlock>
+                        <ComboBox ItemsSource="{Binding AvailableUnits}" 
+                                  SelectedItem="{Binding SelectedUnit}" 
+                                  Width="100"/>
+
+                        <StackPanel Orientation="Vertical"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Center"
+                                    Spacing="10"
+                                    Margin="0,20,0,0">
+
+                            <Button Classes="ButtonLogin"
+                                    IsEnabled="{Binding IsActiveConfirmButton}"
+                                    Command="{Binding ConfirmCommand}"
+                                    Content="Добавить"/>
+
+                            <Button Command="{Binding CancelCommand}"
+                                    Content="Отмена"
+                                    HorizontalAlignment="Center"
+                                    Background="Transparent"/>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+    </Grid>
 
 </UserControl>

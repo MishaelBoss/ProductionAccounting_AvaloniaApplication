@@ -34,7 +34,6 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
     {
         _ = LoadSubProductViewAsync(message.SubProductId);
     }
-
     public StackPanel? SubProductContent { get; set; } = null;
 
     private List<CartSubProductUserControl> subProductList = [];
@@ -44,6 +43,9 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
 
     public ICommand OpenEmployeeAssignmentMasterSubMarkUserControlViewModelCommand
         => new RelayCommand(() => { WeakReferenceMessenger.Default.Send(new OpenOrCloseEmployeeAssignmentMasterSubMarkStatusMessage(true, ProductId)); });
+
+    public ICommand AddOperationCommand 
+        => new RelayCommand(() => { if (SubProductId.HasValue) WeakReferenceMessenger.Default.Send(new OpenOrCloseAddOperationStatusMessage(true, SubProductId.Value)); });
 
     public double ProductId { get; set; }
 

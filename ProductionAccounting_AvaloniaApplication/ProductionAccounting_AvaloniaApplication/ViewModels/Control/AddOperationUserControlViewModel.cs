@@ -13,19 +13,27 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class AddOperationUserControlViewModel : ViewModelBase
 {
+    private readonly double _subProductId;
+    
+    public AddOperationUserControlViewModel(double subProductId)
+    {
+        _subProductId = subProductId;
+        ClearForm();
+    }
+
     public ICommand CancelCommand
         => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseAddOperationStatusMessage(false)) );
 
     public ICommand ConfirmCommand
         => new RelayCommand(async () => 
         { 
-            if ( await SaveAsync() ) 
+            if ( await SaveAndLinkAsync() ) 
             { 
                 WeakReferenceMessenger.Default.Send(new RefreshOperationListMessage());
                 WeakReferenceMessenger.Default.Send(new OpenOrCloseAddOperationStatusMessage(false));
             } 
         });
-        
+
     private string _messageerror = string.Empty;
     public string Messageerror
     {
@@ -99,7 +107,7 @@ public class AddOperationUserControlViewModel : ViewModelBase
         "шт"
     };
 
-    private string _selectedUnit = string.Empty;
+    private string _selectedUnit = "кг";
     public string SelectedUnit
     {
         get => _selectedUnit;
@@ -129,61 +137,132 @@ public class AddOperationUserControlViewModel : ViewModelBase
         }
     }
 
-    public bool IsActiveConfirmButton
-        => SelectedUnit != null
-        && !string.IsNullOrEmpty(OperationName)
-        && OperationPrice != 0
-        && !string.IsNullOrEmpty(OperationCode)
-        && OperationTime != 0
-        && !string.IsNullOrEmpty(OperationDescription);
+    private decimal _operationQuantity = 1;
+    public decimal OperationQuantity
+    {
+        get => _operationQuantity;
+        set
+        {
+            if (_operationQuantity != value)
+            {
+                _operationQuantity = value;
+                OnPropertyChanged(nameof(OperationQuantity));
+                OnPropertyChanged(nameof(IsActiveConfirmButton));
+            }
+        }
+    }
 
-    public async Task<bool> SaveAsync()
+    public bool IsActiveConfirmButton
+        => !string.IsNullOrWhiteSpace(SelectedUnit)
+        && !string.IsNullOrWhiteSpace(OperationName)
+        && OperationPrice > 0
+        && !string.IsNullOrWhiteSpace(OperationCode)
+        && OperationTime > 0
+        && !string.IsNullOrWhiteSpace(OperationDescription)
+        && OperationQuantity > 0;
+
+    private async Task<bool> SaveAndLinkAsync()
     {
         try
         {
-            if (string.IsNullOrEmpty(OperationName) || OperationTime == 0 || string.IsNullOrEmpty(OperationCode) || OperationPrice == 0 || SelectedUnit == null || string.IsNullOrEmpty(OperationDescription)) return false;
-
-            try
+            if (!IsActiveConfirmButton) 
             {
-                string sql = "INSERT INTO public.operation (name, operation_code, price, unit, time_required, description)" +
-                        "VALUES (@name, @operation_code, @price, @unit, @time_required, @description)";
-                using (var connection = new NpgsqlConnection(Arguments.connection))
-                {
-                    await connection.OpenAsync();
-                    using (var command = new NpgsqlCommand(sql, connection))
-                    {
-                        try
-                        {
-                            command.Parameters.AddWithValue("@name", OperationName);
-                            command.Parameters.AddWithValue("@operation_code", OperationCode);
-                            command.Parameters.AddWithValue("@price", OperationPrice);
-                            command.Parameters.AddWithValue("@unit", SelectedUnit);
-                            command.Parameters.AddWithValue("@time_required", OperationTime);
-                            command.Parameters.AddWithValue("@description", OperationDescription);
+                Messageerror = "Заполните все обязательные поля";
+                return false;
+            }
 
-                            await command.ExecuteNonQueryAsync();
-                            return true;
-                        }
-                        catch (Exception ex)
-                        {
-                            Loges.LoggingProcess(level: LogLevel.ERROR,
-                                ex: ex);
-                            return false;
-                        }
-                    }
+            double operationId = await CreateOperationAsync();
+            
+            if (operationId > 0)
+            {
+                bool linked = await LinkOperationToSubProductAsync(operationId, OperationQuantity);
+                
+                if (linked)
+                {
+                    Messageerror = string.Empty;
+                    return true;
+                }
+                else
+                {
+                    Messageerror = "Ошибка при связывании операции с подмаркой";
+                    return false;
                 }
             }
-            catch (Exception ex)
+            else
             {
-                Loges.LoggingProcess(level: LogLevel.WARNING,
-                    ex: ex);
+                Messageerror = "Ошибка при создании операции";
                 return false;
             }
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(level: LogLevel.WARNING,
-                ex: ex);
+            Loges.LoggingProcess(level: LogLevel.ERROR, ex: ex);
+            Messageerror = $"Ошибка: {ex.Message}";
+            return false;
+        }
+    }
+
+    private async Task<double> CreateOperationAsync()
+    {
+        try
+        {
+            string sql = @"
+                INSERT INTO public.operation 
+                (name, operation_code, price, unit, time_required, description) 
+                VALUES (@name, @operation_code, @price, @unit, @time_required, @description)
+                RETURNING id";
+            
+            using (var connection = new NpgsqlConnection(Arguments.connection))
+            {
+                await connection.OpenAsync();
+                using (var command = new NpgsqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@name", OperationName.Trim());
+                    command.Parameters.AddWithValue("@operation_code", OperationCode.Trim());
+                    command.Parameters.AddWithValue("@price", OperationPrice);
+                    command.Parameters.AddWithValue("@unit", SelectedUnit);
+                    command.Parameters.AddWithValue("@time_required", OperationTime);
+                    command.Parameters.AddWithValue("@description", OperationDescription.Trim());
+
+                    var result = await command.ExecuteScalarAsync();
+                    return result != null && result != DBNull.Value ? Convert.ToDouble(result) : 0;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Loges.LoggingProcess(level: LogLevel.ERROR, ex: ex);
+            return 0;
+        }
+    }
+
+    private async Task<bool> LinkOperationToSubProductAsync(double operationId, decimal quantity)
+    {
+        try
+        {
+            string sql = @"
+                INSERT INTO public.sub_product_operations 
+                (sub_product_id, operation_id, planned_quantity, notes, status) 
+                VALUES (@sub_product_id, @operation_id, @quantity, '', 'planned')
+                RETURNING id";
+            
+            using (var connection = new NpgsqlConnection(Arguments.connection))
+            {
+                await connection.OpenAsync();
+                using (var command = new NpgsqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@sub_product_id", _subProductId);
+                    command.Parameters.AddWithValue("@operation_id", operationId);
+                    command.Parameters.AddWithValue("@quantity", quantity);
+                    
+                    var result = await command.ExecuteScalarAsync();
+                    return result != null && result != DBNull.Value;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Loges.LoggingProcess(LogLevel.ERROR, ex: ex);
             return false;
         }
     }
@@ -194,8 +273,10 @@ public class AddOperationUserControlViewModel : ViewModelBase
         OperationCode = string.Empty;
         OperationPrice = 0;
         OperationTime = 0;
+        OperationQuantity = 1;
         OperationDescription = string.Empty;
         SelectedUnit = "шт";
+        Messageerror = string.Empty;
     }
 
     public new event PropertyChangedEventHandler? PropertyChanged;
