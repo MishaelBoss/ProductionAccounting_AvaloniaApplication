@@ -32,16 +32,16 @@
                         <TextBlock Text="{Binding Position}"/>
                 </StackPanel>
                 <TabControl Margin="5">
-           <TabItem Header="Tables">
-                        <StackPanel Name="TableUserContent"
-                                    Orientation="Vertical"
-                                    Margin="0,10,0,0"/>
-           </TabItem>
-           <TabItem Header="Tasks">
-                        <StackPanel Name="TasksUserContent"
-                                    Orientation="Vertical"
-                                    Margin="0,10,0,0"/>
-           </TabItem>
+                   <TabItem Header="Tables">
+                                <StackPanel Name="TableUserContent"
+                                            Orientation="Vertical"
+                                            Margin="0,10,0,0"/>
+                   </TabItem>
+                   <TabItem Header="Tasks">
+                                <StackPanel Name="TasksUserContent"
+                                            Orientation="Vertical"
+                                            Margin="0,10,0,0"/>
+                   </TabItem>
                 </TabControl>
              </StackPanel>
          </ScrollViewer>

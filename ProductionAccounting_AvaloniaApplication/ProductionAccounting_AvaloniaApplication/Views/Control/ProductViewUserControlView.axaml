@@ -75,6 +75,10 @@
                             <TextBlock Text="{Binding SubProductPlannedWeight}"/>
                             <TextBlock Text="{Binding SubProductNotes}"/>
                     </StackPanel>
+
+                     <ScrollViewer>
+						 <StackPanel Name="SubProductOperation"/>
+                     </ScrollViewer>
                  </StackPanel>
              </ScrollViewer>
         </Grid>

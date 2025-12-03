@@ -206,11 +206,7 @@ public class AddOperationUserControlViewModel : ViewModelBase
     {
         try
         {
-            string sql = @"
-                INSERT INTO public.operation 
-                (name, operation_code, price, unit, time_required, description) 
-                VALUES (@name, @operation_code, @price, @unit, @time_required, @description)
-                RETURNING id";
+            string sql = @"INSERT INTO public.operation (name, operation_code, price, unit, time_required, description) VALUES (@name, @operation_code, @price, @unit, @time_required, @description) RETURNING id";
             
             using (var connection = new NpgsqlConnection(Arguments.connection))
             {
@@ -240,11 +236,7 @@ public class AddOperationUserControlViewModel : ViewModelBase
     {
         try
         {
-            string sql = @"
-                INSERT INTO public.sub_product_operations 
-                (sub_product_id, operation_id, planned_quantity, notes, status) 
-                VALUES (@sub_product_id, @operation_id, @quantity, '', 'planned')
-                RETURNING id";
+            string sql = @"INSERT INTO public.sub_product_operations (sub_product_id, operation_id, planned_quantity, notes, status) VALUES (@sub_product_id, @operation_id, @quantity, '', 'planned') RETURNING id";
             
             using (var connection = new NpgsqlConnection(Arguments.connection))
             {

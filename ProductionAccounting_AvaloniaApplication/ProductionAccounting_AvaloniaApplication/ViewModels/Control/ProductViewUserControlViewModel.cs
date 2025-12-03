@@ -43,9 +43,10 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
     }
 
     public StackPanel? SubProductContent { get; set; } = null;
+    public StackPanel? SubProductOperation { get; set; } = null;
 
     private List<CartSubProductUserControl> subProductList = [];
-    private List<CartOperationUserControl> subProductOperationList = [];
+    private List<CartSubProductOperationUserControl> subProductOperationList = [];
 
     public ICommand AddSubProductCommand
         => new RelayCommand(() => { WeakReferenceMessenger.Default.Send(new OpenOrCloseAddSubProductStatusMessage(true, ProductId)); });
@@ -299,6 +300,9 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
 
     public async Task LoadSubProductViewAsync(double subProductId)
     {
+        subProductOperationList.Clear();
+        StackPanelHelper.ClearAndRefreshStackPanel<CartSubProductOperationUserControl>(SubProductOperation, subProductOperationList);
+
         try
         {
             string sql = @"SELECT id, name, planned_quantity, planned_weight, notes, created_at FROM public.sub_products WHERE id = @id";
@@ -307,26 +311,82 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
             {
                 await connection.OpenAsync();
 
-                using (var command = new NpgsqlCommand(sql, connection))
+                using (var command1 = new NpgsqlCommand(sql, connection))
                 {
-                    command.Parameters.AddWithValue("@id", subProductId);
+                    command1.Parameters.AddWithValue("@id", subProductId);
 
-                    using (var reader = await command.ExecuteReaderAsync())
+                    using (var reader1 = await command1.ExecuteReaderAsync())
                     {
-                        if (await reader.ReadAsync())
+                        if (await reader1.ReadAsync())
                         {
-                            SubProductId = reader.IsDBNull(0) ? 0 : reader.GetDouble(0);
-                            SubProductName = reader.IsDBNull(1) ? string.Empty : reader.GetString(1);
-                            SubProductPlannedQuantity = reader.IsDBNull(2) ? 0 : reader.GetDecimal(2);
-                            SubProductPlannedWeight = reader.IsDBNull(3) ? 0 : reader.GetDecimal(3);
-                            SubProductNotes = reader.IsDBNull(4) ? string.Empty : reader.GetString(4);
+                            SubProductId = reader1.IsDBNull(0) ? 0 : reader1.GetDouble(0);
+                            SubProductName = reader1.IsDBNull(1) ? string.Empty : reader1.GetString(1);
+                            SubProductPlannedQuantity = reader1.IsDBNull(2) ? 0 : reader1.GetDecimal(2);
+                            SubProductPlannedWeight = reader1.IsDBNull(3) ? 0 : reader1.GetDecimal(3);
+                            SubProductNotes = reader1.IsDBNull(4) ? string.Empty : reader1.GetString(4);
                         }
                     }
                 }
+
+                string sqlSubProductOperations = @"
+                                                SELECT
+                                                    spo.id,
+                                                    o.name AS operation_name,
+                                                    spo.planned_quantity,
+                                                    COALESCE(SUM(ta.assigned_quantity), 0) AS assigned_qty,
+                                                    spo.completed_quantity AS completed_qty
+                                                FROM public.sub_product_operations spo
+                                                JOIN public.operation o ON o.id = spo.operation_id
+                                                LEFT JOIN public.task_assignments ta ON ta.sub_product_operation_id = spo.id
+                                                WHERE spo.sub_product_id = @sub_product_id
+                                                GROUP BY spo.id, o.name, spo.planned_quantity, spo.completed_quantity
+                                                ORDER BY spo.id";
+
+                using (var command2 = new NpgsqlCommand(sqlSubProductOperations, connection))
+                {
+                    command2.Parameters.AddWithValue("@sub_product_id", subProductId);
+
+                    using (var reader2 = await command2.ExecuteReaderAsync())
+                    {
+                        while (await reader2.ReadAsync())
+                        {
+                            var viewModel = new CartSubProductOperationUserControlViewModel()
+                            {
+                                OperationId = reader2.GetDouble(0),
+                                OperationName = reader2.GetString(1),
+                                PlannedQuantity = reader2.GetDecimal(2),
+                                AssignedQuantity = reader2.GetDecimal(3),
+                                CompletedQuantity = reader2.GetDecimal(4),
+                            };
+
+                            var userControl = new CartSubProductOperationUserControl()
+                            {
+                                DataContext = viewModel,
+                            };
+
+                            subProductOperationList.Add(userControl);
+                        }
+                    }
+                }
+
+                StackPanelHelper.RefreshStackPanelContent<CartSubProductOperationUserControl>(SubProductOperation, subProductOperationList);
+
+                if(subProductOperationList.Count == 0) ItemNotFoundException.Show(SubProductOperation, ErrorLevel.NotFound);
             }
+        }
+        catch (NpgsqlException ex)
+        {
+            StackPanelHelper.ClearAndRefreshStackPanel<CartSubProductOperationUserControl>(SubProductOperation, subProductOperationList);
+            ItemNotFoundException.Show(SubProductOperation, ErrorLevel.NoConnectToDB);
+
+            Loges.LoggingProcess(LogLevel.ERROR,
+                "Connection or request error",
+                ex: ex);
         }
         catch (Exception ex)
         {
+            StackPanelHelper.ClearAndRefreshStackPanel<CartSubProductOperationUserControl>(SubProductOperation, subProductOperationList);
+            ItemNotFoundException.Show(SubProductOperation, ErrorLevel.NoConnectToDB);
             Loges.LoggingProcess(LogLevel.ERROR, ex: ex);
         }
     }

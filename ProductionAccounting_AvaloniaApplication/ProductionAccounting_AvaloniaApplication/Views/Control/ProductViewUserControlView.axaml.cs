@@ -16,6 +16,7 @@ public partial class ProductViewUserControlView : UserControl
     {
         if (DataContext is not ProductViewUserControlViewModel viewModel) return;
         viewModel.SubProductContent = SubProductContent;
+        viewModel.SubProductOperation = SubProductOperation;
         _ = viewModel.LoadSubProductAsync();
     }
 }
