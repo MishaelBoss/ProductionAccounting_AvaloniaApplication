@@ -12,6 +12,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using static ProductionAccounting_AvaloniaApplication.ViewModels.Control.NotFoundUserControlViewModel;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
 
@@ -347,7 +348,17 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
                 }
 
                 StackPanelHelper.RefreshStackPanelContent<CartTimesheetUserControl>(CartTimesheet, timesheetList);
+
+                if (timesheetList.Count == 0) ItemNotFoundException.Show(CartTimesheet, ErrorLevel.NotFound);
             }
+        }
+        catch (NpgsqlException ex)
+        {
+            Loges.LoggingProcess(LogLevel.ERROR,
+                "Connection or request error",
+                ex: ex);
+
+            ItemNotFoundException.Show(CartTimesheet, ErrorLevel.NoConnectToDB);
         }
         catch (Exception ex)
         {
