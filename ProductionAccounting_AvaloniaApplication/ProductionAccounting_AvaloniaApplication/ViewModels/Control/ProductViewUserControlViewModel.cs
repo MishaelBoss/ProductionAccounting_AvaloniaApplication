@@ -45,6 +45,7 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
     public StackPanel? SubProductContent { get; set; } = null;
 
     private List<CartSubProductUserControl> subProductList = [];
+    private List<CartOperationUserControl> subProductOperationList = [];
 
     public ICommand AddSubProductCommand
         => new RelayCommand(() => { WeakReferenceMessenger.Default.Send(new OpenOrCloseAddSubProductStatusMessage(true, ProductId)); });
@@ -278,6 +279,15 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
             StackPanelHelper.RefreshStackPanelContent<CartSubProductUserControl>(SubProductContent, subProductList);
 
             if (subProductList.Count == 0) ItemNotFoundException.Show(SubProductContent, ErrorLevel.NotFound);
+        }
+        catch (NpgsqlException ex)
+        {
+            StackPanelHelper.ClearAndRefreshStackPanel<CartSubProductUserControl>(SubProductContent, subProductList);
+            ItemNotFoundException.Show(SubProductContent, ErrorLevel.NoConnectToDB);
+
+            Loges.LoggingProcess(LogLevel.ERROR,
+                "Connection or request error",
+                ex: ex);
         }
         catch (Exception ex)
         {
