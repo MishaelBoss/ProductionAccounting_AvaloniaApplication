@@ -14,7 +14,7 @@ using static ProductionAccounting_AvaloniaApplication.ViewModels.Control.NotFoun
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
-public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyChanged, IRecipient<RefreshSubProductListMessage>, IRecipient<OpenOrCloseSubProductStatusMessage>
+public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyChanged, IRecipient<RefreshSubProductListMessage>, IRecipient<OpenOrCloseSubProductStatusMessage>, IRecipient<RefreshSubProductOperationsMessage>
 {
     public ProductViewUserControlViewModel(double productId) 
     {
@@ -34,6 +34,14 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
     {
         _ = LoadSubProductViewAsync(message.SubProductId);
     }
+
+    public void Receive(RefreshSubProductOperationsMessage message)
+    {
+        if (SubProductId.HasValue && SubProductId.Value == message.SubProductId)
+        {
+        }
+    }
+
     public StackPanel? SubProductContent { get; set; } = null;
 
     private List<CartSubProductUserControl> subProductList = [];
