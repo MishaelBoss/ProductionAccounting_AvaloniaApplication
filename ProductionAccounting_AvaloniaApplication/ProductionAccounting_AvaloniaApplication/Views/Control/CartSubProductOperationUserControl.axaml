@@ -13,7 +13,7 @@
             Margin="8"
             BorderBrush="#444" 
             BorderThickness="2"
-            MinWidth="400">
+            MinWidth="200">
 
         <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,*" Margin="10">
 
