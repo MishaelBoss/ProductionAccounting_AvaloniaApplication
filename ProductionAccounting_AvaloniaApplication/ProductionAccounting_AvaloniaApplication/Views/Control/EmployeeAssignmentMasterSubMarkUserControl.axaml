@@ -1,4 +1,4 @@
-<UserControl xmlns="https://github.com/avaloniaui"
+ï»¿<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -7,54 +7,58 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="ProductionAccounting_AvaloniaApplication.EmployeeAssignmentMasterSubMarkUserControl">
 
-    <Grid Margin="50" RowDefinitions="Auto,*">
-        <TextBlock Text="Íàçíà÷èòü ðàáîòó ñîòðóäíèêó"
-                   FontSize="32"
-                   FontWeight="Bold"
-                   Foreground="#00D4FF"
-                   HorizontalAlignment="Center"
-                   Margin="0,0,0,40"/>
+    <Grid>
+        <Border Background="#000000" 
+				Opacity="0.5"/>
+        
+        <Border VerticalAlignment="Center" 
+                HorizontalAlignment="Center" 
+                Width="400" 
+                Height="300"
+                Background="Gray" 
+                CornerRadius="12">
+            <Grid>
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="20" 
+								Spacing="10">
+                        <ComboBox ItemsSource="{Binding Employees}"
+                                  SelectedItem="{Binding SelectedEmployee}"
+                                  DisplayMemberBinding="{Binding FullName}"
+                                  PlaceholderText="Ð’Ñ‹Ð±ÐµÑ€Ð¸Ñ‚Ðµ ÑÐ¾Ñ‚Ñ€ÑƒÐ´Ð½Ð¸ÐºÐ°"
+                                  FontSize="22"
+                                  Height="70"/>
 
-        <Border Grid.Row="1"
-                Background="#252526"
-                CornerRadius="20"
-                Padding="60"
-                MaxWidth="800"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Top">
+                        <TextBox Text="{Binding Quantity}" 
+                                 AcceptsReturn="True"
+                                 TextWrapping="Wrap"
+                                 Height="80"
+                                 Watermark="ÐšÐ¾Ð»Ð¸Ñ‡ÐµÑÑ‚Ð²Ð¾"/>
 
-            <StackPanel Spacing="30">
+                        <TextBox Text="{Binding Notes}" 
+                                 AcceptsReturn="True"
+                                 TextWrapping="Wrap"
+                                 Height="80"
+                                 Watermark="ÐŸÑ€Ð¸Ð¼ÐµÑ‡Ð°Ð½Ð¸Ðµ (Ð½ÐµÐ¾Ð±ÑÐ·Ð°Ñ‚ÐµÐ»ÑŒÐ½Ð¾)"/>
 
-                <ComboBox ItemsSource="{Binding Employees}"
-                          SelectedItem="{Binding SelectedEmployee}"
-                          DisplayMemberBinding="{Binding FullName}"
-                          PlaceholderText="Âûáåðèòå ïîäìàðêó"
-                          FontSize="22"
-                          Height="70"/>
+                        <StackPanel Orientation="Vertical"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Center"
+                                    Spacing="10"
+                                    Margin="0,20,0,0">
 
-                <ComboBox ItemsSource="{Binding Employees}"
-                          SelectedItem="{Binding SelectedEmployee}"
-                          DisplayMemberBinding="{Binding FullName}"
-                          PlaceholderText="Êîìó ïîðó÷èòü"
-                          FontSize="22"
-                          Height="70"/>
+                            <Button Classes="ButtonLogin"
+                                    Command="{Binding AssignCommand}"
+                                    Content="ÐÐ°Ð·Ð½Ð°Ñ‡Ð¸Ñ‚ÑŒ"/>
 
-                <TextBox Text="{Binding Quantity}"
-                         Watermark="Ñêîëüêî øòóê íàçíà÷èòü"
-                         FontSize="22"
-                         Padding="20"
-                         Height="70"/>
-
-                <Button Content="ÍÀÇÍÀ×ÈÒÜ ÐÀÁÎÒÓ"
-                        Command="{Binding AssignCommand}"
-                        Background="#28A745"
-                        Foreground="White"
-                        FontSize="28"
-                        FontWeight="Bold"
-                        Height="100"
-                        CornerRadius="20"
-                        HorizontalAlignment="Stretch"/>
-            </StackPanel>
+                            <Button Command="{Binding CancelCommand}"
+                                    Content="ÐžÑ‚Ð¼ÐµÐ½Ð°"
+                                    HorizontalAlignment="Center"
+                                    Background="Transparent"/>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
         </Border>
     </Grid>
+
 </UserControl>
