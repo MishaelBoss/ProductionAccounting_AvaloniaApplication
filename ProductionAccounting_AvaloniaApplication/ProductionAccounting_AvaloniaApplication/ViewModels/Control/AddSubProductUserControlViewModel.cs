@@ -103,6 +103,7 @@ public class AddSubProductUserControlViewModel : ViewModelBase, INotifyPropertyC
                     //await LoadSubProductAsync();
 
                     WeakReferenceMessenger.Default.Send(new RefreshSubProductListMessage());
+                    WeakReferenceMessenger.Default.Send(new OpenOrCloseAddSubProductStatusMessage(false));
 
                     ClearForm();
                 }

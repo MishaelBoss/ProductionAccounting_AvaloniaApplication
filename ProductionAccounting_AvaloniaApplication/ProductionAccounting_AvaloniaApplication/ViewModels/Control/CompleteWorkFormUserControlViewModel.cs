@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using MsBox.Avalonia;
 using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ReactiveUI;
@@ -19,6 +20,9 @@ public class CompleteWorkFormUserControlViewModel : ViewModelBase
         ProductId = productId;
         OperationId = operationId;
         SubProductOperationId = subProductOperationId;
+
+        Loges.LoggingProcess(LogLevel.INFO,
+                $"assignmentId: {assignmentId} taskName: {taskName} assignedQuantity: {assignedQuantity} productId: {productId} operationId: {operationId} subProductOperationId: {subProductOperationId}");
     }
 
     public double AssignmentId { get; }
@@ -52,31 +56,33 @@ public class CompleteWorkFormUserControlViewModel : ViewModelBase
     {
         try
         {
-            using var connection = new NpgsqlConnection(Arguments.connection);
-            await connection.OpenAsync();
-
-            string sqlProduction = "INSERT INTO public.production (user_id, product_id, operation_id, quantity, production_date, notes, status)" +
-                                "VALUES (@user_id, @product_id, @operation_id, @qty, CURRENT_DATE, @notes, 'completed')";
-
-            using (var command = new NpgsqlCommand(sqlProduction, connection)) 
+            using (var connection = new NpgsqlConnection(Arguments.connection)) 
             {
-                command.Parameters.AddWithValue("@user_id", ManagerCookie.GetIdUser ?? 0);
-                command.Parameters.AddWithValue("@product_id", ProductId);
-                command.Parameters.AddWithValue("@operation_id", OperationId);
-                command.Parameters.AddWithValue("@qty", CompletedToday);
-                command.Parameters.AddWithValue("@notes", Notes ?? "");
+                await connection.OpenAsync();
 
-                await command.ExecuteNonQueryAsync();
-            }
+                string sqlProduction = "INSERT INTO public.production (user_id, product_id, operation_id, quantity, production_date, notes, status)" +
+                                        "VALUES (@user_id, @product_id, @operation_id, @qty, CURRENT_DATE, @notes, 'completed')";
 
-            string sqlUpdate = @"UPDATE public.sub_product_operations SET completed_quantity = completed_quantity + @qty WHERE id = @op_id";
+                using (var command = new NpgsqlCommand(sqlProduction, connection))
+                {
+                    command.Parameters.AddWithValue("@user_id", ManagerCookie.GetIdUser ?? 0);
+                    command.Parameters.AddWithValue("@product_id", ProductId);
+                    command.Parameters.AddWithValue("@operation_id", OperationId);
+                    command.Parameters.AddWithValue("@qty", CompletedToday);
+                    command.Parameters.AddWithValue("@notes", Notes ?? "");
 
-            using (var command2 = new NpgsqlCommand(sqlUpdate, connection))
-            {
-                command2.Parameters.AddWithValue("@qty", CompletedToday);
-                command2.Parameters.AddWithValue("@op_id", SubProductOperationId);
+                    await command.ExecuteNonQueryAsync();
+                }
 
-                await command2.ExecuteNonQueryAsync();
+                string sqlUpdate = @"UPDATE public.sub_product_operations SET completed_quantity = completed_quantity + @qty WHERE id = @op_id";
+
+                using (var command2 = new NpgsqlCommand(sqlUpdate, connection))
+                {
+                    command2.Parameters.AddWithValue("@qty", CompletedToday);
+                    command2.Parameters.AddWithValue("@op_id", SubProductOperationId);
+
+                    await command2.ExecuteNonQueryAsync();
+                }
             }
 
             WeakReferenceMessenger.Default.Send(new RefreshEmployeeTasksMessage());

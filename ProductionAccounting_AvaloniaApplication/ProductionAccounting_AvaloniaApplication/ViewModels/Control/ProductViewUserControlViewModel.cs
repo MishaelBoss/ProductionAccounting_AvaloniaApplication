@@ -51,10 +51,10 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
     private List<CartSubProductOperationUserControl> subProductOperationList = [];
 
     public ICommand AddSubProductCommand
-        => new RelayCommand(() => { WeakReferenceMessenger.Default.Send(new OpenOrCloseAddSubProductStatusMessage(true, ProductId)); });
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseAddSubProductStatusMessage(true, ProductId)));
 
     public ICommand OpenEmployeeAssignmentMasterSubMarkUserControlViewModelCommand
-        => new RelayCommand(() => { WeakReferenceMessenger.Default.Send(new OpenOrCloseEmployeeAssignmentMasterSubMarkStatusMessage(true, ProductId)); });
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseEmployeeAssignmentMasterSubMarkStatusMessage(true, ProductId)));
 
     public ICommand AddOperationCommand 
         => new RelayCommand(() => { if (SubProductId.HasValue) WeakReferenceMessenger.Default.Send(new OpenOrCloseAddOperationStatusMessage(true, SubProductId.Value)); });

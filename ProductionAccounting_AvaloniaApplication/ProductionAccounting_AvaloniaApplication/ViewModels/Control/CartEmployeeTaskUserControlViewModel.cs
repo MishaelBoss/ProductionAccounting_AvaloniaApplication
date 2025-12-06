@@ -109,5 +109,5 @@ public class CartEmployeeTaskUserControlViewModel : ViewModelBase
         => !string.IsNullOrWhiteSpace(Notes);
 
     public ICommand OpenCompleteWorkFormCommand
-        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseCompleteWorkFormStatusMessage(true, AssignmentId, OperationName, AssignedQuantity, ProductId, OperationId)));
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseCompleteWorkFormStatusMessage(true, AssignmentId, OperationName, AssignedQuantity, ProductId, OperationId, SubProductOperationId)));
 }
