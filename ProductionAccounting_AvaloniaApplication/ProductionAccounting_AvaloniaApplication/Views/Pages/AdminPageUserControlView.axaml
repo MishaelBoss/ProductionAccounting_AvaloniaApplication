@@ -46,12 +46,6 @@
 		  									HorizontalAlignment="Stretch"
 		  									Content="Add a position"/>
 
-                                    
-		  							<Button Command="{Binding AddOperationCommand}"
-		  									VerticalAlignment="Stretch"
-		  									HorizontalAlignment="Stretch"
-		  									Content="Add a operation"/>
-
 									<Button Command="{Binding AddProductCommand}"
 		  									VerticalAlignment="Stretch"
 		  									HorizontalAlignment="Stretch"
@@ -73,9 +67,6 @@
 			</TabItem>
 			<TabItem Header="Position">
 				<controls:TabPositionUserControl />
-			</TabItem>
-			<TabItem Header="Operation">
-				<controls:TabOperationUserControl />
 			</TabItem>
 			<TabItem Header="Product">
 				<controls:TabProductUserControl />

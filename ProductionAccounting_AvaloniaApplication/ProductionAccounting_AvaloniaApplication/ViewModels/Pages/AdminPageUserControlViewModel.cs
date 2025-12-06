@@ -16,9 +16,6 @@ public class AdminPageUserControlViewModel : ViewModelBase
     public ICommand OpenPositionCommand
         => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseAddPositionStatusMessage(true)));
 
-    public ICommand AddOperationCommand
-        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseAddOperationStatusMessage(true)));
-
     public ICommand AddProductCommand
         => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseAddProductStatusMessage(true)));
 }
