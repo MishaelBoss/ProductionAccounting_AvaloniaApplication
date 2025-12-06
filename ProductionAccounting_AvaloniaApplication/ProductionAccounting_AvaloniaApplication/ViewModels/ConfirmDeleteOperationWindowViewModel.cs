@@ -53,8 +53,21 @@ public class ConfirmDeleteOperationWindowViewModel : ViewModelBase
                 await connection.OpenAsync();
                 try
                 {
-                    string sql1 = "DELETE FROM public.operation WHERE id = @id";
-                    using (var command1 = new NpgsqlCommand(sql1, connection))
+                    var deleteQueries = new[]
+{
+                        "DELETE FROM public.production WHERE product_id = @id"
+                    };
+
+                    foreach (var querty in deleteQueries)
+                    {
+                        await using (var command = new NpgsqlCommand(querty, connection))
+                        {
+                            command.Parameters.AddWithValue("@id", Id);
+                            await command.ExecuteNonQueryAsync();
+                        }
+                    }
+
+                    using (var command1 = new NpgsqlCommand("DELETE FROM public.operation WHERE id = @id", connection))
                     {
                         command1.Parameters.AddWithValue("@id", Id);
                         await command1.ExecuteNonQueryAsync();

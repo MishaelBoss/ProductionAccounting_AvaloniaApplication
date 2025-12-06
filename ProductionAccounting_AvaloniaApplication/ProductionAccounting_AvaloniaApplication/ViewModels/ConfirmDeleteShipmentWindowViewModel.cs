@@ -74,8 +74,7 @@ public class ConfirmDeleteShipmentWindowViewModel : ViewModelBase
                 await connection.OpenAsync();
                 try
                 {
-                    string sql = "DELETE FROM public.shipments WHERE id = @id";
-                    using (var command = new NpgsqlCommand(sql, connection))
+                    using (var command = new NpgsqlCommand("DELETE FROM public.shipments WHERE id = @id", connection))
                     {
                         command.Parameters.AddWithValue("@id", Id);
                         var rows = await command.ExecuteNonQueryAsync();

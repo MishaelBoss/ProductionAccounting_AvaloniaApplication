@@ -56,29 +56,26 @@ public class ConfirmDeleteUserWindowViewModel : ViewModelBase
                 {
                     int rowsAffected = 0;
 
-                    string sql1 = "DELETE FROM public.user_to_user_type WHERE user_id = @id";
-                    using (var command1 = new NpgsqlCommand(sql1, connection))
+                    var deleteQueries = new[]
                     {
-                        command1.Parameters.AddWithValue("@id", UserID);
-                        rowsAffected += await command1.ExecuteNonQueryAsync();
+                        "DELETE FROM public.timesheet WHERE user_id = @id",
+                        "DELETE FROM public.user_to_user_type WHERE user_id = @id",
+                        "DELETE FROM public.user_to_departments WHERE user_id = @id",
+                        "DELETE FROM public.user_to_position WHERE user_id = @id",
+                        "DELETE FROM public.task_assignments WHERE user_id = @id",
+                        "DELETE FROM public.production WHERE user_id = @id"
+                    };
+
+                    foreach (var querty in deleteQueries) 
+                    {
+                        await using (var command = new NpgsqlCommand(querty, connection)) 
+                        {
+                            command.Parameters.AddWithValue("@id", UserID);
+                            await command.ExecuteNonQueryAsync();
+                        }
                     }
 
-                    string sql2 = "DELETE FROM public.user_to_departments WHERE user_id = @id";
-                    using (var command1 = new NpgsqlCommand(sql2, connection))
-                    {
-                        command1.Parameters.AddWithValue("@id", UserID);
-                        rowsAffected += await command1.ExecuteNonQueryAsync();
-                    }
-
-                    string sql3 = "DELETE FROM public.user_to_position WHERE user_id = @id";
-                    using (var command1 = new NpgsqlCommand(sql3, connection))
-                    {
-                        command1.Parameters.AddWithValue("@id", UserID);
-                        rowsAffected += await command1.ExecuteNonQueryAsync();
-                    }
-
-                    string sql4 = "DELETE FROM public.user WHERE id = @id";
-                    using (var command2 = new NpgsqlCommand(sql4, connection))
+                    using (var command2 = new NpgsqlCommand("DELETE FROM public.user WHERE id = @id", connection))
                     {
                         command2.Parameters.AddWithValue("@id", UserID);
                         rowsAffected += await command2.ExecuteNonQueryAsync();
@@ -87,7 +84,7 @@ public class ConfirmDeleteUserWindowViewModel : ViewModelBase
                     Loges.LoggingProcess(level: LogLevel.INFO,
                         message: $"Deleted user {UserID}, Login {Login}");
 
-                    return rowsAffected > 1;
+                    return rowsAffected > 0;
                 }
                 catch (Exception ex)
                 {

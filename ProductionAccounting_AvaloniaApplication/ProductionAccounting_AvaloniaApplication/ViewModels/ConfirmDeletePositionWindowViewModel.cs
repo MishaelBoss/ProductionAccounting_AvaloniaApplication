@@ -55,8 +55,7 @@ public class ConfirmDeletePositionWindowViewModel : ViewModelBase
                 await connection.OpenAsync();
                 try
                 {
-                    string sql1 = "DELETE FROM public.positions WHERE id = @id";
-                    using (var command1 = new NpgsqlCommand(sql1, connection))
+                    using (var command1 = new NpgsqlCommand("DELETE FROM public.positions WHERE id = @id", connection))
                     {
                         command1.Parameters.AddWithValue("@id", Id);
                         await command1.ExecuteNonQueryAsync();
