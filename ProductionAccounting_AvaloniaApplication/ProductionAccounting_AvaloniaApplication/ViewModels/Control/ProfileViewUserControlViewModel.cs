@@ -1,9 +1,11 @@
 ﻿using Avalonia.Controls;
 using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
+using ProductionAccounting_AvaloniaApplication.Views.Control;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Threading.Tasks;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
@@ -14,7 +16,7 @@ public class ProfileViewUserControlViewModel : ViewModelBase
     public StackPanel? TasksUserContent { get; set; } = null;
 
     private List<CartTimesheetUserControl> timesheetList = [];
-    private List<CartTaskUserControl> tasksList = [];
+    private List<CartEmployeeTaskUserControl> tasksList = [];
 
     private double _userID = 0;
     public double UserID
@@ -250,25 +252,24 @@ public class ProfileViewUserControlViewModel : ViewModelBase
 
     private async Task LoadTask()
     {
-        StackPanelHelper.ClearAndRefreshStackPanel<CartTaskUserControl>(TasksUserContent, tasksList);
+        StackPanelHelper.ClearAndRefreshStackPanel<CartEmployeeTaskUserControl>(TasksUserContent, tasksList);
 
         try
         {
-            var sql = @"
-                SELECT 
-                    p.id,
-                    p.quantity, 
-                    p.amount, 
-                    p.notes, 
-                    p.created_at, 
-                    p.status,
-                    pr.name AS product_name, pr.unit,
-                    COALESCE(o.name, '—') AS operation_name
-                FROM public.production p
-                JOIN public.product pr ON pr.id = p.product_id
-                LEFT JOIN public.operation o ON o.id = p.operation_id
-                WHERE p.user_id = @user_id 
-                ORDER BY p.created_at DESC";
+            string sql = @"
+                        SELECT 
+                            sp.name AS sub_product_name,
+                            o.name AS operation_name,
+                            ta.assigned_quantity,
+                            ta.notes,
+                            ta.status,
+                            ta.id AS assignment_id
+                        FROM public.task_assignments ta
+                        JOIN public.sub_product_operations spo ON spo.id = ta.sub_product_operation_id
+                        JOIN public.sub_products sp ON sp.id = spo.sub_product_id
+                        JOIN public.operation o ON o.id = spo.operation_id
+                        WHERE ta.user_id = @user_id
+                        ORDER BY ta.assigned_at DESC";
 
             using (var connection = new NpgsqlConnection(Arguments.connection))
             {
@@ -282,21 +283,17 @@ public class ProfileViewUserControlViewModel : ViewModelBase
                     {
                         while (await reader.ReadAsync())
                         {
-                            var viewModel = new CartTaskUserControlViewModel()
+                            var viewModel = new CartEmployeeTaskUserControlViewModel()
                             {
-                                IsWork = false,
-                                ProductionId = reader.GetDouble(0),
-                                Quantity = reader.GetDecimal(1),
-                                Amount = reader.GetDecimal(2),
-                                Notes = reader.IsDBNull(3) ? string.Empty : reader.GetString(3),
-                                CreatedAt = reader.GetDateTime(4),
-                                Status = reader.GetString(5),
-                                ProductName = reader.GetString(6),
-                                Unit = reader.GetString(7),
-                                OperationName = reader.GetString(8)
+                                AssignmentId = reader.GetDouble("assignment_id"),
+                                SubProductName = reader.GetString("sub_product_name"),
+                                OperationName = reader.GetString("operation_name"),
+                                AssignedQuantity = reader.GetDecimal("assigned_quantity"),
+                                Notes = reader.IsDBNull("notes") ? null : reader.GetString("notes"),
+                                Status = reader.GetString("status")
                             };
 
-                            var cartUser = new CartTaskUserControl()
+                            var cartUser = new CartEmployeeTaskUserControl()
                             {
                                 DataContext = viewModel
                             };
@@ -307,7 +304,7 @@ public class ProfileViewUserControlViewModel : ViewModelBase
                 }
             }
 
-            StackPanelHelper.RefreshStackPanelContent<CartTaskUserControl>(TasksUserContent, tasksList);
+            StackPanelHelper.RefreshStackPanelContent<CartEmployeeTaskUserControl>(TasksUserContent, tasksList);
         }
         catch (Exception ex)
         {

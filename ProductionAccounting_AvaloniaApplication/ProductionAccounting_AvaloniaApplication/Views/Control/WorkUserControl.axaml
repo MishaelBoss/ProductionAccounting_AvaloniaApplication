@@ -18,7 +18,7 @@
         <Border Grid.Row="4" 
                 Padding="20">
             <StackPanel Spacing="15">
-                <TextBlock Text="Сегодняшние работы" 
+                <TextBlock Text="Работы" 
                            FontSize="16"
                            FontWeight="SemiBold" 
                            Foreground="#2C3E50"/>

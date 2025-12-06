@@ -23,9 +23,7 @@ public class TabProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
     }
 
     public void Receive(RefreshProductListMessage message)
-    {
-        GetList();
-    }
+        => GetList();
 
     public StackPanel? HomeMainContent { get; set; } = null;
 
