@@ -73,7 +73,6 @@
 						CornerRadius="6"
 						Background="#4A90E2"
 						BorderThickness="0"
-						IsVisible="{Binding IsAdministrator}"
 						ToolTip.Tip="View">
 					<Image Source="/Assets/search-list-64.png"
 						   Width="18"

@@ -30,7 +30,7 @@ public class CartProductUserControlViewModel : ViewModelBase
         });
 
     public ICommand OpenPruductViewCommand
-        => new RelayCommand(() => { WeakReferenceMessenger.Default.Send(new OpenOrCloseProductViewStatusMessage(true, Id)); });
+        => new RelayCommand(() => { WeakReferenceMessenger.Default.Send(new OpenOrCloseProductViewStatusMessage(true, Name, Id, Mark, Coefficient, Notes)); });
 
 
     private string _status = "new";

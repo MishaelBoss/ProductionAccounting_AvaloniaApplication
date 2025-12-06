@@ -69,7 +69,8 @@
                         FontWeight="Bold"
                         CornerRadius="12"
                         Padding="20,12"
-                        IsEnabled="{Binding CanAssign}"/>
+                        IsEnabled="{Binding CanAssign}"
+                        IsVisible="{Binding IsAdministratorOrMaster}"/>
             </Grid>
         </Grid>
     </Border>

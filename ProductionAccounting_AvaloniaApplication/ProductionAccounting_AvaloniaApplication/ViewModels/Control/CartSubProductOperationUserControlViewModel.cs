@@ -74,6 +74,6 @@ public class CartSubProductOperationUserControlViewModel : ViewModelBase
     public ICommand AssignCommand 
         => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseEmployeeAssignmentMasterSubMarkStatusMessage(true, OperationId)));
 
-    public bool IsAdministrator
+    public bool IsAdministratorOrMaster
         => ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsAdministrator;
 }

@@ -22,7 +22,8 @@
 		  					VerticalAlignment="Top"
 		  					Width="32"
 		  					Height="32"
-		  					ToolTip.Tip="Add a product">
+		  					ToolTip.Tip="Add a product"
+                            IsVisible="{Binding IsAdministrator}">
 		  				<Image Source="/Assets/add-64.png"/>
 		  			</Button>
                     <TextBlock Text="{Binding Name}"/>
@@ -58,7 +59,8 @@
 		  					VerticalAlignment="Top"
 		  					Width="32"
 		  					Height="32"
-		  					ToolTip.Tip="Add a product">
+		  					ToolTip.Tip="Add"
+                            IsVisible="{Binding IsAdministrator}">
 		  				<Image Source="/Assets/add-64.png"/>
 		  			</Button>
              <ScrollViewer Margin="10">

@@ -1,0 +1,67 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:ProductionAccounting_AvaloniaApplication.ViewModels.Control"
+             x:DataType="vm:CompleteWorkFormUserControlViewModel"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ProductionAccounting_AvaloniaApplication.Views.Control.CompleteWorkFormUserControl">
+
+    <Grid>
+        <Border Background="#000000" 
+				Opacity="0.5"/>
+        
+        <Border VerticalAlignment="Center" 
+                HorizontalAlignment="Center" 
+                Width="400" 
+                Height="300"
+                Background="Gray" 
+                CornerRadius="12">
+            <Grid>
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="20" 
+								Spacing="10">
+
+                        <TextBlock Text="{Binding TaskName}" 
+                                 FontSize="24" 
+                                 FontWeight="Bold" 
+                                 Foreground="White"
+                                 HorizontalAlignment="Center"/>
+
+                        <TextBlock Text="{Binding AssignedQuantity, StringFormat='Назначено: {0:F0} шт'}"
+                                   FontSize="18" Foreground="#FFD700"
+                                   HorizontalAlignment="Center"/>
+
+                        <TextBox Text="{Binding CompletedToday}"
+                                 Watermark="Сколько сделали сегодня?"
+                                 FontSize="20" Padding="15"
+                                 HorizontalAlignment="Stretch"/>
+
+                        <TextBox Text="{Binding Notes}"
+                                 Watermark="Примечание (если есть проблемы)"
+                                 Height="80" 
+                                 AcceptsReturn="True"
+                                 TextWrapping="Wrap"
+                                 FontSize="16"/>
+
+                        <StackPanel Orientation="Vertical"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Center"
+                                    Spacing="10"
+                                    Margin="0,20,0,0">
+
+                            <Button Command="{Binding ConfirmCommand}"
+                                    Content="Подтвердить сдачу"/>
+
+                            <Button Command="{Binding CancelCommand}"
+                                    Content="Отмена"
+                                    HorizontalAlignment="Center"
+                                    Background="Transparent"/>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+    </Grid>
+
+</UserControl>

@@ -16,11 +16,13 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyChanged, IRecipient<RefreshSubProductListMessage>, IRecipient<OpenOrCloseSubProductStatusMessage>, IRecipient<RefreshSubProductOperationsMessage>
 {
-    public ProductViewUserControlViewModel(double productId) 
+    public ProductViewUserControlViewModel(string name, double productId, string mark, Int32 coefficient, string notes) 
     {
+        Name = name;
         ProductId = productId;
-
-        _ = LoadTasksAsync();
+        Mark = mark;
+        Coefficient = coefficient;
+        Notes = notes;
 
         WeakReferenceMessenger.Default.RegisterAll(this);
     }
@@ -57,23 +59,21 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
     public ICommand AddOperationCommand 
         => new RelayCommand(() => { if (SubProductId.HasValue) WeakReferenceMessenger.Default.Send(new OpenOrCloseAddOperationStatusMessage(true, SubProductId.Value)); });
 
-    public double ProductId { get; set; }
+    public string Name { get; }
+    public double ProductId { get; }
+    public string Mark { get; }
+    public Int32 Coefficient { get; }
+    public string Notes { get; }
 
-    private string _status = "new";
+    /*private string _status = "new";
     public string Status
     {
         get => _status;
         set => this.RaiseAndSetIfChanged(ref _status, value);
-    }
+    }*/
 
-    private string? _notes;
-    public string? Notes
-    {
-        get => _notes;
-        set => this.RaiseAndSetIfChanged(ref _notes, value);
-    }
 
-    private double? _createdBy;
+    /*private double? _createdBy;
     public double? CreatedBy
     {
         get => _createdBy;
@@ -92,59 +92,38 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
     {
         get => _productName;
         set => this.RaiseAndSetIfChanged(ref _productName, value);
-    }
+    }*/
 
-    private string _mark = string.Empty;
-    public string Mark
-    {
-        get => _mark;
-        set => this.RaiseAndSetIfChanged(ref _mark, value);
-    }
-
-    public string StatusDisplay => Status switch
+    /*public string StatusDisplay => Status switch
     {
         "new" => "Новая",
         "assigned" => "Разбита на подмарки",
         "in_progress" => "В работе",
         "completed" => "Завершена",
         _ => Status
-    };
+    };*/
 
-    private string _name = string.Empty;
-    public string Name
-    {
-        get => _name;
-        set => this.RaiseAndSetIfChanged(ref _name, value);
-    }
-
-    private string _article = string.Empty;
+    /*private string _article = string.Empty;
     public string Article
     {
         get => _article;
         set => this.RaiseAndSetIfChanged(ref _article, value);
-    }
+    }*/
 
-    private Int32 _pricePerUnit;
+    /*private Int32 _pricePerUnit;
     public Int32 PricePerUnit
     {
         get => _pricePerUnit;
         set => this.RaiseAndSetIfChanged(ref _pricePerUnit, value);
-    }
+    }*/
 
-    private string _unit = string.Empty;
+    /*private string _unit = string.Empty;
     public string Unit
     {
         get => _unit;
         set => this.RaiseAndSetIfChanged(ref _unit, value);
     }
-
-    private Int32 _coefficient;
-    public Int32 Coefficient
-    {
-        get => _coefficient;
-        set => this.RaiseAndSetIfChanged(ref _coefficient, value);
-    }
-
+*/
     private double? _subProductId = 0;
     public double? SubProductId
     {
@@ -180,61 +159,8 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
         set => this.RaiseAndSetIfChanged(ref _subProductNotes, value);
     }
 
-    public async Task LoadTasksAsync()
-    {
-        try
-        {
-            string sql = @"
-                    SELECT 
-                        p.name,
-                        COALESCE(p.mark, '') AS mark,
-                        p.article,
-                        p.unit,
-                        p.price_per_unit,
-                        p.coefficient,
-                        COALESCE(pt.status, 'new') AS status,
-                        pt.created_at
-                    FROM public.product_tasks pt
-                    JOIN public.product p ON p.id = pt.product_id
-                    WHERE COALESCE(pt.status, 'new') IN ('new', 'in_progress')
-                      AND p.is_active = true AND pt.id = @product_task_id
-                    ORDER BY pt.created_at DESC";
-
-            using (var connection = new NpgsqlConnection(Arguments.connection))
-            {
-                await connection.OpenAsync();
-                using (var command = new NpgsqlCommand(sql, connection))
-                {
-                    command.Parameters.AddWithValue("@product_task_id", ProductId);
-
-                    using (var reader = await command.ExecuteReaderAsync())
-                    {
-                        if (await reader.ReadAsync()) 
-                        {
-                            Name = Name = reader.GetString(0);
-                            Mark = reader.GetString(1);
-                            Article = reader.GetString(2);
-                            Unit = reader.GetString(3);
-                            PricePerUnit = reader.GetInt32(4);
-                            Coefficient = reader.GetInt32(5);
-                            Status = reader.GetString(6);
-                            CreatedAt = reader.GetDateTime(7);
-                        }
-                    }
-                }
-            }
-        }
-        catch (NpgsqlException ex)
-        {
-            Loges.LoggingProcess(LogLevel.CRITICAL, "Error connect to DB", 
-                ex: ex);
-        }
-        catch (Exception ex)
-        {
-            Loges.LoggingProcess(LogLevel.WARNING,
-                ex: ex);
-        }
-    }
+    public bool IsAdministrator
+        => ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsAdministrator;
 
     public async Task LoadSubProductAsync()
     {

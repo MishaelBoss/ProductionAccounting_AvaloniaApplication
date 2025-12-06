@@ -9,7 +9,17 @@ using System;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels
 {
-    public class MainWindowViewModel : ViewModelBase, IRecipient<OpenOrCloseAddUserStatusMessage>, IRecipient<OpenOrCloseStatusMessage>, IRecipient<OpenOrCloseAddDepartmentStatusMessage>, IRecipient<OpenOrCloseAddOperationStatusMessage>, IRecipient<OpenOrCloseAddProductStatusMessage>, IRecipient<OpenOrCloseAddPositionStatusMessage>, IRecipient<OpenOrCloseAddSubProductStatusMessage>, IRecipient<OpenOrCloseProductViewStatusMessage>, IRecipient<OpenOrCloseEmployeeAssignmentMasterSubMarkStatusMessage>
+    public class MainWindowViewModel : ViewModelBase,
+        IRecipient<OpenOrCloseAddUserStatusMessage>, 
+        IRecipient<OpenOrCloseStatusMessage>, 
+        IRecipient<OpenOrCloseAddDepartmentStatusMessage>, 
+        IRecipient<OpenOrCloseAddOperationStatusMessage>,
+        IRecipient<OpenOrCloseAddProductStatusMessage>, 
+        IRecipient<OpenOrCloseAddPositionStatusMessage>, 
+        IRecipient<OpenOrCloseAddSubProductStatusMessage>, 
+        IRecipient<OpenOrCloseProductViewStatusMessage>, 
+        IRecipient<OpenOrCloseEmployeeAssignmentMasterSubMarkStatusMessage>,
+        IRecipient<OpenOrCloseCompleteWorkFormStatusMessage>
     {
         public event Action? LoginStatusChanged;
 
@@ -21,6 +31,7 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
         private readonly AddProductUserControl _addProduct = new();
         private readonly AddSubProductUserControl _addSubProduct = new();
         private readonly EmployeeAssignmentMasterSubMarkUserControl _employeeAssignmentMasterSubMarkUserControl = new();
+        private readonly CompleteWorkFormUserControl _completeWorkFormUserControl = new();
 
         public Grid? ContentCenter = null;
 
@@ -48,7 +59,7 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
         {
             if (message.ShouldOpen)
             {
-                var productViewModel = new ProductViewUserControlViewModel(message.ProductId);
+                var productViewModel = new ProductViewUserControlViewModel(message.Name, message.ProductId, message.Mark, message.Coefficient, message.Notes);
 
                 viewPageUserControlViewModel.ShowViewModel(productViewModel);
 
@@ -70,6 +81,12 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
         {
             if (message.ShouldOpen) ShowEmployeeAssignmentMasterSubMarkUserControl(message.ProductId);
             else CloseEmployeeAssignmentMasterSubMarkUserControl();
+        }
+
+        public void Receive(OpenOrCloseCompleteWorkFormStatusMessage message)
+        {
+            if (message.ShouldOpen) ShowCompleteWorkFormUserControl(message.AssignmentId, message.TaskName, message.AssignedQuantity, message.ProductId, message.OperationId, message.SubProductOperationId);
+            else CloseCompleteWorkFormUserControl();
         }
 
         public void Receive(OpenOrCloseAddDepartmentStatusMessage message)
@@ -382,6 +399,29 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
             {
                 ContentCenter.Children.Clear();
                 if (_employeeAssignmentMasterSubMarkUserControl.Parent == ContentCenter) ContentCenter.Children.Remove(_employeeAssignmentMasterSubMarkUserControl);
+            }
+        }
+
+        public void ShowCompleteWorkFormUserControl(double assignmentId, string taskName, decimal assignedQuantity, double productId, double operationId, double subProductOperationId)
+        {
+            if (ContentCenter != null)
+            {
+                var userControl = new CompleteWorkFormUserControl { DataContext = new CompleteWorkFormUserControlViewModel(assignmentId, taskName, assignedQuantity, productId, operationId, subProductOperationId) };
+
+                if (ContentCenter.Children.Contains(userControl)) return;
+
+                if (userControl.Parent is Panel currentParent) currentParent.Children.Remove(userControl);
+                ContentCenter.Children.Clear();
+                ContentCenter.Children.Add(userControl);
+            }
+        }
+
+        public void CloseCompleteWorkFormUserControl()
+        {
+            if (ContentCenter != null)
+            {
+                ContentCenter.Children.Clear();
+                if (_completeWorkFormUserControl.Parent == ContentCenter) ContentCenter.Children.Remove(_completeWorkFormUserControl);
             }
         }
     }

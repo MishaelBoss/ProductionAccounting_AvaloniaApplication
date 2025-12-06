@@ -1,16 +1,18 @@
 ﻿using Avalonia.Media;
 using CommunityToolkit.Mvvm.Input;
-using Npgsql;
+using CommunityToolkit.Mvvm.Messaging;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ReactiveUI;
-using System;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class CartEmployeeTaskUserControlViewModel : ViewModelBase
 {
+    public double ProductId { get; set; }
+    public double OperationId { get; set; }
+    public double SubProductOperationId { get; set; }
+
     private double _assignmentId;
     public double AssignmentId
     {
@@ -37,6 +39,19 @@ public class CartEmployeeTaskUserControlViewModel : ViewModelBase
     {
         get => _assignedQuantity;
         set => this.RaiseAndSetIfChanged(ref _assignedQuantity, value);
+    }
+
+    private decimal _completedQuantity;
+    public decimal CompletedQuantity
+    {
+        get => _completedQuantity;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _completedQuantity, value);
+            this.RaisePropertyChanged(nameof(ProgressText));
+            this.RaisePropertyChanged(nameof(IsCompleted));
+            this.RaisePropertyChanged(nameof(CanComplete));
+        }
     }
 
     private string? _notes;
@@ -82,37 +97,17 @@ public class CartEmployeeTaskUserControlViewModel : ViewModelBase
         => Status == "completed" ? "Переоткрыть" : "Сдать работу";
 
     public bool CanComplete 
-        => Status != "completed" && Status != "rejected";
+        => !IsCompleted;
+
+    public string ProgressText => $"{CompletedQuantity:F0} / {AssignedQuantity:F0}";
+
+    public bool IsCompleted => CompletedQuantity >= AssignedQuantity;
+
+    //public bool CanComplete => !IsCompleted;
 
     public bool HasNotes 
         => !string.IsNullOrWhiteSpace(Notes);
 
-    public ICommand ChangeStatusCommand
-        => new RelayCommand(async () => await ChangeStatusAsync());
-
-    private async Task ChangeStatusAsync()
-    {
-        var newStatus = Status == "completed" ? "assigned" : "completed";
-
-        try
-        {
-            using var conn = new NpgsqlConnection(Arguments.connection);
-            await conn.OpenAsync();
-
-            string sql = "UPDATE public.task_assignments SET status = @status WHERE id = @id";
-            using var cmd = new NpgsqlCommand(sql, conn);
-            cmd.Parameters.AddWithValue("@status", newStatus);
-            cmd.Parameters.AddWithValue("@id", AssignmentId);
-
-            await cmd.ExecuteNonQueryAsync();
-
-            Status = newStatus;
-
-            //WeakReferenceMessenger.Default.Send(new RefreshEmployeeTasksMessage());
-        }
-        catch (Exception ex)
-        {
-            Loges.LoggingProcess(LogLevel.ERROR, ex: ex);
-        }
-    }
+    public ICommand OpenCompleteWorkFormCommand
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseCompleteWorkFormStatusMessage(true, AssignmentId, OperationName, AssignedQuantity, ProductId, OperationId)));
 }
