@@ -52,7 +52,7 @@ public class WorkUserControlViewModel : ViewModelBase, INotifyPropertyChanging, 
                         JOIN public.operation o ON o.id = spo.operation_id
                         WHERE ta.user_id = @user_id
                           AND ta.status = 'assigned'
-                          AND spo.completed_quantity < ta.assigned_quantity   -- ← ТОЛЬКО НЕЗАВЕРШЁННЫЕ!
+                          AND spo.completed_quantity < ta.assigned_quantity
                         ORDER BY ta.assigned_at DESC";
 
             using (var connection = new NpgsqlConnection(Arguments.connection))

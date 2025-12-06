@@ -11,7 +11,7 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase,
         IRecipient<OpenOrCloseAddUserStatusMessage>, 
-        IRecipient<OpenOrCloseStatusMessage>, 
+        IRecipient<OpenOrCloseEditUserStatusMessage>, 
         IRecipient<OpenOrCloseAddDepartmentStatusMessage>, 
         IRecipient<OpenOrCloseAddOperationStatusMessage>,
         IRecipient<OpenOrCloseAddProductStatusMessage>, 
@@ -71,7 +71,7 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
             }
         }
 
-        public void Receive(OpenOrCloseStatusMessage message)
+        public void Receive(OpenOrCloseEditUserStatusMessage message)
         {
             if (message.ShouldOpen) ShowEditUsersUserControl(message.UserId);
             else CloseEditUsersUserControl();

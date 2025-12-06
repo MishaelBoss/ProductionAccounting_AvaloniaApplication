@@ -9,11 +9,21 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class CartSubProductOperationUserControlViewModel : ViewModelBase
 {
-    private double _operationId;
-    public double OperationId
+    public double ProductId { get; set; }
+    public double OperationId { get; set; }
+
+    private double _assignmentId;
+    public double AssignmentId
     {
-        get => _operationId;
-        set => this.RaiseAndSetIfChanged(ref _operationId, value);
+        get => _assignmentId;
+        set => this.RaiseAndSetIfChanged(ref _assignmentId, value);
+    }
+
+    private double _subProductOperationId;
+    public double SubProductOperationId
+    {
+        get => _subProductOperationId;
+        set => this.RaiseAndSetIfChanged(ref _subProductOperationId, value);
     }
 
     private string _operationName = string.Empty;
@@ -67,12 +77,20 @@ public class CartSubProductOperationUserControlViewModel : ViewModelBase
     public string StatusText 
         => CompletedQuantity >= PlannedQuantity ? "Готово" : AssignedQuantity > 0 ? "В работе" : "Ожидает";
 
-    public SolidColorBrush StatusColor => CompletedQuantity >= PlannedQuantity ? new SolidColorBrush(Colors.LimeGreen) : AssignedQuantity > 0 ? new SolidColorBrush(Colors.Orange) : new SolidColorBrush(Colors.Gray);
+    public SolidColorBrush StatusColor 
+        => CompletedQuantity >= PlannedQuantity ? new SolidColorBrush(Colors.LimeGreen) : AssignedQuantity > 0 ? new SolidColorBrush(Colors.Orange) : new SolidColorBrush(Colors.Gray);
 
-    public bool CanAssign => AssignedQuantity < PlannedQuantity;
+    public bool CanAssign 
+        => AssignedQuantity < PlannedQuantity;
+
+    public bool isAppointed
+        => true;
 
     public ICommand AssignCommand 
-        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseEmployeeAssignmentMasterSubMarkStatusMessage(true, OperationId)));
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseEmployeeAssignmentMasterSubMarkStatusMessage(true, SubProductOperationId)));
+
+    public ICommand OpenSubmitWorkForAnEmployeeCommand
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseCompleteWorkFormStatusMessage(true, AssignmentId, OperationName, AssignedQuantity, ProductId, OperationId, SubProductOperationId)));
 
     public bool IsAdministratorOrMaster
         => ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsAdministrator;

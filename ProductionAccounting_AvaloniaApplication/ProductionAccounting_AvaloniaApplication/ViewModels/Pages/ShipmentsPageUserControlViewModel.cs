@@ -12,15 +12,15 @@ using System.Windows.Input;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
 
-public class ShipmentsPageUserControlViewModel : ViewModelBase, IRecipient<OpenOrCloseStatusMessage>, IRecipient<RefreshShipmentListMessage>
+public class ShipmentsPageUserControlViewModel : ViewModelBase, IRecipient<OpenOrCloseEditUserStatusMessage>, IRecipient<RefreshShipmentListMessage>
 {
     public ShipmentsPageUserControlViewModel()
     {
-        WeakReferenceMessenger.Default.Register<OpenOrCloseStatusMessage>(this);
+        WeakReferenceMessenger.Default.Register<OpenOrCloseEditUserStatusMessage>(this);
         WeakReferenceMessenger.Default.Register<RefreshShipmentListMessage>(this);
     }
 
-    public void Receive(OpenOrCloseStatusMessage message)
+    public void Receive(OpenOrCloseEditUserStatusMessage message)
     {
         if (message.ShouldOpen) ShowAddShipmentUsersUserControl();
         else CloseAddShipmentUsersUserControl();
@@ -39,7 +39,7 @@ public class ShipmentsPageUserControlViewModel : ViewModelBase, IRecipient<OpenO
     private readonly AddShipmentUserControl _addShipment = new();
 
     public ICommand OpenAddShipmentCommand
-        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseStatusMessage(true)));
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseEditUserStatusMessage(true)));
 
     public ICommand RefreshCommand
         => new RelayCommand(async () => await LoadShipmentsAsync());

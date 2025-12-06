@@ -16,7 +16,7 @@ public class CartUserListUserControlViewModel : ViewModelBase, INotifyPropertyCh
         => new RelayCommand(() => TextCopy.ClipboardService.SetText(Password));
 
     public ICommand EditCommand
-        => new RelayCommand(() => {WeakReferenceMessenger.Default.Send(new OpenOrCloseStatusMessage(true, _userID)); });
+        => new RelayCommand(() => {WeakReferenceMessenger.Default.Send(new OpenOrCloseEditUserStatusMessage(true, _userID)); });
 
     public ICommand ViewCommand
         => new RelayCommand(() => { WeakReferenceMessenger.Default.Send(new OpenOrCloseProfileUserStatusMessage(true, _userID)); });

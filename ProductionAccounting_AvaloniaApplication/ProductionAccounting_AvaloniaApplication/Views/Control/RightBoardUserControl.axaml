@@ -26,7 +26,7 @@
                             Spacing="5">
 					
                     <Button Classes="Button" 
-                            IsVisible="{Binding IsVisibleAdminPanelButton}"
+                            IsVisible="{Binding IsAdministrator}"
                             Command="{Binding OpenAdminPanelPageCommand}">
                         <Grid ColumnDefinitions="24,*" 
                               Classes="GridButtonButton">
@@ -39,7 +39,7 @@
                     </Button>
 
                     <Button Classes="Button" 
-                            IsVisible="{Binding IsVisibleAdminPanelButton}"
+                            IsVisible="{Binding IsAdministratorOrManager}"
                             Command="{Binding OpenProductsManagerUserPageCommand}">
                         <Grid ColumnDefinitions="24,*" 
                               Classes="GridButtonButton">
@@ -52,6 +52,7 @@
                     </Button>
 
                     <Button Classes="Button"
+                            IsVisible="{Binding IsAll}"
                             Command="{Binding OpenProductLibraryPageCommand}">
 						<Grid ColumnDefinitions="24,*"
                               Classes="GridButtonButton">
@@ -64,6 +65,7 @@
 					</Button>
                     
                     <Button Classes="Button"
+                            IsVisible="{Binding IsAll}"
 							Command="{Binding OpenUserLibraryPageCommand}">
                         <Grid ColumnDefinitions="24,*" 
                               Classes="GridButtonButton">
@@ -76,7 +78,7 @@
                     </Button>
 
                     <Button Classes="Button"
-                            IsVisible="{Binding IsVisibleWorkUserButton}"
+                            IsVisible="{Binding IsAdministratorOrMasterOrManager}"
                             Command="{Binding OpenTimesheetPageCommand}">
                         <Grid ColumnDefinitions="24,*" 
                               Classes="GridButtonButton">
@@ -89,7 +91,7 @@
                     </Button>
 
                     <Button Classes="Button"
-                            IsVisible="{Binding IsVisibleWorkUserButton}"
+                            IsVisible="{Binding IsAdministratorOrMasterOrEmployee}"
                             Command="{Binding OpenWorkUserPageCommand}">
                         <Grid ColumnDefinitions="24,*" 
                               Classes="GridButtonButton">
@@ -102,7 +104,7 @@
                     </Button>
 
                     <Button Classes="Button"
-                            IsVisible="{Binding IsVisibleWorkUserButton}"
+                            IsVisible="{Binding IsAdministratorOrMasterOrManager}"
                             Command="{Binding OpenShipmentsUserPageCommand}">
                         <Grid ColumnDefinitions="24,*" 
                               Classes="GridButtonButton">

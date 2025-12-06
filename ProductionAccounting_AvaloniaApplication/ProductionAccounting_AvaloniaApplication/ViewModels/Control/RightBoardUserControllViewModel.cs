@@ -31,10 +31,10 @@ public class RightBoardUserControlViewModel : ViewModelBase
     public ICommand OpenAdminPanelPageCommand
         => new RelayCommand(() => OpenPage(adminPageUserControlViewModel));
 
-    public ICommand OpenProductLibraryPageCommand 
+    public ICommand OpenProductLibraryPageCommand
         => new RelayCommand(() => OpenPage(productLibraryUserControlViewModel));
 
-    public ICommand OpenUserLibraryPageCommand 
+    public ICommand OpenUserLibraryPageCommand
         => new RelayCommand(() => OpenPage(userLibraryUserControlViewModel));
 
     public ICommand OpenTimesheetPageCommand
@@ -46,10 +46,10 @@ public class RightBoardUserControlViewModel : ViewModelBase
     public ICommand OpenShipmentsUserPageCommand
         => new RelayCommand(() => OpenPage(shipmentsPageUserControlViewModel));
 
-    public ICommand OpenSettingsUserPageCommand 
+    public ICommand OpenSettingsUserPageCommand
         => new RelayCommand(() => OpenPage(settingsPageUserControlViewModel));
 
-    public ICommand OpenProductsManagerUserPageCommand 
+    public ICommand OpenProductsManagerUserPageCommand
         => new RelayCommand(() => OpenPage(productsManagerPageUserControlViewModel));
 
     public ICommand OpenAuthorizationCommand
@@ -67,24 +67,73 @@ public class RightBoardUserControlViewModel : ViewModelBase
     }
 
     private string _buttonAuthorizationText = string.Empty;
-    public string ButtonAuthorizationText 
+    public string ButtonAuthorizationText
     {
         get => _buttonAuthorizationText;
         set => this.RaiseAndSetIfChanged(ref _buttonAuthorizationText, value);
     }
 
-    private bool _isVisibleAdminPanelButton;
-    public bool IsVisibleAdminPanelButton
+    private bool _isAdministrator;
+    public bool IsAdministrator
     {
-        get => _isVisibleAdminPanelButton;
-        set => this.RaiseAndSetIfChanged(ref _isVisibleAdminPanelButton, value);
+        get => _isAdministrator;
+        set => this.RaiseAndSetIfChanged(ref _isAdministrator, value);
     }
 
-    private bool _isVisibleWorkUserButton;
-    public bool IsVisibleWorkUserButton
+    private bool _isMaster;
+    public bool IsMaster
     {
-        get => _isVisibleWorkUserButton;
-        set => this.RaiseAndSetIfChanged(ref _isVisibleWorkUserButton, value);
+        get => _isMaster;
+        set => this.RaiseAndSetIfChanged(ref _isMaster, value);
+    }
+
+    private bool _isEmployee;
+    public bool IsEmployee
+    {
+        get => _isEmployee;
+        set => this.RaiseAndSetIfChanged(ref _isEmployee, value);
+    }
+
+    private bool _isManager;
+    public bool IsManager
+    {
+        get => _isManager;
+        set => this.RaiseAndSetIfChanged(ref _isManager, value);
+    }
+
+    private bool _isAdministratorOrMaster;
+    public bool IsAdministratorOrMaster
+    {
+        get => _isAdministratorOrMaster;
+        set => this.RaiseAndSetIfChanged(ref _isAdministratorOrMaster, value);
+    }
+
+    private bool _isAdministratorOrManager;
+    public bool IsAdministratorOrManager
+    {
+        get => _isAdministratorOrManager;
+        set => this.RaiseAndSetIfChanged(ref _isAdministratorOrManager, value);
+    }
+
+    private bool _isAdministratorOrMasterOrEmployee;
+    public bool IsAdministratorOrMasterOrEmployee
+    {
+        get => _isAdministratorOrMasterOrEmployee;
+        set => this.RaiseAndSetIfChanged(ref _isAdministratorOrMasterOrEmployee, value);
+    }
+
+    private bool _isAdministratorOrMasterOrManager;
+    public bool IsAdministratorOrMasterOrManager
+    {
+        get => _isAdministratorOrMasterOrManager;
+        set => this.RaiseAndSetIfChanged(ref _isAdministratorOrMasterOrManager, value);
+    }
+
+    private bool _isAll;
+    public bool IsAll
+    {
+        get => _isAll;
+        set => this.RaiseAndSetIfChanged(ref _isAll, value);
     }
 
     private void OnLoginStatusChanged()
@@ -97,10 +146,18 @@ public class RightBoardUserControlViewModel : ViewModelBase
         if (ManagerCookie.IsUserLoggedIn()) ButtonAuthorizationText = "Профиль";
         else ButtonAuthorizationText = "Войти";
 
-        IsVisibleAdminPanelButton = ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsAdministrator;
-        IsVisibleWorkUserButton = ManagerCookie.IsUserLoggedIn() && (ManagerCookie.IsMaster || ManagerCookie.IsEmployee || ManagerCookie.IsAdministrator);
+        IsAdministrator = ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsAdministrator;
+        IsMaster = ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsMaster;
+        IsEmployee = ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsEmployee;
+        IsManager = ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsManager;
 
-        if (!ManagerCookie.IsUserLoggedIn() || !ManagerCookie.IsAdministrator && _objectViewModels == adminPageUserControlViewModel) OpenPage(mainWindowViewModel);
-        if (!ManagerCookie.IsUserLoggedIn() || (!ManagerCookie.IsMaster || !ManagerCookie.IsEmployee) && _objectViewModels == workUserPageUserControlViewModel) mainWindowViewModel?.ShowAuthorization();
+        IsAdministratorOrMaster = (IsAdministrator || IsMaster);
+        IsAdministratorOrManager = (IsAdministrator || IsManager);
+        IsAdministratorOrMasterOrEmployee = (IsAdministrator || IsMaster || IsEmployee);
+        IsAdministratorOrMasterOrManager = (IsAdministrator || IsMaster || IsMaster);
+        IsAll = (IsAdministrator || IsMaster || IsEmployee || IsManager);
+
+        if (!IsAdministrator && _objectViewModels == adminPageUserControlViewModel) OpenPage(mainWindowViewModel);
+        if (!IsAll && _objectViewModels == workUserPageUserControlViewModel) mainWindowViewModel?.ShowAuthorization();
     }
 }

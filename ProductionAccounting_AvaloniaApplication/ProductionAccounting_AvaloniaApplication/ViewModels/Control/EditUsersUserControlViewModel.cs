@@ -16,7 +16,7 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 public class EditUsersUserControlViewModel : ViewModelBase, INotifyPropertyChanged
 {
     public ICommand CancelCommand
-        => new RelayCommand(() => {WeakReferenceMessenger.Default.Send(new OpenOrCloseStatusMessage(false)); });
+        => new RelayCommand(() => {WeakReferenceMessenger.Default.Send(new OpenOrCloseEditUserStatusMessage(false)); });
 
     public ICommand ConfirmCommand
         => new RelayCommand(async () => 
@@ -24,7 +24,7 @@ public class EditUsersUserControlViewModel : ViewModelBase, INotifyPropertyChang
             if ( await SaveAsync() ) 
             { 
                 WeakReferenceMessenger.Default.Send(new RefreshUserListMessage());
-                WeakReferenceMessenger.Default.Send(new OpenOrCloseStatusMessage(false));
+                WeakReferenceMessenger.Default.Send(new OpenOrCloseEditUserStatusMessage(false));
             } 
         });
     

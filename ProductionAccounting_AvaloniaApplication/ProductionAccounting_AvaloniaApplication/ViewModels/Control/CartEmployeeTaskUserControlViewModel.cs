@@ -103,8 +103,6 @@ public class CartEmployeeTaskUserControlViewModel : ViewModelBase
 
     public bool IsCompleted => CompletedQuantity >= AssignedQuantity;
 
-    //public bool CanComplete => !IsCompleted;
-
     public bool HasNotes 
         => !string.IsNullOrWhiteSpace(Notes);
 
