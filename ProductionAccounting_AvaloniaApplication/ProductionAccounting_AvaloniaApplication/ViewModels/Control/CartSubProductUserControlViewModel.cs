@@ -77,9 +77,6 @@ public class CartSubProductUserControlViewModel : ViewModelBase
     public bool IsNullNotes
         => !string.IsNullOrEmpty(Notes);
 
-    public bool IsAdministrator
-        => ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsAdministrator;
-
     private async Task<bool> DeleteAsync()
     {
         try

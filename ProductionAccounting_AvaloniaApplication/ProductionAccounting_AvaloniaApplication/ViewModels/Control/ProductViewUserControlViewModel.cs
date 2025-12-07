@@ -159,9 +159,6 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
         set => this.RaiseAndSetIfChanged(ref _subProductNotes, value);
     }
 
-    public bool IsAdministrator
-        => ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsAdministrator;
-
     public async Task LoadSubProductAsync()
     {
         StackPanelHelper.ClearAndRefreshStackPanel<CartSubProductUserControl>(SubProductContent, subProductList);

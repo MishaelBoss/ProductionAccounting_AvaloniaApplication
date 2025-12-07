@@ -132,7 +132,4 @@ public class CartProductUserControlViewModel : ViewModelBase
         get => _coefficient;
         set => this.RaiseAndSetIfChanged(ref _coefficient, value);
     }
-
-    public bool IsAdministrator
-        => ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsAdministrator;
 }

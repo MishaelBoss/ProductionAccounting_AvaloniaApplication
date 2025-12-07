@@ -114,7 +114,4 @@ public class CartSubProductOperationUserControlViewModel : ViewModelBase
 
     public ICommand OpenSubmitWorkForAnEmployeeCommand
         => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseCompleteWorkFormStatusMessage(true, OperationName, PlannedQuantity, ProductId, OperationId, SubProductOperationId)));
-
-    public bool IsAdministratorOrMaster
-        => ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsAdministrator;
 }
