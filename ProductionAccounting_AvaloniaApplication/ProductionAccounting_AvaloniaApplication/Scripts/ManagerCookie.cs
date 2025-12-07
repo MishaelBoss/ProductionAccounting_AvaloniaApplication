@@ -8,7 +8,7 @@ namespace ProductionAccounting_AvaloniaApplication.Scripts;
 
 public class ManagerCookie
 {
-    public static Double? GetIdUser { get; set; } = 0;
+    public static double? GetIdUser { get; set; } = 0;
     public static string? GetLogin { get; set; } = string.Empty;
     public static string? GetFirstName { get; set; } = string.Empty;
     public static string? GetLastName { get; set; } = string.Empty;
