@@ -56,13 +56,44 @@ class Arguments
     public static string? User { get; set; }
     public static string? Password { get; set; }
 
+    private static string? _connectionString;
+
     public static string connection
     {
         get
         {
-            if (string.IsNullOrWhiteSpace(Ip) && string.IsNullOrWhiteSpace(Port) && string.IsNullOrWhiteSpace(Database) && string.IsNullOrWhiteSpace(User) && string.IsNullOrWhiteSpace(Password)) Internet.ConnectToDataBase();
-            return $"Server={Ip};Port={Port};Database={Database};User Id={User};Password={Password};";
+            if (!string.IsNullOrEmpty(_connectionString))
+                return _connectionString;
+                
+            bool hasConnectionData =    !string.IsNullOrWhiteSpace(Ip) && 
+                                        !string.IsNullOrWhiteSpace(Port) && 
+                                        !string.IsNullOrWhiteSpace(Database) && 
+                                        !string.IsNullOrWhiteSpace(User) && 
+                                        !string.IsNullOrWhiteSpace(Password);
+            
+            if (!hasConnectionData)
+            {
+                if (Internet.ConnectToDataBase())
+                {
+                    _connectionString = $"Server={Ip};Port={Port};Database={Database};User Id={User};Password={Password};";
+                }
+                else
+                {
+                    _connectionString = string.Empty;
+                }
+            }
+            else
+            {
+                _connectionString = $"Server={Ip};Port={Port};Database={Database};User Id={User};Password={Password};";
+            }
+            
+            return _connectionString ?? string.Empty;
         }
+    }
+
+    public static void ResetConnection()
+    {
+        _connectionString = null;
     }
     #endregion
 }

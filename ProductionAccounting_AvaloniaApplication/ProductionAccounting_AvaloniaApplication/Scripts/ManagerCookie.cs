@@ -50,6 +50,8 @@ public class ManagerCookie
             if (data == null || data.Expires <= DateTime.Now)
                 return false;
 
+            if (!Internet.ConnectToDataBase()) return false;
+
             using (var connection = new NpgsqlConnection(Arguments.connection))
             {
                 connection.Open();

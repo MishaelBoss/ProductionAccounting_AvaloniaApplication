@@ -1,5 +1,7 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Net.NetworkInformation;
+using Npgsql;
 
 namespace ProductionAccounting_AvaloniaApplication.Scripts;
 
@@ -12,8 +14,10 @@ internal abstract class Internet
             Dns.GetHostEntry("dotnet.beget.tech");
             return true;
         }
-        catch
+        catch (Exception ex)
         {
+            Loges.LoggingProcess(LogLevel.ERROR, 
+                $"Connection test failed: {ex.Message}");
             return false;
         }
     }
@@ -22,12 +26,21 @@ internal abstract class Internet
     {
         try
         {
-            if(string.IsNullOrEmpty(Arguments.Ip) || Arguments.Ip == null) return false;
+            if  (string.IsNullOrEmpty(Arguments.Ip) || 
+                string.IsNullOrEmpty(Arguments.Port) || 
+                string.IsNullOrEmpty(Arguments.Database) || 
+                string.IsNullOrEmpty(Arguments.User) || 
+                string.IsNullOrEmpty(Arguments.Password))
+            {
+                Loges.LoggingProcess(LogLevel.WARNING, 
+                    "Database connection data is incomplete");
+                return false;
+            }
 
             using (var ping = new Ping())
             {
                 string hostName = Arguments.Ip;
-                PingReply reply = ping.Send(hostName);
+                PingReply reply = ping.Send(hostName, 3000);
 
                 Loges.LoggingProcess(level: LogLevel.INFO,
                         message: $"Ping status for ({hostName}): {reply.Status}");
@@ -43,7 +56,7 @@ internal abstract class Internet
                     Loges.LoggingProcess(level: LogLevel.INFO,
                         message: $"Time to live: {reply.Options?.Ttl}");
 
-                    return true;
+                    return TestPostgreSqlConnection();
                 }
                 else
                 {
@@ -52,14 +65,42 @@ internal abstract class Internet
 
             }
         }
-        catch
+        catch (PingException pex)
         {
+            Loges.LoggingProcess(LogLevel.WARNING, 
+                $"Ping failed: {pex.Message}");
+            return false;
+        }
+        catch (Exception ex)
+        {
+            Loges.LoggingProcess(LogLevel.ERROR, 
+                $"Connection test failed: {ex.Message}");
             return false;
         }
     }
 
-    public static void Reconnect()
+    private static bool TestPostgreSqlConnection()
     {
-        Connect();
+        try
+        {
+            using (var connection = new NpgsqlConnection($"Server={Arguments.Ip};Port={Arguments.Port};Database={Arguments.Database};User Id={Arguments.User};Password={Arguments.Password};Timeout=5"))
+            {
+                connection.Open();
+                
+                using (var cmd = new NpgsqlCommand("SELECT 1", connection))
+                {
+                    var result = cmd.ExecuteScalar();
+                    Loges.LoggingProcess(LogLevel.INFO, 
+                        "PostgreSQL connection test successful");
+                    return true;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Loges.LoggingProcess(LogLevel.WARNING, 
+                $"PostgreSQL connection failed: {ex.Message}");
+            return false;
+        }
     }
 }
