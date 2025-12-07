@@ -109,6 +109,33 @@
 						</Grid>
 					</Border>
 				</Grid>
+				<Grid Classes="GridFile">
+					<Border Height="300">
+						<Grid	RowDefinitions="40,*">
+							<Label	Grid.Row="0" 
+									Content="Ip server"/>
+							<StackPanel	Grid.Row="1"
+										Orientation="Vertical"
+										Spacing="10">
+								<TextBox	Watermark="ip"
+											Width="200"
+											Text="{Binding Ip}"/>
+								<TextBox	Watermark="port"
+											Width="200"
+											Text="{Binding Port}"/>
+								<TextBox	Watermark="Name"
+											Width="200"
+											Text="{Binding Name}"/>
+								<TextBox	Watermark="User name"
+											Width="200"
+											Text="{Binding User}"/>
+								<TextBox	Watermark="Password"
+											Width="200"
+											Text="{Binding Password}"/>
+							</StackPanel>
+						</Grid>
+					</Border>
+				</Grid>
 			</StackPanel>			
 		</Grid>
 	</ScrollViewer>

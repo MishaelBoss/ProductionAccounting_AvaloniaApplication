@@ -22,9 +22,11 @@ internal abstract class Internet
     {
         try
         {
+            if(string.IsNullOrEmpty(Arguments.Ip) || Arguments.Ip == null) return false;
+
             using (var ping = new Ping())
             {
-                string hostName = "192.168.0.108";
+                string hostName = Arguments.Ip;
                 PingReply reply = ping.Send(hostName);
 
                 Loges.LoggingProcess(level: LogLevel.INFO,

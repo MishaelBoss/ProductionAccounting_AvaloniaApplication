@@ -50,38 +50,18 @@ class Arguments
     #endregion
 
     #region DB
-    private static string? Ip { get; set; }
-    private static string? Port { get; set; }
-    private static string? Database { get; set; }
-    private static string? UserId { get; set; }
-    private static string? Password { get; set; }
-
-    private static void Connect()
-    {
-        if (Internet.ConnectToDataBase())
-        {
-            Ip = "192.168.0.108";
-            Port = "5432";
-            Database = "ProductionAccounting";
-            UserId = "postgres";
-            Password = "cr2032";
-        }
-        else
-        {
-            Ip = "localhost";
-            Port = "5432";
-            Database = "ProductionAccounting";
-            UserId = "postgres";
-            Password = "cr2032";
-        }
-    }
+    public static string? Ip { get; set; }
+    public static string? Port { get; set; }
+    public static string? Database { get; set; }
+    public static string? User { get; set; }
+    public static string? Password { get; set; }
 
     public static string connection
     {
         get
         {
-            if (string.IsNullOrWhiteSpace(Ip) && string.IsNullOrWhiteSpace(Port) && string.IsNullOrWhiteSpace(Database) && string.IsNullOrWhiteSpace(UserId) && string.IsNullOrWhiteSpace(Password)) Connect();
-            return $"Server={Ip};Port={Port};Database={Database};User Id={UserId};Password={Password};";
+            if (string.IsNullOrWhiteSpace(Ip) && string.IsNullOrWhiteSpace(Port) && string.IsNullOrWhiteSpace(Database) && string.IsNullOrWhiteSpace(User) && string.IsNullOrWhiteSpace(Password)) Internet.ConnectToDataBase();
+            return $"Server={Ip};Port={Port};Database={Database};User Id={User};Password={Password};";
         }
     }
     #endregion

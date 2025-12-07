@@ -18,8 +18,12 @@ public interface ISettings
 
     [JsonProperty("OpenAfterDownloading")]
     public bool OpenAfterDownloading { get; set; }
+
     [JsonProperty("Language")]
     public string Language { get; set; }
+
+    [JsonProperty("Server")]
+    public IServer Server { get; set; }
 }
 
 public interface ITimeCheckUpdate
@@ -50,4 +54,22 @@ public interface ILoggers
 
     [JsonProperty("loggerInfo")]
     public bool LoggerInfo { get; set; }
+}
+
+public interface IServer
+{
+    [JsonProperty("ip")]
+    public string Ip { get; set; }
+
+    [JsonProperty("port")]
+    public string Port { get; set; }
+
+    [JsonProperty("name")]
+    public string Name { get; set; }
+
+    [JsonProperty("user")]
+    public string User { get; set; }
+
+    [JsonProperty("password")]
+    public string Password { get; set; }
 }

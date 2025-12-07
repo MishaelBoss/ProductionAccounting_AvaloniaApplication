@@ -12,7 +12,7 @@ internal abstract class ManagerSettingsJson
     {
         try
         {
-            var defaultData = new
+            var defaultSettings = new
             {
                 AutoUpdate = false,
                 AutoUpdateCheck = true,
@@ -21,12 +21,6 @@ internal abstract class ManagerSettingsJson
                     hours = 0,
                     minutes = 1,
                     seconds = 0
-                },
-                TimeAllUpdateUI = new
-                {
-                    hours = 0,
-                    minutes = 0,
-                    seconds = 5
                 },
                 Loggers = new
                 {
@@ -38,11 +32,23 @@ internal abstract class ManagerSettingsJson
                 },
                 DeveloperDebug = false,
                 OpenAfterDownloading = true,
-                Language = "ru_ru.json"
+                Language = "ru_ru.json",
+                Server = new
+                {
+                    ip = string.Empty,
+                    port = string.Empty,
+                    name = string.Empty,
+                    user = string.Empty,
+                    password = string.Empty
+                }
             };
 
-            if (Directory.Exists(Paths.Settings)) File.WriteAllText(Path.Combine(Paths.Settings, Files.ConfigSettingsFileName), JsonConvert.SerializeObject(defaultData, Formatting.Indented));
-            else Directory.CreateDirectory(Paths.Settings);
+            var dir = Paths.Settings;
+            if (!Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
+
+            var filePath = Path.Combine(dir, Files.ConfigSettingsFileName);
+            File.WriteAllText(filePath, JsonConvert.SerializeObject(defaultSettings, Formatting.Indented));
         }
         catch (Exception ex)
         {
@@ -54,68 +60,167 @@ internal abstract class ManagerSettingsJson
     {
         try
         {
-            var json = File.ReadAllText(Path.Combine(Paths.Settings, Files.ConfigSettingsFileName));
+            var filePath = Path.Combine(Paths.Settings, Files.ConfigSettingsFileName);
+            
+            if (!File.Exists(filePath))
+            {
+                CreateSettings();
+                return;
+            }
+            
+            var json = File.ReadAllText(filePath);
             var data = JsonConvert.DeserializeObject<Settings>(json);
 
             if (data == null) return;
+            
             Arguments.AutoUpdate = data.AutoUpdate;
             Arguments.AutoUpdateCheck = data.AutoUpdateCheck;
-
-            if (data.TimeCheckUpdate is { Seconds: 0, Minutes: 0, Hours: 0 })
-            {
-                Arguments.TimeCheckUpdate.Seconds = data.TimeCheckUpdate.Seconds;
-                Arguments.TimeCheckUpdate.Minutes = 1;
-                Arguments.TimeCheckUpdate.Hours = data.TimeCheckUpdate.Hours;
-            }
-            else
+            
+            if (data.TimeCheckUpdate != null)
             {
                 Arguments.TimeCheckUpdate.Seconds = data.TimeCheckUpdate.Seconds;
                 Arguments.TimeCheckUpdate.Minutes = data.TimeCheckUpdate.Minutes;
                 Arguments.TimeCheckUpdate.Hours = data.TimeCheckUpdate.Hours;
             }
 
-            if ((data.TimeCheckUpdate is { Seconds: >= 0, Minutes: >= 0, Hours: >= 0 }) &
-                Arguments.DeveloperDebug)
-                MessageBoxManager.GetMessageBoxStandard("Error", "i < 0").ShowAsync();
-
-            Arguments.Loggers.LoggerCritical = data.Loggers.LoggerCritical;
-            Arguments.Loggers.LoggerDebug = data.Loggers.LoggerDebug;
-            Arguments.Loggers.LoggerError = data.Loggers.LoggerError;
-            Arguments.Loggers.LoggerInfo = data.Loggers.LoggerInfo;
-            Arguments.Loggers.LoggerWarning = data.Loggers.LoggerWarning;
+            if (data.Loggers != null)
+            {
+                Arguments.Loggers.LoggerCritical = data.Loggers.LoggerCritical;
+                Arguments.Loggers.LoggerDebug = data.Loggers.LoggerDebug;
+                Arguments.Loggers.LoggerError = data.Loggers.LoggerError;
+                Arguments.Loggers.LoggerInfo = data.Loggers.LoggerInfo;
+                Arguments.Loggers.LoggerWarning = data.Loggers.LoggerWarning;
+            }
 
             Arguments.DeveloperDebug = data.DeveloperDebug;
             Arguments.OpenAfterDownloading = data.OpenAfterDownloading;
-
             Arguments.PathToLocalization = data.Language;
+
+            if (data.Server != null)
+            {
+                Arguments.Ip = data.Server.Ip ?? string.Empty;
+                Arguments.Port = data.Server.Port ?? string.Empty;
+                Arguments.Database = data.Server.Name ?? string.Empty;
+                Arguments.User = data.Server.User ?? string.Empty;
+                Arguments.Password = data.Server.Password ?? string.Empty;
+            }
         }
         catch (FileNotFoundException)
         {
-            MessageBoxManager.GetMessageBoxStandard("Ошибка", "файл к json не найден").ShowAsync();
+            Loges.LoggingProcess(level: LogLevel.ERROR, 
+                message: "file settings not found");
+            CreateSettings();
         }
         catch (JsonException ex)
         {
-            MessageBoxManager.GetMessageBoxStandard("Ошибка", ex.Message).ShowAsync();
+            Loges.LoggingProcess(level: LogLevel.ERROR, 
+                ex.Message);
+            CreateSettings();
         }
         catch (Exception ex)
         {
-            MessageBoxManager.GetMessageBoxStandard("Ошибка", ex.Message).ShowAsync();
+            Loges.LoggingProcess(level: LogLevel.ERROR, 
+                ex.Message);
         }
     }
 
-    public static void Change(string dsad)
+    public static void Change(string propertyPath, object value)
     {
         try
         {
-            var json = File.ReadAllText(Path.Combine(Paths.Settings, Files.ConfigSettingsFileName));
+            var filePath = Path.Combine(Paths.Settings, Files.ConfigSettingsFileName);
+            
+            if (!File.Exists(filePath))
+            {
+                CreateSettings();
+                return;
+            }
+            
+            var json = File.ReadAllText(filePath);
             var data = JsonConvert.DeserializeObject<Settings>(json);
 
-            if(data == null)
-                Loges.LoggingProcess(level: LogLevel.WARNING,
-                   "Failed to deserialize localization data");
+            if (data == null)
+            {
+                Loges.LoggingProcess(LogLevel.WARNING, "Failed to deserialize settings");
+                return;
+            }
 
-            data?.Language = dsad;
-            File.WriteAllText(Path.Combine(Paths.Settings, Files.ConfigSettingsFileName), JsonConvert.SerializeObject(data, Formatting.Indented));
+            if (propertyPath.Contains('.'))
+            {
+                var parts = propertyPath.Split('.');
+                
+                if (parts.Length != 2)
+                {
+                    Loges.LoggingProcess(LogLevel.WARNING, 
+                        $"Invalid property path: {propertyPath}");
+                    return;
+                }
+
+                switch (parts[0].ToLower())
+                {
+                    case "server":
+                        switch (parts[1].ToLower())
+                        {
+                            case "ip":
+                                data.Server.Ip = value?.ToString() ?? string.Empty;
+                                break;
+                            case "port":
+                                data.Server.Port = value?.ToString() ?? string.Empty;
+                                break;
+                            case "name":
+                                data.Server.Name = value?.ToString() ?? string.Empty;
+                                break;
+                            case "user":
+                                data.Server.User = value?.ToString() ?? string.Empty;
+                                break;
+                            case "password":
+                                data.Server.Password = value?.ToString() ?? string.Empty;
+                                break;
+                            default:
+                                Loges.LoggingProcess(LogLevel.WARNING,
+                                    $"Unknown Server property: {parts[1]}");
+                                return;
+                        }
+                        break;
+                        
+                    default:
+                        Loges.LoggingProcess(LogLevel.WARNING,
+                            $"Unknown object: {parts[0]}");
+                        return;
+                }
+            }
+            else
+            {
+                switch (propertyPath.ToLower())
+                {
+                    case "language":
+                        data.Language = value?.ToString() ?? "ru_ru.json";
+                        break;
+                    case "autoupdate":
+                        data.AutoUpdate = Convert.ToBoolean(value);
+                        break;
+                    case "autoupdatecheck":
+                        data.AutoUpdateCheck = Convert.ToBoolean(value);
+                        break;
+                    case "developerdebug":
+                        data.DeveloperDebug = Convert.ToBoolean(value);
+                        break;
+                    case "openafterdownloading":
+                        data.OpenAfterDownloading = Convert.ToBoolean(value);
+                        break;
+                    default:
+                        Loges.LoggingProcess(LogLevel.WARNING,
+                            $"Unknown property: {propertyPath}");
+                        return;
+                }
+            }
+
+            var dir = Path.GetDirectoryName(filePath);
+            if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
+
+            File.WriteAllText(filePath, 
+                JsonConvert.SerializeObject(data, Formatting.Indented));
         }
         catch (Exception ex)
         {
