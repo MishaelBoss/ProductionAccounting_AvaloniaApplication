@@ -43,7 +43,7 @@ class Arguments
     {
         get
         {
-            if (Internet.ConnectToDataBase()) return "http://192.168.0.108:8000/version.json";
+            if (Internet.ConnectToDataBase()) return $"http://{Ip}/version.json";
             else return string.Empty;
         }
     }
