@@ -16,7 +16,7 @@ public class CartSubProductUserControlViewModel : ViewModelBase
         => new RelayCommand(async () => await DeleteAsync());
 
     public ICommand ViewCommand
-        => new RelayCommand(async () => { WeakReferenceMessenger.Default.Send(new OpenOrCloseSubProductStatusMessage(true, Id)); });
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseSubProductStatusMessage(true, Id)));
 
     private double? _id;
     public double? Id

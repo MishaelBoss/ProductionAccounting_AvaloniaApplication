@@ -9,22 +9,10 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class CartSubProductOperationUserControlViewModel : ViewModelBase
 {
+    public double AssignmentId { get; set; }
+    public double SubProductOperationId { get; set; }
     public double ProductId { get; set; }
     public double OperationId { get; set; }
-
-    private double _assignmentId;
-    public double AssignmentId
-    {
-        get => _assignmentId;
-        set => this.RaiseAndSetIfChanged(ref _assignmentId, value);
-    }
-
-    private double _subProductOperationId;
-    public double SubProductOperationId
-    {
-        get => _subProductOperationId;
-        set => this.RaiseAndSetIfChanged(ref _subProductOperationId, value);
-    }
 
     private string _operationName = string.Empty;
     public string OperationName
@@ -37,22 +25,14 @@ public class CartSubProductOperationUserControlViewModel : ViewModelBase
     public decimal PlannedQuantity
     {
         get => _plannedQuantity;
-        set => this.RaiseAndSetIfChanged(ref _plannedQuantity, value);
-    }
-
-    private decimal _assignedQuantity;
-    public decimal AssignedQuantity
-    {
-        get => _assignedQuantity;
         set
         {
-            if (_assignedQuantity != value)
+            if (_plannedQuantity != value)
             {
-                _assignedQuantity = value;
+                _plannedQuantity = value;
                 this.RaisePropertyChanged();
+                this.RaisePropertyChanged(nameof(IsCompleted));
                 this.RaisePropertyChanged(nameof(CanAssign));
-                this.RaisePropertyChanged(nameof(StatusText));
-                this.RaisePropertyChanged(nameof(StatusColor));
             }
         }
     }
@@ -67,30 +47,65 @@ public class CartSubProductOperationUserControlViewModel : ViewModelBase
             {
                 _completedQuantity = value;
                 this.RaisePropertyChanged();
+                this.RaisePropertyChanged(nameof(IsCompleted));
+                this.RaisePropertyChanged(nameof(StatusText));
+                this.RaisePropertyChanged(nameof(StatusColor));
                 this.RaisePropertyChanged(nameof(CanAssign));
+            }
+        }
+    }
+
+    private double? _assignedToUserId;
+    public double? AssignedToUserId
+    {
+        get => _assignedToUserId;
+        set
+        {
+            if (_assignedToUserId != value)
+            {
+                _assignedToUserId = value;
+                this.RaisePropertyChanged();
+                this.RaisePropertyChanged(nameof(IsAssigned));
+                this.RaisePropertyChanged(nameof(IsAssignedToMe));
+                this.RaisePropertyChanged(nameof(CanAssign));
+                this.RaisePropertyChanged(nameof(CanSubmit));
                 this.RaisePropertyChanged(nameof(StatusText));
                 this.RaisePropertyChanged(nameof(StatusColor));
             }
         }
     }
 
-    public string StatusText 
-        => CompletedQuantity >= PlannedQuantity ? "Готово" : AssignedQuantity > 0 ? "В работе" : "Ожидает";
+    public bool IsAssigned 
+        => AssignedToUserId.HasValue;
+        
+    public bool IsAssignedToMe 
+        => AssignedToUserId == ManagerCookie.GetIdUser;
 
-    public SolidColorBrush StatusColor 
-        => CompletedQuantity >= PlannedQuantity ? new SolidColorBrush(Colors.LimeGreen) : AssignedQuantity > 0 ? new SolidColorBrush(Colors.Orange) : new SolidColorBrush(Colors.Gray);
+    public bool CanSubmit 
+        => IsAssignedToMe && !IsCompleted;
+    public bool IsCompleted
+        => CompletedQuantity >= PlannedQuantity;
 
     public bool CanAssign 
-        => AssignedQuantity < PlannedQuantity;
+        => !IsAssigned && !IsCompleted;
 
-    public bool isAppointed
-        => true;
+    public string StatusText 
+        => IsCompleted ? "Готово" 
+        : IsAssignedToMe ? "Ваша задача" 
+        : IsAssigned ? "Занято" 
+        : "Ожидает";
+
+    public SolidColorBrush StatusColor 
+        => IsCompleted ? new(Colors.LimeGreen)
+        : IsAssignedToMe ? new(Colors.Orange)
+        : IsAssigned ? new(Colors.Gray)
+        : new(Colors.Cyan);
 
     public ICommand AssignCommand 
         => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseEmployeeAssignmentMasterSubMarkStatusMessage(true, SubProductOperationId)));
 
     public ICommand OpenSubmitWorkForAnEmployeeCommand
-        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseCompleteWorkFormStatusMessage(true, AssignmentId, OperationName, AssignedQuantity, ProductId, OperationId, SubProductOperationId)));
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseCompleteWorkFormStatusMessage(true, OperationName, PlannedQuantity, ProductId, OperationId, SubProductOperationId)));
 
     public bool IsAdministratorOrMaster
         => ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsAdministrator;

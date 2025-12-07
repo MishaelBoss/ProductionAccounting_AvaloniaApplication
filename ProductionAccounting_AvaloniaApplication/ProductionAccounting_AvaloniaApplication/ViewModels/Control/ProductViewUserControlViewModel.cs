@@ -255,24 +255,19 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
                 }
 
                 string sqlSubProductOperations = @"
-                                                SELECT
-                                                    spo.id AS sub_product_operation_id,
-                                                    o.name AS operation_name,
+                                                SELECT 
+                                                    spo.id,
+                                                    o.name,
                                                     spo.planned_quantity,
                                                     spo.completed_quantity,
-                                                    sp.product_task_id,
+                                                    spo.assigned_to_user_id,
                                                     pt.product_id,
-                                                    o.id AS operation_id,
-                                                    COALESCE(SUM(ta.assigned_quantity), 0) AS assigned_quantity,
-                                                    MIN(ta.id) AS assignment_id  -- или MAX(ta.id) для последнего
+                                                    o.id
                                                 FROM public.sub_product_operations spo
+                                                JOIN public.operation o ON o.id = spo.operation_id
                                                 JOIN public.sub_products sp ON sp.id = spo.sub_product_id
                                                 JOIN public.product_tasks pt ON pt.id = sp.product_task_id
-                                                JOIN public.operation o ON o.id = spo.operation_id
-                                                LEFT JOIN public.task_assignments ta ON ta.sub_product_operation_id = spo.id
                                                 WHERE spo.sub_product_id = @sub_product_id
-                                                GROUP BY spo.id, o.name, spo.planned_quantity, spo.completed_quantity, 
-                                                         sp.product_task_id, pt.product_id, o.id
                                                 ORDER BY spo.id";
 
                 using (var command2 = new NpgsqlCommand(sqlSubProductOperations, connection))
@@ -289,10 +284,9 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
                                 OperationName = reader2.GetString(1),
                                 PlannedQuantity = reader2.GetDecimal(2),
                                 CompletedQuantity = reader2.GetDecimal(3),
+                                AssignedToUserId = reader2.IsDBNull(4) ? null : reader2.GetDouble(4),
                                 ProductId = reader2.GetDouble(5),
-                                OperationId = reader2.GetDouble(6),
-                                AssignedQuantity = reader2.GetDecimal(7),
-                                AssignmentId = reader2.IsDBNull(8) ? 0 : reader2.GetDouble(8)
+                                OperationId = reader2.GetDouble(6)
                             };
 
                             var userControl = new CartSubProductOperationUserControl()

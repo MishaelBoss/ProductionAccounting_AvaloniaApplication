@@ -28,12 +28,6 @@
                                   FontSize="22"
                                   Height="70"/>
 
-                        <TextBox Text="{Binding Quantity}" 
-                                 AcceptsReturn="True"
-                                 TextWrapping="Wrap"
-                                 Height="80"
-                                 Watermark="Количество"/>
-
                         <TextBox Text="{Binding Notes}" 
                                  AcceptsReturn="True"
                                  TextWrapping="Wrap"

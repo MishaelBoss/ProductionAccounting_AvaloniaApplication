@@ -13,14 +13,14 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class EmployeeAssignmentMasterSubMarkUserControlViewModel : ViewModelBase
 {
-    public EmployeeAssignmentMasterSubMarkUserControlViewModel(double productId)
+    public EmployeeAssignmentMasterSubMarkUserControlViewModel(double id)
     {
-        ProductId = productId;
+        Id = id;
 
         _ = LoadListUsersAsync();
     }
 
-    public double ProductId { get; }
+    public double Id { get; }
 
     public ObservableCollection<ComboBoxUser> Employees { get; } = [];
 
@@ -31,13 +31,6 @@ public class EmployeeAssignmentMasterSubMarkUserControlViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _selectedEmployee, value);
     }
 
-    private decimal _quantity = 1;
-    public decimal Quantity
-    {
-        get => _quantity;
-        set => this.RaiseAndSetIfChanged(ref _quantity, value);
-    }
-
     private string? _notes = string.Empty;
     public string? Notes
     {
@@ -46,8 +39,7 @@ public class EmployeeAssignmentMasterSubMarkUserControlViewModel : ViewModelBase
     }
 
     public bool CanAssign
-        =>  SelectedEmployee != null 
-            && Quantity > 0;
+        =>  SelectedEmployee != null;
 
     public ICommand AssignCommand 
         => new RelayCommand(async () => await AssignAsync());
@@ -63,19 +55,16 @@ public class EmployeeAssignmentMasterSubMarkUserControlViewModel : ViewModelBase
             {
                 await connection.OpenAsync();
 
-                string sql = "INSERT INTO public.task_assignments  (sub_product_operation_id, user_id, assigned_quantity, assigned_by, status, notes) VALUES (@spo_id, @user_id, @qty, @by, 'assigned', @notes)";
+                string sql = "UPDATE public.sub_product_operations SET assigned_to_user_id = @assigned_to_user_id WHERE id = @id";
 
                 using (var command = new NpgsqlCommand(sql, connection)) 
                 {
-                    command.Parameters.AddWithValue("@spo_id", ProductId);
-                    command.Parameters.AddWithValue("@user_id", SelectedEmployee!.Id);
-                    command.Parameters.AddWithValue("@qty", Quantity);
-                    command.Parameters.AddWithValue("@by", ManagerCookie.GetIdUser ?? 0);
-                    command.Parameters.AddWithValue("@notes", Notes ?? string.Empty);
+                    command.Parameters.AddWithValue("@assigned_to_user_id", SelectedEmployee!.Id);
+                    command.Parameters.AddWithValue("id", Id);
 
                     await command.ExecuteNonQueryAsync();
 
-                    WeakReferenceMessenger.Default.Send(new RefreshSubProductOperationsMessage(ProductId));
+                    WeakReferenceMessenger.Default.Send(new RefreshSubProductOperationsMessage(Id));
                     WeakReferenceMessenger.Default.Send(new OpenOrCloseEmployeeAssignmentMasterSubMarkStatusMessage(false));
                 }
             }

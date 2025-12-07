@@ -62,7 +62,6 @@ public class ConfirmDeleteUserWindowViewModel : ViewModelBase
                         "DELETE FROM public.user_to_user_type WHERE user_id = @id",
                         "DELETE FROM public.user_to_departments WHERE user_id = @id",
                         "DELETE FROM public.user_to_position WHERE user_id = @id",
-                        "DELETE FROM public.task_assignments WHERE user_id = @id",
                         "DELETE FROM public.production WHERE user_id = @id"
                     };
 

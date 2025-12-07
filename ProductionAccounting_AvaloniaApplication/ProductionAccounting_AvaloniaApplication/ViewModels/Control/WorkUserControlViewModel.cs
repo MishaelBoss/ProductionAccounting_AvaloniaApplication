@@ -35,25 +35,22 @@ public class WorkUserControlViewModel : ViewModelBase, INotifyPropertyChanging, 
         {
             string sql = @"
                         SELECT 
-                            ta.id AS assignment_id,
+                            spo.id AS sub_product_operation_id,
                             sp.name AS sub_product_name,
                             o.name AS operation_name,
-                            ta.assigned_quantity,
-                            ta.notes,
-                            ta.status,
-                            spo.completed_quantity, 
+                            spo.planned_quantity,
+                            spo.completed_quantity,
+                            spo.notes,
                             pt.product_id,
                             o.id AS operation_id,
-                            spo.id AS sub_product_operation_id
-                        FROM public.task_assignments ta
-                        JOIN public.sub_product_operations spo ON spo.id = ta.sub_product_operation_id
+                            spo.assigned_to_user_id
+                        FROM public.sub_product_operations spo
                         JOIN public.sub_products sp ON sp.id = spo.sub_product_id
                         JOIN public.product_tasks pt ON pt.id = sp.product_task_id
                         JOIN public.operation o ON o.id = spo.operation_id
-                        WHERE ta.user_id = @user_id
-                          AND ta.status = 'assigned'
-                          AND spo.completed_quantity < ta.assigned_quantity
-                        ORDER BY ta.assigned_at DESC";
+                        WHERE spo.assigned_to_user_id = @user_id
+                            AND spo.completed_quantity < spo.planned_quantity
+                        ORDER BY spo.created_at DESC";
 
             using (var connection = new NpgsqlConnection(Arguments.connection))
             {
@@ -69,16 +66,14 @@ public class WorkUserControlViewModel : ViewModelBase, INotifyPropertyChanging, 
                         {
                             var viewModel = new CartEmployeeTaskUserControlViewModel()
                             {
-                                AssignmentId = reader.GetDouble("assignment_id"),
+                                SubProductOperationId = reader.GetDouble("sub_product_operation_id"),
                                 SubProductName = reader.GetString("sub_product_name"),
                                 OperationName = reader.GetString("operation_name"),
-                                AssignedQuantity = reader.GetDecimal("assigned_quantity"),
+                                PlannedQuantity = reader.GetDecimal("planned_quantity"),
                                 CompletedQuantity = reader.GetDecimal("completed_quantity"),
                                 Notes = reader.IsDBNull("notes") ? null : reader.GetString("notes"),
-                                Status = reader.GetString("status"),
                                 ProductId = reader.GetDouble("product_id"),
-                                OperationId = reader.GetDouble("operation_id"),
-                                SubProductOperationId = reader.GetDouble("sub_product_operation_id")
+                                OperationId = reader.GetDouble("operation_id")
                             };
 
                             var cartUser = new CartEmployeeTaskUserControl()

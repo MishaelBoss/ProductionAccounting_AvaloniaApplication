@@ -288,7 +288,7 @@ public class ProfileViewUserControlViewModel : ViewModelBase
                                 AssignmentId = reader.GetDouble("assignment_id"),
                                 SubProductName = reader.GetString("sub_product_name"),
                                 OperationName = reader.GetString("operation_name"),
-                                AssignedQuantity = reader.GetDecimal("assigned_quantity"),
+                                PlannedQuantity = reader.GetDecimal("assigned_quantity"),
                                 Notes = reader.IsDBNull("notes") ? null : reader.GetString("notes"),
                                 Status = reader.GetString("status")
                             };

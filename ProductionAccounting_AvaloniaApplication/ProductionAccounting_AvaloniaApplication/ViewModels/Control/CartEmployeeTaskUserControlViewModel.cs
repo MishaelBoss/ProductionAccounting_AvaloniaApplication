@@ -34,11 +34,11 @@ public class CartEmployeeTaskUserControlViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _operationName, value);
     }
 
-    private decimal _assignedQuantity;
-    public decimal AssignedQuantity
+    private decimal _plannedQuantity;
+    public decimal PlannedQuantity
     {
-        get => _assignedQuantity;
-        set => this.RaiseAndSetIfChanged(ref _assignedQuantity, value);
+        get => _plannedQuantity;
+        set => this.RaiseAndSetIfChanged(ref _plannedQuantity, value);
     }
 
     private decimal _completedQuantity;
@@ -99,13 +99,15 @@ public class CartEmployeeTaskUserControlViewModel : ViewModelBase
     public bool CanComplete 
         => !IsCompleted;
 
-    public string ProgressText => $"{CompletedQuantity:F0} / {AssignedQuantity:F0}";
+    public string ProgressText 
+        => $"{CompletedQuantity:F0} / {PlannedQuantity:F0}";
 
-    public bool IsCompleted => CompletedQuantity >= AssignedQuantity;
+    public bool IsCompleted 
+        => CompletedQuantity >= PlannedQuantity;
 
     public bool HasNotes 
         => !string.IsNullOrWhiteSpace(Notes);
 
     public ICommand OpenCompleteWorkFormCommand
-        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseCompleteWorkFormStatusMessage(true, AssignmentId, OperationName, AssignedQuantity, ProductId, OperationId, SubProductOperationId)));
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseCompleteWorkFormStatusMessage(true, OperationName, PlannedQuantity, ProductId, OperationId, SubProductOperationId)));
 }

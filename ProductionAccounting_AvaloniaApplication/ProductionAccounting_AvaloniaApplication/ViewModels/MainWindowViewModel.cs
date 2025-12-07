@@ -85,7 +85,7 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
 
         public void Receive(OpenOrCloseCompleteWorkFormStatusMessage message)
         {
-            if (message.ShouldOpen) ShowCompleteWorkFormUserControl(message.AssignmentId, message.TaskName, message.AssignedQuantity, message.ProductId, message.OperationId, message.SubProductOperationId);
+            if (message.ShouldOpen) ShowCompleteWorkFormUserControl(message.TaskName, message.PlannedQuantity, message.ProductId, message.OperationId, message.SubProductOperationId);
             else CloseCompleteWorkFormUserControl();
         }
 
@@ -402,11 +402,11 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
             }
         }
 
-        public void ShowCompleteWorkFormUserControl(double assignmentId, string taskName, decimal assignedQuantity, double productId, double operationId, double subProductOperationId)
+        public void ShowCompleteWorkFormUserControl(string taskName, decimal assignedQuantity, double productId, double operationId, double subProductOperationId)
         {
             if (ContentCenter != null)
             {
-                var userControl = new CompleteWorkFormUserControl { DataContext = new CompleteWorkFormUserControlViewModel(assignmentId, taskName, assignedQuantity, productId, operationId, subProductOperationId) };
+                var userControl = new CompleteWorkFormUserControl { DataContext = new CompleteWorkFormUserControlViewModel(taskName, assignedQuantity, productId, operationId, subProductOperationId) };
 
                 if (ContentCenter.Children.Contains(userControl)) return;
 

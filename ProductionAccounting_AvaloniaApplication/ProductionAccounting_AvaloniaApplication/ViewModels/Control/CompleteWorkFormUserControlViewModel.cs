@@ -1,6 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using MsBox.Avalonia;
 using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ReactiveUI;
@@ -12,22 +11,21 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class CompleteWorkFormUserControlViewModel : ViewModelBase
 {
-    public CompleteWorkFormUserControlViewModel(double assignmentId, string taskName, decimal assignedQuantity, double productId, double operationId, double subProductOperationId)
+    public CompleteWorkFormUserControlViewModel(string taskName, decimal plannedQuantity, double productId, double operationId, double subProductOperationId)
     {
-        AssignmentId = assignmentId;
         TaskName = taskName;
-        AssignedQuantity = assignedQuantity;
+        PlannedQuantity = plannedQuantity;
         ProductId = productId;
         OperationId = operationId;
         SubProductOperationId = subProductOperationId;
 
         Loges.LoggingProcess(LogLevel.INFO,
-                $"assignmentId: {assignmentId} taskName: {taskName} assignedQuantity: {assignedQuantity} productId: {productId} operationId: {operationId} subProductOperationId: {subProductOperationId}");
+                $"taskName: {taskName} assignedQuantity: {plannedQuantity} productId: {productId} operationId: {operationId} subProductOperationId: {subProductOperationId}");
     }
 
     public double AssignmentId { get; }
     public string TaskName { get; } = string.Empty;
-    public decimal AssignedQuantity { get; }
+    public decimal PlannedQuantity { get; }
     public double ProductId { get; }
     public double OperationId { get; }
     public double SubProductOperationId { get; }
