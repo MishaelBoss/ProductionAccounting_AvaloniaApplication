@@ -22,14 +22,7 @@ public class ConfirmDeleteOperationWindowViewModel : ViewModelBase
         => new RelayCommand(() => window?.Close());
 
     public ICommand DeleteCommand
-        => new RelayCommand(async () => 
-        { 
-            if ( await DeleteAsync() ) 
-            { 
-                WeakReferenceMessenger.Default.Send(new RefreshOperationListMessage());
-                window?.Close();
-            } 
-        });
+        => new RelayCommand(async () => await DeleteAsync());
     private double _id = 0;
     public double Id
     {
@@ -44,7 +37,7 @@ public class ConfirmDeleteOperationWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _name, value);
     }
 
-    private async Task<bool> DeleteAsync()
+    private async Task DeleteAsync()
     {
         try
         {
@@ -53,8 +46,10 @@ public class ConfirmDeleteOperationWindowViewModel : ViewModelBase
                 await connection.OpenAsync();
                 try
                 {
+                    int rowsAffected = 0;
+
                     var deleteQueries = new[]
-{
+                    {
                         "DELETE FROM public.production WHERE product_id = @id"
                     };
 
@@ -70,19 +65,23 @@ public class ConfirmDeleteOperationWindowViewModel : ViewModelBase
                     using (var command1 = new NpgsqlCommand("DELETE FROM public.operation WHERE id = @id", connection))
                     {
                         command1.Parameters.AddWithValue("@id", Id);
-                        await command1.ExecuteNonQueryAsync();
+                        rowsAffected = await command1.ExecuteNonQueryAsync();
                     }
 
-                    Loges.LoggingProcess(level: LogLevel.INFO,
-                        message: $"Deleted user {Id}, Name {Name}");
+                    if (rowsAffected > 0) 
+                    {
 
-                    return true;
+                        Loges.LoggingProcess(level: LogLevel.INFO,
+                            message: $"Deleted user {Id}, Name {Name}");
+
+                        WeakReferenceMessenger.Default.Send(new RefreshOperationListMessage());
+                        window?.Close();
+                    }
                 }
                 catch (Exception ex)
                 {
                     Loges.LoggingProcess(level: LogLevel.ERROR,
                         ex: ex);
-                    return false;
                 }
             }
         }
@@ -90,7 +89,6 @@ public class ConfirmDeleteOperationWindowViewModel : ViewModelBase
         {
             Loges.LoggingProcess(level: LogLevel.ERROR,
                 ex: ex);
-            return false;
         }
     }
 }

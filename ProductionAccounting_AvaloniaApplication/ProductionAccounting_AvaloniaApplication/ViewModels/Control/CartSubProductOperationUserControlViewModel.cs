@@ -82,12 +82,20 @@ public class CartSubProductOperationUserControlViewModel : ViewModelBase
         => AssignedToUserId == ManagerCookie.GetIdUser;
 
     public bool CanSubmit 
-        => IsAssignedToMe && !IsCompleted;
+        => IsAssignedToMe 
+        && !IsCompleted;
     public bool IsCompleted
         => CompletedQuantity >= PlannedQuantity;
 
     public bool CanAssign 
-        => !IsAssigned && !IsCompleted;
+        => !IsAssigned 
+        && !IsCompleted;
+
+    public bool CanAssignTest
+        => IsAdministratorOrMaster 
+        && IsAssigned 
+        && !IsCompleted 
+        && CompletedQuantity == PlannedQuantity;
 
     public string StatusText 
         => IsCompleted ? "Готово" 

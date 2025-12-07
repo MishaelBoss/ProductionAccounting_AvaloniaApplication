@@ -3,15 +3,15 @@ using CommunityToolkit.Mvvm.Messaging;
 using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Models;
 using ProductionAccounting_AvaloniaApplication.Scripts;
-using ReactiveUI;
 using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
-public class EmployeeAssignmentMasterSubMarkUserControlViewModel : ViewModelBase
+public class EmployeeAssignmentMasterSubMarkUserControlViewModel : ViewModelBase, INotifyPropertyChanged
 {
     public EmployeeAssignmentMasterSubMarkUserControlViewModel(double id)
     {
@@ -28,14 +28,15 @@ public class EmployeeAssignmentMasterSubMarkUserControlViewModel : ViewModelBase
     public ComboBoxUser? SelectedEmployee
     {
         get => _selectedEmployee;
-        set => this.RaiseAndSetIfChanged(ref _selectedEmployee, value);
-    }
-
-    private string? _notes = string.Empty;
-    public string? Notes
-    {
-        get => _notes;
-        set => this.RaiseAndSetIfChanged(ref _notes, value);
+        set 
+        {
+            if (_selectedEmployee != value) 
+            {
+                _selectedEmployee = value;
+                OnPropertyChanged(nameof(SelectedEmployee));
+                OnPropertyChanged(nameof(CanAssign));
+            }
+        }
     }
 
     public bool CanAssign
@@ -111,4 +112,9 @@ public class EmployeeAssignmentMasterSubMarkUserControlViewModel : ViewModelBase
                 ex: ex);
         }
     }
+
+
+    public new event PropertyChangedEventHandler? PropertyChanged;
+    protected void OnPropertyChanged(string propertyName)
+        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }

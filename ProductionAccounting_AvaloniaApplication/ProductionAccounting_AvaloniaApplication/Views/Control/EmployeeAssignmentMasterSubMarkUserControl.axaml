@@ -14,25 +14,20 @@
         <Border VerticalAlignment="Center" 
                 HorizontalAlignment="Center" 
                 Width="400" 
-                Height="300"
+                Height="190"
                 Background="Gray" 
                 CornerRadius="12">
             <Grid>
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="20" 
 								Spacing="10">
-                        <ComboBox ItemsSource="{Binding Employees}"
-                                  SelectedItem="{Binding SelectedEmployee}"
-                                  DisplayMemberBinding="{Binding FullName}"
-                                  PlaceholderText="Выберите сотрудника"
-                                  FontSize="22"
-                                  Height="70"/>
-
-                        <TextBox Text="{Binding Notes}" 
-                                 AcceptsReturn="True"
-                                 TextWrapping="Wrap"
-                                 Height="80"
-                                 Watermark="Примечание (необязательно)"/>
+                        <ComboBox   HorizontalAlignment="Center"
+                                    ItemsSource="{Binding Employees}"
+                                    SelectedItem="{Binding SelectedEmployee}"
+                                    DisplayMemberBinding="{Binding FullName}"
+                                    PlaceholderText="Выберите сотрудника"
+                                    FontSize="22"
+                                    Height="70"/>
 
                         <StackPanel Orientation="Vertical"
                                     VerticalAlignment="Center"
@@ -42,6 +37,7 @@
 
                             <Button Classes="ButtonLogin"
                                     Command="{Binding AssignCommand}"
+                                    IsEnabled="{Binding CanAssign}"
                                     Content="Назначить"/>
 
                             <Button Command="{Binding CancelCommand}"

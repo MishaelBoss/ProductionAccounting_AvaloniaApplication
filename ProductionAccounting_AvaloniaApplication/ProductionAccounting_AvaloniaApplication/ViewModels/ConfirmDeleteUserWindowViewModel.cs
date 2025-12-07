@@ -22,14 +22,7 @@ public class ConfirmDeleteUserWindowViewModel : ViewModelBase
         => new RelayCommand(() => window?.Close());
 
     public ICommand DeleteCommand
-        => new RelayCommand(async () => 
-        { 
-            if ( await DeleteAsync() ) 
-            { 
-                WeakReferenceMessenger.Default.Send(new RefreshUserListMessage());
-                window?.Close();
-            } 
-        });
+        => new RelayCommand(async () => await DeleteAsync());
 
     private double _userId = 0;
     public double UserID
@@ -45,7 +38,7 @@ public class ConfirmDeleteUserWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _login, value);
     }
 
-    private async Task<bool> DeleteAsync()
+    private async Task DeleteAsync()
     {
         try
         {
@@ -80,16 +73,19 @@ public class ConfirmDeleteUserWindowViewModel : ViewModelBase
                         rowsAffected += await command2.ExecuteNonQueryAsync();
                     }
 
-                    Loges.LoggingProcess(level: LogLevel.INFO,
-                        message: $"Deleted user {UserID}, Login {Login}");
+                    if (rowsAffected > 0) 
+                    {
+                        Loges.LoggingProcess(level: LogLevel.INFO,
+                            message: $"Deleted user {UserID}, Login {Login}");
 
-                    return rowsAffected > 0;
+                        WeakReferenceMessenger.Default.Send(new RefreshUserListMessage());
+                        window?.Close();
+                    }
                 }
                 catch (Exception ex)
                 {
                     Loges.LoggingProcess(level: LogLevel.ERROR,
                         ex: ex);
-                    return false;
                 }
             }
         }
@@ -97,7 +93,6 @@ public class ConfirmDeleteUserWindowViewModel : ViewModelBase
         {
             Loges.LoggingProcess(level: LogLevel.ERROR,
                 ex: ex);
-            return false;
         }
     }
 }

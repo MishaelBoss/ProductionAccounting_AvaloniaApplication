@@ -83,7 +83,7 @@
                         FontWeight="Bold"
                         CornerRadius="12"
                         Padding="20,12"
-                        IsVisible="{Binding IsAdministratorOrMaster}"/>
+                        IsVisible="{Binding CanAssignTest}"/>
 
                 <Button Grid.Column="2"
                         Content="Назначить"

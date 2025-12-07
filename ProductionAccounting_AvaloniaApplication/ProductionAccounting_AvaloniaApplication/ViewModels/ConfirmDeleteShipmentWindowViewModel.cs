@@ -12,25 +12,18 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels;
 
 public class ConfirmDeleteShipmentWindowViewModel : ViewModelBase
 {
-    private ConfirmDeleteShipmentWindow? shipmentWindow { get; set; } = null;
+    private ConfirmDeleteShipmentWindow? window { get; set; } = null;
 
-    public void SetWindow(ConfirmDeleteShipmentWindow window)
+    public void SetWindow(ConfirmDeleteShipmentWindow _window)
     {
-        shipmentWindow = window;
+        window = _window;
     }
 
     public ICommand CancelCommand
-        => new RelayCommand(() => shipmentWindow?.Close());
+        => new RelayCommand(() => window?.Close());
 
     public ICommand DeleteCommand
-        => new RelayCommand(async () => 
-        { 
-            if ( await DeleteAsync() ) 
-            { 
-                WeakReferenceMessenger.Default.Send(new RefreshShipmentListMessage());
-                shipmentWindow?.Close();
-            } 
-        });
+        => new RelayCommand(async () => await DeleteAsync());
 
     private double _id = 0;
     public double Id
@@ -60,12 +53,9 @@ public class ConfirmDeleteShipmentWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _shipmentDate, value);
     }
 
-    public bool IsAdministrator
-        => ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsAdministrator;
-
-    private async Task<bool> DeleteAsync()
+    private async Task DeleteAsync()
     {
-        if(!IsAdministrator) return false;
+        if(!IsAdministrator) return;
 
         try
         {
@@ -77,24 +67,22 @@ public class ConfirmDeleteShipmentWindowViewModel : ViewModelBase
                     using (var command = new NpgsqlCommand("DELETE FROM public.shipments WHERE id = @id", connection))
                     {
                         command.Parameters.AddWithValue("@id", Id);
-                        var rows = await command.ExecuteNonQueryAsync();
+                        var rowsAffected = await command.ExecuteNonQueryAsync();
 
-                        if(rows > 0) 
+                        if(rowsAffected > 0) 
                         {
                             Loges.LoggingProcess(level: LogLevel.INFO,
                                 message: $"Deleted user {Id}, Name {Name}");
-                                
-                            return true;
+
+                            WeakReferenceMessenger.Default.Send(new RefreshShipmentListMessage());
+                            window?.Close();
                         }
                     }
-
-                    return false;
                 }
                 catch (Exception ex)
                 {
                     Loges.LoggingProcess(level: LogLevel.ERROR,
                         ex: ex);
-                    return false;
                 }
             }
         }
@@ -102,7 +90,6 @@ public class ConfirmDeleteShipmentWindowViewModel : ViewModelBase
         {
             Loges.LoggingProcess(level: LogLevel.ERROR,
                 ex: ex);
-            return false;
         }
     }
 }

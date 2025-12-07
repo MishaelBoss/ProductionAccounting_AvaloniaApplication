@@ -11,8 +11,5 @@ public class ComboBoxUser(double id, string firstName, string lastName, string M
     public string Login { get; set; } = login;
 
     public string FullName
-        => $"{FirstName} {LastName} {MiddleName}" + Login;
-
-/*    public override string ToString()
-        => $"{FirstName} {LastName} {MiddleName}" + Login;*/
+        => $"{FirstName} {LastName} {MiddleName} {Login}";
 }

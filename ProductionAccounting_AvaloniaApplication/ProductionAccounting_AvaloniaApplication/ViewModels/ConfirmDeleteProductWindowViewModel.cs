@@ -23,14 +23,7 @@ public class ConfirmDeleteProductWindowViewModel : ViewModelBase
         => new RelayCommand(() => window?.Close());
 
     public ICommand DeleteCommand
-        => new RelayCommand(async () => 
-        { 
-            if ( await DeleteAsync() ) 
-            { 
-                WeakReferenceMessenger.Default.Send(new RefreshProductListMessage());
-                window?.Close();
-            } 
-        });
+        => new RelayCommand(async () => await DeleteAsync());
 
     private double _id = 0;
     public double Id
@@ -46,7 +39,7 @@ public class ConfirmDeleteProductWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _name, value);
     }
 
-    private async Task<bool> DeleteAsync()
+    private async Task DeleteAsync()
     {
         try
         {
@@ -55,6 +48,20 @@ public class ConfirmDeleteProductWindowViewModel : ViewModelBase
                 await connection.OpenAsync();
                 try
                 {
+                    var deleteQueries = new[]
+{
+                        "DELETE FROM public.production WHERE product_id = @id"
+                    };
+
+                    foreach (var querty in deleteQueries)
+                    {
+                        await using (var command = new NpgsqlCommand(querty, connection))
+                        {
+                            command.Parameters.AddWithValue("@id", Id);
+                            await command.ExecuteNonQueryAsync();
+                        }
+                    }
+
                     using (var command1 = new NpgsqlCommand("DELETE FROM public.product WHERE id = @id", connection))
                     {
                         command1.Parameters.AddWithValue("@id", Id);
@@ -64,13 +71,13 @@ public class ConfirmDeleteProductWindowViewModel : ViewModelBase
                     Loges.LoggingProcess(level: LogLevel.INFO,
                         message: $"Deleted user {Id}, Name {Name}");
 
-                    return true;
+                    WeakReferenceMessenger.Default.Send(new RefreshProductListMessage());
+                    window?.Close();
                 }
                 catch (Exception ex)
                 {
                     Loges.LoggingProcess(level: LogLevel.ERROR,
                         ex: ex);
-                    return false;
                 }
             }
         }
@@ -78,7 +85,6 @@ public class ConfirmDeleteProductWindowViewModel : ViewModelBase
         {
             Loges.LoggingProcess(level: LogLevel.ERROR,
                 ex: ex);
-            return false;
         }
     }
 }
