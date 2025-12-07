@@ -79,7 +79,7 @@ public class AddSubProductUserControlViewModel : ViewModelBase, INotifyPropertyC
         => new RelayCommand(async () => await SaveCurrentSubProductAsync());
 
     public ICommand CancelCommand
-        => new RelayCommand(async () => WeakReferenceMessenger.Default.Send(new OpenOrCloseAddSubProductStatusMessage(false)));
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseAddSubProductStatusMessage(false)));
 
     private async Task SaveCurrentSubProductAsync()
     {

@@ -166,6 +166,8 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
 
             string sqlUsers = @"SELECT id, first_name, last_name, middle_name, login FROM public.user WHERE is_active = true ORDER BY last_name, first_name";
 
+            if(Internet.ConnectToDataBase()) return;
+            
             using (var connection = new NpgsqlConnection(Arguments.connection))
             {
                 await connection.OpenAsync();

@@ -130,9 +130,6 @@ public class CartShipmentUserControlViewModel : ViewModelBase
         _ => new SolidColorBrush(Colors.Gray)
     };
 
-    public bool IsAdministrator
-        => ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsAdministrator;
-
     private async Task ChangeStatus() 
     {
         if(!IsAdministrator) return;
