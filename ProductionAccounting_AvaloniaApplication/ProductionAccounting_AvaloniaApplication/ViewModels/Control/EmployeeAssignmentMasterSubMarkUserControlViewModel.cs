@@ -82,7 +82,18 @@ public class EmployeeAssignmentMasterSubMarkUserControlViewModel : ViewModelBase
         {
             Employees.Clear();
 
-            string sqlUsers = @"SELECT id, first_name, last_name, middle_name, login FROM public.user WHERE is_active = true ORDER BY last_name, first_name";
+            string sqlUsers = @"
+                                SELECT 
+                                    u.id, 
+                                    u.first_name, 
+                                    u.last_name, 
+                                    u.middle_name, 
+                                    u.login 
+                                FROM public.user AS u
+                                JOIN public.user_to_user_type AS uut ON u.id = uut.user_id
+                                JOIN public.user_type AS ut ON uut.user_type_id = ut.id
+                                WHERE u.is_active = true AND ut.type_user = 'Сотрудник'
+                                ORDER BY u.last_name, u.first_name";
 
             using (var connection = new NpgsqlConnection(Arguments.connection))
             {
