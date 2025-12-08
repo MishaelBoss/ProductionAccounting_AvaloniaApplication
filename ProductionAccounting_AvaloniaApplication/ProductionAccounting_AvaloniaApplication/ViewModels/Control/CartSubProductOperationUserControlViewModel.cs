@@ -21,6 +21,13 @@ public class CartSubProductOperationUserControlViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _operationName, value);
     }
 
+    private string _userName = string.Empty;
+    public string UserName
+    {
+        get => _userName;
+        set => this.RaiseAndSetIfChanged(ref _userName, value);
+    }
+
     private decimal _plannedQuantity;
     public decimal PlannedQuantity
     {
@@ -96,6 +103,10 @@ public class CartSubProductOperationUserControlViewModel : ViewModelBase
         && IsAssigned 
         && !IsCompleted 
         && CompletedQuantity == PlannedQuantity;
+
+    public string StatusButtonText 
+        => IsAssigned ? "Переназначить" 
+        : "Назначить";
 
     public string StatusText 
         => IsCompleted ? "Готово" 

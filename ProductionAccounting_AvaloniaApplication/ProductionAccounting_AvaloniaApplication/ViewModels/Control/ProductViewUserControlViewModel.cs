@@ -259,11 +259,13 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
                                                     spo.completed_quantity,
                                                     spo.assigned_to_user_id,
                                                     pt.product_id,
-                                                    o.id
+                                                    o.id,
+                                                    u.login
                                                 FROM public.sub_product_operations spo
                                                 JOIN public.operation o ON o.id = spo.operation_id
                                                 JOIN public.sub_products sp ON sp.id = spo.sub_product_id
                                                 JOIN public.product_tasks pt ON pt.id = sp.product_task_id
+                                                LEFT JOIN public.user u ON u.id = spo.assigned_to_user_id
                                                 WHERE spo.sub_product_id = @sub_product_id
                                                 ORDER BY spo.id";
 
@@ -283,7 +285,8 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
                                 CompletedQuantity = reader2.GetDecimal(3),
                                 AssignedToUserId = reader2.IsDBNull(4) ? null : reader2.GetDouble(4),
                                 ProductId = reader2.GetDouble(5),
-                                OperationId = reader2.GetDouble(6)
+                                OperationId = reader2.GetDouble(6),
+                                UserName = reader2.IsDBNull(7) ? string.Empty : reader2.GetString(7)
                             };
 
                             var userControl = new CartSubProductOperationUserControl()

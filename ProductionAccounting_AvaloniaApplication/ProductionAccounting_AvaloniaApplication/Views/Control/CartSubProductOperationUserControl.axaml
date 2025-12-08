@@ -59,6 +59,15 @@
                                 Foreground="#28A745"
                                 FontSize="18"/>
                 </StackPanel>
+                <StackPanel>
+                    <TextBlock Text="Сделано" 
+                                Foreground="#888" 
+                                FontSize="13"/>
+                    <TextBlock  Text="{Binding UserName}" 
+                                FontWeight="SemiBold" 
+                                Foreground="#28A745"
+                                FontSize="18"/>
+                </StackPanel>
             </StackPanel>
 
             <Grid   Grid.Row="2" 
@@ -86,7 +95,7 @@
                         IsVisible="{Binding CanAssignTest}"/>
 
                 <Button Grid.Column="2"
-                        Content="Назначить"
+                        Content="{Binding StatusButtonText}"
                         Command="{Binding AssignCommand}"
                         Background="#28A745"
                         Foreground="White"
@@ -94,7 +103,6 @@
                         FontWeight="Bold"
                         CornerRadius="12"
                         Padding="20,12"
-                        IsEnabled="{Binding CanAssign}"
                         IsVisible="{Binding IsAdministratorOrMaster}"/>
             </Grid>
         </Grid>
