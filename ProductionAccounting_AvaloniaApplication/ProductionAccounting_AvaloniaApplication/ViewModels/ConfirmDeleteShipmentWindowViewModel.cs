@@ -53,6 +53,9 @@ public class ConfirmDeleteShipmentWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _shipmentDate, value);
     }
 
+    public bool IsAdministrator
+        => ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsAdministrator;
+
     private async Task DeleteAsync()
     {
         if(!IsAdministrator) return;
