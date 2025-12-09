@@ -63,65 +63,13 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
     public Int32 Coefficient { get; }
     public string Notes { get; }
 
-    /*private string _status = "new";
+    private string _status = "new";
     public string Status
     {
         get => _status;
         set => this.RaiseAndSetIfChanged(ref _status, value);
-    }*/
-
-
-    /*private double? _createdBy;
-    public double? CreatedBy
-    {
-        get => _createdBy;
-        set => this.RaiseAndSetIfChanged(ref _createdBy, value);
     }
 
-    private DateTime? _createdAt;
-    public DateTime? CreatedAt
-    {
-        get => _createdAt;
-        set => this.RaiseAndSetIfChanged(ref _createdAt, value);
-    }
-
-    private string? _productName;
-    public string? ProductName
-    {
-        get => _productName;
-        set => this.RaiseAndSetIfChanged(ref _productName, value);
-    }*/
-
-    /*public string StatusDisplay => Status switch
-    {
-        "new" => "Новая",
-        "assigned" => "Разбита на подмарки",
-        "in_progress" => "В работе",
-        "completed" => "Завершена",
-        _ => Status
-    };*/
-
-    /*private string _article = string.Empty;
-    public string Article
-    {
-        get => _article;
-        set => this.RaiseAndSetIfChanged(ref _article, value);
-    }*/
-
-    /*private Int32 _pricePerUnit;
-    public Int32 PricePerUnit
-    {
-        get => _pricePerUnit;
-        set => this.RaiseAndSetIfChanged(ref _pricePerUnit, value);
-    }*/
-
-    /*private string _unit = string.Empty;
-    public string Unit
-    {
-        get => _unit;
-        set => this.RaiseAndSetIfChanged(ref _unit, value);
-    }
-*/
     private double? _subProductId = 0;
     public double? SubProductId
     {
@@ -156,6 +104,10 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
         get => _subProductNotes;
         set => this.RaiseAndSetIfChanged(ref _subProductNotes, value);
     }
+
+    public bool IsAdministratorOrMaster
+        => ManagerCookie.IsUserLoggedIn()
+        && (ManagerCookie.IsAdministrator || ManagerCookie.IsMaster);
 
     public async Task LoadSubProductAsync()
     {

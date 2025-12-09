@@ -15,66 +15,63 @@
             BorderThickness="2"
             MinWidth="200">
 
-        <Grid   RowDefinitions="Auto,Auto,Auto" 
-                ColumnDefinitions="Auto,*"
-                Margin="10">
+        <Grid RowDefinitions="Auto,Auto,Auto" 
+              Margin="10">
 
-            <TextBlock Grid.Row="0" Grid.Column="0"
-                       Text="→" 
-                       FontSize="32" 
-                       Foreground="#00D4FF" 
-                       VerticalAlignment="Center"
-                       Margin="0,0,20,0"/>
+            <Grid Grid.Row="0" ColumnDefinitions="Auto,*">
+                <TextBlock Grid.Column="0"
+                           Text="→" 
+                           FontSize="32" 
+                           Foreground="#00D4FF" 
+                           VerticalAlignment="Center"
+                           Margin="0,0,20,0"/>
 
-            <StackPanel Grid.Row="0" 
-                        Grid.Column="1" 
-                        VerticalAlignment="Center">
-                <TextBlock Text="{Binding OperationName}" 
-                           FontSize="22" 
-                           FontWeight="Bold" 
-                           Foreground="White"/>
-            </StackPanel>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding OperationName}" 
+                               FontSize="22" 
+                               FontWeight="Bold" 
+                               Foreground="White"/>
+                </StackPanel>
+            </Grid>
 
             <StackPanel Grid.Row="1" 
-                        Grid.Column="0" 
-                        Grid.ColumnSpan="2" 
                         Orientation="Horizontal" 
                         Spacing="20" 
                         Margin="0,15,0,10">
                 <StackPanel>
-                    <TextBlock  Text="План" 
-                                Foreground="#888" 
-                                FontSize="13"/>
-                    <TextBlock  Text="{Binding PlannedQuantity}" 
-                                FontWeight="SemiBold" 
-                                Foreground="#00D4FF" 
-                                FontSize="18"/>
+                    <TextBlock Text="План" 
+                               Foreground="#888" 
+                               FontSize="13"/>
+                    <TextBlock Text="{Binding PlannedQuantity}" 
+                               FontWeight="SemiBold" 
+                               Foreground="#00D4FF" 
+                               FontSize="18"/>
                 </StackPanel>
                 <StackPanel>
                     <TextBlock Text="Сделано" 
-                                Foreground="#888" 
-                                FontSize="13"/>
-                    <TextBlock  Text="{Binding CompletedQuantity}" 
-                                FontWeight="SemiBold" 
-                                Foreground="#28A745"
-                                FontSize="18"/>
+                               Foreground="#888" 
+                               FontSize="13"/>
+                    <TextBlock Text="{Binding CompletedQuantity}" 
+                               FontWeight="SemiBold" 
+                               Foreground="#28A745"
+                               FontSize="18"/>
                 </StackPanel>
                 <StackPanel>
-                    <TextBlock Text="Сделано" 
-                                Foreground="#888" 
-                                FontSize="13"/>
-                    <TextBlock  Text="{Binding UserName}" 
-                                FontWeight="SemiBold" 
-                                Foreground="#28A745"
-                                FontSize="18"/>
+                    <TextBlock Text="Исполнитель" 
+                               Foreground="#888" 
+                               FontSize="13"/>
+                    <TextBlock Text="{Binding UserName}" 
+                               FontWeight="SemiBold" 
+                               Foreground="#28A745"
+                               FontSize="18"/>
                 </StackPanel>
             </StackPanel>
 
-            <Grid   Grid.Row="2" 
-                    Grid.Column="0" 
-                    Grid.ColumnSpan="2" 
-                    ColumnDefinitions="*, Auto, Auto"
-                    Margin="0,10,0,0">
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
                 <TextBlock Grid.Column="0"
                            Text="{Binding StatusText}"
@@ -83,49 +80,40 @@
                            Foreground="{Binding StatusColor}"
                            VerticalAlignment="Center"/>
 
-                <Button Grid.Column="1"
-                        Content="Изменить"
-                        Command="{Binding EditCommand}"
-                        Background="#28A745"
-                        Foreground="White"
-                        FontSize="18"
-                        FontWeight="Bold"
-                        CornerRadius="12"
-                        Padding="20,12"
-                        IsVisible="{Binding IsAdministratorOrMaster}"/>
+                <StackPanel Grid.Column="1"
+                            Orientation="Horizontal"
+                            Spacing="10">
 
-                <Button Grid.Column="1"
-                        Content="Удалить"
-                        Command="{Binding DeleteCommand}"
-                        Background="#28A745"
-                        Foreground="White"
-                        FontSize="18"
-                        FontWeight="Bold"
-                        CornerRadius="12"
-                        Padding="20,12"
-                        IsVisible="{Binding IsAdministratorOrMaster}"/>
+                    <Button Content="Удалить"
+                            Command="{Binding DeleteCommand}"
+                            Background="#DC3545"
+                            Foreground="White"
+                            FontSize="18"
+                            FontWeight="Bold"
+                            CornerRadius="12"
+                            Padding="20,12"
+                            IsVisible="{Binding IsAdministratorOrMaster}"/>
 
-                <Button Grid.Column="1"
-                        Content="Сдать"
-                        Command="{Binding OpenSubmitWorkForAnEmployeeCommand}"
-                        Background="#28A745"
-                        Foreground="White"
-                        FontSize="18"
-                        FontWeight="Bold"
-                        CornerRadius="12"
-                        Padding="20,12"
-                        IsVisible="{Binding CanAssignTest}"/>
+                    <Button Content="Сдать"
+                            Command="{Binding OpenSubmitWorkForAnEmployeeCommand}"
+                            Background="#007BFF"
+                            Foreground="White"
+                            FontSize="18"
+                            FontWeight="Bold"
+                            CornerRadius="12"
+                            Padding="20,12"
+                            IsVisible="{Binding CanAssignTest}"/>
 
-                <Button Grid.Column="2"
-                        Content="{Binding StatusButtonText}"
-                        Command="{Binding AssignCommand}"
-                        Background="#28A745"
-                        Foreground="White"
-                        FontSize="18"
-                        FontWeight="Bold"
-                        CornerRadius="12"
-                        Padding="20,12"
-                        IsVisible="{Binding IsAdministratorOrMaster}"/>
+                    <Button Content="{Binding StatusButtonText}"
+                            Command="{Binding AssignCommand}"
+                            Background="#FFC107"
+                            Foreground="#212529"
+                            FontSize="18"
+                            FontWeight="Bold"
+                            CornerRadius="12"
+                            Padding="20,12"
+                            IsVisible="{Binding IsAdministratorOrMaster}"/>
+                </StackPanel>
             </Grid>
         </Grid>
     </Border>

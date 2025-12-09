@@ -37,7 +37,7 @@ public class CartPositionUserControlViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _type, value);
     }
 
-    public bool IsVisibleButtonDelete
-        => ManagerCookie.IsUserLoggedIn()
+    public bool IsAdministrator
+        => ManagerCookie.IsUserLoggedIn() 
         && ManagerCookie.IsAdministrator;
 }

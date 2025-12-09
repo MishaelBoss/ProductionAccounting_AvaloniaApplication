@@ -48,7 +48,7 @@
 						CornerRadius="6"
 						Background="#FF3B30"
 						BorderThickness="0"
-						IsVisible="{Binding IsVisibleButtonDelete}"
+						IsVisible="{Binding IsAdministrator}"
 						ToolTip.Tip="�������">
 					<Image Source="/Assets/remove-64.png"
 						   Width="18"

@@ -1,14 +1,16 @@
 ﻿using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
-using ProductionAccounting_AvaloniaApplication.Views;
 using ReactiveUI;
 using System;
+using System.ComponentModel;
+using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
-public class CartProductUserControlViewModel : ViewModelBase
+public class CartProductUserControlViewModel : ViewModelBase, INotifyPropertyChanged
 {
     public ICommand DeleteCommand
         => new RelayCommand(() =>
@@ -31,8 +33,10 @@ public class CartProductUserControlViewModel : ViewModelBase
         });
 
     public ICommand OpenPruductViewCommand
-        => new RelayCommand(() => { WeakReferenceMessenger.Default.Send(new OpenOrCloseProductViewStatusMessage(true, Name, Id, Mark, Coefficient, Notes)); });
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseProductViewStatusMessage(true, Name, Id, Mark, Coefficient, Notes)));
 
+    public ICommand CompleteTaskCommand
+        => new RelayCommand(async () => await CompleteTaskAsync());
 
     private string _status = "new";
     public string Status
@@ -133,4 +137,96 @@ public class CartProductUserControlViewModel : ViewModelBase
         get => _coefficient;
         set => this.RaiseAndSetIfChanged(ref _coefficient, value);
     }
+
+    private bool _canCompleteTask;
+    public bool CanCompleteTask 
+    {
+        get => _canCompleteTask;
+        set
+        {
+            if (_canCompleteTask != value) 
+            {
+                _canCompleteTask = value;
+                OnPropertyChanged(nameof(CanCompleteTask));
+                OnPropertyChanged(nameof(IsAdministratorOrMasterAndCanCompleteTask));
+            }
+        }
+    }
+
+    public bool IsAdministratorOrMaster
+        => ManagerCookie.IsUserLoggedIn()
+        && (ManagerCookie.IsMaster || ManagerCookie.IsAdministrator);
+
+    public bool IsAdministratorOrMasterAndCanCompleteTask
+        => IsAdministratorOrMaster && CanCompleteTask;
+
+    public async Task CheckIsTaskCanBeCompleted() 
+    {
+        try
+        {
+            string sql = @"
+                        SELECT COUNT(*) = 0 
+                        FROM public.sub_product_operations spo
+                        JOIN public.sub_products sp ON sp.id = spo.sub_product_id
+                        WHERE sp.product_task_id = @task_id
+                          AND spo.completed_quantity < spo.planned_quantity";
+            using (var connection = new NpgsqlConnection(Arguments.connection)) 
+            {
+                await connection.OpenAsync();
+                using (var command = new NpgsqlCommand(sql, connection)) 
+                {
+                    command.Parameters.AddWithValue("@task_id", Id);
+
+                    CanCompleteTask = (bool)await command.ExecuteScalarAsync();
+                }
+            }
+        }
+        catch (PostgresException ex)
+        {
+            Loges.LoggingProcess(level: LogLevel.WARNING,
+                ex: ex);
+
+            CanCompleteTask = false;
+        }
+        catch (Exception ex) 
+        {
+            Loges.LoggingProcess(level: LogLevel.WARNING,
+                ex: ex);
+
+            CanCompleteTask = false;
+        }
+    }
+
+    private async Task CompleteTaskAsync() 
+    {
+        try
+        {
+            string sql = "UPDATE public.product_tasks SET status = 'completed' WHERE id = @id";
+            using (var connection = new NpgsqlConnection(Arguments.connection))
+            {
+                await connection.OpenAsync();
+                using (var command = new NpgsqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@id", Id);
+                    await command.ExecuteNonQueryAsync();
+
+                    WeakReferenceMessenger.Default.Send(new RefreshProductListMessage());
+                }
+            }
+        }
+        catch (PostgresException ex)
+        {
+            Loges.LoggingProcess(level: LogLevel.WARNING,
+                ex: ex);
+        }
+        catch (Exception ex)
+        {
+            Loges.LoggingProcess(level: LogLevel.WARNING,
+                ex: ex);
+        }
+    }
+
+    public new event PropertyChangedEventHandler? PropertyChanged;
+    protected void OnPropertyChanged(string propertyName)
+        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }

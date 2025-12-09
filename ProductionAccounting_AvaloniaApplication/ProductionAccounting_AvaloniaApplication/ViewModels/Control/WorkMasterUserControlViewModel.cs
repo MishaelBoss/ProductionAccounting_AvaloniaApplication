@@ -79,6 +79,8 @@ public class WorkMasterUserControlViewModel : ViewModelBase, INotifyPropertyChan
                                 DataContext = viewModel,
                             };
 
+                            _  = viewModel.CheckIsTaskCanBeCompleted();
+
                             productList.Add(userControl);
                         }
                     }

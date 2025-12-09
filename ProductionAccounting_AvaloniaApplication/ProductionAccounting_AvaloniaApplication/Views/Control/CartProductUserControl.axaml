@@ -98,13 +98,27 @@
 						   Height="18"/>
 				</Button>
 
+				<Button Command="{Binding CompleteTaskCommand}"
+						Content="Сдать марку"
+						Width="110"
+						Height="34"
+						CornerRadius="6"
+						Background="#28A745"
+						Foreground="White"
+						BorderThickness="0"
+						HorizontalContentAlignment="Center"
+						VerticalContentAlignment="Center"
+						IsVisible="{Binding CanCompleteTask}"
+						ToolTip.Tip="Сдать марку">
+				</Button>
+
 				<Button Command="{Binding DeleteCommand}"
 						Width="34"
 						Height="34"
 						CornerRadius="6"
 						Background="#FF3B30"
 						BorderThickness="0"
-						IsVisible="{Binding IsAdministrator}"
+						IsVisible="{Binding IsAdministratorOrMaster}"
 						ToolTip.Tip="Удалить">
 					<Image Source="/Assets/remove-64.png"
 						   Width="18"

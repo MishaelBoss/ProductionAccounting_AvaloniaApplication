@@ -23,11 +23,10 @@
 		  					Width="32"
 		  					Height="32"
 		  					ToolTip.Tip="Add a product"
-                            IsVisible="{Binding IsAdministrator}">
+                            IsVisible="{Binding IsAdministratorOrMaster}">
 		  				<Image Source="/Assets/add-64.png"/>
 		  			</Button>
                     <TextBlock Text="{Binding Name}"/>
-                    <TextBlock Text="{Binding StatusDisplay}"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal"
                             HorizontalAlignment="Center"
@@ -60,7 +59,7 @@
 		  					Width="32"
 		  					Height="32"
 		  					ToolTip.Tip="Add"
-                            IsVisible="{Binding IsAdministrator}">
+                            IsVisible="{Binding IsAdministratorOrMaster}">
 		  				<Image Source="/Assets/add-64.png"/>
 		  			</Button>
              <ScrollViewer Margin="10">

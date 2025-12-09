@@ -143,7 +143,7 @@ public class CartSubProductOperationUserControlViewModel : ViewModelBase
         });
 
     public ICommand AssignCommand 
-        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseEmployeeAssignmentMasterSubMarkStatusMessage(true, SubProductOperationId)));
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseEmployeeAssignmentMasterSubMarkStatusMessage(true, SubProductId)));
 
     public ICommand OpenSubmitWorkForAnEmployeeCommand
         => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseCompleteWorkFormStatusMessage(true, OperationName, PlannedQuantity, ProductId, OperationId, SubProductOperationId)));
