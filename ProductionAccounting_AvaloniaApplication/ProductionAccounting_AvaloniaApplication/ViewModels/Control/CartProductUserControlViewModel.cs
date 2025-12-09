@@ -13,20 +13,21 @@ public class CartProductUserControlViewModel : ViewModelBase
     public ICommand DeleteCommand
         => new RelayCommand(() =>
         {
-            var confirmDeleteViewModel = new ConfirmDeleteProductWindowViewModel()
+            string[] deleteQueries =
             {
-                Id = ProductId,
-                Name = Name,
+                "DELETE FROM public.production WHERE product_id = @id"
             };
 
-            var confirmDeleteWindows = new ConfirmDeleteProductWindow()
+            var viewModel = new ConfirmDeleteWindowViewModel(ProductId, Name, "DELETE FROM public.product WHERE id = @id", (() => WeakReferenceMessenger.Default.Send(new RefreshProductListMessage())), deleteQueries);
+
+            var window = new ConfirmDeleteWindow()
             {
-                DataContext = confirmDeleteViewModel,
+                DataContext = viewModel,
             };
 
-            confirmDeleteViewModel.SetWindow(confirmDeleteWindows);
+            viewModel.SetWindow(window);
 
-            confirmDeleteWindows.Show();
+            window.Show();
         });
 
     public ICommand OpenPruductViewCommand

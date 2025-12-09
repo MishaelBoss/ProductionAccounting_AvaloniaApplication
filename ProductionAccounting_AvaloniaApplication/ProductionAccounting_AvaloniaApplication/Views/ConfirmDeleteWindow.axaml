@@ -2,16 +2,16 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:vm="using:ProductionAccounting_AvaloniaApplication.ViewModels"
-        x:DataType="vm:ConfirmDeleteUserWindowViewModel"
+		xmlns:vm="using:ProductionAccounting_AvaloniaApplication.ViewModels"
+        x:DataType="vm:ConfirmDeleteWindowViewModel"
         mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="200"
         MaxWidth="400" MaxHeight="200"
-        x:Class="ProductionAccounting_AvaloniaApplication.ConfirmDeleteUserWindow"
+        x:Class="ProductionAccounting_AvaloniaApplication.ConfirmDeleteWindow"
 		ExtendClientAreaToDecorationsHint="True"
 		WindowStartupLocation="CenterScreen"
-        Title="ConfirmDeleteUserWindow">
+        Title="ConfirmDeleteWindow">
 
-	<Border CornerRadius="12"
+  <Border CornerRadius="12"
             Background="LightGray"
             BorderBrush="#E1E5E9"
             BorderThickness="1"
@@ -23,13 +23,13 @@
 			<StackPanel Grid.Column="1"
                         VerticalAlignment="Center"
                         Margin="0,0,15,0">
-				<TextBlock Text="{Binding Login}"
+				<TextBlock Text="{Binding Title}"
                            Foreground="#2C3E50"
                            FontSize="14"
                            FontWeight="SemiBold"
                            Margin="0,0,0,2"/>
 				
-				<TextBlock Text="{Binding UserID}"
+				<TextBlock Text="{Binding Id}"
                            Foreground="#7F8C8D"
                            FontSize="12"
                            Margin="0,0,0,1"/>
@@ -64,5 +64,4 @@
 			</StackPanel>
 		</Grid>
     </Border>
-
 </Window>

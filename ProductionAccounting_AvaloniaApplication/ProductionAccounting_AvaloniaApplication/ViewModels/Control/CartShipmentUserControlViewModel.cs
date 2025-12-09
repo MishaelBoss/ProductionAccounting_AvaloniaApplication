@@ -1,8 +1,8 @@
 ﻿using Avalonia.Media;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
-using ProductionAccounting_AvaloniaApplication.Views;
 using ReactiveUI;
 using System;
 using System.Threading.Tasks;
@@ -19,20 +19,14 @@ public class CartShipmentUserControlViewModel : ViewModelBase
     public ICommand DeleteCommand
         => new RelayCommand(() =>
         {
-            var viewModel = new ConfirmDeleteShipmentWindowViewModel
+            var viewModel = new ConfirmDeleteWindowViewModel(Id, CustomerName ?? "Заказ без названия", "DELETE FROM public.shipments WHERE id = @id", (() => WeakReferenceMessenger.Default.Send(new RefreshShipmentListMessage())));
+
+            var window = new ConfirmDeleteWindow()
             {
-                Id = Id,
-                Name = CustomerName ?? "Заказ без названия",
-                OrderNumber = OrderNubmer ?? string.Empty,
-                ShipmentDate = ShipmentDate
+                DataContext = viewModel,
             };
 
-            var window = new ConfirmDeleteShipmentWindow
-            {
-                DataContext = viewModel
-            };
-
-            viewModel.SetWindow(window);  
+            viewModel.SetWindow(window);
 
             window.Show();
         });

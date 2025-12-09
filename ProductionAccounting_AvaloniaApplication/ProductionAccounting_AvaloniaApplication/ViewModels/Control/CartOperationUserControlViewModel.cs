@@ -1,7 +1,8 @@
-﻿using System.Windows.Input;
-using CommunityToolkit.Mvvm.Input;
+﻿using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ReactiveUI;
+using System.Windows.Input;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
@@ -10,20 +11,22 @@ public class CartOperationUserControlViewModel : ViewModelBase
     public ICommand DeleteCommand
         => new RelayCommand(() =>
         {
-            var confirmDeleteUserViewModel = new ConfirmDeleteOperationWindowViewModel()
+            string[] deleteQueries =
             {
-                Id = OperationID,
-                Name = Name,
+                "DELETE FROM public.production WHERE product_id = @id"
             };
 
-            var confirmDeleteUserWindows = new ConfirmDeleteOperationWindow()
+
+            var viewModel = new ConfirmDeleteWindowViewModel(OperationID, Name, "DELETE FROM public.operation WHERE id = @id", (() => WeakReferenceMessenger.Default.Send(new RefreshOperationListMessage())), deleteQueries);
+
+            var window = new ConfirmDeleteWindow()
             {
-                DataContext = confirmDeleteUserViewModel,
+                DataContext = viewModel,
             };
 
-            confirmDeleteUserViewModel.SetWindow(confirmDeleteUserWindows);
+            viewModel.SetWindow(window);
 
-            confirmDeleteUserWindows.Show();
+            window.Show();
         });
 
     private double _operationID = 0;

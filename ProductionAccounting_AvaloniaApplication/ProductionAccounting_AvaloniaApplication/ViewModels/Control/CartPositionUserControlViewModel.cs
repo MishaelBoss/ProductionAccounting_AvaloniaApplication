@@ -1,7 +1,8 @@
-﻿using System.Windows.Input;
-using CommunityToolkit.Mvvm.Input;
+﻿using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ReactiveUI;
+using System.Windows.Input;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
@@ -10,20 +11,16 @@ public class CartPositionUserControlViewModel : ViewModelBase
     public ICommand DeleteCommand
         => new RelayCommand(() =>
         {
-            var confirmDeleteUserViewModel = new ConfirmDeletePositionWindowViewModel()
+            var viewModel = new ConfirmDeleteWindowViewModel(Id, Type, "DELETE FROM public.positions WHERE id = @id", (() => WeakReferenceMessenger.Default.Send(new RefreshPositionListMessage())));
+
+            var window = new ConfirmDeleteWindow()
             {
-                Id = Id,
-                Type = Type,
+                DataContext = viewModel,
             };
 
-            var confirmDeleteUserWindows = new ConfirmDeletePositionWindow()
-            {
-                DataContext = confirmDeleteUserViewModel,
-            };
+            viewModel.SetWindow(window);
 
-            confirmDeleteUserViewModel.SetWindow(confirmDeleteUserWindows);
-
-            confirmDeleteUserWindows.Show();
+            window.Show();
         });
 
     private double _id = 0;

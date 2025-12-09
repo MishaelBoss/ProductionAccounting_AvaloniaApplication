@@ -1,15 +1,13 @@
 using Avalonia.Controls;
 using Avalonia.Input;
-using ProductionAccounting_AvaloniaApplication.ViewModels;
 
 namespace ProductionAccounting_AvaloniaApplication;
 
-public partial class ConfirmDeleteUserWindow : Window
+public partial class ConfirmDeleteWindow : Window
 {
-    public ConfirmDeleteUserWindow()
+    public ConfirmDeleteWindow()
     {
         InitializeComponent();
-        DataContext = new ConfirmDeleteUserWindowViewModel();
     }
 
     private void TopBorder(object? sender, PointerPressedEventArgs e)

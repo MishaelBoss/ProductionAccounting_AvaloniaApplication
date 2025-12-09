@@ -1,11 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
@@ -13,7 +11,19 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 public class CartSubProductUserControlViewModel : ViewModelBase
 {
     public ICommand DeleteCommand
-        => new RelayCommand(async () => await DeleteAsync());
+        => new RelayCommand(() =>
+        {
+            var viewModel = new ConfirmDeleteWindowViewModel(Id ?? 0, Name ?? string.Empty, "DELETE FROM public.sub_products WHERE id = @id", (() => WeakReferenceMessenger.Default.Send(new RefreshSubProductListMessage())));
+
+            var window = new ConfirmDeleteWindow()
+            {
+                DataContext = viewModel,
+            };
+
+            viewModel.SetWindow(window);
+
+            window.Show();
+        });
 
     public ICommand ViewCommand
         => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseSubProductStatusMessage(true, Id)));
@@ -76,43 +86,4 @@ public class CartSubProductUserControlViewModel : ViewModelBase
 
     public bool IsNullNotes
         => !string.IsNullOrEmpty(Notes);
-
-    private async Task<bool> DeleteAsync()
-    {
-        try
-        {
-            using (var connection = new NpgsqlConnection(Arguments.connection))
-            {
-                await connection.OpenAsync();
-                try
-                {
-                    string sql1 = "DELETE FROM public.sub_products WHERE id = @id";
-                    using (var command1 = new NpgsqlCommand(sql1, connection))
-                    {
-                        command1.Parameters.AddWithValue("@id", Id ?? 0);
-                        await command1.ExecuteNonQueryAsync();
-                    }
-
-                    Loges.LoggingProcess(level: LogLevel.INFO,
-                        message: $"Deleted position {Id}, Name {Name}");
-
-                    WeakReferenceMessenger.Default.Send(new RefreshSubProductListMessage());
-
-                    return true;
-                }
-                catch (Exception ex)
-                {
-                    Loges.LoggingProcess(level: LogLevel.ERROR,
-                        ex: ex);
-                    return false;
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Loges.LoggingProcess(level: LogLevel.ERROR,
-                ex: ex);
-            return false;
-        }
-    }
 }

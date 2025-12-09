@@ -24,20 +24,25 @@ public class CartUserListUserControlViewModel : ViewModelBase, INotifyPropertyCh
     public ICommand DeleteCommand
         => new RelayCommand(() =>
         {
-            var confirmDeleteUserViewModel = new ConfirmDeleteUserWindowViewModel()
+            string[] deleteQueries =
+            [
+                "DELETE FROM public.timesheet WHERE user_id = @id",
+                "DELETE FROM public.user_to_user_type WHERE user_id = @id",
+                "DELETE FROM public.user_to_departments WHERE user_id = @id",
+                "DELETE FROM public.user_to_position WHERE user_id = @id",
+                "DELETE FROM public.production WHERE user_id = @id"
+            ];
+
+            var viewModel = new ConfirmDeleteWindowViewModel(UserID, Login, "DELETE FROM public.user WHERE id = @id", (() => WeakReferenceMessenger.Default.Send(new RefreshUserListMessage())), deleteQueries);
+
+            var window = new ConfirmDeleteWindow()
             {
-                UserID = UserID,
-                Login = Login,
+                DataContext = viewModel,
             };
 
-            var confirmDeleteUserWindows = new ConfirmDeleteUserWindow()
-            {
-                DataContext = confirmDeleteUserViewModel,
-            };
+            viewModel.SetWindow(window);
 
-            confirmDeleteUserViewModel.SetWindow(confirmDeleteUserWindows);
-
-            confirmDeleteUserWindows.Show();
+            window.Show();
         });
 
     private double _userID = 0;
