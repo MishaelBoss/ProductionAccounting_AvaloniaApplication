@@ -84,6 +84,28 @@
                            VerticalAlignment="Center"/>
 
                 <Button Grid.Column="1"
+                        Content="Изменить"
+                        Command="{Binding EditCommand}"
+                        Background="#28A745"
+                        Foreground="White"
+                        FontSize="18"
+                        FontWeight="Bold"
+                        CornerRadius="12"
+                        Padding="20,12"
+                        IsVisible="{Binding IsAdministratorOrMaster}"/>
+
+                <Button Grid.Column="1"
+                        Content="Удалить"
+                        Command="{Binding DeleteCommand}"
+                        Background="#28A745"
+                        Foreground="White"
+                        FontSize="18"
+                        FontWeight="Bold"
+                        CornerRadius="12"
+                        Padding="20,12"
+                        IsVisible="{Binding IsAdministratorOrMaster}"/>
+
+                <Button Grid.Column="1"
                         Content="Сдать"
                         Command="{Binding OpenSubmitWorkForAnEmployeeCommand}"
                         Background="#28A745"

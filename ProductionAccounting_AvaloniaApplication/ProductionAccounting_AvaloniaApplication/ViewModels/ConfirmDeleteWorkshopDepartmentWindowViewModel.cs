@@ -59,7 +59,7 @@ public class ConfirmDeleteWorkshopDepartmentWindowViewModel : ViewModelBase
                     if(rowsAffected > 0)
                     {
                         Loges.LoggingProcess(level: LogLevel.INFO,
-                        message: $"Deleted position {Id}, Type {Type}");
+                            message: $"Deleted position {Id}, Type {Type}");
 
                         WeakReferenceMessenger.Default.Send(new RefreshDepartmentListMessage());
                         window?.Close();

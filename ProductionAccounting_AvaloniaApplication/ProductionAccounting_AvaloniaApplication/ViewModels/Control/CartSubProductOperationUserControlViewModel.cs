@@ -1,8 +1,12 @@
 ﻿using Avalonia.Media;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using MsBox.Avalonia;
+using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ReactiveUI;
+using System;
+using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
@@ -13,6 +17,7 @@ public class CartSubProductOperationUserControlViewModel : ViewModelBase
     public double SubProductOperationId { get; set; }
     public double ProductId { get; set; }
     public double OperationId { get; set; }
+    public double SubProductId { get; set; }
 
     private string _operationName = string.Empty;
     public string OperationName
@@ -104,8 +109,8 @@ public class CartSubProductOperationUserControlViewModel : ViewModelBase
     public bool CanAssignTest
         => IsAdministratorOrMaster 
         && IsAssigned 
-        && !IsCompleted 
-        && CompletedQuantity == PlannedQuantity;
+        && !IsAssignedToMe
+        && !IsCompleted;
 
     public string StatusButtonText 
         => IsAssigned ? "Переназначить" 
@@ -123,9 +128,55 @@ public class CartSubProductOperationUserControlViewModel : ViewModelBase
         : IsAssigned ? new(Colors.Gray)
         : new(Colors.Cyan);
 
+    public ICommand EditCommand 
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseEditSubOperationStatusMessage(true, SubProductOperationId)));
+
+    public ICommand DeleteCommand 
+        => new RelayCommand(async () => await DeleteSubOperationAsync());
+
     public ICommand AssignCommand 
         => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseEmployeeAssignmentMasterSubMarkStatusMessage(true, SubProductOperationId)));
 
     public ICommand OpenSubmitWorkForAnEmployeeCommand
         => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseCompleteWorkFormStatusMessage(true, OperationName, PlannedQuantity, ProductId, OperationId, SubProductOperationId)));
+
+    private async Task DeleteSubOperationAsync()
+    {
+        if(!Internet.ConnectToDataBase()) return;
+
+        try
+        {
+            var sql = "DELETE FROM public.sub_product_operations WHERE id = @id";
+            using (var connection = new NpgsqlConnection(Arguments.connection))
+            {
+                await connection.OpenAsync();
+                using (var command = new NpgsqlCommand(sql, connection))
+                {
+                    int rowsAffected = 0;
+
+                    command.Parameters.AddWithValue("@id", SubProductOperationId);
+                    rowsAffected = await command.ExecuteNonQueryAsync();
+
+                    if(rowsAffected > 0)
+                    {
+                        Loges.LoggingProcess(level: LogLevel.INFO,
+                            message: $"Deleted sub operation {SubProductOperationId}, Type {OperationName}");
+
+                        WeakReferenceMessenger.Default.Send(new RefreshSubProductOperationsMessage(SubProductId));
+                    }
+                }
+            }
+        }
+        catch (PostgresException ex)
+        {
+            Loges.LoggingProcess(LogLevel.ERROR,
+                "Connection or request error",
+                ex: ex);
+        }
+        catch (Exception ex)
+        {
+            Loges.LoggingProcess(LogLevel.ERROR, 
+                ex: ex);
+        }
+    }
 }

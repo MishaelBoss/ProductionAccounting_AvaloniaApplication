@@ -29,7 +29,6 @@ public class AddOperationUserControlViewModel : ViewModelBase
         { 
             if ( await SaveAndLinkAsync() ) 
             { 
-                WeakReferenceMessenger.Default.Send(new RefreshOperationListMessage());
                 WeakReferenceMessenger.Default.Send(new OpenOrCloseAddOperationStatusMessage(false));
             } 
         });
@@ -248,6 +247,9 @@ public class AddOperationUserControlViewModel : ViewModelBase
                     command.Parameters.AddWithValue("@quantity", quantity);
                     
                     var result = await command.ExecuteScalarAsync();
+
+                    WeakReferenceMessenger.Default.Send(new RefreshSubProductOperationsMessage(_subProductId));
+
                     return result != null && result != DBNull.Value;
                 }
             }

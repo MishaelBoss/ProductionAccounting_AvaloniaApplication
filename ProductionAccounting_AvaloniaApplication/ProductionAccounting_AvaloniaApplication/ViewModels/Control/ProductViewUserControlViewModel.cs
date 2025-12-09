@@ -34,14 +34,12 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
 
     public void Receive(OpenOrCloseSubProductStatusMessage message)
     {
-        _ = LoadSubProductViewAsync(message.SubProductId);
+        LoadSubProductViewAsync(message.SubProductId);
     }
 
     public void Receive(RefreshSubProductOperationsMessage message)
     {
-        if (SubProductId.HasValue && SubProductId.Value == message.SubProductId)
-        {
-        }
+        _ = LoadDateSubOperationAsync(message.SubProductId);
     }
 
     public StackPanel? SubProductContent { get; set; } = null;
@@ -221,11 +219,14 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
         }
     }
 
-    public async Task LoadSubProductViewAsync(double subProductId)
+    public async void LoadSubProductViewAsync(double subProductId)
     {
-        subProductOperationList.Clear();
-        StackPanelHelper.ClearAndRefreshStackPanel<CartSubProductOperationUserControl>(SubProductOperation, subProductOperationList);
+        await LoadDateSubProductAsync(subProductId);
+        await LoadDateSubOperationAsync(subProductId);
+    }
 
+    private async Task LoadDateSubProductAsync(double subProductId)
+    {
         try
         {
             string sql = @"SELECT id, name, planned_quantity, planned_weight, notes, created_at FROM public.sub_products WHERE id = @id";
@@ -250,29 +251,58 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
                         }
                     }
                 }
+            }
+        }
+        catch (NpgsqlException ex)
+        {
+            StackPanelHelper.ClearAndRefreshStackPanel<CartSubProductOperationUserControl>(SubProductOperation, subProductOperationList);
+            ItemNotFoundException.Show(SubProductOperation, ErrorLevel.NoConnectToDB);
 
-                string sqlSubProductOperations = @"
-                                                SELECT 
-                                                    spo.id,
-                                                    o.name,
-                                                    spo.planned_quantity,
-                                                    spo.completed_quantity,
-                                                    spo.assigned_to_user_id,
-                                                    pt.product_id,
-                                                    o.id,
-                                                    u.login
-                                                FROM public.sub_product_operations spo
-                                                JOIN public.operation o ON o.id = spo.operation_id
-                                                JOIN public.sub_products sp ON sp.id = spo.sub_product_id
-                                                JOIN public.product_tasks pt ON pt.id = sp.product_task_id
-                                                LEFT JOIN public.user u ON u.id = spo.assigned_to_user_id
-                                                WHERE spo.sub_product_id = @sub_product_id
-                                                ORDER BY spo.id";
+            Loges.LoggingProcess(LogLevel.ERROR,
+                "Connection or request error",
+                ex: ex);
+        }
+        catch (Exception ex)
+        {
+            StackPanelHelper.ClearAndRefreshStackPanel<CartSubProductOperationUserControl>(SubProductOperation, subProductOperationList);
+            ItemNotFoundException.Show(SubProductOperation, ErrorLevel.NoConnectToDB);
+            Loges.LoggingProcess(LogLevel.ERROR, 
+                ex: ex);
+        }
+    }
 
+    private async Task LoadDateSubOperationAsync(double subProductId)
+    {
+        subProductOperationList.Clear();
+        StackPanelHelper.ClearAndRefreshStackPanel<CartSubProductOperationUserControl>(SubProductOperation, subProductOperationList);
+
+        try
+        {
+            string sqlSubProductOperations = @"
+                                            SELECT 
+                                                spo.id,
+                                                o.name,
+                                                spo.planned_quantity,
+                                                spo.completed_quantity,
+                                                spo.assigned_to_user_id,
+                                                pt.product_id,
+                                                o.id,
+                                                u.login,
+                                                sp.id
+                                            FROM public.sub_product_operations spo
+                                            JOIN public.operation o ON o.id = spo.operation_id
+                                            JOIN public.sub_products sp ON sp.id = spo.sub_product_id
+                                            JOIN public.product_tasks pt ON pt.id = sp.product_task_id
+                                            LEFT JOIN public.user u ON u.id = spo.assigned_to_user_id
+                                            WHERE spo.sub_product_id = @sub_product_id
+                                            ORDER BY spo.id";
+
+            using (var connection = new NpgsqlConnection(Arguments.connection))
+            {
+                await connection.OpenAsync();
                 using (var command2 = new NpgsqlCommand(sqlSubProductOperations, connection))
                 {
                     command2.Parameters.AddWithValue("@sub_product_id", subProductId);
-
                     using (var reader2 = await command2.ExecuteReaderAsync())
                     {
                         while (await reader2.ReadAsync())
@@ -286,7 +316,8 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
                                 AssignedToUserId = reader2.IsDBNull(4) ? null : reader2.GetDouble(4),
                                 ProductId = reader2.GetDouble(5),
                                 OperationId = reader2.GetDouble(6),
-                                UserName = reader2.IsDBNull(7) ? string.Empty : reader2.GetString(7)
+                                UserName = reader2.IsDBNull(7) ? string.Empty : reader2.GetString(7),
+                                SubProductId = reader2.GetDouble(8)
                             };
 
                             var userControl = new CartSubProductOperationUserControl()
@@ -308,7 +339,6 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
         {
             StackPanelHelper.ClearAndRefreshStackPanel<CartSubProductOperationUserControl>(SubProductOperation, subProductOperationList);
             ItemNotFoundException.Show(SubProductOperation, ErrorLevel.NoConnectToDB);
-
             Loges.LoggingProcess(LogLevel.ERROR,
                 "Connection or request error",
                 ex: ex);
@@ -317,7 +347,8 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
         {
             StackPanelHelper.ClearAndRefreshStackPanel<CartSubProductOperationUserControl>(SubProductOperation, subProductOperationList);
             ItemNotFoundException.Show(SubProductOperation, ErrorLevel.NoConnectToDB);
-            Loges.LoggingProcess(LogLevel.ERROR, ex: ex);
+            Loges.LoggingProcess(LogLevel.ERROR, 
+                ex: ex);
         }
     }
 }
