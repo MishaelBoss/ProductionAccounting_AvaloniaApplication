@@ -64,12 +64,12 @@ public class WorkMasterUserControlViewModel : ViewModelBase, INotifyPropertyChan
                             {
                                 Id = reader.GetDouble(0),
                                 ProductId = reader.GetDouble(1),
-                                Name = reader.GetString(2),
+                                ProductName = reader.GetString(2),
                                 Mark = reader.GetString(3),
                                 Article = reader.GetString(4),
                                 Unit = reader.GetString(5),
-                                PricePerUnit = reader.GetInt32(6),
-                                Coefficient = reader.GetInt32(7),
+                                PricePerUnit = reader.GetDecimal(6),
+                                Coefficient = reader.GetDecimal(7),
                                 Status = reader.GetString(8),
                                 CreatedAt = reader.GetDateTime(9)
                             };

@@ -11,7 +11,7 @@ public class CartWorkshopDepartmentUserControlViewModel : ViewModelBase
     public ICommand DeleteCommand
         => new RelayCommand(() =>
         {
-            var viewModel = new ConfirmDeleteWindowViewModel(Id, Type, "DELETE FROM public.departments WHERE id = @id", (() => WeakReferenceMessenger.Default.Send(new RefreshDepartmentListMessage())));
+            var viewModel = new ConfirmDeleteWindowViewModel(Id, Type, "DELETE FROM public.departments WHERE id = @id", () => WeakReferenceMessenger.Default.Send(new RefreshDepartmentListMessage()));
 
             var window = new ConfirmDeleteWindow()
             {

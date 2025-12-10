@@ -33,7 +33,7 @@ public class CartUserListUserControlViewModel : ViewModelBase, INotifyPropertyCh
                 "DELETE FROM public.production WHERE user_id = @id"
             ];
 
-            var viewModel = new ConfirmDeleteWindowViewModel(UserID, Login, "DELETE FROM public.user WHERE id = @id", (() => WeakReferenceMessenger.Default.Send(new RefreshUserListMessage())), deleteQueries);
+            var viewModel = new ConfirmDeleteWindowViewModel(UserID, Login, "DELETE FROM public.user WHERE id = @id", () => WeakReferenceMessenger.Default.Send(new RefreshUserListMessage()), deleteQueries);
 
             var window = new ConfirmDeleteWindow()
             {

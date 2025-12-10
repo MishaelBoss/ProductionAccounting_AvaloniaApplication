@@ -127,6 +127,18 @@
                             <Label Grid.Column="1" Content="{Binding ButtonAuthorizationText}"/>
                         </Grid>
                     </Button>
+
+                    <Button Classes="Button"
+                            Command="{Binding OpenSalaryUserPageCommand}">
+                        <Grid ColumnDefinitions="24,*" 
+                              Classes="GridButtonButton">
+                            <Image Source="/Assets/login-64.png" 
+                                   Width="21" 
+                                   Height="21" 
+                                   Stretch="Uniform"/>
+                            <Label Grid.Column="1" Content="Salary"/>
+                        </Grid>
+                    </Button>
                 </StackPanel>
             </Grid>
             <Grid Grid.Row="2">

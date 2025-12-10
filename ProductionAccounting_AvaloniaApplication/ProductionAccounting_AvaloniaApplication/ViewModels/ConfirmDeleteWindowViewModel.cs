@@ -45,40 +45,64 @@ public class ConfirmDeleteWindowViewModel : ViewModelBase
             using (var connection = new NpgsqlConnection(Arguments.connection))
             {
                 await connection.OpenAsync();
-                try
+                await using (var transaction = await connection.BeginTransactionAsync())
                 {
-                    int rowsAffected = 0;
-                    if (additionalQueries != null) 
+                    try
                     {
-                        foreach (var querty in additionalQueries)
+                        int rowsAffected = 0;
+                        if (additionalQueries != null) 
                         {
-                            await using (var command = new NpgsqlCommand(querty, connection))
+                            try
                             {
-                                command.Parameters.AddWithValue("@id", Id);
-                                await command.ExecuteNonQueryAsync();
+                                foreach (var querty in additionalQueries)
+                                {
+                                    await using (var command = new NpgsqlCommand(querty, connection, transaction))
+                                    {
+                                        command.Parameters.AddWithValue("@id", Id);
+                                        await command.ExecuteNonQueryAsync();
+                                    }
+                                }
+
+                                await transaction.CommitAsync();
+                            }
+                            catch (PostgresException ex)
+                            {
+                                await transaction.RollbackAsync();
+
+                                Loges.LoggingProcess(level: LogLevel.WARNING,
+                                    ex: ex);
+                                throw;
+                            }
+                            catch (Exception ex)
+                            {
+                                await transaction.RollbackAsync();
+                                
+                                Loges.LoggingProcess(level: LogLevel.WARNING,
+                                    ex: ex);
+                                throw;
                             }
                         }
-                    }
 
-                    using (var command2 = new NpgsqlCommand(deleteSql, connection))
+                        using (var command2 = new NpgsqlCommand(deleteSql, connection))
+                        {
+                            command2.Parameters.AddWithValue("@id", Id);
+                            rowsAffected += await command2.ExecuteNonQueryAsync();
+                        }
+
+                        if (rowsAffected > 0)
+                        {
+                            Loges.LoggingProcess(level: LogLevel.INFO,
+                                message: $"Deleted record with ID: {Id}");
+
+                            onSuccessCallback?.Invoke();
+                            window?.Close();
+                        }
+                    }
+                    catch (Exception ex)
                     {
-                        command2.Parameters.AddWithValue("@id", Id);
-                        rowsAffected += await command2.ExecuteNonQueryAsync();
+                        Loges.LoggingProcess(level: LogLevel.ERROR,
+                            ex: ex);
                     }
-
-                    if (rowsAffected > 0)
-                    {
-                        Loges.LoggingProcess(level: LogLevel.INFO,
-                            message: $"Deleted record with ID: {Id}");
-
-                        onSuccessCallback?.Invoke();
-                        window?.Close();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Loges.LoggingProcess(level: LogLevel.ERROR,
-                        ex: ex);
                 }
             }
         }
