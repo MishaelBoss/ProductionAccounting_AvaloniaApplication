@@ -7,6 +7,7 @@ using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Tmds.DBus.Protocol;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
@@ -36,7 +37,7 @@ public class CartProductUserControlViewModel : ViewModelBase, INotifyPropertyCha
         => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseProductViewStatusMessage(true, Name, Id, Mark, Coefficient, Notes)));
 
     public ICommand CompleteTaskCommand
-        => new RelayCommand(async () => await CompleteTaskAsync());
+        => new RelayCommand(async () => { if (!CanCompleteTask) return; await CompleteTaskAndShipAsync(); });
 
     private string _status = "new";
     public string Status
@@ -197,18 +198,55 @@ public class CartProductUserControlViewModel : ViewModelBase, INotifyPropertyCha
         }
     }
 
-    private async Task CompleteTaskAsync() 
+    private async Task CompleteTaskAndShipAsync() 
     {
         try
         {
-            string sql = "UPDATE public.product_tasks SET status = 'completed' WHERE id = @id";
+            string getDateSql = "SELECT pt.product_id, SUM(spo.planned_quantity) " +
+                "FROM public.product_tasks pt " +
+                "JOIN public.sub_products sp ON sp.product_task_id = pt.id " +
+                "JOIN public.sub_product_operations spo ON spo.sub_product_id = sp.id " +
+                "WHERE pt.id = @task_id " +
+                "GROUP BY pt.product_id";
+            string toShipmentSql = "INSERT INTO public.shipments (product_task_id, product_id, planned_quantity, shipped_quantity, created_by, status, shipment_date) " +
+                "VALUES (@task_id, @product_id, @qty, @qty, @user_id, 'ready', CURRENT_DATE)";
+            string closeTaskSql = "UPDATE public.product_tasks SET status = 'completed' WHERE id = @id";
+
+            double productId = 0;
+            decimal totalQuantity = 0;
+
             using (var connection = new NpgsqlConnection(Arguments.connection))
             {
                 await connection.OpenAsync();
-                using (var command = new NpgsqlCommand(sql, connection))
+
+                using (var command1 = new NpgsqlCommand(getDateSql, connection))
                 {
-                    command.Parameters.AddWithValue("@id", Id);
-                    await command.ExecuteNonQueryAsync();
+                    command1.Parameters.AddWithValue("@task_id", Id);
+                    using (var reader = await command1.ExecuteReaderAsync()) 
+                    {
+                        if (await reader.ReadAsync()) 
+                        {
+                            productId = reader.GetDouble(0);
+                            totalQuantity = reader.GetDecimal(1);
+                        }
+
+                        await reader.CloseAsync();
+                    }
+                }
+
+                using (var command2 = new NpgsqlCommand(toShipmentSql, connection))
+                {
+                    command2.Parameters.AddWithValue("@task_id", Id);
+                    command2.Parameters.AddWithValue("@product_id", ProductId);
+                    command2.Parameters.AddWithValue("@qty", totalQuantity);
+                    command2.Parameters.AddWithValue("@user_id", ManagerCookie.GetIdUser ?? 0);
+                    await command2.ExecuteNonQueryAsync();
+                }
+
+                using (var command3 = new NpgsqlCommand(closeTaskSql, connection))
+                {
+                    command3.Parameters.AddWithValue("@id", Id);
+                    await command3.ExecuteNonQueryAsync();
 
                     WeakReferenceMessenger.Default.Send(new RefreshProductListMessage());
                 }

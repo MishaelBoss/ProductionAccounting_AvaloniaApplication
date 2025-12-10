@@ -12,14 +12,13 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class CartShipmentUserControlViewModel : ViewModelBase
 {
-
     public ICommand ChangeStatusCommand
         => new RelayCommand(async () => await ChangeStatus());
 
     public ICommand DeleteCommand
         => new RelayCommand(() =>
         {
-            var viewModel = new ConfirmDeleteWindowViewModel(Id, CustomerName ?? "Заказ без названия", "DELETE FROM public.shipments WHERE id = @id", (() => WeakReferenceMessenger.Default.Send(new RefreshShipmentListMessage())));
+            var viewModel = new ConfirmDeleteWindowViewModel(Id, ProductName ?? "Заказ без названия", "DELETE FROM public.shipments WHERE id = @id", (() => WeakReferenceMessenger.Default.Send(new RefreshShipmentListMessage())));
 
             var window = new ConfirmDeleteWindow()
             {
@@ -31,82 +30,22 @@ public class CartShipmentUserControlViewModel : ViewModelBase
             window.Show();
         });
 
-    private double _id;
-    public double Id 
-    {
-        get => _id;
-        set => this.RaiseAndSetIfChanged(ref _id, value);
-    }
+    public double Id { get; set; }
+    public double ProductTaskId { get; set; }
+    public double ProductId { get; set; }
 
-    private double _orderId;
-    public double OrderId
-    {
-        get => _orderId;
-        set => this.RaiseAndSetIfChanged(ref _orderId, value);
-    }
+    public string ProductName { get; set; } = string.Empty;
+    public string Article { get; set; } = string.Empty;
+    public string Status { get; set; } = string.Empty;
+    public string Notes { get; set; } = string.Empty;
+    public string CreateByName { get; set; } = string.Empty;
 
-    private DateTime _shipmentDate;
-    public DateTime ShipmentDate 
-    {
-        get => _shipmentDate;
-        set => this.RaiseAndSetIfChanged(ref _shipmentDate, value);
-    }
+    public decimal? ShipmentpedWeight { get; set; }
+    public decimal? ShippedQuantity { get; set; }
+    public decimal? PlannedQuantity { get; set; }
 
-    private string? _status;
-    public string? Status 
-    {
-        get => _status;
-        set => this.RaiseAndSetIfChanged(ref _status, value);
-    }
-
-    private decimal? _shippedWeight;
-    public decimal? ShipmentpedWeight 
-    {
-        get => _shippedWeight;
-        set => this.RaiseAndSetIfChanged(ref _shippedWeight, value);
-    }
-
-    private decimal? _shippedQuantity;
-    public decimal? ShippedQuantity
-    {
-        get => _shippedQuantity;
-        set => this.RaiseAndSetIfChanged(ref _shippedQuantity, value);
-    }
-
-    private string? _notes;
-    public string? Notes
-    {
-        get => _notes;
-        set => this.RaiseAndSetIfChanged(ref _notes, value);
-    }
-
-    private double _createBy;
-    public double CreateBy
-    {
-        get => _createBy;
-        set => this.RaiseAndSetIfChanged(ref _createBy, value);
-    }
-
-    private DateTime _createAt;
-    public DateTime CreateAt
-    {
-        get => _createAt;
-        set => this.RaiseAndSetIfChanged(ref _createAt, value);
-    }
-
-    private string? _orderNubmer;
-    public string? OrderNubmer
-    {
-        get => _orderNubmer;
-        set => this.RaiseAndSetIfChanged(ref _orderNubmer, value);
-    }
-
-    private string? _customerName;
-    public string? CustomerName
-    {
-        get => _customerName;
-        set => this.RaiseAndSetIfChanged(ref _customerName, value);
-    }
+    public DateTime ShipmentDate { get; set; }
+    public DateTime CreateAt { get; set; }
 
     public string StatusDisplay => Status switch
     {
@@ -125,7 +64,8 @@ public class CartShipmentUserControlViewModel : ViewModelBase
     };
 
     public bool IsAdministrator
-        => ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsAdministrator;
+        => ManagerCookie.IsUserLoggedIn() 
+        && ManagerCookie.IsAdministrator;
 
     private async Task ChangeStatus() 
     {

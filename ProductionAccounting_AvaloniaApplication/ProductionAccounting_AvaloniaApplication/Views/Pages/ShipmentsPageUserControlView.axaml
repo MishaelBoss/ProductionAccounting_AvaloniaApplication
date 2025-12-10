@@ -8,8 +8,6 @@
              x:Class="ProductionAccounting_AvaloniaApplication.Views.Pages.ShipmentsPageUserControlView">
 
     <Grid>
-        <Grid Name="Content" ZIndex="1"/>
-
 		<Grid Margin="10" 
               RowDefinitions="Auto, Auto, *">
 
@@ -27,14 +25,6 @@
                             Orientation="Horizontal"
                             HorizontalAlignment="Center"
                             Margin="10,0,0,0">
-
-                    <Button Margin="10,0,0,0"
-                            Command="{Binding OpenAddShipmentCommand}"
-                            Width="32"
-                            Height="32"
-                            ToolTip.Tip="Add">
-                      <Image Source="/Assets/add-64.png"/>
-                    </Button>
 
                     <Button Margin="10,0,0,0"
                             Width="32"

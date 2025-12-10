@@ -13,14 +13,16 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class EmployeeAssignmentMasterSubMarkUserControlViewModel : ViewModelBase, INotifyPropertyChanged
 {
-    public EmployeeAssignmentMasterSubMarkUserControlViewModel(double id)
+    public EmployeeAssignmentMasterSubMarkUserControlViewModel(double id, double subProductId)
     {
         Id = id;
+        SubProductId = subProductId;
 
         _ = LoadListUsersAsync();
     }
 
     public double Id { get; }
+    public double SubProductId { get; }
 
     public ObservableCollection<ComboBoxUser> Employees { get; } = [];
 
@@ -65,7 +67,7 @@ public class EmployeeAssignmentMasterSubMarkUserControlViewModel : ViewModelBase
 
                     await command.ExecuteNonQueryAsync();
 
-                    WeakReferenceMessenger.Default.Send(new RefreshSubProductOperationsMessage(Id));
+                    WeakReferenceMessenger.Default.Send(new RefreshSubProductOperationsMessage(SubProductId));
                     WeakReferenceMessenger.Default.Send(new OpenOrCloseEmployeeAssignmentMasterSubMarkStatusMessage(false));
                 }
             }

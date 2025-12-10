@@ -12,18 +12,11 @@ using System.Windows.Input;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
 
-public class ShipmentsPageUserControlViewModel : ViewModelBase, IRecipient<OpenOrCloseEditUserStatusMessage>, IRecipient<RefreshShipmentListMessage>
+public class ShipmentsPageUserControlViewModel : ViewModelBase, IRecipient<RefreshShipmentListMessage>
 {
     public ShipmentsPageUserControlViewModel()
     {
-        WeakReferenceMessenger.Default.Register<OpenOrCloseEditUserStatusMessage>(this);
-        WeakReferenceMessenger.Default.Register<RefreshShipmentListMessage>(this);
-    }
-
-    public void Receive(OpenOrCloseEditUserStatusMessage message)
-    {
-        if (message.ShouldOpen) ShowAddShipmentUsersUserControl();
-        else CloseAddShipmentUsersUserControl();
+        WeakReferenceMessenger.Default.Register(this);
     }
 
     public void Receive(RefreshShipmentListMessage message)
@@ -31,15 +24,9 @@ public class ShipmentsPageUserControlViewModel : ViewModelBase, IRecipient<OpenO
         _ = LoadShipmentsAsync();
     }
 
-    public Grid? Content { get; set; } = null;
     public StackPanel? CartShipment { get; set; } = null;
 
     private List<CartShipmentUserControl> shipmentsList = [];
-
-    private readonly AddShipmentUserControl _addShipment = new();
-
-    public ICommand OpenAddShipmentCommand
-        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseEditUserStatusMessage(true)));
 
     public ICommand RefreshCommand
         => new RelayCommand(async () => await LoadShipmentsAsync());
@@ -50,22 +37,25 @@ public class ShipmentsPageUserControlViewModel : ViewModelBase, IRecipient<OpenO
 
         try
         {
-            var sql = @"
+            string sql = @"
                     SELECT 
-                        s.id, 
-                        s.order_id, 
-                        s.shipment_date, 
-                        s.status, 
-                        s.shipped_weight, 
-                        s.shipped_quantity, 
-                        s.notes, 
-                        s.created_by, 
-                        s.created_at,
-                        o.order_number, 
-                        o.customer_name
-                FROM public.shipments s
-                JOIN public.orders o ON o.id = s.order_id
-                ORDER BY s.created_at DESC";
+                        s.id,
+                        s.product_task_id,
+                        pt.product_id,
+                        p.name,
+                        p.article,
+                        s.planned_quantity,
+                        s.shipped_quantity,
+                        s.shipped_weight,
+                        s.shipment_date,
+                        s.status,
+                        s.notes,
+                        s.created_by,
+                        s.created_at
+                    FROM public.shipments s
+                    JOIN public.product_tasks pt ON pt.id = s.product_task_id
+                    JOIN public.product p ON p.id = pt.product_id
+                    ORDER BY s.created_at DESC";
 
             using (var connection = new NpgsqlConnection(Arguments.connection))
             {
@@ -77,17 +67,18 @@ public class ShipmentsPageUserControlViewModel : ViewModelBase, IRecipient<OpenO
                         {
                             var viewModel = new CartShipmentUserControlViewModel()
                             {
-                                Id = reader.GetDouble(0),
-                                OrderId = reader.GetDouble(1),
-                                ShipmentDate = reader.GetDateTime(2),
-                                Status = reader.GetString(3),
-                                ShipmentpedWeight = reader.GetDecimal(4),
-                                ShippedQuantity = reader.GetDecimal(5),
-                                Notes = reader.GetString(6),
-                                CreateBy = reader.GetDouble(7),
-                                CreateAt = reader.GetDateTime(8),
-                                OrderNubmer = reader.GetString(9),
-                                CustomerName = reader.GetString(10),
+                                Id = reader.IsDBNull(0) ? 0 : reader.GetDouble(0),
+                                ProductTaskId = reader.IsDBNull(1) ? 0 : reader.GetDouble(1),
+                                ProductId = reader.IsDBNull(2) ? 0 : reader.GetDouble(2),
+                                ProductName = reader.IsDBNull(3) ? string.Empty : reader.GetString(3),
+                                Article = reader.IsDBNull(4) ? string.Empty : reader.GetString(4),
+                                PlannedQuantity = reader.IsDBNull(5) ? 0 : reader.GetDecimal(5),
+                                ShippedQuantity = reader.IsDBNull(6) ? 0 : reader.GetDecimal(6),
+                                ShipmentpedWeight = reader.IsDBNull(7) ? 0 : reader.GetDecimal(7),
+                                ShipmentDate = reader.IsDBNull(8) ? DateTime.UtcNow : reader.GetFieldValue<DateTime>(8),
+                                Status = reader.IsDBNull(9) ? string.Empty : reader.GetString(9),
+                                Notes = reader.IsDBNull(10) ? string.Empty : reader.GetString(10),
+                                CreateAt = reader.IsDBNull(12) ? DateTime.UtcNow : reader.GetFieldValue<DateTime>(12),
                             };
 
                             var userControl = new CartShipmentUserControl()
@@ -107,33 +98,6 @@ public class ShipmentsPageUserControlViewModel : ViewModelBase, IRecipient<OpenO
         {
             Loges.LoggingProcess(level: LogLevel.WARNING,
                 ex: ex);
-        }
-    }
-
-    public void ShowAddShipmentUsersUserControl()
-    {
-        if (Content != null)
-        {
-            if (Content.Children.Contains(_addShipment))
-            {
-                _addShipment.RefreshDataAsync();
-                return;
-            }
-
-            if (_addShipment.Parent is Panel currentParent) currentParent.Children.Remove(_addShipment);
-            Content.Children.Clear();
-            Content.Children.Add(_addShipment);
-
-            _addShipment.RefreshDataAsync();
-        }
-    }
-
-    public void CloseAddShipmentUsersUserControl()
-    {
-        if (Content != null)
-        {
-            Content.Children.Clear();
-            if (_addShipment.Parent == Content) Content.Children.Remove(_addShipment);
         }
     }
 }

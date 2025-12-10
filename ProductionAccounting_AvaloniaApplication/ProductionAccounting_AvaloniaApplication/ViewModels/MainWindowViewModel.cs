@@ -79,7 +79,7 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
 
         public void Receive(OpenOrCloseEmployeeAssignmentMasterSubMarkStatusMessage message)
         {
-            if (message.ShouldOpen) ShowEmployeeAssignmentMasterSubMarkUserControl(message.ProductId);
+            if (message.ShouldOpen) ShowEmployeeAssignmentMasterSubMarkUserControl(message.ProductId, message.SubProductId);
             else CloseEmployeeAssignmentMasterSubMarkUserControl();
         }
 
@@ -373,11 +373,11 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
             }
         }
 
-        public void ShowEmployeeAssignmentMasterSubMarkUserControl(double productId)
+        public void ShowEmployeeAssignmentMasterSubMarkUserControl(double productId, double subProductId)
         {
             if (ContentCenter != null)
             {
-                var userControl = new EmployeeAssignmentMasterSubMarkUserControl { DataContext = new EmployeeAssignmentMasterSubMarkUserControlViewModel(productId) };
+                var userControl = new EmployeeAssignmentMasterSubMarkUserControl { DataContext = new EmployeeAssignmentMasterSubMarkUserControlViewModel(productId, subProductId) };
 
                 if (ContentCenter.Children.Contains(userControl))
                 {
