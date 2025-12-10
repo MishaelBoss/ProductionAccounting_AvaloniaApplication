@@ -13,18 +13,33 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class AddProductUserControlViewModel : ViewModelBase, INotifyPropertyChanged
 {
+    public AddProductUserControlViewModel(
+        double? id = null, 
+        string? productName = null, 
+        string? productArticle = null, 
+        string? productDescription = null,
+        decimal? productPricePerUnit = 0, 
+        decimal? productPricePerKg = null,
+        string? productMark = null,
+        decimal? productCoefficient = null) 
+    { 
+        Id = id;
+        ProductName = productName ?? string.Empty;
+        ProductArticle = productArticle ?? string.Empty;
+        ProductDescription = productDescription ?? string.Empty;
+        ProductPricePerUnit = productPricePerUnit ?? 1.0m;
+        ProductPricePerKg = productPricePerKg ?? 1.0m;
+        ProductMark = productMark ?? string.Empty;
+        ProductCoefficient = productCoefficient ?? 1.0m;
+    }
+
     public ICommand CancelCommand
-        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseAddProductStatusMessage(false)) );
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseProductStatusMessage(false)) );
 
     public ICommand ConfirmCommand
-        => new RelayCommand(async () => 
-        { 
-            if ( await SaveAsync() ) 
-            { 
-                WeakReferenceMessenger.Default.Send(new RefreshProductListMessage());
-                WeakReferenceMessenger.Default.Send(new OpenOrCloseAddProductStatusMessage(false));
-            } 
-        });
+        => new RelayCommand(async () => await SaveAsync());
+
+    public double? Id { get; set; }
         
     private string _messageerror = string.Empty;
     public string Messageerror
@@ -168,18 +183,35 @@ public class AddProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
         && ProductCoefficient != 0
         && !string.IsNullOrEmpty(ProductMark);
 
-    public async Task<bool> SaveAsync()
+    public async Task SaveAsync()
     {
-        if(!ManagerCookie.IsUserLoggedIn() && !ManagerCookie.IsManager || !ManagerCookie.IsAdministrator) return false;
+        if(!ManagerCookie.IsUserLoggedIn() && !ManagerCookie.IsManager || !ManagerCookie.IsAdministrator) return;
 
         try
         {
-            if (string.IsNullOrEmpty(ProductName) || string.IsNullOrEmpty(ProductArticle) || string.IsNullOrEmpty(ProductDescription) || string.IsNullOrEmpty(ProductMark) || ProductPricePerUnit == 0 || ProductPricePerKg == 0 || SelectedUnit == null || ProductCoefficient == 0) return false;
+            if (string.IsNullOrEmpty(ProductName) 
+                || string.IsNullOrEmpty(ProductArticle) 
+                || string.IsNullOrEmpty(ProductDescription) 
+                || string.IsNullOrEmpty(ProductMark) 
+                || ProductPricePerUnit == 0 
+                || ProductPricePerKg == 0 
+                || SelectedUnit == null 
+                || ProductCoefficient == 0) return;
 
             try
             {
-                string sql = "INSERT INTO public.product (name, article, description, price_per_unit, price_per_kg, unit, category_id, mark, coefficient)" +
+                string addProductSql = "INSERT INTO public.product (name, article, description, price_per_unit, price_per_kg, unit, category_id, mark, coefficient)" +
                             "VALUES (@name, @article, @desc, @priceUnit, @priceKg, @unit, @categoryId, @mark, @coefficient) RETURNING id";
+                string updateProductSql = "UPDATE public.product " +
+                    "SET name = @name, article = @article, description = @desc, price_per_unit = @priceUnit, price_per_kg = @priceKg, unit = @unit, updated_at = CURRENT_DATE, category_id = @categoryId, mark = @mark, coefficient = @coefficient " +
+                    "WHERE id = @id";
+
+
+                string sql = string.Empty;
+
+                if (Id == 0) sql = addProductSql;
+                else sql = updateProductSql;
+
                 using (var connection = new NpgsqlConnection(Arguments.connection))
                 {
                     await connection.OpenAsync();
@@ -187,31 +219,51 @@ public class AddProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
                     {
                         try
                         {
-                            command.Parameters.AddWithValue("@name", ProductName.Trim());
-                            command.Parameters.AddWithValue("@article", ProductArticle?.Trim() ?? "");
-                            command.Parameters.AddWithValue("@desc", ProductDescription?.Trim() ?? "");
-                            command.Parameters.AddWithValue("@priceUnit", ProductPricePerUnit);
-                            command.Parameters.AddWithValue("@priceKg", ProductPricePerKg);
-                            command.Parameters.AddWithValue("@unit", SelectedUnit);
-                            command.Parameters.AddWithValue("@categoryId", DBNull.Value);
-                            command.Parameters.AddWithValue("@mark", ProductMark?.Trim() ?? "");
-                            command.Parameters.AddWithValue("@coefficient", ProductCoefficient);
+                            if (Id == 0)
+                            {
+                                command.Parameters.AddWithValue("@name", ProductName.Trim());
+                                command.Parameters.AddWithValue("@article", ProductArticle?.Trim() ?? "");
+                                command.Parameters.AddWithValue("@desc", ProductDescription?.Trim() ?? "");
+                                command.Parameters.AddWithValue("@priceUnit", ProductPricePerUnit);
+                                command.Parameters.AddWithValue("@priceKg", ProductPricePerKg);
+                                command.Parameters.AddWithValue("@unit", SelectedUnit);
+                                command.Parameters.AddWithValue("@categoryId", DBNull.Value);
+                                command.Parameters.AddWithValue("@mark", ProductMark?.Trim() ?? "");
+                                command.Parameters.AddWithValue("@coefficient", ProductCoefficient);
 
-                            var result = await command.ExecuteScalarAsync();
+                                var result = await command.ExecuteScalarAsync();
 
-                            if (result == null || result == DBNull.Value) return false;
+                                if (result == null || result == DBNull.Value) return;
 
-                            double newProductId = Convert.ToDouble(result);
+                                double newProductId = Convert.ToDouble(result);
 
-                            await CreateTaskForMasterAsync(newProductId);
+                                await CreateTaskForMasterAsync(newProductId);
+                            }
+                            else 
+                            {
+                                command.Parameters.AddWithValue("@id", Id ?? 0);
+                                command.Parameters.AddWithValue("@name", ProductName.Trim());
+                                command.Parameters.AddWithValue("@article", ProductArticle?.Trim() ?? "");
+                                command.Parameters.AddWithValue("@desc", ProductDescription?.Trim() ?? "");
+                                command.Parameters.AddWithValue("@priceUnit", ProductPricePerUnit);
+                                command.Parameters.AddWithValue("@priceKg", ProductPricePerKg);
+                                command.Parameters.AddWithValue("@unit", SelectedUnit);
+                                command.Parameters.AddWithValue("@categoryId", DBNull.Value);
+                                command.Parameters.AddWithValue("@mark", ProductMark?.Trim() ?? "");
+                                command.Parameters.AddWithValue("@coefficient", ProductCoefficient);
 
-                            return true;
+                                await command.ExecuteNonQueryAsync();
+                            }
+
+                            WeakReferenceMessenger.Default.Send(new RefreshProductListMessage());
+                            WeakReferenceMessenger.Default.Send(new OpenOrCloseProductStatusMessage(false));
+
+                            ClearForm();
                         }
                         catch (Exception ex)
                         {
                             Loges.LoggingProcess(level: LogLevel.ERROR,
                                 ex: ex);
-                            return false;
                         }
                     }
                 }
@@ -220,14 +272,12 @@ public class AddProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
             {
                 Loges.LoggingProcess(level: LogLevel.WARNING,
                     ex: ex);
-                return false;
             }
         }
         catch (Exception ex)
         {
             Loges.LoggingProcess(level: LogLevel.WARNING,
                 ex: ex);
-            return false;
         }
     }
 
@@ -246,8 +296,6 @@ public class AddProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
                     await command.ExecuteNonQueryAsync();
                 }
             }
-
-            //WeakReferenceMessenger.Default.Send(new NewProductTaskMessage(productId));
         }
         catch (Exception ex)
         {

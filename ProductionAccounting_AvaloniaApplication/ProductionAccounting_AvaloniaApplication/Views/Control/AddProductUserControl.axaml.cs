@@ -10,10 +10,4 @@ public partial class AddProductUserControl : UserControl
         InitializeComponent();
         DataContext = new AddProductUserControlViewModel();
     }
-
-    public void RefreshData()
-    {
-        if (DataContext is not AddProductUserControlViewModel viewModel) return;
-        viewModel.ClearForm();
-    }
 }

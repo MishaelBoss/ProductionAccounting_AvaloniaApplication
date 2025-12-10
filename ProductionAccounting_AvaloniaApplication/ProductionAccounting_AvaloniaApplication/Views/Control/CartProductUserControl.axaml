@@ -112,6 +112,17 @@
 						ToolTip.Tip="Сдать марку">
 				</Button>
 
+				<Button Command="{Binding EditCommand}"
+						Width="34"
+						Height="34"
+						CornerRadius="6"
+						Background="#34C759"
+						BorderThickness="0"
+						IsVisible="{Binding IsAdministratorOrMaster}"
+						ToolTip.Tip="Edit">
+					<Image Source="/Assets/edit-64.png"/>
+				</Button>
+
 				<Button Command="{Binding DeleteCommand}"
 						Width="34"
 						Height="34"

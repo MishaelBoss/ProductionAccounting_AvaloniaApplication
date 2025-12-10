@@ -39,18 +39,14 @@ public class CartProductUserControlViewModel : ViewModelBase, INotifyPropertyCha
     public ICommand CompleteTaskCommand
         => new RelayCommand(async () => { if (!CanCompleteTask) return; await CompleteTaskAndShipAsync(); });
 
+    public ICommand EditCommand
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseProductStatusMessage(true, ProductId, ProductName, Article, Description, PricePerUnit, PricePerUnitKg, Mark, Coefficient)));
+
     private string _status = "new";
     public string Status
     {
         get => _status;
         set => this.RaiseAndSetIfChanged(ref _status, value);
-    }
-
-    private string? _notes;
-    public string? Notes
-    {
-        get => _notes;
-        set => this.RaiseAndSetIfChanged(ref _notes, value);
     }
 
     private double? _createdBy;
@@ -67,20 +63,6 @@ public class CartProductUserControlViewModel : ViewModelBase, INotifyPropertyCha
         set => this.RaiseAndSetIfChanged(ref _createdAt, value);
     }
 
-    private string? _productName;
-    public string? ProductName
-    {
-        get => _productName;
-        set => this.RaiseAndSetIfChanged(ref _productName, value);
-    }
-
-    private string _mark = string.Empty;
-    public string Mark
-    {
-        get => _mark;
-        set => this.RaiseAndSetIfChanged(ref _mark, value);
-    }
-
     public string StatusDisplay => Status switch
     {
         "new" => "Новая",
@@ -90,54 +72,21 @@ public class CartProductUserControlViewModel : ViewModelBase, INotifyPropertyCha
         _ => Status
     };
 
-    private double _id = 0;
-    public double Id
-    {
-        get => _id;
-        set => this.RaiseAndSetIfChanged(ref _id, value);
-    }
+    public double Id { get; set; }
+    public double ProductId { get; set; }
 
-    private double _productId = 0;
-    public double ProductId
-    {
-        get => _productId;
-        set => this.RaiseAndSetIfChanged(ref _productId, value);
-    }
+    public string Notes { get; set; } = string.Empty;
+    public string ProductName { get; set; } = string.Empty;
+    public string Mark { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string Article { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public string Unit { get; set; } = string.Empty;
 
-    private string _name = string.Empty;
-    public string Name 
-    { 
-        get => _name;
-        set => this.RaiseAndSetIfChanged(ref _name, value);
-    }
+    public Int32 PricePerUnit { get; set; }
 
-    private string _article = string.Empty;
-    public string Article 
-    {
-        get => _article;
-        set => this.RaiseAndSetIfChanged(ref _article, value);
-    }
-
-    private Int32 _pricePerUnit;
-    public Int32 PricePerUnit 
-    { 
-        get => _pricePerUnit;
-        set => this.RaiseAndSetIfChanged(ref _pricePerUnit, value);
-    }
-
-    private string _unit = string.Empty;
-    public string Unit
-    {
-        get => _unit;
-        set => this.RaiseAndSetIfChanged(ref _unit, value);
-    }
-
-    private Int32 _coefficient;
-    public Int32 Coefficient
-    {
-        get => _coefficient;
-        set => this.RaiseAndSetIfChanged(ref _coefficient, value);
-    }
+    public Int32 PricePerUnitKg { get; set; }
+    public Int32 Coefficient { get; set; }
 
     private bool _canCompleteTask;
     public bool CanCompleteTask 

@@ -14,7 +14,7 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
         IRecipient<OpenOrCloseEditUserStatusMessage>, 
         IRecipient<OpenOrCloseAddDepartmentStatusMessage>, 
         IRecipient<OpenOrCloseAddOperationStatusMessage>,
-        IRecipient<OpenOrCloseAddProductStatusMessage>, 
+        IRecipient<OpenOrCloseProductStatusMessage>, 
         IRecipient<OpenOrCloseAddPositionStatusMessage>, 
         IRecipient<OpenOrCloseAddSubProductStatusMessage>, 
         IRecipient<OpenOrCloseProductViewStatusMessage>, 
@@ -101,9 +101,9 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
             else CloseOperationUsersUserControl();
         }
 
-        public void Receive(OpenOrCloseAddProductStatusMessage message)
+        public void Receive(OpenOrCloseProductStatusMessage message)
         {
-            if (message.ShouldOpen) ShowProductUsersUserControl();
+            if (message.ShouldOpen) ShowProductUsersUserControl(message.Id, message.ProductName, message.ProductArticle, message.ProductDescription, message.ProductPricePerUnit, message.ProductPricePerKg, message.ProductMark, message.ProductCoefficient);
             else CloseProductUsersUserControl();
         }
 
@@ -322,21 +322,24 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
             }
         }
 
-        public void ShowProductUsersUserControl()
+        public void ShowProductUsersUserControl(
+            double? id = null,
+            string? productName = null,
+            string? productArticle = null,
+            string? productDescription = null,
+            decimal? productPricePerUnit = 0,
+            decimal? productPricePerKg = null,
+            string? productMark = null,
+            decimal? productCoefficient = null)
         {
             if (ContentCenter != null)
             {
-                if (ContentCenter.Children.Contains(_addProduct))
-                {
-                    _addProduct.RefreshData();
-                    return;
-                }
+                var userControl = new AddProductUserControl { DataContext = new AddProductUserControlViewModel(id, productName, productArticle, productDescription, productPricePerUnit, productPricePerKg, productMark, productCoefficient) };
 
-                if (_addProduct.Parent is Panel currentParent) currentParent.Children.Remove(_addProduct);
+                if (ContentCenter.Children.Contains(userControl)) return;
+                if (userControl.Parent is Panel currentParent) currentParent.Children.Remove(userControl);
                 ContentCenter.Children.Clear();
-                ContentCenter.Children.Add(_addProduct);
-
-                _addProduct.RefreshData();
+                ContentCenter.Children.Add(userControl);
             }
         }
 
@@ -359,8 +362,6 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
 
                 ContentCenter.Children.Clear();
                 ContentCenter.Children.Add(userControl);
-
-                //_addProduct.RefreshData();
             }
         }
 
@@ -381,15 +382,12 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
 
                 if (ContentCenter.Children.Contains(userControl))
                 {
-                    //_addProduct.RefreshData();
                     return;
                 }
 
                 if (userControl.Parent is Panel currentParent) currentParent.Children.Remove(userControl);
                 ContentCenter.Children.Clear();
                 ContentCenter.Children.Add(userControl);
-
-                //_addProduct.RefreshData();
             }
         }
 

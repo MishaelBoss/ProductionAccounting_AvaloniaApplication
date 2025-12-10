@@ -378,7 +378,7 @@ public class EditUsersUserControlViewModel : ViewModelBase, INotifyPropertyChang
                 {
                     await connection.OpenAsync();
 
-                    string sql = "UPDATE public.\"user\" SET login = @newLogin, middle_name = @newMiddleName, first_name = @newFirstName, last_name = @newLastName, base_salary = @newBaseSalary WHERE id = @userID";
+                    string sql = "UPDATE public.user SET login = @newLogin, middle_name = @newMiddleName, first_name = @newFirstName, last_name = @newLastName, base_salary = @newBaseSalary WHERE id = @userID";
                     using (var command = new NpgsqlCommand(sql, connection))
                     {
                         command.Parameters.AddWithValue("@userID", UserID);
