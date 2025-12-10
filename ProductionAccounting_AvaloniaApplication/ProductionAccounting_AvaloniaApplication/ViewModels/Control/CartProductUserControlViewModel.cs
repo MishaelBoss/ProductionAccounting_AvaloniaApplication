@@ -7,7 +7,6 @@ using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Tmds.DBus.Protocol;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
@@ -18,7 +17,8 @@ public class CartProductUserControlViewModel : ViewModelBase, INotifyPropertyCha
         {
             string[] deleteQueries =
             {
-                "DELETE FROM public.production WHERE product_id = @id"
+                "DELETE FROM public.production WHERE product_id = @id",
+                "DELETE FROM public.shipments WHERE product_id = @id"
             };
 
             var viewModel = new ConfirmDeleteWindowViewModel(ProductId, Name, "DELETE FROM public.product WHERE id = @id", (() => WeakReferenceMessenger.Default.Send(new RefreshProductListMessage())), deleteQueries);
