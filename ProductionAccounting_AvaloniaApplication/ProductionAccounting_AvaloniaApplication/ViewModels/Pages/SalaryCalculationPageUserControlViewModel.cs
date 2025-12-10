@@ -13,7 +13,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using static ProductionAccounting_AvaloniaApplication.ViewModels.Control.NotFoundUserControlViewModel;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
 
@@ -37,7 +36,6 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
         set => this.RaiseAndSetIfChanged(ref _periodEnd, value);
     }
 
-    // Изменяем тип на UserComboBoxItem
     private UserComboBoxItem? _selectedUser;
     public UserComboBoxItem? SelectedUser
     {
@@ -105,7 +103,7 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
                         }
 
                         Users = users;
-                        SelectedUser = users[0]; // Устанавливаем по умолчанию "Все сотрудники"
+                        SelectedUser = users[0];
                     }
                 }
             }
@@ -128,45 +126,52 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
         {
             var parameters = new List<NpgsqlParameter>();
             var sql = @"
-            SELECT 
-                p.user_id,
-                u.first_name || ' ' || u.last_name AS employee_name,
-                o.name AS operation_name,
-                p.production_date,
-                p.quantity,
-                p.tonnage,
-                -- Определяем ставку: сначала из work_rate, потом из operation.price
-                COALESCE(wr.rate, o.price) AS rate,
-                -- Определяем использование тоннажа: из work_rate или по единице измерения
-                COALESCE(wr.use_tonnage, LOWER(o.unit) IN ('кг', 'kg', 'тонна', 'ton', 'т')) AS use_tonnage,
-                COALESCE(wr.coefficient, 1.0) AS coefficient,
-                -- Формула расчета
-                CASE 
-                    WHEN COALESCE(wr.use_tonnage, LOWER(o.unit) IN ('кг', 'kg', 'тонна', 'ton', 'т')) THEN 
-                        COALESCE(wr.rate, o.price) * COALESCE(p.tonnage, 1) / 1000 * p.quantity * COALESCE(wr.coefficient, 1.0)
-                    ELSE 
-                        COALESCE(wr.rate, o.price) * p.quantity
-                END AS calculated_amount,
-                -- Формула для отображения
-                CASE 
-                    WHEN COALESCE(wr.use_tonnage, LOWER(o.unit) IN ('кг', 'kg', 'тонна', 'ton', 'т')) THEN 
-                        COALESCE(wr.rate, o.price)::text || ' × ' || COALESCE(p.tonnage, 1)::text || ' / 1000 × ' || 
-                        p.quantity::text || ' × ' || COALESCE(wr.coefficient, 1.0)::text || ' = ' ||
-                        ROUND(
-                            COALESCE(wr.rate, o.price) * COALESCE(p.tonnage, 1) / 1000 * p.quantity * COALESCE(wr.coefficient, 1.0), 
-                            2
-                        )::text
-                    ELSE 
-                        COALESCE(wr.rate, o.price)::text || ' × ' || p.quantity::text || ' = ' || 
-                        ROUND(COALESCE(wr.rate, o.price) * p.quantity, 2)::text
-                END AS calculation_formula
-            FROM public.production p
-            JOIN public.user u ON u.id = p.user_id
-            JOIN public.operation o ON o.id = p.operation_id
-            LEFT JOIN public.work_rate wr ON LOWER(TRIM(wr.work_type)) = LOWER(TRIM(o.name))
-            WHERE p.production_date BETWEEN @startDate AND @endDate
-                AND p.status = 'issued'
-                AND u.is_active = true";
+                SELECT 
+                    p.user_id,
+                    u.first_name || ' ' || u.last_name AS employee_name,
+                    o.name AS operation_name,
+                    p.production_date,
+                    p.quantity,
+                    p.tonnage,
+                    o.unit,
+                    COALESCE(wr.rate, o.price) AS rate,
+                    -- Определяем использование тоннажа
+                    COALESCE(wr.use_tonnage, 
+                        LOWER(o.unit) IN ('кг', 'kg', 'тонна', 'ton', 'т', 'т.', 'тонны', 'килограмм', 'килограммы')) AS use_tonnage, -- [8]
+                    COALESCE(wr.coefficient, 1.0) AS coefficient, -- [9]
+                    -- Формула расчета
+                    CASE 
+                        WHEN COALESCE(wr.use_tonnage, 
+                                LOWER(o.unit) IN ('кг', 'kg', 'тонна', 'ton', 'т', 'т.', 'тонны', 'килограмм', 'килограммы')) 
+                            AND p.tonnage > 0 
+                        THEN 
+                            COALESCE(wr.rate, o.price) * p.tonnage / 1000 * p.quantity * COALESCE(wr.coefficient, 1.0)
+                        ELSE 
+                            COALESCE(wr.rate, o.price) * p.quantity
+                    END AS calculated_amount,           -- [10]
+                    -- Формула для отображения
+                    CASE 
+                        WHEN COALESCE(wr.use_tonnage, 
+                                LOWER(o.unit) IN ('кг', 'kg', 'тонна', 'ton', 'т', 'т.', 'тонны', 'килограмм', 'килограммы')) 
+                            AND p.tonnage > 0 
+                        THEN 
+                            COALESCE(wr.rate, o.price)::text || ' × ' || p.tonnage::text || ' / 1000 × ' || 
+                            p.quantity::text || ' × ' || COALESCE(wr.coefficient, 1.0)::text || ' = ' ||
+                            ROUND(
+                                COALESCE(wr.rate, o.price) * p.tonnage / 1000 * p.quantity * COALESCE(wr.coefficient, 1.0), 
+                                2
+                            )::text
+                        ELSE 
+                            COALESCE(wr.rate, o.price)::text || ' × ' || p.quantity::text || ' = ' || 
+                            ROUND(COALESCE(wr.rate, o.price) * p.quantity, 2)::text
+                    END AS calculation_formula          -- [11]
+                FROM public.production p
+                JOIN public.user u ON u.id = p.user_id
+                JOIN public.operation o ON o.id = p.operation_id
+                LEFT JOIN public.work_rate wr ON LOWER(TRIM(wr.work_type)) = LOWER(TRIM(o.name))
+                WHERE p.production_date BETWEEN @startDate AND @endDate
+                    AND p.status IN ('issued', 'completed')
+                    AND u.is_active = true";
 
             if (SelectedUser != null && SelectedUser.Id > 0)
             {
@@ -179,216 +184,238 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
             parameters.Add(new NpgsqlParameter("@startDate", PeriodStart.DateTime.Date));
             parameters.Add(new NpgsqlParameter("@endDate", PeriodEnd.DateTime.Date.AddDays(1).AddSeconds(-1)));
 
-            Console.WriteLine($"SQL запрос: {sql}");
+            Console.WriteLine($"SQL запрос подготовлен");
             Console.WriteLine($"Параметры:");
-            Console.WriteLine($"  startDate: {PeriodStart.DateTime:yyyy-MM-dd HH:mm:ss}");
-            Console.WriteLine($"  endDate: {PeriodEnd.DateTime:yyyy-MM-dd 23:59:59}");
+            Console.WriteLine($"  startDate: {PeriodStart.DateTime:yyyy-MM-dd}");
+            Console.WriteLine($"  endDate: {PeriodEnd.DateTime:yyyy-MM-dd}");
 
             using (var connection = new NpgsqlConnection(Arguments.connection))
             {
+                Console.WriteLine("Подключение к БД...");
+
+                connection.ConnectionString = Arguments.connection + ";Command Timeout=60";
+
                 await connection.OpenAsync();
                 Console.WriteLine("Подключение к БД установлено");
 
-                // Сначала проверим, есть ли данные в production за указанный период
-                var checkSql = @"
-                SELECT COUNT(*) as cnt, 
-                       MIN(production_date) as min_date, 
-                       MAX(production_date) as max_date
-                FROM public.production 
-                WHERE production_date BETWEEN @startDate AND @endDate 
-                  AND status = 'issued'";
-
-                if (SelectedUser != null && SelectedUser.Id > 0)
+                using (var testCmd = new NpgsqlCommand("SELECT 1", connection))
                 {
-                    checkSql += " AND user_id = @userId";
+                    var testResult = await testCmd.ExecuteScalarAsync();
+                    Console.WriteLine($"Тест соединения: {(testResult?.ToString() == "1" ? "OK" : "FAILED")}");
                 }
-
-                using (var checkCmd = new NpgsqlCommand(checkSql, connection))
+                try
                 {
-                    checkCmd.Parameters.AddWithValue("@startDate", PeriodStart.DateTime.Date);
-                    checkCmd.Parameters.AddWithValue("@endDate", PeriodEnd.DateTime.Date.AddDays(1).AddSeconds(-1));
+                    Console.WriteLine("=== ПРОВЕРКА ДАННЫХ ===");
+                    var checkSql = @"
+                    SELECT COUNT(*) 
+                    FROM public.production 
+                    WHERE production_date BETWEEN @startDate AND @endDate 
+                      AND status IN ('issued', 'completed')";
 
                     if (SelectedUser != null && SelectedUser.Id > 0)
                     {
-                        checkCmd.Parameters.AddWithValue("@userId", SelectedUser.Id);
+                        checkSql += " AND user_id = @userId";
                     }
 
-                    using (var checkReader = await checkCmd.ExecuteReaderAsync())
+                    using (var checkCmd = new NpgsqlCommand(checkSql, connection))
                     {
-                        if (await checkReader.ReadAsync())
+                        checkCmd.Parameters.AddWithValue("@startDate", PeriodStart.DateTime.Date);
+                        checkCmd.Parameters.AddWithValue("@endDate", PeriodEnd.DateTime.Date.AddDays(1).AddSeconds(-1));
+
+                        if (SelectedUser != null && SelectedUser.Id > 0)
                         {
-                            var count = checkReader.GetInt64(0);
-                            var minDate = checkReader.IsDBNull(1) ? (DateTime?)null : checkReader.GetDateTime(1);
-                            var maxDate = checkReader.IsDBNull(2) ? (DateTime?)null : checkReader.GetDateTime(2);
+                            checkCmd.Parameters.AddWithValue("@userId", SelectedUser.Id);
+                        }
 
-                            Console.WriteLine($"Проверка production:");
-                            Console.WriteLine($"  Всего записей: {count}");
-                            Console.WriteLine($"  Минимальная дата: {(minDate?.ToString("yyyy-MM-dd") ?? "нет данных")}");
-                            Console.WriteLine($"  Максимальная дата: {(maxDate?.ToString("yyyy-MM-dd") ?? "нет данных")}");
+                        var count = Convert.ToInt64(await checkCmd.ExecuteScalarAsync());
+                        Console.WriteLine($"Найдено записей: {count}");
 
-                            if (count == 0)
-                            {
-                                ShowDetailedNoDataMessage();
-                                return;
-                            }
+                        if (count == 0)
+                        {
+                            ShowDetailedNoDataMessage();
+                            return;
                         }
                     }
                 }
-
-                using (var command = new NpgsqlCommand(sql, connection))
+                catch (Exception ex)
                 {
-                    foreach (var param in parameters)
+                    Console.WriteLine($"Ошибка при проверке данных: {ex.Message}");
+                }
+
+                decimal totalAmount = 0;
+                var userSummaries = new Dictionary<double, UserSalarySummary>();
+                int recordCount = 0;
+
+                try
+                {
+                    using (var command = new NpgsqlCommand(sql, connection))
                     {
-                        command.Parameters.Add(param);
+                        foreach (var param in parameters)
+                        {
+                            command.Parameters.Add(param);
+                        }
+
+                        command.CommandTimeout = 30;
+
+                        Console.WriteLine("Выполнение основного запроса...");
+
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            Console.WriteLine("=== ЧТЕНИЕ ДАННЫХ ===");
+
+                            while (await reader.ReadAsync())
+                            {
+                                recordCount++;
+
+                                try
+                                {
+                                    var userId = reader.GetDouble(0);
+                                    var employeeName = reader.GetString(1);
+                                    var operationName = reader.GetString(2);
+                                    var productionDate = reader.GetDateTime(3);
+                                    var quantity = reader.GetDecimal(4);
+                                    var tonnage = reader.IsDBNull(5) ? 0 : reader.GetDecimal(5);
+                                    var unit = reader.IsDBNull(6) ? "шт" : reader.GetString(6);
+                                    var rate = reader.GetDecimal(7);
+                                    var useTonnage = reader.GetBoolean(8);
+                                    var coefficient = reader.GetDecimal(9);
+                                    var amount = reader.GetDecimal(10);
+                                    var calculationFormula = reader.GetString(11);
+
+                                    Console.WriteLine($"Запись #{recordCount}:");
+                                    Console.WriteLine($"  Сотрудник: {employeeName}");
+                                    Console.WriteLine($"  Операция: {operationName}");
+                                    Console.WriteLine($"  Дата: {productionDate:dd.MM.yyyy}");
+                                    Console.WriteLine($"  Кол-во: {quantity}");
+                                    Console.WriteLine($"  Тоннаж: {tonnage}");
+                                    Console.WriteLine($"  Единица: {unit}");
+                                    Console.WriteLine($"  Ставка: {rate}");
+                                    Console.WriteLine($"  Исп.тоннаж: {useTonnage}");
+                                    Console.WriteLine($"  Коэффициент: {coefficient}");
+                                    Console.WriteLine($"  Сумма: {amount:N2} руб");
+
+                                    totalAmount += amount;
+
+                                    if (!userSummaries.ContainsKey(userId))
+                                    {
+                                        userSummaries[userId] = new UserSalarySummary
+                                        {
+                                            UserId = userId,
+                                            EmployeeName = employeeName,
+                                            TotalAmount = 0
+                                        };
+                                    }
+                                    userSummaries[userId].TotalAmount += amount;
+
+                                    var viewModel = new SalaryRecordUserControlViewModel
+                                    {
+                                        EmployeeName = employeeName,
+                                        OperationName = operationName,
+                                        ProductionDate = productionDate,
+                                        Quantity = quantity,
+                                        Tonnage = tonnage,
+                                        Amount = amount,
+                                        CalculationFormula = calculationFormula,
+                                        Unit = unit,
+                                        Rate = rate,
+                                        UseTonnage = useTonnage && tonnage > 0,
+                                        Coefficient = coefficient,
+                                        IsSummary = false,
+                                        IsTotal = false
+                                    };
+
+                                    var control = new SalaryRecordUserControl
+                                    {
+                                        DataContext = viewModel
+                                    };
+
+                                    salaryList.Add(control);
+                                }
+                                catch (Exception ex)
+                                {
+                                    Console.WriteLine($"Ошибка обработки записи #{recordCount}: {ex.Message}");
+                                    continue;
+                                }
+                            }
+                        }
                     }
 
-                    using (var reader = await command.ExecuteReaderAsync())
+                    Console.WriteLine($"=== ИТОГО ===");
+                    Console.WriteLine($"Всего найдено записей: {recordCount}");
+                    Console.WriteLine($"Общая сумма: {totalAmount:N2} руб");
+                    Console.WriteLine($"Количество сотрудников: {userSummaries.Count}");
+
+                    foreach (var summary in userSummaries.Values)
                     {
-                        Console.WriteLine("Чтение данных из БД...");
+                        Console.WriteLine($"  {summary.EmployeeName}: {summary.TotalAmount:N2} руб");
 
-                        decimal totalAmount = 0;
-                        var userSummaries = new Dictionary<double, UserSalarySummary>();
-                        int recordCount = 0;
-
-                        while (await reader.ReadAsync())
+                        var summaryViewModel = new SalaryRecordUserControlViewModel
                         {
-                            recordCount++;
+                            EmployeeName = $"{summary.EmployeeName} (Итого)",
+                            Amount = summary.TotalAmount,
+                            IsSummary = true,
+                            IsTotal = false
+                        };
 
-                            try
-                            {
-                                var userId = reader.GetDouble(0);
-                                var employeeName = reader.GetString(1);
-                                var operationName = reader.GetString(2);
-                                var productionDate = reader.GetDateTime(3);
-                                var quantity = reader.GetDecimal(4);
-                                var tonnage = reader.IsDBNull(5) ? 1 : reader.GetDecimal(5); // По умолчанию 1, если NULL
-                                var notes = reader.IsDBNull(6) ? "" : reader.GetString(6);
-                                var rate = reader.GetDecimal(7);
-                                var useTonnage = reader.GetBoolean(8);
-                                var coefficient = reader.GetDecimal(9);
-                                var amount = reader.GetDecimal(10);
-                                var calculationFormula = reader.GetString(11);
-
-                                Console.WriteLine($"Запись #{recordCount}:");
-                                Console.WriteLine($"  Сотрудник: {employeeName}");
-                                Console.WriteLine($"  Операция: {operationName}");
-                                Console.WriteLine($"  Дата: {productionDate:dd.MM.yyyy}");
-                                Console.WriteLine($"  Кол-во: {quantity}");
-                                Console.WriteLine($"  Тоннаж: {tonnage}");
-                                Console.WriteLine($"  Ставка: {rate}");
-                                Console.WriteLine($"  Исп.тоннаж: {useTonnage}");
-                                Console.WriteLine($"  Коэффициент: {coefficient}");
-                                Console.WriteLine($"  Сумма: {amount:N2} руб");
-                                Console.WriteLine($"  Формула: {calculationFormula}");
-
-                                totalAmount += amount;
-
-                                if (!userSummaries.ContainsKey(userId))
-                                {
-                                    userSummaries[userId] = new UserSalarySummary
-                                    {
-                                        UserId = userId,
-                                        EmployeeName = employeeName,
-                                        TotalAmount = 0
-                                    };
-                                }
-                                userSummaries[userId].TotalAmount += amount;
-
-                                var viewModel = new SalaryRecordUserControlViewModel
-                                {
-                                    EmployeeName = employeeName,
-                                    OperationName = operationName,
-                                    ProductionDate = productionDate,
-                                    Quantity = quantity,
-                                    Tonnage = tonnage,
-                                    Amount = amount,
-                                    CalculationFormula = calculationFormula,
-                                    Rate = rate,
-                                    UseTonnage = useTonnage,
-                                    Coefficient = coefficient,
-                                    IsSummary = false,
-                                    IsTotal = false
-                                };
-
-                                var control = new SalaryRecordUserControl
-                                {
-                                    DataContext = viewModel
-                                };
-
-                                salaryList.Add(control);
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.WriteLine($"Ошибка чтения записи #{recordCount}: {ex.Message}");
-                                Console.WriteLine($"StackTrace: {ex.StackTrace}");
-                            }
-                        }
-
-                        Console.WriteLine($"=== ИТОГО ===");
-                        Console.WriteLine($"Всего найдено записей: {recordCount}");
-                        Console.WriteLine($"Общая сумма: {totalAmount:N2} руб");
-                        Console.WriteLine($"Количество сотрудников: {userSummaries.Count}");
-
-                        // Добавляем итоги по сотрудникам
-                        foreach (var summary in userSummaries.Values)
+                        var summaryControl = new SalaryRecordUserControl
                         {
-                            Console.WriteLine($"  {summary.EmployeeName}: {summary.TotalAmount:N2} руб");
+                            DataContext = summaryViewModel
+                        };
 
-                            var summaryViewModel = new SalaryRecordUserControlViewModel
-                            {
-                                EmployeeName = $"{summary.EmployeeName} (Итого)",
-                                Amount = summary.TotalAmount,
-                                IsSummary = true,
-                                IsTotal = false
-                            };
+                        salaryList.Add(summaryControl);
+                    }
 
-                            var summaryControl = new SalaryRecordUserControl
-                            {
-                                DataContext = summaryViewModel
-                            };
-
-                            salaryList.Add(summaryControl);
-                        }
-
-                        // Добавляем общий итог
-                        if (recordCount > 0)
+                    if (recordCount > 0)
+                    {
+                        var totalViewModel = new SalaryRecordUserControlViewModel
                         {
-                            var totalViewModel = new SalaryRecordUserControlViewModel
-                            {
-                                EmployeeName = "ОБЩИЙ ИТОГ",
-                                Amount = totalAmount,
-                                IsSummary = false,
-                                IsTotal = true
-                            };
+                            EmployeeName = "ОБЩИЙ ИТОГ",
+                            Amount = totalAmount,
+                            IsSummary = false,
+                            IsTotal = true
+                        };
 
-                            var totalControl = new SalaryRecordUserControl
-                            {
-                                DataContext = totalViewModel
-                            };
+                        var totalControl = new SalaryRecordUserControl
+                        {
+                            DataContext = totalViewModel
+                        };
 
-                            salaryList.Add(totalControl);
-                        }
+                        salaryList.Add(totalControl);
+                    }
+
+                    StackPanelHelper.RefreshStackPanelContent<SalaryRecordUserControl>(SalaryContent, salaryList);
+
+                    if (salaryList.Count == 0)
+                    {
+                        Console.WriteLine("=== НЕТ ДАННЫХ ===");
+                        ShowDetailedNoDataMessage();
+                    }
+                    else
+                    {
+                        Console.WriteLine($"=== ДАННЫЕ ОТОБРАЖЕНЫ ===");
+                        Console.WriteLine($"Отображено {salaryList.Count} записей");
                     }
                 }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Ошибка выполнения запроса: {ex.Message}");
+                    Console.WriteLine($"Тип ошибки: {ex.GetType().Name}");
+                    throw;
+                }
             }
-
-            StackPanelHelper.RefreshStackPanelContent<SalaryRecordUserControl>(SalaryContent, salaryList);
-
-            if (salaryList.Count == 0)
-            {
-                Console.WriteLine("=== НЕТ ДАННЫХ ===");
-                ShowDetailedNoDataMessage();
-            }
-            else
-            {
-                Console.WriteLine($"=== ДАННЫЕ ОТОБРАЖЕНЫ ===");
-                Console.WriteLine($"Отображено {salaryList.Count} записей");
-            }
+        }
+        catch (NpgsqlException npgsqlEx)
+        {
+            Console.WriteLine($"=== ОШИБКА POSTGRESQL ===");
+            Console.WriteLine($"Сообщение: {npgsqlEx.Message}");
+            Console.WriteLine($"Код ошибки: {npgsqlEx.ErrorCode}");
+            Console.WriteLine($"StackTrace: {npgsqlEx.StackTrace}");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"=== ОШИБКА ===");
+            Console.WriteLine($"=== ОБЩАЯ ОШИБКА ===");
             Console.WriteLine($"Сообщение: {ex.Message}");
+            Console.WriteLine($"Тип ошибки: {ex.GetType().Name}");
             Console.WriteLine($"StackTrace: {ex.StackTrace}");
 
             if (ex.InnerException != null)
@@ -398,7 +425,6 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
 
             Loges.LoggingProcess(LogLevel.ERROR, "Ошибка расчета зарплаты", ex: ex);
             StackPanelHelper.ClearAndRefreshStackPanel<SalaryRecordUserControl>(SalaryContent, salaryList);
-            ShowDetailedNoDataMessage();
         }
 
         Console.WriteLine($"=== КОНЕЦ РАСЧЕТА ===");
@@ -413,7 +439,6 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
             Margin = new Thickness(0, 40, 0, 0)
         };
 
-        // Иконка
         stackPanel.Children.Add(new TextBlock
         {
             Text = "📊",
@@ -422,7 +447,6 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
             Margin = new Thickness(0, 0, 0, 20)
         });
 
-        // Заголовок
         stackPanel.Children.Add(new TextBlock
         {
             Text = "Данные не найдены",
@@ -432,7 +456,6 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
             Margin = new Thickness(0, 0, 0, 10)
         });
 
-        // Описание
         var description = new TextBlock
         {
             Text = $"За период {PeriodStart.DateTime:dd.MM.yyyy} - {PeriodEnd.DateTime:dd.MM.yyyy}\n" +
@@ -451,7 +474,6 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
         };
         stackPanel.Children.Add(description);
 
-        // Кнопка для проверки БД
         var checkButton = new Button
         {
             Content = "Проверить базу данных",
@@ -476,39 +498,122 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
             {
                 await connection.OpenAsync();
 
-                // 1. Проверяем work_rate
-                using (var cmd1 = new NpgsqlCommand("SELECT COUNT(*) FROM public.work_rate", connection))
-                {
-                    var count = await cmd1.ExecuteScalarAsync();
-                    Console.WriteLine($"Тарифов в work_rate: {count}");
-                }
+                Console.WriteLine($"Период: {PeriodStart.DateTime:yyyy-MM-dd} - {PeriodEnd.DateTime:yyyy-MM-dd}");
 
-                // 2. Проверяем production
-                using (var cmd2 = new NpgsqlCommand("SELECT COUNT(*) FROM public.production WHERE status = 'issued'", connection))
+                using (var cmd = new NpgsqlCommand(@"
+                SELECT 
+                    COUNT(*) as total,
+                    COUNT(CASE WHEN status = 'issued' THEN 1 END) as issued,
+                    COUNT(CASE WHEN status != 'issued' THEN 1 END) as other_status
+                FROM public.production 
+                WHERE production_date BETWEEN @startDate AND @endDate",
+                    connection))
                 {
-                    var count = await cmd2.ExecuteScalarAsync();
-                    Console.WriteLine($"Записей в production (issued): {count}");
-                }
+                    cmd.Parameters.AddWithValue("@startDate", PeriodStart.DateTime.Date);
+                    cmd.Parameters.AddWithValue("@endDate", PeriodEnd.DateTime.Date.AddDays(1).AddSeconds(-1));
 
-                // 3. Проверяем operation
-                using (var cmd3 = new NpgsqlCommand("SELECT id, name, unit FROM public.operation LIMIT 10", connection))
-                {
-                    using (var reader = await cmd3.ExecuteReaderAsync())
+                    using (var reader = await cmd.ExecuteReaderAsync())
                     {
-                        Console.WriteLine("Операции в operation:");
-                        while (await reader.ReadAsync())
+                        if (await reader.ReadAsync())
                         {
-                            Console.WriteLine($"  ID: {reader.GetDouble(0)}, Название: {reader.GetString(1)}, Единица: {reader.GetString(2)}");
+                            Console.WriteLine($"Записи в production:");
+                            Console.WriteLine($"  Всего: {reader.GetInt64(0)}");
+                            Console.WriteLine($"  Со статусом 'issued': {reader.GetInt64(1)}");
+                            Console.WriteLine($"  С другим статусом: {reader.GetInt64(2)}");
                         }
                     }
                 }
 
-                Console.WriteLine("=== ПРОВЕРКА ЗАВЕРШЕНА ===");
+                Console.WriteLine("\nТарифы в work_rate:");
+                using (var cmd = new NpgsqlCommand(
+                    "SELECT work_type, rate, use_tonnage, coefficient FROM public.work_rate WHERE is_active = true",
+                    connection))
+                {
+                    using (var reader = await cmd.ExecuteReaderAsync())
+                    {
+                        int count = 0;
+                        while (await reader.ReadAsync())
+                        {
+                            count++;
+                            Console.WriteLine($"  {count}. {reader.GetString(0)}: {reader.GetDecimal(1)} руб, " +
+                                             $"тоннаж: {reader.GetBoolean(2)}, коэф: {reader.GetDecimal(3)}");
+                        }
+                        if (count == 0) Console.WriteLine("  (нет активных тарифов)");
+                    }
+                }
+
+                Console.WriteLine("\nОперации в operation:");
+                using (var cmd = new NpgsqlCommand(
+                    "SELECT id, name, price, unit FROM public.operation",
+                    connection))
+                {
+                    using (var reader = await cmd.ExecuteReaderAsync())
+                    {
+                        int count = 0;
+                        while (await reader.ReadAsync())
+                        {
+                            count++;
+                            Console.WriteLine($"  {count}. {reader.GetString(1)}: {reader.GetDecimal(2)} руб, " +
+                                             $"ед: {reader.GetString(3)}");
+                        }
+                    }
+                }
+
+                Console.WriteLine("\nСвязь operation <-> work_rate:");
+                using (var cmd = new NpgsqlCommand(@"
+                SELECT 
+                    o.name as operation_name,
+                    o.price as operation_price,
+                    o.unit as operation_unit,
+                    wr.work_type as rate_type,
+                    wr.rate as work_rate,
+                    wr.use_tonnage,
+                    wr.coefficient
+                FROM public.operation o
+                LEFT JOIN public.work_rate wr ON LOWER(TRIM(wr.work_type)) = LOWER(TRIM(o.name))
+                ORDER BY o.name",
+                    connection))
+                {
+                    using (var reader = await cmd.ExecuteReaderAsync())
+                    {
+                        int count = 0;
+                        while (await reader.ReadAsync())
+                        {
+                            count++;
+                            var operationName = reader.GetString(0);
+                            var operationPrice = reader.GetDecimal(1);
+                            var operationUnit = reader.GetString(2);
+                            var hasRate = !reader.IsDBNull(3);
+
+                            if (hasRate)
+                            {
+                                var rateType = reader.GetString(3);
+                                var workRate = reader.GetDecimal(4);
+                                var useTonnage = reader.GetBoolean(5);
+                                var coefficient = reader.GetDecimal(6);
+
+                                Console.WriteLine($"  {count}. {operationName} ({operationUnit}):");
+                                Console.WriteLine($"       Цена из operation: {operationPrice} руб");
+                                Console.WriteLine($"       Тариф из work_rate: {workRate} руб");
+                                Console.WriteLine($"       Исп.тоннаж: {useTonnage}, Коэф: {coefficient}");
+                            }
+                            else
+                            {
+                                Console.WriteLine($"  {count}. {operationName} ({operationUnit}):");
+                                Console.WriteLine($"       Цена из operation: {operationPrice} руб");
+                                Console.WriteLine($"       (нет тарифа в work_rate)");
+                            }
+                        }
+                    }
+                }
+
+                Console.WriteLine("\n=== ПРОВЕРКА ЗАВЕРШЕНА ===");
             }
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Ошибка проверки БД: {ex.Message}");
+            Console.WriteLine($"StackTrace: {ex.StackTrace}");
         }
     }
 

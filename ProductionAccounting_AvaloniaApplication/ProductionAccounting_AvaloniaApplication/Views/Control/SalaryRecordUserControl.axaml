@@ -22,22 +22,21 @@
             </Grid.ColumnDefinitions>
             
             <StackPanel Grid.Column="0">
-                <!-- Заголовок -->
                 <DockPanel Margin="0,0,0,8">
                     <TextBlock x:Name="EmployeeNameText" 
-                               Text="Иванов Иван Иванович"
+                               Text="{Binding EmployeeName}"
                                FontSize="16" 
                                FontWeight="SemiBold"
                                Foreground="#333333"
                                DockPanel.Dock="Left"/>
                     
-                    <!-- Бейдж для итоговых записей -->
                     <Border x:Name="SummaryBadge"
                             CornerRadius="4"
                             Padding="6,2"
                             DockPanel.Dock="Right"
                             Margin="10,0,0,0"
-                            Background="#E8F5E9">
+                            Background="#E8F5E9"
+                            IsVisible="{Binding ShowSummary}">
                         <TextBlock Text="Итого"
                                    FontSize="12"
                                    Foreground="#2E7D32"
@@ -49,7 +48,8 @@
                             Padding="6,2"
                             DockPanel.Dock="Right"
                             Margin="10,0,0,0"
-                            Background="#2196F3">
+                            Background="#2196F3"
+                            IsVisible="{Binding ShowTotal}">
                         <TextBlock Text="ОБЩИЙ ИТОГ"
                                    FontSize="12"
                                    Foreground="White"
@@ -57,8 +57,8 @@
                     </Border>
                 </DockPanel>
                 
-                <!-- Детали для обычных записей -->
-                <StackPanel x:Name="DetailsPanel">
+                <StackPanel x:Name="DetailsPanel"
+                            IsVisible="{Binding ShowDetails}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -67,63 +67,57 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         
-                        <!-- Операция -->
                         <StackPanel Grid.Column="0" Margin="0,0,20,0">
                             <TextBlock Text="Операция:" 
                                        FontSize="12" 
                                        Foreground="#666666"/>
-                            <TextBlock x:Name="OperationText"
-                                       Text="Сварка"
+                            <TextBlock Text="{Binding OperationName}"
                                        FontSize="14" 
-                                       FontWeight="Medium"/>
+                                       FontWeight="Medium"
+                                       Foreground="#666666"/>
                         </StackPanel>
                         
-                        <!-- Дата -->
                         <StackPanel Grid.Column="1" Margin="0,0,20,0">
                             <TextBlock Text="Дата:" 
                                        FontSize="12" 
                                        Foreground="#666666"/>
-                            <TextBlock x:Name="DateText"
-                                       Text="01.03.2024"
-                                       FontSize="14"/>
+                            <TextBlock Text="{Binding ProductionDate, StringFormat='dd.MM.yyyy'}"
+                                       FontSize="14"
+                                       Foreground="#666666"/>
                         </StackPanel>
                         
-                        <!-- Количество -->
                         <StackPanel Grid.Column="2" Margin="0,0,20,0">
                             <TextBlock Text="Кол-во:" 
                                        FontSize="12" 
                                        Foreground="#666666"/>
-                            <TextBlock x:Name="QuantityText"
-                                       Text="10"
-                                       FontSize="14"/>
+                            <TextBlock Text="{Binding Quantity, StringFormat='{}{0:N2}'}"
+                                       FontSize="14"
+                                       Foreground="#666666"/>
                         </StackPanel>
                         
-                        <!-- Тоннаж -->
                         <StackPanel Grid.Column="3" 
-                                    x:Name="TonnagePanel">
+                                    IsVisible="{Binding ShowTonnage}">
                             <TextBlock Text="Тоннаж:" 
                                        FontSize="12" 
                                        Foreground="#666666"/>
-                            <TextBlock x:Name="TonnageText"
-                                       Text="1.500 т"
-                                       FontSize="14"/>
+                            <TextBlock Text="{Binding Tonnage, StringFormat='{}{0:N0} кг'}"
+                                       FontSize="14"
+                                       Foreground="#666666"/>
                         </StackPanel>
                     </Grid>
                     
-                    <!-- Формула расчета -->
                     <Border Background="#F5F5F5"
                             CornerRadius="4"
                             Padding="10"
                             Margin="0,10,0,0">
                         <TextBlock x:Name="FormulaText"
-                                   Text="Тариф: 4500 × Тоннаж: 1.5 / 1000 × Кол-во: 10 × Коэф: 1.5 = 101250"
+                                   Text="{Binding CalculationFormula}"
                                    FontSize="12"
                                    Foreground="#424242"
                                    TextWrapping="Wrap"/>
                     </Border>
                 </StackPanel>
                 
-                <!-- Сумма -->
                 <DockPanel Margin="0,15,0,0">
                     <TextBlock Text="Сумма:" 
                                FontSize="14" 
@@ -132,7 +126,7 @@
                                VerticalAlignment="Center"/>
                     
                     <TextBlock x:Name="AmountText"
-                               Text="101,250.00 ₽" 
+                               Text="{Binding Amount, StringFormat='{}{0:N2} ₽'}" 
                                FontSize="20" 
                                FontWeight="Bold"
                                Foreground="#1976D2"
@@ -142,4 +136,5 @@
             </StackPanel>
         </Grid>
     </Border>
+
 </UserControl>

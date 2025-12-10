@@ -58,14 +58,22 @@ public class SalaryRecordUserControlViewModel : ViewModelBase
     public bool IsSummary
     {
         get => _isSummary;
-        set => this.RaiseAndSetIfChanged(ref _isSummary, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _isSummary, value);
+            UpdateDisplayProperties();
+        }
     }
 
     private bool _isTotal;
     public bool IsTotal
     {
         get => _isTotal;
-        set => this.RaiseAndSetIfChanged(ref _isTotal, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _isTotal, value);
+            UpdateDisplayProperties();
+        }
     }
 
     public bool ShowDetails => !IsSummary && !IsTotal;
@@ -99,4 +107,13 @@ public class SalaryRecordUserControlViewModel : ViewModelBase
         get => _useTonnage;
         set => this.RaiseAndSetIfChanged(ref _useTonnage, value);
     }
+
+     public void UpdateDisplayProperties()
+    {
+        this.RaisePropertyChanged(nameof(ShowDetails));
+        this.RaisePropertyChanged(nameof(ShowSummary));
+        this.RaisePropertyChanged(nameof(ShowTotal));
+    }
+
+    public bool ShowTonnage => UseTonnage && Tonnage > 0;
 }
