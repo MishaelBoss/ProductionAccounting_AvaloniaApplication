@@ -205,11 +205,21 @@ public class AddOperationUserControlViewModel : ViewModelBase
     {
         try
         {
-            string sql = @"INSERT INTO public.operation (name, operation_code, price, unit, time_required, description) VALUES (@name, @operation_code, @price, @unit, @time_required, @description) RETURNING id";
-            
+            string sql = @"INSERT INTO public.operation 
+                      (name, operation_code, price, unit, time_required, description) 
+                      VALUES (@name, @operation_code, @price, @unit, @time_required, @description) 
+                      RETURNING id";
+
+            // Также добавляем запись в work_rate
+            string rateSql = @"INSERT INTO public.work_rate 
+                          (work_type, rate, use_tonnage, coefficient) 
+                          VALUES (@work_type, @rate, @use_tonnage, @coefficient)";
+
             using (var connection = new NpgsqlConnection(Arguments.connection))
             {
                 await connection.OpenAsync();
+
+                // Создаем операцию
                 using (var command = new NpgsqlCommand(sql, connection))
                 {
                     command.Parameters.AddWithValue("@name", OperationName.Trim());
@@ -220,7 +230,28 @@ public class AddOperationUserControlViewModel : ViewModelBase
                     command.Parameters.AddWithValue("@description", OperationDescription.Trim());
 
                     var result = await command.ExecuteScalarAsync();
-                    return result != null && result != DBNull.Value ? Convert.ToDouble(result) : 0;
+                    var operationId = result != null && result != DBNull.Value ? Convert.ToDouble(result) : 0;
+
+                    if (operationId > 0)
+                    {
+                        // Добавляем тариф
+                        using (var rateCommand = new NpgsqlCommand(rateSql, connection))
+                        {
+                            bool useTonnage = SelectedUnit == "кг";
+                            decimal coefficient = OperationName.Contains("Зачистка") ||
+                                                OperationName.Contains("Сборка") ||
+                                                OperationName.Contains("Сварка") ? 1.5m : 1.0m;
+
+                            rateCommand.Parameters.AddWithValue("@work_type", OperationName.Trim());
+                            rateCommand.Parameters.AddWithValue("@rate", OperationPrice);
+                            rateCommand.Parameters.AddWithValue("@use_tonnage", useTonnage);
+                            rateCommand.Parameters.AddWithValue("@coefficient", coefficient);
+
+                            await rateCommand.ExecuteNonQueryAsync();
+                        }
+                    }
+
+                    return operationId;
                 }
             }
         }

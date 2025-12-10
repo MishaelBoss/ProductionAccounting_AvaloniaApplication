@@ -17,11 +17,11 @@ public class CartProductUserControlViewModel : ViewModelBase, INotifyPropertyCha
         {
             string[] deleteQueries =
             {
-                "DELETE FROM public.production WHERE product_id = @id",
-                "DELETE FROM public.shipments WHERE product_id = @id"
+                "DELETE FROM public.shipments WHERE product_id = @id",
+                "DELETE FROM public.production WHERE product_id = @id"
             };
 
-            var viewModel = new ConfirmDeleteWindowViewModel(ProductId, Name, "DELETE FROM public.product WHERE id = @id", (() => WeakReferenceMessenger.Default.Send(new RefreshProductListMessage())), deleteQueries);
+            var viewModel = new ConfirmDeleteWindowViewModel(ProductId, ProductName, "DELETE FROM public.product WHERE id = @id", () => WeakReferenceMessenger.Default.Send(new RefreshProductListMessage()), deleteQueries);
 
             var window = new ConfirmDeleteWindow()
             {
@@ -34,7 +34,7 @@ public class CartProductUserControlViewModel : ViewModelBase, INotifyPropertyCha
         });
 
     public ICommand OpenPruductViewCommand
-        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseProductViewStatusMessage(true, Name, Id, Mark, Coefficient, Notes)));
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseProductViewStatusMessage(true, ProductName, Id, Mark, Coefficient, Notes)));
 
     public ICommand CompleteTaskCommand
         => new RelayCommand(async () => { if (!CanCompleteTask) return; await CompleteTaskAndShipAsync(); });
@@ -78,15 +78,14 @@ public class CartProductUserControlViewModel : ViewModelBase, INotifyPropertyCha
     public string Notes { get; set; } = string.Empty;
     public string ProductName { get; set; } = string.Empty;
     public string Mark { get; set; } = string.Empty;
-    public string Name { get; set; } = string.Empty;
     public string Article { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string Unit { get; set; } = string.Empty;
 
-    public Int32 PricePerUnit { get; set; }
+    public decimal PricePerUnit { get; set; }
 
-    public Int32 PricePerUnitKg { get; set; }
-    public Int32 Coefficient { get; set; }
+    public decimal PricePerUnitKg { get; set; }
+    public decimal Coefficient { get; set; }
 
     private bool _canCompleteTask;
     public bool CanCompleteTask 
@@ -119,7 +118,7 @@ public class CartProductUserControlViewModel : ViewModelBase, INotifyPropertyCha
                         FROM public.sub_product_operations spo
                         JOIN public.sub_products sp ON sp.id = spo.sub_product_id
                         WHERE sp.product_task_id = @task_id
-                          AND spo.completed_quantity < spo.planned_quantity";
+                            AND spo.completed_quantity < spo.planned_quantity";
             using (var connection = new NpgsqlConnection(Arguments.connection)) 
             {
                 await connection.OpenAsync();

@@ -16,7 +16,7 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyChanged, IRecipient<RefreshSubProductListMessage>, IRecipient<OpenOrCloseSubProductStatusMessage>, IRecipient<RefreshSubProductOperationsMessage>
 {
-    public ProductViewUserControlViewModel(string name, double productId, string mark, Int32 coefficient, string notes) 
+    public ProductViewUserControlViewModel(string name, double productId, string mark, decimal coefficient, string notes) 
     {
         Name = name;
         ProductId = productId;
@@ -60,7 +60,7 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
     public string Name { get; }
     public double ProductId { get; }
     public string Mark { get; }
-    public Int32 Coefficient { get; }
+    public decimal Coefficient { get; }
     public string Notes { get; }
 
     private string _status = "new";

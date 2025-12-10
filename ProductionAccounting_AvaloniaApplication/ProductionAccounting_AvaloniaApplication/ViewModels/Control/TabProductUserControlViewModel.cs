@@ -215,9 +215,11 @@ public class TabProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
                         p.article,
                         p.unit,
                         p.price_per_unit,
+                        p.price_per_kg,
                         p.coefficient,
                         COALESCE(pt.status, 'new') AS status,
-                        pt.created_at
+                        pt.created_at,
+                        p.description
                     FROM public.product_tasks pt
                     JOIN public.product p ON p.id = pt.product_id
                     WHERE p.id IN ({string.Join(", ", paramNames)})
@@ -242,14 +244,16 @@ public class TabProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
                             {
                                 Id = reader.GetDouble(0),
                                 ProductId = reader.GetDouble(1),
-                                Name = reader.GetString(2),
+                                ProductName = reader.GetString(2),
                                 Mark = reader.GetString(3),
                                 Article = reader.GetString(4),
                                 Unit = reader.GetString(5),
-                                PricePerUnit = reader.GetInt32(6),
-                                Coefficient = reader.GetInt32(7),
-                                Status = reader.GetString(8),
-                                CreatedAt = reader.GetDateTime(9)
+                                PricePerUnit = reader.GetDecimal(6),
+                                PricePerUnitKg = reader.GetDecimal(7),
+                                Coefficient = reader.GetDecimal(8),
+                                Status = reader.GetString(9),
+                                CreatedAt = reader.GetDateTime(10),
+                                Description = reader.GetString(11),
                             };
 
                             var userControl = new CartProductUserControl

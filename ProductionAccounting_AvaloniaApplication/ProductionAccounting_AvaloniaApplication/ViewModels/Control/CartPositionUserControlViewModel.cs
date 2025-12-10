@@ -11,7 +11,7 @@ public class CartPositionUserControlViewModel : ViewModelBase
     public ICommand DeleteCommand
         => new RelayCommand(() =>
         {
-            var viewModel = new ConfirmDeleteWindowViewModel(Id, Type, "DELETE FROM public.positions WHERE id = @id", (() => WeakReferenceMessenger.Default.Send(new RefreshPositionListMessage())));
+            var viewModel = new ConfirmDeleteWindowViewModel(Id, Type, "DELETE FROM public.positions WHERE id = @id", () => WeakReferenceMessenger.Default.Send(new RefreshPositionListMessage()));
 
             var window = new ConfirmDeleteWindow()
             {
