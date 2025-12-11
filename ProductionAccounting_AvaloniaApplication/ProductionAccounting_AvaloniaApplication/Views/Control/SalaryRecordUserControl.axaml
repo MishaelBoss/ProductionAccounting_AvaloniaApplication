@@ -7,7 +7,10 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="ProductionAccounting_AvaloniaApplication.Views.Control.SalaryRecordUserControl">
   
-<Border BorderThickness="1"
+    <Border x:Name="MainBorder"
+            Background="#FFFFFF"
+            BorderBrush="#E0E0E0"
+            BorderThickness="1"
             CornerRadius="6"
             Margin="0,0,0,10"
             Padding="15">
@@ -18,29 +21,44 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             
-            <!-- Основная информация -->
             <StackPanel Grid.Column="0">
-                
-                <!-- Заголовок с типом записи -->
                 <DockPanel Margin="0,0,0,8">
-                    <TextBlock Text="{Binding EmployeeName}" 
+                    <TextBlock x:Name="EmployeeNameText" 
+                               Text="{Binding EmployeeName}"
                                FontSize="16" 
                                FontWeight="SemiBold"
-                               Foreground="{DynamicResource ThemeForegroundBrush}"
+                               Foreground="#333333"
                                DockPanel.Dock="Left"/>
                     
-                    <Border CornerRadius="4"
+                    <Border x:Name="SummaryBadge"
+                            CornerRadius="4"
                             Padding="6,2"
                             DockPanel.Dock="Right"
-                            Margin="10,0,0,0">
-                        <TextBlock Text="{Binding RecordType, FallbackValue='Запись'}"
+                            Margin="10,0,0,0"
+                            Background="#E8F5E9"
+                            IsVisible="{Binding ShowSummary}">
+                        <TextBlock Text="Итого"
                                    FontSize="12"
+                                   Foreground="#2E7D32"
                                    FontWeight="Medium"/>
+                    </Border>
+                    
+                    <Border x:Name="TotalBadge"
+                            CornerRadius="4"
+                            Padding="6,2"
+                            DockPanel.Dock="Right"
+                            Margin="10,0,0,0"
+                            Background="#2196F3"
+                            IsVisible="{Binding ShowTotal}">
+                        <TextBlock Text="ОБЩИЙ ИТОГ"
+                                   FontSize="12"
+                                   Foreground="White"
+                                   FontWeight="Bold"/>
                     </Border>
                 </DockPanel>
                 
-                <!-- Детали для обычных записей -->
-                <StackPanel>
+                <StackPanel x:Name="DetailsPanel"
+                            IsVisible="{Binding ShowDetails}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -49,48 +67,53 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         
-                        <!-- Операция -->
                         <StackPanel Grid.Column="0" Margin="0,0,20,0">
                             <TextBlock Text="Операция:" 
                                        FontSize="12" 
-                                       Foreground="#666"/>
-                            <TextBlock Text="{Binding OperationName, FallbackValue='-'}" 
+                                       Foreground="#666666"/>
+                            <TextBlock Text="{Binding OperationName}"
                                        FontSize="14" 
-                                       FontWeight="Medium"/>
+                                       FontWeight="Medium"
+                                       Foreground="#666666"/>
                         </StackPanel>
                         
                         <StackPanel Grid.Column="1" Margin="0,0,20,0">
                             <TextBlock Text="Дата:" 
                                        FontSize="12" 
-                                       Foreground="#666"/>
-                            <TextBlock Text="{Binding ProductionDate, StringFormat='dd.MM.yyyy', FallbackValue='-'}" 
-                                       FontSize="14"/>
+                                       Foreground="#666666"/>
+                            <TextBlock Text="{Binding ProductionDate, StringFormat='dd.MM.yyyy'}"
+                                       FontSize="14"
+                                       Foreground="#666666"/>
                         </StackPanel>
                         
                         <StackPanel Grid.Column="2" Margin="0,0,20,0">
                             <TextBlock Text="Кол-во:" 
                                        FontSize="12" 
-                                       Foreground="#666"/>
-                            <TextBlock Text="{Binding Quantity, StringFormat='{}{0:N2}', FallbackValue='-'}" 
-                                       FontSize="14"/>
+                                       Foreground="#666666"/>
+                            <TextBlock Text="{Binding Quantity, StringFormat='{}{0:N2}'}"
+                                       FontSize="14"
+                                       Foreground="#666666"/>
                         </StackPanel>
                         
-                        <StackPanel Grid.Column="3">
+                        <StackPanel Grid.Column="3" 
+                                    IsVisible="{Binding ShowTonnage}">
                             <TextBlock Text="Тоннаж:" 
                                        FontSize="12" 
-                                       Foreground="#666"/>
-                            <TextBlock Text="{Binding Tonnage, StringFormat='{}{0:N3} т', FallbackValue='-'}" 
-                                       FontSize="14"/>
+                                       Foreground="#666666"/>
+                            <TextBlock Text="{Binding Tonnage, StringFormat='{}{0:N0} кг'}"
+                                       FontSize="14"
+                                       Foreground="#666666"/>
                         </StackPanel>
                     </Grid>
                     
-                    <Border Background="#F8F9FA"
+                    <Border Background="#F5F5F5"
                             CornerRadius="4"
                             Padding="10"
                             Margin="0,10,0,0">
-                        <TextBlock Text="{Binding CalculationFormula, FallbackValue='-'}"
+                        <TextBlock x:Name="FormulaText"
+                                   Text="{Binding CalculationFormula}"
                                    FontSize="12"
-                                   Foreground="#495057"
+                                   Foreground="#424242"
                                    TextWrapping="Wrap"/>
                     </Border>
                 </StackPanel>
@@ -98,40 +121,20 @@
                 <DockPanel Margin="0,15,0,0">
                     <TextBlock Text="Сумма:" 
                                FontSize="14" 
-                               Foreground="#666"
+                               Foreground="#666666"
                                DockPanel.Dock="Left"
                                VerticalAlignment="Center"/>
                     
-                    <TextBlock Text="{Binding Amount, StringFormat='{}{0:N2} ₽', FallbackValue='0,00 ₽'}" 
+                    <TextBlock x:Name="AmountText"
+                               Text="{Binding Amount, StringFormat='{}{0:N2} ₽'}" 
                                FontSize="20" 
                                FontWeight="Bold"
-                               Foreground="#2196F3"
+                               Foreground="#1976D2"
                                DockPanel.Dock="Right"
                                HorizontalAlignment="Right"/>
                 </DockPanel>
-                
             </StackPanel>
-            
-            <!-- Иконка для итоговых записей -->
-            <StackPanel Grid.Column="1" 
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Center">
-                <Border Width="40" 
-                        Height="40" 
-                        CornerRadius="20"
-                        Background="#E8F5E9"
-                        VerticalAlignment="Center"
-                        HorizontalAlignment="Center"
-                        IsVisible="{Binding IsSummary, FallbackValue=False}">
-                    <PathIcon Data="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"
-                              Foreground="#2E7D32"
-                              Width="20"
-                              Height="20"
-                              VerticalAlignment="Center"
-                              HorizontalAlignment="Center"/>
-                </Border>
-            </StackPanel>
-            
         </Grid>
     </Border>
+
 </UserControl>
