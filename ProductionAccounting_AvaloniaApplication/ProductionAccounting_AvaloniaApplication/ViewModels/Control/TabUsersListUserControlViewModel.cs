@@ -436,7 +436,7 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
                 parameters.Add(new NpgsqlParameter(paramName, userIds[i]));
             }
 
-            string sql = @$"SELECT * FROM public.""user"" WHERE id IN ({string.Join(", ", paramNames)}) AND id NOT IN ({ManagerCookie.GetIdUser})";
+            string sql = @$"SELECT * FROM public.user WHERE id IN ({string.Join(", ", paramNames)}) AND id NOT IN ({ManagerCookie.GetIdUser})";
 
             using (var connection = new NpgsqlConnection(Arguments.connection))
             {
@@ -453,25 +453,19 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
                     {
                         while (await reader.ReadAsync())
                         {
-                            double dbid = reader.IsDBNull(0) ? 0 : reader.GetDouble(0);
-                            string dbpassword = reader.IsDBNull(1) ? string.Empty : reader.GetString(1);
-                            string dblogin = reader.IsDBNull(6) ? string.Empty : reader.GetString(6);
-                            string dbmiddleName = reader.IsDBNull(4) ? string.Empty : reader.GetString(4);
-                            string dbfirst_name = reader.IsDBNull(2) ? string.Empty : reader.GetString(2);
-                            string dblast_name = reader.IsDBNull(3) ? string.Empty : reader.GetString(2);
-                            string dbdate_joined = reader.IsDBNull(5) ? string.Empty : reader.GetDateTime(5).ToString("yyyy-MM-dd");
-                            bool dbis_active = reader.IsDBNull(10) ? true : reader.GetBoolean(10);
-
                             var userViewModel = new CartUserListUserControlViewModel
                             {
-                                UserID = dbid,
-                                Login = dblogin,
-                                MiddleName = dbmiddleName,
-                                FirstName = dbfirst_name,
-                                LastName = dblast_name,
-                                Password = dbpassword,
-                                DateJoined = dbdate_joined,
-                                IsActive = dbis_active,
+                                UserID = reader.IsDBNull(0) ? 0 : reader.GetDouble(0),
+                                Password = reader.IsDBNull(1) ? string.Empty : reader.GetString(1),
+                                FirstName = reader.IsDBNull(2) ? string.Empty : reader.GetString(2),
+                                LastName = reader.IsDBNull(3) ? string.Empty : reader.GetString(3),
+                                MiddleName = reader.IsDBNull(4) ? string.Empty : reader.GetString(4),
+                                DateJoined = reader.IsDBNull(5) ? string.Empty : reader.GetDateTime(5).ToString("yyyy-MM-dd"),
+                                Login = reader.IsDBNull(6) ? string.Empty : reader.GetString(6),
+                                BaseSalary = reader.IsDBNull(7) ? 0m : reader.GetDecimal(7),
+                                Email = reader.IsDBNull(8) ? string.Empty : reader.GetString(8),
+                                Phone = reader.IsDBNull(9) ? string.Empty : reader.GetString(9),
+                                IsActive = reader.IsDBNull(10) ? true : reader.GetBoolean(10),
                             };
 
                             var userControl = new CartUserListUserControl

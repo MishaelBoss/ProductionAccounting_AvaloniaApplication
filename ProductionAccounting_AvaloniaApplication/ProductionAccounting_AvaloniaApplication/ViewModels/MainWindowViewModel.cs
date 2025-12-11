@@ -10,8 +10,7 @@ using System;
 namespace ProductionAccounting_AvaloniaApplication.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase,
-        IRecipient<OpenOrCloseAddUserStatusMessage>, 
-        IRecipient<OpenOrCloseEditUserStatusMessage>, 
+        IRecipient<OpenOrCloseUserStatusMessage>, 
         IRecipient<OpenOrCloseAddDepartmentStatusMessage>, 
         IRecipient<OpenOrCloseAddOperationStatusMessage>,
         IRecipient<OpenOrCloseProductStatusMessage>, 
@@ -24,7 +23,6 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
         public event Action? LoginStatusChanged;
 
         private readonly AddUsersUserControl _addUsers = new();
-        private readonly EditUsersUserControl _editUsers = new();
         private readonly AddDepartmentUserControl _addDepartment = new();
         private readonly AddPositionUserControl _addPosition = new();
         private readonly AddOperationUserControl _addOperation = new();
@@ -71,12 +69,6 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
             }
         }
 
-        public void Receive(OpenOrCloseEditUserStatusMessage message)
-        {
-            if (message.ShouldOpen) ShowEditUsersUserControl(message.UserId);
-            else CloseEditUsersUserControl();
-        }
-
         public void Receive(OpenOrCloseEmployeeAssignmentMasterSubMarkStatusMessage message)
         {
             if (message.ShouldOpen) ShowEmployeeAssignmentMasterSubMarkUserControl(message.ProductId, message.SubProductId);
@@ -113,9 +105,9 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
             else CloseAddPositionUserControl();
         }
 
-        public void Receive(OpenOrCloseAddUserStatusMessage message)
+        public void Receive(OpenOrCloseUserStatusMessage message)
         {
-            if (message.ShouldOpen) ShowAddUsersUserControl();
+            if (message.ShouldOpen) ShowAddUsersUserControl(message.Id, message.Login, message.FirstUsername, message.LastUsername, message.MiddleName, message.BaseSalary, message.Email, message.Phone);
             else CloseAddUsersUserControl();
         }
 
@@ -182,21 +174,21 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
             }
         }
 
-        public void ShowAddUsersUserControl()
+        public void ShowAddUsersUserControl(double? id = null, string? login = null, string? firstName = null, string? lastName = null, string? middleName = null, decimal? baseSalary = null, string? email = null, string? phone = null)
         {
             if (ContentCenter != null)
             {
-                if (ContentCenter.Children.Contains(_addUsers))
+                var userControl = new AddUsersUserControl { DataContext = new AddUsersUserControlViewModel(id, login, firstName, lastName, middleName, baseSalary, email, phone) };
+
+                if (ContentCenter.Children.Contains(userControl))
                 {
-                    _ = _addUsers.RefreshDataAsync();
                     return;
                 }
 
-                if (_addUsers.Parent is Panel currentParent) currentParent.Children.Remove(_addUsers);
+                if (userControl.Parent is Panel currentParent) currentParent.Children.Remove(userControl);
                 ContentCenter.Children.Clear();
-                ContentCenter.Children.Add(_addUsers);
+                ContentCenter.Children.Add(userControl);
 
-                _ = _addUsers.RefreshDataAsync();
             }
         }
 
@@ -260,36 +252,6 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
             {
                 ContentCenter.Children.Clear();
                 if (_addPosition.Parent == ContentCenter) ContentCenter.Children.Remove(_addPosition);
-            }
-        }
-
-        public void ShowEditUsersUserControl(double userID)
-        {
-            if (ContentCenter != null)
-            {
-                var editViewModel = new EditUsersUserControlViewModel(userID);
-                _editUsers.DataContext = editViewModel;
-
-                if (ContentCenter.Children.Contains(_editUsers)) 
-                {
-                    _ = _editUsers.RefreshDataAsync();
-                    return;
-                }
-
-                if (_editUsers.Parent is Panel currentParent) currentParent.Children.Remove(_editUsers);
-                ContentCenter.Children.Clear();
-                ContentCenter.Children.Add(_editUsers);
-
-                _ = _editUsers.RefreshDataAsync();
-            }
-        }
-
-        public void CloseEditUsersUserControl()
-        {
-            if (ContentCenter != null)
-            {
-                ContentCenter.Children.Clear();
-                if (_editUsers.Parent == ContentCenter) ContentCenter.Children.Remove(_editUsers);
             }
         }
 

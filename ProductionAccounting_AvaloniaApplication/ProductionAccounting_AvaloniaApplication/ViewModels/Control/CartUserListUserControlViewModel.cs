@@ -16,10 +16,10 @@ public class CartUserListUserControlViewModel : ViewModelBase, INotifyPropertyCh
         => new RelayCommand(() => TextCopy.ClipboardService.SetText(Password));
 
     public ICommand EditCommand
-        => new RelayCommand(() => {WeakReferenceMessenger.Default.Send(new OpenOrCloseEditUserStatusMessage(true, _userID)); });
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseUserStatusMessage(true, _userID, Login, FirstName, LastName, MiddleName, BaseSalary, Email, Phone)));
 
     public ICommand ViewCommand
-        => new RelayCommand(() => { WeakReferenceMessenger.Default.Send(new OpenOrCloseProfileUserStatusMessage(true, _userID)); });
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseProfileUserStatusMessage(true, _userID)));
 
     public ICommand DeleteCommand
         => new RelayCommand(() =>
@@ -82,6 +82,10 @@ public class CartUserListUserControlViewModel : ViewModelBase, INotifyPropertyCh
         get => _lastName;
         set => this.RaiseAndSetIfChanged(ref _lastName, value);
     }
+
+    public decimal BaseSalary { get; set; }
+    public string Email { get; set; }
+    public string Phone { get; set; }
 
     private string _dateJoined = string.Empty;
     public string DateJoined { 

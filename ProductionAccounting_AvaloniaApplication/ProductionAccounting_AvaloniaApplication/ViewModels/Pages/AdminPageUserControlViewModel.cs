@@ -8,7 +8,7 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
 public class AdminPageUserControlViewModel : ViewModelBase
 {
     public ICommand OpenAddUsers
-        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseAddUserStatusMessage(true)));
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseUserStatusMessage(true)));
 
     public ICommand OpenDepartmentCommand
         => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseAddDepartmentStatusMessage(true)));

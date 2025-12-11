@@ -15,7 +15,7 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChanged
 {
     public ICommand CancelCommand
-        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseAddUserStatusMessage(false)) );
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseUserStatusMessage(false)) );
 
     public ICommand ConfirmCommand
         => new RelayCommand(async () => 
@@ -23,9 +23,24 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
             if ( await SaveAsync() ) 
             { 
                 WeakReferenceMessenger.Default.Send(new RefreshUserListMessage());
-                WeakReferenceMessenger.Default.Send(new OpenOrCloseAddUserStatusMessage(false));
+                WeakReferenceMessenger.Default.Send(new OpenOrCloseUserStatusMessage(false));
             } 
         });
+
+    public AddUsersUserControlViewModel(double? id = null, string? login = null, string? firstName = null, string? lastName = null, string? middleName = null, decimal? baseSalary = null, string? email = null, string? phone = null)
+    {
+        Id = id ?? 0;
+        Login = login ?? string.Empty;
+        FirstUsername = firstName ?? string.Empty;
+        LastUsername = lastName ?? string.Empty;
+        MiddleName = middleName ?? string.Empty;
+        BaseSalary = baseSalary ?? 1.0m;
+        Email = email ?? string.Empty;
+        Phone = phone ?? string.Empty;
+        _ = LoadListTypeToComboBoxAsync();
+    }
+
+    public double Id { get; }
 
     private string _messageerror = string.Empty;
     public string Messageerror
@@ -160,8 +175,8 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
         }
     }
 
-    private Decimal _baseSalary = 0;
-    public Decimal BaseSalary 
+    private decimal _baseSalary = 0;
+    public decimal BaseSalary 
     {
         get => _baseSalary;
         set 
@@ -282,69 +297,109 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
 
             try
             {
-                string sql = "INSERT INTO public.user (login, password, first_name, last_name, middle_name, base_salary, email, phone) " +
-                             "VALUES (@login, @password, @first_name, @last_name, @middle_name, @base_salary, @email, @phone) RETURNING id";
+                string addUserSql = "INSERT INTO public.user (login, password, first_name, last_name, middle_name, base_salary, email, phone) " +
+                        "VALUES (@login, @password, @first_name, @last_name, @middle_name, @base_salary, @email, @phone) RETURNING id";
+                string updateUserSql = "UPDATE public.user SET login = @newLogin, middle_name = @newMiddleName, first_name = @newFirstName, last_name =     @newLastName, base_salary = @newBaseSalary WHERE id = @userID";
+
+                string sql = string.Empty;
+
+                if(Id == 0) sql = addUserSql;
+                else sql = updateUserSql;
 
                 using (var connection = new NpgsqlConnection(Arguments.connection))
                 {
                     await connection.OpenAsync();
-                    using (var command = new NpgsqlCommand(sql, connection)) {
+                    using (var command = new NpgsqlCommand(sql, connection))
+                    {
                         try
                         {
-                            char[] letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray();
-
-                            Random random = new();
-                            char randomChar = letters[random.Next(letters.Length)];
-
-                            string randomString = string.Empty;
-                            for (int i = 0; i < 10; i++) randomString += letters[random.Next(letters.Length)];
-
-                            command.Parameters.AddWithValue("@login", Login);
-                            command.Parameters.AddWithValue("@password", randomString);
-                            command.Parameters.AddWithValue("@first_name", FirstUsername);
-                            command.Parameters.AddWithValue("@last_name", LastUsername);
-                            command.Parameters.AddWithValue("@middle_name", MiddleName);
-                            command.Parameters.AddWithValue("@base_salary", BaseSalary);
-                            command.Parameters.AddWithValue("@email", Email);
-                            command.Parameters.AddWithValue("@phone", Phone);
-
-                            var userId = await command.ExecuteScalarAsync();
-                            if (userId == null) return false;
-
-                            string sql2 = "INSERT INTO public.user_to_user_type (user_id, user_type_id) VALUES (@user_id, @user_type_id)";
-                            using (var commandRel = new NpgsqlCommand(sql2, connection))
+                            if(Id == 0)
                             {
-                                commandRel.Parameters.AddWithValue("@user_id", userId);
-                                commandRel.Parameters.AddWithValue("@user_type_id", SelectedComboBoxItem?.Id ?? 0);
-                                await commandRel.ExecuteNonQueryAsync();
+                                char[] letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray();
+
+                                Random random = new();
+                                char randomChar = letters[random.Next(letters.Length)];
+
+                                string randomString = string.Empty;
+                                for (int i = 0; i < 10; i++) randomString += letters[random.Next(letters.Length)];
+
+                                command.Parameters.AddWithValue("@login", Login);
+                                command.Parameters.AddWithValue("@password", randomString);
+                                command.Parameters.AddWithValue("@first_name", FirstUsername);
+                                command.Parameters.AddWithValue("@last_name", LastUsername);
+                                command.Parameters.AddWithValue("@middle_name", MiddleName);
+                                command.Parameters.AddWithValue("@base_salary", BaseSalary);
+                                command.Parameters.AddWithValue("@email", Email);
+                                command.Parameters.AddWithValue("@phone", Phone);
+
+                                var userId = await command.ExecuteScalarAsync();
+                                if (userId == null) return false;
+
+                                string sql2 = "INSERT INTO public.user_to_user_type (user_id, user_type_id) VALUES (@user_id, @user_type_id)";
+                                using (var commandRel = new NpgsqlCommand(sql2, connection))
+                                {
+                                    commandRel.Parameters.AddWithValue("@user_id", userId);
+                                    commandRel.Parameters.AddWithValue("@user_type_id", SelectedComboBoxItem?.Id ?? 0);
+                                    await commandRel.ExecuteNonQueryAsync();
+                                }
+
+                                string sql3 = "INSERT INTO public.user_to_departments (user_id, department_id) VALUES (@user_id, @department_id)";
+                                using (var commandDepartment = new NpgsqlCommand(sql3, connection))
+                                {
+                                    commandDepartment.Parameters.AddWithValue("@user_id", userId);
+                                    commandDepartment.Parameters.AddWithValue("@department_id", SelectedComboBoxItemDepartment?.Id ?? 0);
+                                    await commandDepartment.ExecuteNonQueryAsync();
+                                }
+
+                                string sql4 = "INSERT INTO public.user_to_position (user_id, position_id) VALUES (@user_id, @position_id)";
+                                using (var commandPosition = new NpgsqlCommand(sql4, connection))
+                                {
+                                    commandPosition.Parameters.AddWithValue("@user_id", userId);
+                                    commandPosition.Parameters.AddWithValue("@position_id", SelectedComboBoxItemPosition?.Id ?? 0);
+                                    await commandPosition.ExecuteNonQueryAsync();
+                                }
+
+                                if (!string.IsNullOrEmpty(randomString))
+                                {
+                                    ClearForm();
+
+                                    return true;
+                                }
+                                else 
+                                {
+                                    Messageerror = "Ошибка генерации пароля";
+                                    return false;
+                                }
                             }
-
-                            string sql3 = "INSERT INTO public.user_to_departments (user_id, department_id) VALUES (@user_id, @department_id)";
-                            using (var commandDepartment = new NpgsqlCommand(sql3, connection))
+                            else
                             {
-                                commandDepartment.Parameters.AddWithValue("@user_id", userId);
-                                commandDepartment.Parameters.AddWithValue("@department_id", SelectedComboBoxItemDepartment?.Id ?? 0);
-                                await commandDepartment.ExecuteNonQueryAsync();
-                            }
+                                command.Parameters.AddWithValue("@userID", Id);
+                                command.Parameters.AddWithValue("@newLogin", Login);
+                                command.Parameters.AddWithValue("@newFirstName", FirstUsername);
+                                command.Parameters.AddWithValue("@newLastName", LastUsername);
+                                command.Parameters.AddWithValue("@newMiddleName", MiddleName);
+                                command.Parameters.AddWithValue("@newBaseSalary", BaseSalary);
+                                await command.ExecuteNonQueryAsync();
 
-                            string sql4 = "INSERT INTO public.user_to_position (user_id, position_id) VALUES (@user_id, @position_id)";
-                            using (var commandPosition = new NpgsqlCommand(sql4, connection))
-                            {
-                                commandPosition.Parameters.AddWithValue("@user_id", userId);
-                                commandPosition.Parameters.AddWithValue("@position_id", SelectedComboBoxItemPosition?.Id ?? 0);
-                                await commandPosition.ExecuteNonQueryAsync();
-                            }
+                                string deleteSql = "DELETE FROM public.user_to_user_type WHERE user_id = @userID";
+                                using (var deleteCommand = new NpgsqlCommand(deleteSql, connection))
+                                {
+                                    deleteCommand.Parameters.AddWithValue("@userID", Id);
+                                    await deleteCommand.ExecuteNonQueryAsync();
+                                }
 
-                            if (!string.IsNullOrEmpty(randomString))
-                            {
+                                string insertSql = "INSERT INTO public.user_to_user_type (user_id, user_type_id) VALUES (@userID, @userTypeID)";
+                                using (var insertCommand = new NpgsqlCommand(insertSql, connection))
+                                {
+                                    insertCommand.Parameters.AddWithValue("@userID", Id);
+                                    insertCommand.Parameters.AddWithValue("@userTypeID", SelectedComboBoxItem.Id);
+                                    await insertCommand.ExecuteNonQueryAsync();
+                                }
+
+                                ClearForm();
+
                                 return true;
                             }
-                            else 
-                            {
-                                Messageerror = "Ошибка генерации пароля";
-                                return false;
-                            }
-
                         }
                         catch (Exception ex)
                         {
@@ -369,6 +424,16 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
                 ex: ex);
             return false;
         }
+    }
+
+    public void ClearForm()
+    {
+        Messageerror = string.Empty;
+        ComboBoxItems.Clear();
+        MiddleName = string.Empty;
+        FirstUsername = string.Empty;
+        LastUsername = string.Empty;
+        BaseSalary = 0;
     }
 
     public new event PropertyChangedEventHandler? PropertyChanged;
