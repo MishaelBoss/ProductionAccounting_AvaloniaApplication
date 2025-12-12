@@ -88,6 +88,8 @@ public class CartShipmentUserControlViewModel : ViewModelBase
 
                     Status = newStatus;
                     OnStatusChanged();
+
+                    WeakReferenceMessenger.Default.Send(new RefreshShipmentListMessage());
                 }
             }
         }

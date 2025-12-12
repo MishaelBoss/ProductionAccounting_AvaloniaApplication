@@ -1,7 +1,14 @@
-﻿using CommunityToolkit.Mvvm.Input;
+﻿using Avalonia.Controls;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
+using CommunityToolkit.Mvvm.Input;
+using ProductionAccounting_AvaloniaApplication.Models;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
 using ReactiveUI;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Windows.Input;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
@@ -18,6 +25,10 @@ public class RightBoardUserControlViewModel : ViewModelBase
 
         mainWindowViewModel?.LoginStatusChanged += OnLoginStatusChanged;
     }
+
+    public ObservableCollection<DashboardButton> buttons { get; set; }
+
+    public StackPanel stackPanel;
 
     private readonly AdminPageUserControlViewModel adminPageUserControlViewModel = new();
     private readonly ProductLibraryPageUserControlViewModel productLibraryUserControlViewModel = new();
@@ -163,5 +174,18 @@ public class RightBoardUserControlViewModel : ViewModelBase
 
         if (!IsAdministrator && _objectViewModels == adminPageUserControlViewModel) OpenPage(mainWindowViewModel);
         if (!IsAll && _objectViewModels == workUserPageUserControlViewModel) mainWindowViewModel?.ShowAuthorization();
+
+        buttons = new ObservableCollection<DashboardButton>(new List<DashboardButton>
+        {
+            new DashboardButton("Admin panel", OpenAdminPanelPageCommand, new Bitmap(AssetLoader.Open(new Uri("avares://ProductionAccounting_AvaloniaApplication/Assets/administrator-64.png"))), IsAdministrator),
+            new DashboardButton("Manager", OpenProductsManagerUserPageCommand, new Bitmap(AssetLoader.Open(new Uri("avares://ProductionAccounting_AvaloniaApplication/Assets/administrator-64.png"))), IsAdministratorOrManager),
+            new DashboardButton("Timesheet", OpenTimesheetPageCommand, new Bitmap(AssetLoader.Open(new Uri("avares://ProductionAccounting_AvaloniaApplication/Assets/home-64.png"))), IsAdministratorOrManager),
+            new DashboardButton("Library product", OpenProductLibraryPageCommand, new Bitmap(AssetLoader.Open(new Uri("avares://ProductionAccounting_AvaloniaApplication/Assets/library-64.png"))), IsAll),
+            new DashboardButton("Library user", OpenUserLibraryPageCommand, new Bitmap(AssetLoader.Open(new Uri("avares://ProductionAccounting_AvaloniaApplication/Assets/library-64.png"))), IsAll),
+            new DashboardButton("Windows user", OpenWorkUserPageCommand, new Bitmap(AssetLoader.Open(new Uri("avares://ProductionAccounting_AvaloniaApplication/Assets/home-64.png"))), IsAdministratorOrMasterOrEmployee),
+            new DashboardButton("Shipments", OpenShipmentsUserPageCommand, new Bitmap(AssetLoader.Open(new Uri("avares://ProductionAccounting_AvaloniaApplication/Assets/home-64.png"))), IsAdministratorOrMasterOrManager),
+            new DashboardButton(ButtonAuthorizationText, OpenAuthorizationCommand, new Bitmap(AssetLoader.Open(new Uri("avares://ProductionAccounting_AvaloniaApplication/Assets/login-64.png"))), IsAdministratorOrMasterOrManager),
+            new DashboardButton("Salary", OpenSalaryUserPageCommand, new Bitmap(AssetLoader.Open(new Uri("avares://ProductionAccounting_AvaloniaApplication/Assets/login-64.png")))),
+        });
     }
 }

@@ -22,123 +22,29 @@
             <Grid Grid.Row="1">
                 <StackPanel Orientation="Vertical" 
                             VerticalAlignment="Stretch" 
-                            HorizontalAlignment="Center" 
-                            Spacing="5">
-					
-                    <Button Classes="Button" 
-                            IsVisible="{Binding IsAdministrator}"
-                            Command="{Binding OpenAdminPanelPageCommand}">
-                        <Grid ColumnDefinitions="24,*" 
-                              Classes="GridButtonButton">
-                            <Image Source="/Assets/administrator-64.png" 
-                                   Width="21" 
-                                   Height="21" 
-                                   Stretch="Uniform"/>
-                            <Label Grid.Column="1" Classes="LabelButtonButton" Content="Admin panel"/>
-                        </Grid>
-                    </Button>
+                            HorizontalAlignment="Center">
 
-                    <Button Classes="Button" 
-                            IsVisible="{Binding IsAdministratorOrManager}"
-                            Command="{Binding OpenProductsManagerUserPageCommand}">
-                        <Grid ColumnDefinitions="24,*" 
-                              Classes="GridButtonButton">
-                            <Image Source="/Assets/administrator-64.png" 
-                                   Width="21" 
-                                   Height="21" 
-                                   Stretch="Uniform"/>
-                            <Label Grid.Column="1" Classes="LabelButtonButton" Content="Manager"/>
-                        </Grid>
-                    </Button>
-
-                    <Button Classes="Button"
-                            IsVisible="{Binding IsAll}"
-                            Command="{Binding OpenProductLibraryPageCommand}">
-						<Grid ColumnDefinitions="24,*"
-                              Classes="GridButtonButton">
-							<Image Source="/Assets/library-64.png"
-                                   Width="21"
-                                   Height="21"
-                                   Stretch="Uniform"/>
-							<Label Grid.Column="1" Classes="LabelButtonButton" Content="Library product"/>
-						</Grid>
-					</Button>
-                    
-                    <Button Classes="Button"
-                            IsVisible="{Binding IsAll}"
-							Command="{Binding OpenUserLibraryPageCommand}">
-                        <Grid ColumnDefinitions="24,*" 
-                              Classes="GridButtonButton">
-                            <Image Source="/Assets/library-64.png" 
-                                   Width="21" 
-                                   Height="21" 
-                                   Stretch="Uniform"/>
-                            <Label Grid.Column="1" Classes="LabelButtonButton" Content="Library user"/>
-                        </Grid>
-                    </Button>
-
-                    <Button Classes="Button"
-                            IsVisible="{Binding IsAdministratorOrMasterOrManager}"
-                            Command="{Binding OpenTimesheetPageCommand}">
-                        <Grid ColumnDefinitions="24,*" 
-                              Classes="GridButtonButton">
-                            <Image Source="/Assets/home-64.png" 
-                                   Width="21" 
-                                   Height="21" 
-                                   Stretch="Uniform"/>
-                            <Label Grid.Column="1" Content="Timesheet"/>
-                        </Grid>
-                    </Button>
-
-                    <Button Classes="Button"
-                            IsVisible="{Binding IsAdministratorOrMasterOrEmployee}"
-                            Command="{Binding OpenWorkUserPageCommand}">
-                        <Grid ColumnDefinitions="24,*" 
-                              Classes="GridButtonButton">
-                            <Image Source="/Assets/home-64.png" 
-                                   Width="21" 
-                                   Height="21" 
-                                   Stretch="Uniform"/>
-                            <Label Grid.Column="1" Content="Windows user"/>
-                        </Grid>
-                    </Button>
-
-                    <Button Classes="Button"
-                            IsVisible="{Binding IsAdministratorOrMasterOrManager}"
-                            Command="{Binding OpenShipmentsUserPageCommand}">
-                        <Grid ColumnDefinitions="24,*" 
-                              Classes="GridButtonButton">
-                            <Image Source="/Assets/home-64.png" 
-                                   Width="21" 
-                                   Height="21" 
-                                   Stretch="Uniform"/>
-                            <Label Grid.Column="1" Content="Shipments"/>
-                        </Grid>
-                    </Button>
-
-                    <Button Classes="Button"
-                            Command="{Binding OpenAuthorizationCommand}">
-                        <Grid ColumnDefinitions="24,*" 
-                              Classes="GridButtonButton">
-                            <Image Source="/Assets/login-64.png" 
-                                   Width="21" 
-                                   Height="21" 
-                                   Stretch="Uniform"/>
-                            <Label Grid.Column="1" Content="{Binding ButtonAuthorizationText}"/>
-                        </Grid>
-                    </Button>
-
-                    <Button Classes="Button"
-                            Command="{Binding OpenSalaryUserPageCommand}">
-                        <Grid ColumnDefinitions="24,*" 
-                              Classes="GridButtonButton">
-                            <Image Source="/Assets/login-64.png" 
-                                   Width="21" 
-                                   Height="21" 
-                                   Stretch="Uniform"/>
-                            <Label Grid.Column="1" Content="Salary"/>
-                        </Grid>
-                    </Button>
+                    <ItemsControl ItemsSource="{Binding buttons}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Classes="Button"
+                                        Command="{Binding Command}"
+                                        Margin="0,2">
+                                    <Grid   ColumnDefinitions="24,*" 
+                                            Classes="GridButtonButton">
+                                        <Image  Source="{Binding IconPath}" 
+                                                Width="21" 
+                                                Height="21" 
+                                                Stretch="Uniform"/>
+                                        <TextBlock  Grid.Column="1" 
+                                                    Classes="TextBlockButtonButton" 
+                                                    Text="{Binding Content}"
+                                                    VerticalAlignment="Center"/>
+                                    </Grid>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
                 </StackPanel>
             </Grid>
             <Grid Grid.Row="2">
