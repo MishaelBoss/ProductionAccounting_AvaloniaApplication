@@ -22,9 +22,9 @@
 								HorizontalAlignment="Center" 
 								Text="{Binding Messageerror}" />
 
-					<TextBlock	Margin="0 5">Name operation:</TextBlock>
+					<TextBlock	Margin="0 5">Name product:</TextBlock>
 					<TextBox	Text="{Binding ProductName}" 
-								Watermark="Enter name operation"/>
+								Watermark="Enter name product"/>
 
 					<TextBlock	Margin="0 5">Article:</TextBlock>
 					<TextBox	Text="{Binding ProductArticle}" 
