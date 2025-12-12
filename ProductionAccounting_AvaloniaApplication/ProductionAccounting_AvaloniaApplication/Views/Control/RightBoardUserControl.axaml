@@ -11,10 +11,6 @@
         <StyleInclude Source="/Styles/Resources/RightBoardStyles.axaml"/>
     </UserControl.Styles>
 
-    <Design.DataContext>
-		<vm:RightBoardUserControlViewModel/>
-	</Design.DataContext>
-
     <Grid>
         <Border Background="#2D2D2D" 
                 Opacity="0.8"/>
@@ -163,4 +159,5 @@
             </Grid>
         </Grid>
     </Grid>
+
 </UserControl>
