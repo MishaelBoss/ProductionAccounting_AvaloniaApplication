@@ -2,7 +2,6 @@
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using CommunityToolkit.Mvvm.Input;
-using ProductionAccounting_AvaloniaApplication.Models;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
 using ReactiveUI;
@@ -21,12 +20,12 @@ public class RightBoardUserControlViewModel : ViewModelBase
     {
         mainWindowViewModel = _mainWindowViewModel;
 
+        buttons = new ObservableCollection<DashboardButtonViewModel>();
+
         UpdateUI();
 
         mainWindowViewModel?.LoginStatusChanged += OnLoginStatusChanged;
     }
-
-    public ObservableCollection<DashboardButton> buttons { get; set; }
 
     public StackPanel stackPanel;
 
@@ -86,6 +85,13 @@ public class RightBoardUserControlViewModel : ViewModelBase
     {
         get => _buttonAuthorizationText;
         set => this.RaiseAndSetIfChanged(ref _buttonAuthorizationText, value);
+    }
+
+    private ObservableCollection<DashboardButtonViewModel> _buttons;
+    public ObservableCollection<DashboardButtonViewModel> buttons 
+    { 
+        get => _buttons; 
+        set => this.RaiseAndSetIfChanged(ref _buttons, value); 
     }
 
     private void OnLoginStatusChanged()
@@ -169,23 +175,45 @@ public class RightBoardUserControlViewModel : ViewModelBase
         IsAdministratorOrMaster = (IsAdministrator || IsMaster);
         IsAdministratorOrManager = (IsAdministrator || IsManager);
         IsAdministratorOrMasterOrEmployee = (IsAdministrator || IsMaster || IsEmployee);
-        IsAdministratorOrMasterOrManager = (IsAdministrator || IsMaster || IsMaster);
+        IsAdministratorOrMasterOrManager = (IsAdministrator || IsMaster || IsManager);
         IsAll = (IsAdministrator || IsMaster || IsEmployee || IsManager);
 
         if (!IsAdministrator && _objectViewModels == adminPageUserControlViewModel) OpenPage(mainWindowViewModel);
         if (!IsAll && _objectViewModels == workUserPageUserControlViewModel) mainWindowViewModel?.ShowAuthorization();
 
-        buttons = new ObservableCollection<DashboardButton>(new List<DashboardButton>
+        buttons.Clear();
+
+        var newButtons = new List<DashboardButtonViewModel>
         {
-            new DashboardButton("Admin panel", OpenAdminPanelPageCommand, new Bitmap(AssetLoader.Open(new Uri("avares://ProductionAccounting_AvaloniaApplication/Assets/administrator-64.png"))), IsAdministrator),
-            new DashboardButton("Manager", OpenProductsManagerUserPageCommand, new Bitmap(AssetLoader.Open(new Uri("avares://ProductionAccounting_AvaloniaApplication/Assets/administrator-64.png"))), IsAdministratorOrManager),
-            new DashboardButton("Timesheet", OpenTimesheetPageCommand, new Bitmap(AssetLoader.Open(new Uri("avares://ProductionAccounting_AvaloniaApplication/Assets/home-64.png"))), IsAdministratorOrManager),
-            new DashboardButton("Library product", OpenProductLibraryPageCommand, new Bitmap(AssetLoader.Open(new Uri("avares://ProductionAccounting_AvaloniaApplication/Assets/library-64.png"))), IsAll),
-            new DashboardButton("Library user", OpenUserLibraryPageCommand, new Bitmap(AssetLoader.Open(new Uri("avares://ProductionAccounting_AvaloniaApplication/Assets/library-64.png"))), IsAll),
-            new DashboardButton("Windows user", OpenWorkUserPageCommand, new Bitmap(AssetLoader.Open(new Uri("avares://ProductionAccounting_AvaloniaApplication/Assets/home-64.png"))), IsAdministratorOrMasterOrEmployee),
-            new DashboardButton("Shipments", OpenShipmentsUserPageCommand, new Bitmap(AssetLoader.Open(new Uri("avares://ProductionAccounting_AvaloniaApplication/Assets/home-64.png"))), IsAdministratorOrMasterOrManager),
-            new DashboardButton(ButtonAuthorizationText, OpenAuthorizationCommand, new Bitmap(AssetLoader.Open(new Uri("avares://ProductionAccounting_AvaloniaApplication/Assets/login-64.png"))), IsAdministratorOrMasterOrManager),
-            new DashboardButton("Salary", OpenSalaryUserPageCommand, new Bitmap(AssetLoader.Open(new Uri("avares://ProductionAccounting_AvaloniaApplication/Assets/login-64.png")))),
-        });
+            new DashboardButtonViewModel("Admin panel", OpenAdminPanelPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/administrator-64.png"), () => ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsAdministrator),
+            new DashboardButtonViewModel("Manager", OpenProductsManagerUserPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/administrator-64.png"), () => IsAdministratorOrManager),
+            new DashboardButtonViewModel("Timesheet", OpenTimesheetPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/home-64.png"), () => IsAdministratorOrManager),
+            new DashboardButtonViewModel("Library product", OpenProductLibraryPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/library-64.png"), () => IsAll),
+            new DashboardButtonViewModel("Library user", OpenUserLibraryPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/library-64.png"), () => IsAll),
+            new DashboardButtonViewModel("Windows user", OpenWorkUserPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/home-64.png"), () => IsAdministratorOrMasterOrEmployee),
+            new DashboardButtonViewModel("Shipments", OpenShipmentsUserPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/home-64.png"), () => IsAdministratorOrMasterOrManager),
+            new DashboardButtonViewModel(ButtonAuthorizationText, OpenAuthorizationCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/login-64.png")),
+            new DashboardButtonViewModel("Salary", OpenSalaryUserPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/login-64.png")),
+        };
+
+        foreach (var button in newButtons)
+        {
+            buttons.Add(button);
+        }
+
+        this.RaisePropertyChanged(nameof(buttons));
+        
+        foreach (var button in buttons)
+        {
+            button.UpdateVisibility();
+        }
+    }
+
+    private Bitmap LoadBitmap(string uriString)
+    {
+        using (var stream = AssetLoader.Open(new Uri(uriString)))
+        {
+            return new Bitmap(stream);
+        }
     }
 }

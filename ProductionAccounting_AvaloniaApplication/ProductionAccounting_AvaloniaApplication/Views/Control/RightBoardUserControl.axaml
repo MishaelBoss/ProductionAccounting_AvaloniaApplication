@@ -25,6 +25,7 @@
                             <DataTemplate>
                                 <Button Classes="Button"
                                         Command="{Binding Command}"
+                                        IsVisible="{Binding IsVisible}"
                                         Margin="0,2">
                                     <Grid   ColumnDefinitions="24,*" 
                                             Classes="GridButtonButton">
