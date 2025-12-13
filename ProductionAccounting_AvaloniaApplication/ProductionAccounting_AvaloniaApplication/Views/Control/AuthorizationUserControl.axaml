@@ -17,26 +17,28 @@
 				Background="Gray"
 				CornerRadius="12">
 			<Grid>
-				<StackPanel Margin="20">
-					<TextBlock Margin="0 5" HorizontalAlignment="Center" Text="{Binding Messageerror}" />
-					<TextBlock Margin="0 5" Text="Login"/>
-					<TextBox Watermark="Enter login" Text="{Binding Login}"/>
-					<TextBlock Margin="0 5" Text="Пароль"/>
-					<TextBox PasswordChar="*" Watermark="Введите пароль" Text="{Binding Password}"/>
-					<StackPanel Orientation="Vertical"
-								VerticalAlignment="Center"
-								HorizontalAlignment="Center"
-								Spacing="10">
-						<Button Classes="ButtonLogin"
-								IsEnabled="{Binding IsActiveConfirmButton}"
-								Click="Confirm_Click"
-								Content="Авторизоваться"/>
-						<Button Click="Cancel_Click"
-								Content="Отмена"
-								HorizontalAlignment="Center"
-								Background="Transparent"/>
+				<ScrollViewer VerticalScrollBarVisibility="Auto">
+					<StackPanel Margin="20">
+						<TextBlock Margin="0 5" HorizontalAlignment="Center" Text="{Binding Messageerror}" />
+						<TextBlock Margin="0 5" Text="Login"/>
+						<TextBox Watermark="Enter login" Text="{Binding Login}"/>
+						<TextBlock Margin="0 5" Text="Пароль"/>
+						<TextBox PasswordChar="*" Watermark="Введите пароль" Text="{Binding Password}"/>
+						<StackPanel Orientation="Vertical"
+									VerticalAlignment="Center"
+									HorizontalAlignment="Center"
+									Spacing="10">
+							<Button Classes="ButtonLogin"
+									IsEnabled="{Binding IsActiveConfirmButton}"
+									Click="Confirm_Click"
+									Content="Авторизоваться"/>
+							<Button Click="Cancel_Click"
+									Content="Отмена"
+									HorizontalAlignment="Center"
+									Background="Transparent"/>
+						</StackPanel>
 					</StackPanel>
-				</StackPanel>
+				</ScrollViewer>
 			</Grid>
 		</Border>
 	</Grid>

@@ -17,27 +17,29 @@
 				Background="Gray" 
 				CornerRadius="12">
 			<Grid>
-				<StackPanel Margin="20">
-					<TextBlock Margin="0 5" HorizontalAlignment="Center" Text="{Binding Messageerror}" />
-					<TextBlock Margin="0 5">Type:</TextBlock>
-					<TextBox Watermark="Enter type" Text="{Binding Position}"/>
+				<ScrollViewer VerticalScrollBarVisibility="Auto">
+					<StackPanel Margin="20">
+						<TextBlock Margin="0 5" HorizontalAlignment="Center" Text="{Binding Messageerror}" />
+						<TextBlock Margin="0 5">Type:</TextBlock>
+						<TextBox Watermark="Enter type" Text="{Binding Position}"/>
 
-					<StackPanel Orientation="Vertical"
-								VerticalAlignment="Center"
-								HorizontalAlignment="Center"
-								Spacing="10">
+						<StackPanel Orientation="Vertical"
+									VerticalAlignment="Center"
+									HorizontalAlignment="Center"
+									Spacing="10">
 
-						<Button Classes="ButtonLogin"
-								IsEnabled="{Binding IsActiveConfirmButton}"
-								Command="{Binding ConfirmCommand}"
-								Content="Confirm"/>
+							<Button Classes="ButtonLogin"
+									IsEnabled="{Binding IsActiveConfirmButton}"
+									Command="{Binding ConfirmCommand}"
+									Content="Confirm"/>
 
-						<Button Command="{Binding CancelCommand}"
-								Content="Cancel"
-								HorizontalAlignment="Center"
-								Background="Transparent"/>
+							<Button Command="{Binding CancelCommand}"
+									Content="Cancel"
+									HorizontalAlignment="Center"
+									Background="Transparent"/>
+						</StackPanel>
 					</StackPanel>
-				</StackPanel>
+				</ScrollViewer>
 			</Grid>
 		</Border>
 	</Grid>

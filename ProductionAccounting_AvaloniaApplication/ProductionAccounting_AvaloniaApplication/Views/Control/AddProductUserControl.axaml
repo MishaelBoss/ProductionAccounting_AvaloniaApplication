@@ -17,61 +17,63 @@
 				Background="Gray" 
 				CornerRadius="12">
 			<Grid>
-				<StackPanel Margin="20">
-					<TextBlock	Margin="0 5" 
-								HorizontalAlignment="Center" 
-								Text="{Binding Messageerror}" />
+				<ScrollViewer VerticalScrollBarVisibility="Auto">
+					<StackPanel Margin="20">
+						<TextBlock	Margin="0 5" 
+									HorizontalAlignment="Center" 
+									Text="{Binding Messageerror}" />
 
-					<TextBlock	Margin="0 5">Name product:</TextBlock>
-					<TextBox	Text="{Binding ProductName}" 
-								Watermark="Enter name product"/>
+						<TextBlock	Margin="0 5">Name product:</TextBlock>
+						<TextBox	Text="{Binding ProductName}" 
+									Watermark="Enter name product"/>
 
-					<TextBlock	Margin="0 5">Article:</TextBlock>
-					<TextBox	Text="{Binding ProductArticle}" 
-								Watermark="Enter article"/>
+						<TextBlock	Margin="0 5">Article:</TextBlock>
+						<TextBox	Text="{Binding ProductArticle}" 
+									Watermark="Enter article"/>
 
-					<TextBlock	Margin="0 5">Description:</TextBlock>
-					<TextBox	Text="{Binding ProductDescription}" 
-								Watermark="Enter description"/>
+						<TextBlock	Margin="0 5">Description:</TextBlock>
+						<TextBox	Text="{Binding ProductDescription}" 
+									Watermark="Enter description"/>
 
-					<TextBlock	Margin="0 5">Price per unit:</TextBlock>
-					<TextBox	Text="{Binding ProductPricePerUnit}" 
-								Watermark="Enter price per unit"/>
+						<TextBlock	Margin="0 5">Price per unit:</TextBlock>
+						<TextBox	Text="{Binding ProductPricePerUnit}" 
+									Watermark="Enter price per unit"/>
 
-					<TextBlock	Margin="0 5">Price per kg:</TextBlock>
-					<TextBox	Text="{Binding ProductPricePerKg}" 
-								Watermark="Enter price per kg"/>
+						<TextBlock	Margin="0 5">Price per kg:</TextBlock>
+						<TextBox	Text="{Binding ProductPricePerKg}" 
+									Watermark="Enter price per kg"/>
 
-					<TextBlock	Margin="0 5">Mark:</TextBlock>
-					<TextBox	Text="{Binding ProductMark}" 
-								Watermark="Enter mark"/>
+						<TextBlock	Margin="0 5">Mark:</TextBlock>
+						<TextBox	Text="{Binding ProductMark}" 
+									Watermark="Enter mark"/>
 
-					<TextBlock	Margin="0 5">Coefficient:</TextBlock>
-					<TextBox	Text="{Binding ProductCoefficient}" 
-								Watermark="Enter coefficient"/>
+						<TextBlock	Margin="0 5">Coefficient:</TextBlock>
+						<TextBox	Text="{Binding ProductCoefficient}" 
+									Watermark="Enter coefficient"/>
 
-					<TextBlock	Margin="0 5">Units:</TextBlock>
-					<ComboBox	ItemsSource="{Binding AvailableUnits}" 
-								SelectedItem="{Binding SelectedUnit}" 
-								Width="100" 
-								PlaceholderText="��.���"/>
+						<TextBlock	Margin="0 5">Units:</TextBlock>
+						<ComboBox	ItemsSource="{Binding AvailableUnits}" 
+									SelectedItem="{Binding SelectedUnit}" 
+									Width="100" 
+									PlaceholderText="��.���"/>
 
-					<StackPanel Orientation="Vertical"
-								VerticalAlignment="Center"
-								HorizontalAlignment="Center"
-								Spacing="10">
+						<StackPanel Orientation="Vertical"
+									VerticalAlignment="Center"
+									HorizontalAlignment="Center"
+									Spacing="10">
 
-						<Button Classes="ButtonLogin"
-								IsEnabled="{Binding IsActiveConfirmButton}"
-								Command="{Binding ConfirmCommand}"
-								Content="Confirm"/>
+							<Button Classes="ButtonLogin"
+									IsEnabled="{Binding IsActiveConfirmButton}"
+									Command="{Binding ConfirmCommand}"
+									Content="Confirm"/>
 
-						<Button Command="{Binding CancelCommand}"
-								Content="Cancel"
-								HorizontalAlignment="Center"
-								Background="Transparent"/>
+							<Button Command="{Binding CancelCommand}"
+									Content="Cancel"
+									HorizontalAlignment="Center"
+									Background="Transparent"/>
+						</StackPanel>
 					</StackPanel>
-				</StackPanel>
+				</ScrollViewer>
 			</Grid>
 		</Border>
 	</Grid>
