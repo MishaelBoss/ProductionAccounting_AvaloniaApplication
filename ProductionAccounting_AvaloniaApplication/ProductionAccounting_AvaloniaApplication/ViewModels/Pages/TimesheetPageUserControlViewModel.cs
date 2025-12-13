@@ -153,20 +153,25 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
     }
 
     public ICommand ApplyMassEditCommand
-        => new RelayCommand(async () => { await ApplyMassEditAsync(); LoadDataForRange(MassEditStartDate.DateTime, MassEditEndDate.DateTime); });
+        => new RelayCommand(async () => await ApplyMassEditAsync());
 
     public ICommand SaveSingleRecordCommand
-        => new RelayCommand(async () => { await SaveSingleRecordAsync(); await LoadTimesheetAsync(MassEditStartDate.DateTime, MassEditEndDate.DateTime); });
+        => new RelayCommand(async () => await SaveSingleRecordAsync());
 
     public async Task LoadListUsersAsync()
     {
+        if (!Internet.ConnectToDataBase())
+        {
+            Loges.LoggingProcess(LogLevel.ERROR,
+                message: "No connect to db");
+            return;
+        }
+
         try
         {
             ComboBoxUsers.Clear();
 
-            string sqlUsers = @"SELECT id, first_name, last_name, middle_name, login FROM public.user WHERE is_active = true ORDER BY last_name, first_name";
-
-            if(Internet.ConnectToDataBase()) return;
+            string sqlUsers = "SELECT id, first_name, last_name, middle_name, login FROM public.user WHERE is_active = true ORDER BY last_name, first_name";
             
             using (var connection = new NpgsqlConnection(Arguments.connection))
             {
@@ -219,9 +224,11 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
                     command.Parameters.AddWithValue("@notes", SingleNotes ?? "");
                     command.Parameters.AddWithValue("@createdBy", ManagerCookie.GetIdUser ?? 0);
 
-                    int result = await command.ExecuteNonQueryAsync();
+                    await command.ExecuteNonQueryAsync();
 
-                    if (result > 0) ClearSingleForm();
+                    ClearSingleForm();
+
+                    await LoadTimesheetAsync(MassEditStartDate.DateTime, MassEditEndDate.DateTime);
                 }
             }
         }
@@ -235,6 +242,13 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
 
     public async Task ApplyMassEditAsync()
     {
+        if (!Internet.ConnectToDataBase())
+        {
+            Loges.LoggingProcess(LogLevel.ERROR,
+                message: "No connect to db");
+            return;
+        }
+
         if (SelectedMassStatus == null) return;
 
         var usersToProcess = ApplyToAllUsers ? ComboBoxUsers.ToList() : (SelectedSingleUser != null ? new List<ComboBoxUser> { SelectedSingleUser } : new());
@@ -247,53 +261,59 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
 
         int totalInserted = 0;
 
-        await using var connection = new NpgsqlConnection(Arguments.connection);
-        await connection.OpenAsync();
-        await using var transaction = await connection.BeginTransactionAsync();
-
-        try
+        await using (var connection = new NpgsqlConnection(Arguments.connection)) 
         {
-            const string sql = @"INSERT INTO public.timesheet (user_id, work_date, status, hours_worked, notes, created_by)" +
-            "VALUES (@userId, @workDate, @status, @hoursWorked, @notes, @createdBy) ON CONFLICT (user_id, work_date) DO NOTHING";
-
-            await using var command = new NpgsqlCommand(sql, connection, transaction);
-
-            foreach (var user in usersToProcess)
+            await connection.OpenAsync();
+            await using (var transaction = await connection.BeginTransactionAsync())
             {
-                var currentDate = startDate;
-                while (currentDate <= endDate)
+                try
                 {
-                    if (ExcludeWeekends && (currentDate.DayOfWeek == DayOfWeek.Saturday || currentDate.DayOfWeek == DayOfWeek.Sunday))
+                    string sql = @"INSERT INTO public.timesheet (user_id, work_date, status, hours_worked, notes, created_by)" +
+                    "VALUES (@userId, @workDate, @status, @hoursWorked, @notes, @createdBy) ON CONFLICT (user_id, work_date) DO NOTHING";
+
+                    await using var command = new NpgsqlCommand(sql, connection, transaction);
+
+                    foreach (var user in usersToProcess)
                     {
-                        currentDate = currentDate.AddDays(1);
-                        continue;
+                        var currentDate = startDate;
+                        while (currentDate <= endDate)
+                        {
+                            if (ExcludeWeekends && (currentDate.DayOfWeek == DayOfWeek.Saturday || currentDate.DayOfWeek == DayOfWeek.Sunday))
+                            {
+                                currentDate = currentDate.AddDays(1);
+                                continue;
+                            }
+
+                            command.Parameters.Clear();
+                            command.Parameters.AddWithValue("@userId", user.Id);
+                            command.Parameters.AddWithValue("@workDate", currentDate);
+                            command.Parameters.AddWithValue("@status", SelectedMassStatus.Code);
+                            command.Parameters.AddWithValue("@hoursWorked", SelectedMassStatus.Code == "Я" ? MassEditHours : 0m);
+                            command.Parameters.AddWithValue("@notes", $"Массовое добавление: {SelectedMassStatus.Name}");
+                            command.Parameters.AddWithValue("@createdBy", ManagerCookie.GetIdUser ?? 0);
+
+                            int affected = await command.ExecuteNonQueryAsync();
+                            if (affected > 0) totalInserted++;
+
+                            currentDate = currentDate.AddDays(1);
+                        }
                     }
 
-                    command.Parameters.Clear();
-                    command.Parameters.AddWithValue("@userId", user.Id);
-                    command.Parameters.AddWithValue("@workDate", currentDate);
-                    command.Parameters.AddWithValue("@status", SelectedMassStatus.Code);
-                    command.Parameters.AddWithValue("@hoursWorked", SelectedMassStatus.Code == "Я" ? MassEditHours : 0m);
-                    command.Parameters.AddWithValue("@notes", $"Массовое добавление: {SelectedMassStatus.Name}");
-                    command.Parameters.AddWithValue("@createdBy", ManagerCookie.GetIdUser ?? 0);
+                    await transaction.CommitAsync();
+                    Loges.LoggingProcess(LogLevel.INFO,
+                        message: $"Успешно добавлено {totalInserted} новых записей в табель");
 
-                    int affected = await command.ExecuteNonQueryAsync();
-                    if (affected > 0) totalInserted++;
-
-                    currentDate = currentDate.AddDays(1);
+                    await LoadTimesheetAsync(MassEditStartDate.DateTime, MassEditEndDate.DateTime);
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    Loges.LoggingProcess(LogLevel.ERROR,
+                        ex: ex,
+                        message: "Ошибка при массовом добавлении");
                 }
             }
 
-            await transaction.CommitAsync();
-            Loges.LoggingProcess(LogLevel.INFO, 
-                message: $"Успешно добавлено {totalInserted} новых записей в табель");
-        }
-        catch (Exception ex)
-        {
-            await transaction.RollbackAsync();
-            Loges.LoggingProcess(LogLevel.ERROR, 
-                ex: ex, 
-                message: "Ошибка при массовом добавлении");
         }
     }
 
@@ -303,11 +323,6 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
         SelectedSingleStatus = Statuses[0];
         SingleHours = 8.0m;
         SingleNotes = string.Empty;
-    }
-
-    public void LoadDataForRange(DateTime startDate, DateTime endDate)
-    {
-        _ = LoadTimesheetAsync(startDate, endDate);
     }
 
     public async Task LoadTimesheetAsync(DateTime startDate, DateTime endDate)
