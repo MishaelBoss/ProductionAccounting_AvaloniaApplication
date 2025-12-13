@@ -297,8 +297,8 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
 
             try
             {
-                string addUserSql = "INSERT INTO public.user (login, password, first_name, last_name, middle_name, base_salary, email, phone) " +
-                        "VALUES (@login, @password, @first_name, @last_name, @middle_name, @base_salary, @email, @phone) RETURNING id";
+                string addUserSql = "INSERT INTO public.user (login, first_name, last_name, middle_name, base_salary, email, phone) " +
+                        "VALUES (@login, @first_name, @last_name, @middle_name, @base_salary, @email, @phone) RETURNING id";
                 string updateUserSql = "UPDATE public.user SET login = @newLogin, middle_name = @newMiddleName, first_name = @newFirstName, last_name =     @newLastName, base_salary = @newBaseSalary WHERE id = @userID";
 
                 string sql = string.Empty;
@@ -315,16 +315,7 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
                         {
                             if(Id == 0)
                             {
-                                char[] letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray();
-
-                                Random random = new();
-                                char randomChar = letters[random.Next(letters.Length)];
-
-                                string randomString = string.Empty;
-                                for (int i = 0; i < 10; i++) randomString += letters[random.Next(letters.Length)];
-
                                 command.Parameters.AddWithValue("@login", Login);
-                                command.Parameters.AddWithValue("@password", randomString);
                                 command.Parameters.AddWithValue("@first_name", FirstUsername);
                                 command.Parameters.AddWithValue("@last_name", LastUsername);
                                 command.Parameters.AddWithValue("@middle_name", MiddleName);
@@ -359,17 +350,9 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
                                     await commandPosition.ExecuteNonQueryAsync();
                                 }
 
-                                if (!string.IsNullOrEmpty(randomString))
-                                {
-                                    ClearForm();
+                                ClearForm();
 
-                                    return true;
-                                }
-                                else 
-                                {
-                                    Messageerror = "Ошибка генерации пароля";
-                                    return false;
-                                }
+                                return true;
                             }
                             else
                             {
