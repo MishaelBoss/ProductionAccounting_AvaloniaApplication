@@ -1,21 +1,34 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <Style Selector="Button.Button">
-            <Setter Property="Width" Value="120"/>
-            <Setter Property="Height" Value="50"/>
-            <Setter Property="CornerRadius" Value="5"/>
-            <Setter Property="FontSize" Value="12"/>
+    <Style Selector="Button.MenuItemButton">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Height" Value="40"/>
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="Cursor" Value="Hand"/>
     </Style>
     
-    <Style Selector="Grid.GridButtonButton">
-            <Setter Property="Width" Value="110"/>
-            <Setter Property="Margin" Value="5"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
+    <Style Selector="Button.MenuItemButton:pointerover">
+        <Setter Property="Background" Value="#3D3D3D"/>
     </Style>
     
-    <Style Selector="TextBlock.TextBlockButtonButton">
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="Margin" Value="5,0,0,0"/>
+    <Style Selector="Button.MenuItemButton:pressed">
+        <Setter Property="Background" Value="#4D4D4D"/>
+    </Style>
+    
+    <Style Selector="Button.SettingsButton">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="Height" Value="40"/>
+        <Setter Property="Padding" Value="8,0"/>
+        <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    
+    <Style Selector="Button.SettingsButton:pointerover">
+        <Setter Property="Background" Value="#3D3D3D"/>
     </Style>
 </Styles>

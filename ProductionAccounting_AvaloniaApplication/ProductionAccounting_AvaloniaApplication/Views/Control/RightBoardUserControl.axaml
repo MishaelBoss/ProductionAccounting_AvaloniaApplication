@@ -4,66 +4,87 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:ProductionAccounting_AvaloniaApplication.ViewModels.Control"
              x:DataType="vm:RightBoardUserControlViewModel"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             mc:Ignorable="d" d:DesignWidth="200" d:DesignHeight="450"
              x:Class="ProductionAccounting_AvaloniaApplication.Views.Control.RightBoardUserControl">
 
     <UserControl.Styles>
         <StyleInclude Source="/Styles/Resources/RightBoardStyles.axaml"/>
     </UserControl.Styles>
 
-    <Grid>
-        <Border Background="#2D2D2D" 
-                Opacity="0.8"/>
-        <Grid RowDefinitions="40,*,50,40">
-            <Grid Grid.Row="1">
-                <StackPanel Orientation="Vertical" 
-                            VerticalAlignment="Stretch" 
-                            HorizontalAlignment="Center">
+    <Grid Background="#2D2D2D">
+        <Grid RowDefinitions="Auto,*,Auto">
+            <Border Grid.Row="0" 
+                    BorderBrush="Gray" 
+                    BorderThickness="0,0,0,1"
+                    Height="64">
+                <TextBlock Text="ERP System"
+                          FontSize="18"
+                          FontWeight="SemiBold"
+                          Foreground="White"
+                          VerticalAlignment="Center"
+                          Margin="20, 0, 0, 0"/>
+            </Border>
 
-                    <ItemsControl ItemsSource="{Binding buttons}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Button Classes="Button"
-                                        Command="{Binding Command}"
-                                        IsVisible="{Binding IsVisible}"
-                                        Margin="0,2">
-                                    <Grid   ColumnDefinitions="24,*" 
-                                            Classes="GridButtonButton">
-                                        <Image  Source="{Binding IconPath}" 
-                                                Width="21" 
-                                                Height="21" 
-                                                Stretch="Uniform"/>
-                                        <TextBlock  Grid.Column="1" 
-                                                    Classes="TextBlockButtonButton" 
-                                                    Text="{Binding Content}"
-                                                    VerticalAlignment="Center"/>
-                                    </Grid>
-                                </Button>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+            <ScrollViewer Grid.Row="1">
+                <StackPanel Margin="0,16">
+                    <StackPanel Margin="0,0,0,24">
+                        <TextBlock Text="Main Menu"
+                                  FontSize="12"
+                                  FontWeight="Medium"
+                                  Foreground="#9CA3AF"
+                                  Margin="24,0,24,8"/>
+                        
+                        <StackPanel>
+                            <ItemsControl ItemsSource="{Binding buttons}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button Classes="MenuItemButton"
+                                                Command="{Binding Command}"
+                                                IsVisible="{Binding IsVisible}"
+                                                Margin="12,2">
+                                            <Grid ColumnDefinitions="Auto,*" 
+                                                  Width="200"
+                                                  HorizontalAlignment="Stretch">
+                                                <Image Grid.Column="0"
+                                                       Width="21"
+                                                       Height="21"
+                                                       Margin="0,0,12,0"
+                                                       Source="{Binding IconPath}"/>
+                                                <TextBlock Grid.Column="1"
+                                                           Text="{Binding Content}"
+                                                           Foreground="White"
+                                                           VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </StackPanel>
                 </StackPanel>
-            </Grid>
-            <Grid Grid.Row="2">
-                <StackPanel Orientation="Vertical" 
-                            VerticalAlignment="Stretch" 
-                            HorizontalAlignment="Center" 
-                            Spacing="5">
-                    <Separator Background="Gray" VerticalAlignment="Top"/>
+            </ScrollViewer>
+
+            <Border Grid.Row="2" 
+                    Padding="24,0">
+                <StackPanel Spacing="8">
+                    <Separator Background="Gray"/>
                     
-                    <Button Classes="Button"
+                    <Button Classes="SettingsButton"
                             Command="{Binding OpenSettingsUserPageCommand}">
-                        <Grid ColumnDefinitions="24,*" 
-                              Classes="GridButtonButton">
-                            <Image Source="/Assets/settings-64.png" 
-                                   Width="21" 
-                                   Height="21" 
-                                   Stretch="Uniform"/>
-                            <Label Grid.Column="1" Content="Settings"/>
+                        <Grid ColumnDefinitions="Auto,*">
+                            <Image Source="/Assets/settings-64.png"
+                                   Width="21"
+                                   Height="21"
+                                   Stretch="Uniform"
+                                   Margin="0,0,12,0"/>
+                            <TextBlock Grid.Column="1"
+                                       Text="Settings"
+                                       Foreground="White"
+                                       VerticalAlignment="Center"/>
                         </Grid>
                     </Button>
                 </StackPanel>
-            </Grid>
+            </Border>
         </Grid>
     </Grid>
 
