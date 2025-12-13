@@ -6,21 +6,6 @@ namespace ProductionAccounting_AvaloniaApplication.Scripts;
 
 internal abstract class Internet
 {
-    // public static bool Connect()
-    // {
-    //     try
-    //     {
-    //         Dns.GetHostEntry("dotnet.beget.tech");
-    //         return true;
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         Loges.LoggingProcess(LogLevel.ERROR, 
-    //             $"Connection test failed: {ex.Message}");
-    //         return false;
-    //     }
-    // }
-
     public static bool ConnectToDataBase()
     {
         try
@@ -61,7 +46,6 @@ internal abstract class Internet
                 {
                     return false;
                 }
-
             }
         }
         catch (PingException pex)

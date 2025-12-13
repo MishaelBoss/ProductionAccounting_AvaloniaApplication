@@ -36,10 +36,10 @@
 		  		</Button>
 
 		  		<Button Margin="10,0,0,0"
-                  Width="32"
-                  Height="32"
-                  Command="{Binding RefreshAsyncCommand}"
-                  ToolTip.Tip="�������� ������">
+                        Width="32"
+                        Height="32"
+                        Command="{Binding RefreshAsyncCommand}"
+                        ToolTip.Tip="�������� ������">
 		  			<Image Source="/Assets/return-64.png"/>
 		  		</Button>
             </StackPanel>

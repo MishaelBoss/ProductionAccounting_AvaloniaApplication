@@ -1,4 +1,4 @@
-<UserControl xmlns="https://github.com/avaloniaui"
+ï»¿<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -22,8 +22,8 @@
 						<TextBlock Margin="0 5" HorizontalAlignment="Center" Text="{Binding Messageerror}" />
 						<TextBlock Margin="0 5" Text="Login"/>
 						<TextBox Watermark="Enter login" Text="{Binding Login}"/>
-						<TextBlock Margin="0 5" Text="Ïàðîëü"/>
-						<TextBox PasswordChar="*" Watermark="Ââåäèòå ïàðîëü" Text="{Binding Password}"/>
+						<TextBlock Margin="0 5" Text="ÐŸÐ°Ñ€Ð¾Ð»ÑŒ"/>
+						<TextBox PasswordChar="*" Watermark="Ð’Ð²ÐµÐ´Ð¸Ñ‚Ðµ Ð¿Ð°Ñ€Ð¾Ð»ÑŒ" Text="{Binding Password}"/>
 						<StackPanel Orientation="Vertical"
 									VerticalAlignment="Center"
 									HorizontalAlignment="Center"
@@ -31,9 +31,9 @@
 							<Button Classes="ButtonLogin"
 									IsEnabled="{Binding IsActiveConfirmButton}"
 									Click="Confirm_Click"
-									Content="Àâòîðèçîâàòüñÿ"/>
+									Content="ÐÐ²Ñ‚Ð¾Ñ€Ð¸Ð·Ð¾Ð²Ð°Ñ‚ÑŒÑÑ"/>
 							<Button Click="Cancel_Click"
-									Content="Îòìåíà"
+									Content="ÐžÑ‚Ð¼ÐµÐ½Ð°"
 									HorizontalAlignment="Center"
 									Background="Transparent"/>
 						</StackPanel>
@@ -42,4 +42,5 @@
 			</Grid>
 		</Border>
 	</Grid>
+
 </UserControl>

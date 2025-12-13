@@ -44,7 +44,11 @@
 		  		</Button>
             </StackPanel>
             </Grid>
-             <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="15" Margin="0,10,0,10" HorizontalAlignment="Center">
+             <StackPanel Grid.Row="1" 
+                         Orientation="Horizontal" 
+                         Spacing="15" 
+                         Margin="0,10,0,10" 
+                         HorizontalAlignment="Center">
                  
                  <StackPanel Orientation="Horizontal" Spacing="5">
                      <CheckBox IsChecked="{Binding FilterByRole}" 

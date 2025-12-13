@@ -1,7 +1,11 @@
-﻿using System.ComponentModel;
-using System.IO;
+﻿using CommunityToolkit.Mvvm.Input;
+using MsBox.Avalonia;
+using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
-using ReactiveUI;
+using System;
+using System.ComponentModel;
+using System.Net.NetworkInformation;
+using System.Windows.Input;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
 
@@ -16,12 +20,8 @@ public class SettingsPageUserControlViewModel : ViewModelBase, INotifyPropertyCh
         Password = Arguments.Password ?? string.Empty;
     }
 
-    private string _pathToSettingsFile = Path.GetFullPath(Path.Combine(Paths.Settings, Files.ConfigSettingsFileName));
-    public string PathToSettingsFile
-    {
-        get => _pathToSettingsFile;
-        set => this.RaiseAndSetIfChanged(ref _pathToSettingsFile, value);
-    }
+    public ICommand TestConnectCommand
+        => new RelayCommand(() => TestConnection());
 
     private string _ip = string.Empty;
     public string Ip
@@ -189,6 +189,74 @@ public class SettingsPageUserControlViewModel : ViewModelBase, INotifyPropertyCh
     public void ChangeServerPassword()
     {
         ManagerSettingsJson.Change("Server.Password", Password);
+    }
+
+    private void TestConnection() 
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(Ip) ||
+                string.IsNullOrEmpty(Port) ||
+                string.IsNullOrEmpty(Name) ||
+                string.IsNullOrEmpty(User) ||
+                string.IsNullOrEmpty(Password))
+            {
+                MessageBoxManager.GetMessageBoxStandard("Message", "Не все поля заполнены для подключения").ShowWindowAsync();
+                return;
+            }
+
+            using (var ping = new Ping())
+            {
+                string hostName = Ip;
+                PingReply reply = ping.Send(hostName, 3000);
+
+
+                if (reply is { Status: IPStatus.Success })
+                {
+                    Loges.LoggingProcess(level: LogLevel.INFO,
+                        message: $"Address: {reply.Address}");
+
+                    Loges.LoggingProcess(level: LogLevel.INFO,
+                        message: $"Roundtrip time: {reply.RoundtripTime}");
+
+                    Loges.LoggingProcess(level: LogLevel.INFO,
+                        message: $"Time to live: {reply.Options?.Ttl}");
+
+                    TestPostgreSqlConnection();
+                }
+            }
+        }
+        catch (PingException pex)
+        {
+            Loges.LoggingProcess(LogLevel.WARNING,
+                $"Ping failed: {pex.Message}");
+        }
+        catch (Exception ex)
+        {
+            Loges.LoggingProcess(LogLevel.ERROR,
+                $"Connection test failed: {ex.Message}");
+        }
+    }
+
+    private void TestPostgreSqlConnection()
+    {
+        try
+        {
+            using (var connection = new NpgsqlConnection($"Server={Ip};Port={Port};Database={Name};User Id={User};Password={Password};Timeout=10"))
+            {
+                connection.Open();
+
+                using (var cmd = new NpgsqlCommand("SELECT 1", connection))
+                {
+                    var result = cmd.ExecuteScalar();
+                    MessageBoxManager.GetMessageBoxStandard("Message", "PostgreSQL connection test successful").ShowWindowAsync();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBoxManager.GetMessageBoxStandard("Message", "PostgreSQL connection failed").ShowWindowAsync();
+        }
     }
 
     public new event PropertyChangedEventHandler? PropertyChanged;

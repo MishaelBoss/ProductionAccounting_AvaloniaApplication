@@ -13,7 +13,6 @@
         <Calendar   Grid.Row="0" 
                     SelectionMode="MultipleRange"
                     ZIndex="1"
-                    IsVisible="False"
                     Name="CalendarDateTimesheetList"
                     SelectedDatesChanged="CalendarDateTimesheetList_SelectedDatesChanged"/>
 
