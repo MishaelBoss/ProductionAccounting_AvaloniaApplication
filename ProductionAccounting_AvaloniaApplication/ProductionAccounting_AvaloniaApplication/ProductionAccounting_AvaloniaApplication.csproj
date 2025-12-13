@@ -69,9 +69,6 @@
     <Compile Update="Views\Pages\AdminPageUserControlView.axaml.cs">
       <DependentUpon>AdminPageUserControlView.axaml</DependentUpon>
     </Compile>
-    <Compile Update="Views\Pages\OrdersPageUserControlView.axaml.cs">
-      <DependentUpon>OrdersPageUserControlView.axaml</DependentUpon>
-    </Compile>
     <Compile Update="Views\Pages\ProductLibraryPageUserControlView.axaml.cs">
       <DependentUpon>ProductLibraryPageUserControlView.axaml</DependentUpon>
     </Compile>
