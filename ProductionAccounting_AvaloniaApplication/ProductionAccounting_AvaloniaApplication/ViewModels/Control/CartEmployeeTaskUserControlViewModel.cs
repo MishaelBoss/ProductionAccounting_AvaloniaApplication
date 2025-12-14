@@ -12,6 +12,7 @@ public class CartEmployeeTaskUserControlViewModel : ViewModelBase
     public double ProductId { get; set; }
     public double OperationId { get; set; }
     public double SubProductOperationId { get; set; }
+    public double UserId { get; set; }
 
     private double _assignmentId;
     public double AssignmentId
@@ -109,5 +110,5 @@ public class CartEmployeeTaskUserControlViewModel : ViewModelBase
         => !string.IsNullOrWhiteSpace(Notes);
 
     public ICommand OpenCompleteWorkFormCommand
-        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseCompleteWorkFormStatusMessage(true, OperationName, PlannedQuantity, ProductId, OperationId, SubProductOperationId)));
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseCompleteWorkFormStatusMessage(true, OperationName, PlannedQuantity, ProductId, OperationId, SubProductOperationId, UserId)));
 }

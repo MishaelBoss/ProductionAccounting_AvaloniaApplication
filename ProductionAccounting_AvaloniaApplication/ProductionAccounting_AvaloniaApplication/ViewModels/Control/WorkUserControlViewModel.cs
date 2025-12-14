@@ -73,7 +73,8 @@ public class WorkUserControlViewModel : ViewModelBase, INotifyPropertyChanging, 
                                 CompletedQuantity = reader.GetDecimal("completed_quantity"),
                                 Notes = reader.IsDBNull("notes") ? null : reader.GetString("notes"),
                                 ProductId = reader.GetDouble("product_id"),
-                                OperationId = reader.GetDouble("operation_id")
+                                OperationId = reader.GetDouble("operation_id"),
+                                UserId = reader.GetDouble("assigned_to_user_id")
                             };
 
                             var cartUser = new CartEmployeeTaskUserControl()

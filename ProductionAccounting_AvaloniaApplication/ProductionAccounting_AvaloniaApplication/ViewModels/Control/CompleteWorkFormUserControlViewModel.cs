@@ -11,16 +11,17 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class CompleteWorkFormUserControlViewModel : ViewModelBase
 {
-    public CompleteWorkFormUserControlViewModel(string taskName, decimal plannedQuantity, double productId, double operationId, double subProductOperationId)
+    public CompleteWorkFormUserControlViewModel(string taskName, decimal plannedQuantity, double productId, double operationId, double subProductOperationId, double userId)
     {
         TaskName = taskName;
         PlannedQuantity = plannedQuantity;
         ProductId = productId;
         OperationId = operationId;
         SubProductOperationId = subProductOperationId;
+        UserId = userId;
 
         Loges.LoggingProcess(LogLevel.INFO,
-                $"taskName: {taskName} assignedQuantity: {plannedQuantity} productId: {productId} operationId: {operationId} subProductOperationId: {subProductOperationId}");
+                $"taskName: {taskName} assignedQuantity: {plannedQuantity} productId: {productId} operationId: {operationId} subProductOperationId: {subProductOperationId} userId {userId}");
     }
 
     public double AssignmentId { get; }
@@ -29,6 +30,7 @@ public class CompleteWorkFormUserControlViewModel : ViewModelBase
     public double ProductId { get; }
     public double OperationId { get; }
     public double SubProductOperationId { get; }
+    public double UserId { get; }
 
     private decimal _completedToday;
     public decimal CompletedToday
@@ -58,7 +60,6 @@ public class CompleteWorkFormUserControlViewModel : ViewModelBase
             {
                 await connection.OpenAsync();
 
-                // Получаем информацию о тарифе
                 string rateSql = @"SELECT wr.rate, wr.use_tonnage, wr.coefficient 
                              FROM public.work_rate wr
                              JOIN public.operation o ON o.name = wr.work_type
@@ -82,13 +83,11 @@ public class CompleteWorkFormUserControlViewModel : ViewModelBase
                     }
                 }
 
-                // Рассчитываем сумму
                 decimal calculatedAmount = 0;
                 string formula = "";
 
                 if (useTonnage)
                 {
-                    // Нужно получить тоннаж из подпродукта или заказа
                     string tonnageSql = @"SELECT sp.planned_weight 
                                     FROM public.sub_products sp
                                     JOIN public.sub_product_operations spo ON spo.sub_product_id = sp.id
@@ -111,7 +110,6 @@ public class CompleteWorkFormUserControlViewModel : ViewModelBase
                     formula = $"Тариф: {rate} × Кол-во: {CompletedToday} = {calculatedAmount}";
                 }
 
-                // Сохраняем производственную запись
                 string sqlProduction = @"INSERT INTO public.production 
                                    (user_id, product_id, operation_id, quantity, production_date, 
                                     notes, status, amount, tonnage, calculated_amount, calculation_formula)
@@ -120,7 +118,7 @@ public class CompleteWorkFormUserControlViewModel : ViewModelBase
 
                 using (var command = new NpgsqlCommand(sqlProduction, connection))
                 {
-                    command.Parameters.AddWithValue("@user_id", ManagerCookie.GetIdUser ?? 0);
+                    command.Parameters.AddWithValue("@user_id", UserId);
                     command.Parameters.AddWithValue("@product_id", ProductId);
                     command.Parameters.AddWithValue("@operation_id", OperationId);
                     command.Parameters.AddWithValue("@qty", CompletedToday);
@@ -129,10 +127,8 @@ public class CompleteWorkFormUserControlViewModel : ViewModelBase
                     command.Parameters.AddWithValue("@calculated_amount", calculatedAmount);
                     command.Parameters.AddWithValue("@formula", formula);
 
-                    // Если есть тоннаж, добавляем его
                     if (useTonnage)
                     {
-                        // Получаем тоннаж еще раз для уверенности
                         string tonnageSql = @"SELECT sp.planned_weight 
                                         FROM public.sub_products sp
                                         JOIN public.sub_product_operations spo ON spo.sub_product_id = sp.id
@@ -154,7 +150,6 @@ public class CompleteWorkFormUserControlViewModel : ViewModelBase
                     await command.ExecuteNonQueryAsync();
                 }
 
-                // Обновляем выполненное количество в операции подпродукта
                 string sqlUpdate = @"UPDATE public.sub_product_operations 
                                SET completed_quantity = completed_quantity + @qty 
                                WHERE id = @op_id";

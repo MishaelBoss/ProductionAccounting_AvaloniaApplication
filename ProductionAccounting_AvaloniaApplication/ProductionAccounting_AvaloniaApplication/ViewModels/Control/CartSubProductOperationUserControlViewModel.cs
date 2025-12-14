@@ -14,6 +14,7 @@ public class CartSubProductOperationUserControlViewModel : ViewModelBase
     public double ProductId { get; set; }
     public double OperationId { get; set; }
     public double SubProductId { get; set; }
+    public double UserId { get; set; }
 
     private string _operationName = string.Empty;
     public string OperationName
@@ -146,5 +147,5 @@ public class CartSubProductOperationUserControlViewModel : ViewModelBase
         => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseEmployeeAssignmentMasterSubMarkStatusMessage(true, SubProductOperationId, SubProductId)));
 
     public ICommand OpenSubmitWorkForAnEmployeeCommand
-        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseCompleteWorkFormStatusMessage(true, OperationName, PlannedQuantity, ProductId, OperationId, SubProductOperationId)));
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseCompleteWorkFormStatusMessage(true, OperationName, PlannedQuantity, ProductId, OperationId, SubProductOperationId, AssignedToUserId)));
 }
