@@ -108,7 +108,7 @@
 						BorderThickness="0"
 						HorizontalContentAlignment="Center"
 						VerticalContentAlignment="Center"
-						IsVisible="{Binding CanCompleteTask}"
+						IsVisible="{Binding IsAdministratorOrMasterAndCanCompleteTask}"
 						ToolTip.Tip="Сдать марку">
 				</Button>
 
@@ -118,7 +118,7 @@
 						CornerRadius="6"
 						Background="#34C759"
 						BorderThickness="0"
-						IsVisible="{Binding IsAdministratorOrMaster}"
+						IsVisible="{Binding IsAdministratorOrMasterAndCanCompleteTask}"
 						ToolTip.Tip="Edit">
 					<Image Source="/Assets/edit-64.png"/>
 				</Button>
@@ -129,7 +129,7 @@
 						CornerRadius="6"
 						Background="#FF3B30"
 						BorderThickness="0"
-						IsVisible="{Binding IsAdministratorOrMaster}"
+						IsVisible="{Binding IsAdministratorOrMasterAndManager}"
 						ToolTip.Tip="Удалить">
 					<Image Source="/Assets/remove-64.png"
 						   Width="18"

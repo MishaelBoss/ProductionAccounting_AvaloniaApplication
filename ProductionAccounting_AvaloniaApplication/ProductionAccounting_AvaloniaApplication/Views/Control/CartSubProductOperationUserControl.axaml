@@ -92,7 +92,7 @@
                             FontWeight="Bold"
                             CornerRadius="12"
                             Padding="20,12"
-                            IsVisible="{Binding IsAdministratorOrMaster}"/>
+                            IsVisible="{Binding IsAdministratorOrMasterAndCanCompleteTask}"/>
 
                     <Button Content="Сдать"
                             Command="{Binding OpenSubmitWorkForAnEmployeeCommand}"
@@ -112,7 +112,7 @@
                             FontWeight="Bold"
                             CornerRadius="12"
                             Padding="20,12"
-                            IsVisible="{Binding IsAdministratorOrMaster}"/>
+                            IsVisible="{Binding IsAdministratorOrMasterAndCanCompleteTask}"/>
                 </StackPanel>
             </Grid>
         </Grid>

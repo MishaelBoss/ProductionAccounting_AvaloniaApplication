@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using static ProductionAccounting_AvaloniaApplication.ViewModels.Control.NotFoundUserControlViewModel;
@@ -183,8 +184,6 @@ public class TabProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
 
     private async Task SearchProductAsync(List<double> userIds)
     {
-        //if (!ManagerCookie.IsUserLoggedIn() && !ManagerCookie.IsAdministrator) return;
-
         if (userIds.Count == 0)
         {
             StackPanelHelper.ClearAndRefreshStackPanel<CartProductUserControl>(HomeMainContent, productList);
@@ -222,7 +221,7 @@ public class TabProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
                         p.description
                     FROM public.product_tasks pt
                     JOIN public.product p ON p.id = pt.product_id
-                    WHERE p.id IN ({string.Join(", ", paramNames)})
+                    WHERE p.id IN ({string.Join(", ", paramNames)}) 
                     ORDER BY pt.created_at DESC";
 
             using (var connection = new NpgsqlConnection(Arguments.connection))
@@ -263,6 +262,8 @@ public class TabProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
 
                             productList.Add(userControl);
                         }
+
+                        if (productList.FirstOrDefault()?.DataContext is CartProductUserControlViewModel vm) await vm.CheckIsTaskCanBeCompleted();
                     }
                 }
             }

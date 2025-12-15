@@ -16,6 +16,8 @@ public class CartSubProductOperationUserControlViewModel : ViewModelBase
     public double SubProductId { get; set; }
     public double UserId { get; set; }
 
+    public string Status { get; set; } = string.Empty;
+
     private string _operationName = string.Empty;
     public string OperationName
     {
@@ -100,14 +102,19 @@ public class CartSubProductOperationUserControlViewModel : ViewModelBase
         => !IsAssigned 
         && !IsCompleted;
 
-    public bool IsAdministratorOrMaster
-        => ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsAdministrator || ManagerCookie.IsMaster;
+    public bool IsAdministratorOrMasterAndManager
+        => ManagerCookie.IsUserLoggedIn()
+        && (ManagerCookie.IsAdministrator || ManagerCookie.IsMaster || ManagerCookie.IsManager);
 
     public bool CanAssignTest
-        => IsAdministratorOrMaster 
+        => IsAdministratorOrMasterAndManager 
         && IsAssigned 
         && !IsAssignedToMe
         && !IsCompleted;
+
+    public bool IsAdministratorOrMasterAndCanCompleteTask
+        => IsAdministratorOrMasterAndManager 
+        && Status != "completed";
 
     public string StatusButtonText 
         => IsAssigned ? "Переназначить" 

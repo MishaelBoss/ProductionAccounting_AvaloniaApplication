@@ -158,7 +158,7 @@ public class AddProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
         }
     }
 
-    private decimal _productCoefficient = 1m;
+    private decimal _productCoefficient = 1.0m;
     public decimal ProductCoefficient
     {
         get => _productCoefficient;
@@ -309,8 +309,8 @@ public class AddProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
         ProductArticle = string.Empty;
         ProductMark = string.Empty;
         ProductDescription = string.Empty;
-        ProductPricePerUnit = 0;
-        ProductPricePerKg = 0;
+        ProductPricePerUnit = 0.0m;
+        ProductPricePerKg = 0.0m;
         ProductCoefficient = 1.0m;
         SelectedUnit = "шт.";
     }

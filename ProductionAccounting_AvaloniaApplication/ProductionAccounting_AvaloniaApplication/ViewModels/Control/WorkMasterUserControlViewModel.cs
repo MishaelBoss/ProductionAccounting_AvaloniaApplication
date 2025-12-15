@@ -6,6 +6,7 @@ using ProductionAccounting_AvaloniaApplication.Views.Control;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Threading.Tasks;
 using static ProductionAccounting_AvaloniaApplication.ViewModels.Control.NotFoundUserControlViewModel;
 
@@ -48,7 +49,7 @@ public class WorkMasterUserControlViewModel : ViewModelBase, INotifyPropertyChan
                     FROM public.product_tasks pt
                     JOIN public.product p ON p.id = pt.product_id
                     WHERE COALESCE(pt.status, 'new') IN ('new', 'in_progress')
-                      AND p.is_active = true
+                        AND p.is_active = true
                     ORDER BY pt.created_at DESC";
 
             using (var connection = new NpgsqlConnection(Arguments.connection))
@@ -79,10 +80,10 @@ public class WorkMasterUserControlViewModel : ViewModelBase, INotifyPropertyChan
                                 DataContext = viewModel,
                             };
 
-                            _  = viewModel.CheckIsTaskCanBeCompleted();
-
                             productList.Add(userControl);
                         }
+
+                        if (productList.FirstOrDefault()?.DataContext is CartProductUserControlViewModel vm) await vm.CheckIsTaskCanBeCompleted();
                     }
                 }
             }

@@ -23,7 +23,7 @@
 		  					Width="32"
 		  					Height="32"
 		  					ToolTip.Tip="Add a product"
-                            IsVisible="{Binding IsAdministratorOrMaster}">
+                            IsVisible="{Binding IsAdministratorOrMasterAndCanCompleteTask}">
 		  				<Image Source="/Assets/add-64.png"/>
 		  			</Button>
                     <TextBlock Text="{Binding Name}"/>
@@ -59,7 +59,7 @@
 		  					Width="32"
 		  					Height="32"
 		  					ToolTip.Tip="Add"
-                            IsVisible="{Binding IsAdministratorOrMaster}">
+                            IsVisible="{Binding IsAdministratorOrMasterAndCanCompleteTask}">
 		  				<Image Source="/Assets/add-64.png"/>
 		  			</Button>
              <ScrollViewer Margin="10">

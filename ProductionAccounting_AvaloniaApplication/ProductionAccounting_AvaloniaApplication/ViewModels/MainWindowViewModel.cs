@@ -57,15 +57,11 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
         {
             if (message.ShouldOpen)
             {
-                var productViewModel = new ProductViewUserControlViewModel(message.Name, message.ProductId, message.Mark, message.Coefficient, message.Notes);
+                var productViewModel = new ProductViewUserControlViewModel(message.Name, message.ProductId, message.Mark, message.Coefficient, message.Notes, message.Status);
 
                 viewPageUserControlViewModel.ShowViewModel(productViewModel);
 
                 CurrentPage = viewPageUserControlViewModel;
-            }
-            else
-            {
-                //CloseProfileUserControl();
             }
         }
 

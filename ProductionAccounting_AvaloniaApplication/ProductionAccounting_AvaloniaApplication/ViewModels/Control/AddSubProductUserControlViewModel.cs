@@ -16,15 +16,6 @@ public class AddSubProductUserControlViewModel : ViewModelBase, INotifyPropertyC
         TaskId = taskId;
     }
 
-/*    public void Receive(RefreshSubProductListMessage message)
-    {
-        _ = LoadSubProductAsync();
-    }*/
-
-/*    public StackPanel? HomeMainContent { get; set; } = null;
-
-    private List<CartSubProductUserControl> subProductList = [];*/
-
     public double TaskId { get; }
 
     private string? _title = string.Empty;
@@ -114,59 +105,6 @@ public class AddSubProductUserControlViewModel : ViewModelBase, INotifyPropertyC
             Loges.LoggingProcess(LogLevel.ERROR, ex: ex);
         }
     }
-
-    /*public async Task LoadSubProductAsync() 
-    {
-        StackPanelHelper.ClearAndRefreshStackPanel<CartSubProductUserControl>(HomeMainContent, subProductList);
-
-        try
-        {
-            string sql = "SELECT id, product_task_id, name, planned_quantity, planned_weight, notes, created_at FROM public.sub_products WHERE product_task_id = @product_task_id";
-
-            using (var connection = new NpgsqlConnection(Arguments.connection))
-            {
-                await connection.OpenAsync();
-
-                using (var command = new NpgsqlCommand(sql, connection))
-                {
-                    command.Parameters.AddWithValue("@product_task_id", TaskId);
-
-                    using (var reader = await command.ExecuteReaderAsync()) 
-                    {
-                        while (await reader.ReadAsync()) 
-                        {
-                            var viewModel = new CartSubProductUserControlViewModel()
-                            {
-                                Id = reader.GetDouble(0),
-                                ProductTaskId = reader.GetDouble(1),
-                                Name = reader.GetString(2),
-                                PlannedQuantity = reader.GetDouble(3),
-                                PlannedWeight = reader.GetDouble(4),
-                                Notes = reader.GetString(5),
-                            };
-
-                            var userControl = new CartSubProductUserControl()
-                            {
-                                DataContext = viewModel,
-                            };
-
-                            subProductList.Add(userControl);
-                        }
-                    }
-                }
-            }
-
-            StackPanelHelper.RefreshStackPanelContent<CartSubProductUserControl>(HomeMainContent, subProductList);
-
-            if (subProductList.Count == 0) ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NotFound);
-        }
-        catch (Exception ex)
-        {
-            StackPanelHelper.ClearAndRefreshStackPanel<CartSubProductUserControl>(HomeMainContent, subProductList);
-            ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NoConnectToDB);
-            Loges.LoggingProcess(LogLevel.ERROR, ex: ex);
-        }
-    }*/
 
     private void ClearForm() 
     {

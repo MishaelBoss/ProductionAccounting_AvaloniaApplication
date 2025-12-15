@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ProductionAccounting_AvaloniaApplication.Scripts;
+﻿namespace ProductionAccounting_AvaloniaApplication.Scripts;
 
 public class OpenOrCloseProductViewStatusMessage
 {
@@ -10,8 +8,9 @@ public class OpenOrCloseProductViewStatusMessage
     public string Mark { get; }
     public decimal Coefficient { get; }
     public string Notes { get; }
+    public string Status { get; }
 
-    public OpenOrCloseProductViewStatusMessage(bool shouldOpen, string? name = null, double? productId = null, string? mark = null, decimal? coefficient = null, string? notes = null)
+    public OpenOrCloseProductViewStatusMessage(bool shouldOpen, string? name = null, double? productId = null, string? mark = null, decimal? coefficient = null, string? notes = null, string? status = null)
     {
         ShouldOpen = shouldOpen;
         Name = name ?? string.Empty;
@@ -19,5 +18,6 @@ public class OpenOrCloseProductViewStatusMessage
         Mark = mark ?? string.Empty;
         Coefficient = coefficient ?? 0;
         Notes = notes ?? string.Empty;
+        Status = status ?? string.Empty;
     }
 }

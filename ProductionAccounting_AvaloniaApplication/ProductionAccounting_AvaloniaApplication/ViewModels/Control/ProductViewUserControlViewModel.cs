@@ -16,13 +16,14 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyChanged, IRecipient<RefreshSubProductListMessage>, IRecipient<OpenOrCloseSubProductStatusMessage>, IRecipient<RefreshSubProductOperationsMessage>
 {
-    public ProductViewUserControlViewModel(string name, double productId, string mark, decimal coefficient, string notes) 
+    public ProductViewUserControlViewModel(string name, double productId, string mark, decimal coefficient, string notes, string status) 
     {
         Name = name;
         ProductId = productId;
         Mark = mark;
         Coefficient = coefficient;
         Notes = notes;
+        Status = status;
 
         WeakReferenceMessenger.Default.RegisterAll(this);
     }
@@ -62,13 +63,7 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
     public string Mark { get; }
     public decimal Coefficient { get; }
     public string Notes { get; }
-
-    private string _status = "new";
-    public string Status
-    {
-        get => _status;
-        set => this.RaiseAndSetIfChanged(ref _status, value);
-    }
+    public string Status { get; set; }
 
     private double? _subProductId = 0;
     public double? SubProductId
@@ -105,10 +100,13 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
         set => this.RaiseAndSetIfChanged(ref _subProductNotes, value);
     }
 
-    public bool IsAdministratorOrMaster
+    public bool IsAdministratorOrMasterAndManager
         => ManagerCookie.IsUserLoggedIn()
-        && (ManagerCookie.IsAdministrator || ManagerCookie.IsMaster);
+        && (ManagerCookie.IsAdministrator || ManagerCookie.IsMaster || ManagerCookie.IsManager);
 
+    public bool IsAdministratorOrMasterAndCanCompleteTask
+        => IsAdministratorOrMasterAndManager 
+        && Status != "completed";
     public async Task LoadSubProductAsync()
     {
         StackPanelHelper.ClearAndRefreshStackPanel<CartSubProductUserControl>(SubProductContent, subProductList);
@@ -240,7 +238,8 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
                                                 pt.product_id,
                                                 o.id,
                                                 u.login,
-                                                sp.id
+                                                sp.id,
+                                                COALESCE(pt.status, 'new') AS status
                                             FROM public.sub_product_operations spo
                                             JOIN public.operation o ON o.id = spo.operation_id
                                             JOIN public.sub_products sp ON sp.id = spo.sub_product_id
@@ -269,7 +268,8 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
                                 ProductId = reader2.GetDouble(5),
                                 OperationId = reader2.GetDouble(6),
                                 UserName = reader2.IsDBNull(7) ? string.Empty : reader2.GetString(7),
-                                SubProductId = reader2.GetDouble(8)
+                                SubProductId = reader2.GetDouble(8),
+                                Status = reader2.GetString(9)
                             };
 
                             var userControl = new CartSubProductOperationUserControl()

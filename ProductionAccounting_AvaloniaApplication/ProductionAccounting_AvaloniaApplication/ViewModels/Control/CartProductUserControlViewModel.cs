@@ -34,7 +34,7 @@ public class CartProductUserControlViewModel : ViewModelBase, INotifyPropertyCha
         });
 
     public ICommand OpenPruductViewCommand
-        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseProductViewStatusMessage(true, ProductName, Id, Mark, Coefficient, Notes)));
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseProductViewStatusMessage(true, ProductName, Id, Mark, Coefficient, Notes, Status)));
 
     public ICommand CompleteTaskCommand
         => new RelayCommand(async () => { if (!CanCompleteTask) return; await CompleteTaskAndShipAsync(); });
@@ -102,12 +102,14 @@ public class CartProductUserControlViewModel : ViewModelBase, INotifyPropertyCha
         }
     }
 
-    public bool IsAdministratorOrMaster
+    public bool IsAdministratorOrMasterAndManager
         => ManagerCookie.IsUserLoggedIn()
-        && (ManagerCookie.IsMaster || ManagerCookie.IsAdministrator);
+        && (ManagerCookie.IsAdministrator || ManagerCookie.IsMaster || ManagerCookie.IsManager);
 
     public bool IsAdministratorOrMasterAndCanCompleteTask
-        => IsAdministratorOrMaster && CanCompleteTask;
+        => IsAdministratorOrMasterAndManager 
+        && CanCompleteTask
+        && Status != "completed";
 
     public async Task CheckIsTaskCanBeCompleted() 
     {
