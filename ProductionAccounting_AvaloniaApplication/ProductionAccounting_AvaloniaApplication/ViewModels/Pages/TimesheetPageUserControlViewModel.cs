@@ -18,10 +18,14 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
 
 public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyChanging
 {
-    public TimesheetPageUserControlViewModel() 
+
+    public TimesheetPageUserControlViewModel()
     {
         SelectedMassStatus = Statuses[0];
         SelectedSingleStatus = Statuses[0];
+
+        _filterStartDate = new DateTimeOffset(DateTime.Today);
+        _filterEndDate = new DateTimeOffset(DateTime.Today);
 
         _ = LoadListUsersAsync();
     }
@@ -30,7 +34,33 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
 
     private List<CartTimesheetUserControl> timesheetList = [];
 
-    private DateTimeOffset _selectedDate = new (DateTime.Today);
+    private DateTimeOffset _filterStartDate;
+    public DateTimeOffset FilterStartDate
+    {
+        get => _filterStartDate;
+        set
+        {
+            if (_filterStartDate != value)
+            {
+                this.RaiseAndSetIfChanged(ref _filterStartDate, value);
+            }
+        }
+    }
+
+    private DateTimeOffset _filterEndDate;
+    public DateTimeOffset FilterEndDate
+    {
+        get => _filterEndDate;
+        set
+        {
+            if (_filterEndDate != value)
+            {
+                this.RaiseAndSetIfChanged(ref _filterEndDate, value);
+            }
+        }
+    }
+
+    private DateTimeOffset _selectedDate = new(DateTime.Today);
     public DateTimeOffset SelectedDate
     {
         get => _selectedDate;
@@ -65,7 +95,7 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
         set => this.RaiseAndSetIfChanged(ref _singleNotes, value);
     }
 
-    private DateTimeOffset _massEditStartDate = new (DateTime.Today);
+    private DateTimeOffset _massEditStartDate = new(DateTime.Today);
     public DateTimeOffset MassEditStartDate
     {
         get => _massEditStartDate;
@@ -152,11 +182,41 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
         set => this.RaiseAndSetIfChanged(ref _massEditHours, value);
     }
 
+    public ICommand RefreshTimesheetCommand
+        => new RelayCommand(async () => await RefreshTimesheetAsync());
+
     public ICommand ApplyMassEditCommand
         => new RelayCommand(async () => await ApplyMassEditAsync());
 
     public ICommand SaveSingleRecordCommand
         => new RelayCommand(async () => await SaveSingleRecordAsync());
+
+    public async Task RefreshTimesheetAsync()
+    {
+        try
+        {
+            if (FilterStartDate > FilterEndDate)
+            {
+                var temp = FilterStartDate;
+                _filterStartDate = FilterEndDate;
+                _filterEndDate = temp;
+
+                this.RaisePropertyChanged(nameof(FilterStartDate));
+                this.RaisePropertyChanged(nameof(FilterEndDate));
+            }
+
+            await LoadTimesheetAsync(FilterStartDate.DateTime, FilterEndDate.DateTime);
+
+            Loges.LoggingProcess(LogLevel.INFO,
+                message: $"Табель обновлен за период: {FilterStartDate:dd.MM.yyyy} - {FilterEndDate:dd.MM.yyyy}");
+        }
+        catch (Exception ex)
+        {
+            Loges.LoggingProcess(LogLevel.ERROR,
+                ex: ex,
+                message: "Ошибка обновления табеля");
+        }
+    }
 
     public async Task LoadListUsersAsync()
     {
@@ -172,7 +232,7 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
             ComboBoxUsers.Clear();
 
             string sqlUsers = "SELECT id, first_name, last_name, middle_name, login FROM public.user WHERE is_active = true ORDER BY last_name, first_name";
-            
+
             using (var connection = new NpgsqlConnection(Arguments.connection))
             {
                 await connection.OpenAsync();
@@ -199,7 +259,7 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(level: LogLevel.WARNING, 
+            Loges.LoggingProcess(level: LogLevel.WARNING,
                 ex: ex);
         }
     }
@@ -210,7 +270,10 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
 
         try
         {
-            string sql = @"INSERT INTO public.timesheet (user_id, work_date, status, hours_worked, notes, created_by) VALUES (@userId, @workDate, @status, @hoursWorked, @notes, @createdBy)";
+            string sql = "INSERT INTO public.timesheet  (user_id, work_date, status, hours_worked, notes, created_by, created_at)" +
+                "VALUES (@userId, @workDate, @status, @hoursWorked, @notes, @createdBy, @createdAt) " +
+                "ON CONFLICT (user_id, work_date) " +
+                "DO UPDATE SET status = EXCLUDED.status, hours_worked = EXCLUDED.hours_worked, notes = EXCLUDED.notes, updated_by = @createdBy, updated_at = @createdAt";
 
             using (var connection = new NpgsqlConnection(Arguments.connection))
             {
@@ -223,19 +286,20 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
                     command.Parameters.AddWithValue("@hoursWorked", SelectedSingleStatus.Code == "Я" ? SingleHours : 0);
                     command.Parameters.AddWithValue("@notes", SingleNotes ?? "");
                     command.Parameters.AddWithValue("@createdBy", ManagerCookie.GetIdUser ?? 0);
+                    command.Parameters.AddWithValue("@createdAt", DateTime.Now);
 
                     await command.ExecuteNonQueryAsync();
 
                     ClearSingleForm();
 
-                    await LoadTimesheetAsync(MassEditStartDate.DateTime, MassEditEndDate.DateTime);
+                    await RefreshTimesheetAsync();
                 }
             }
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(LogLevel.ERROR, 
-                ex: ex, 
+            Loges.LoggingProcess(LogLevel.ERROR,
+                ex: ex,
                 message: "Ошибка сохранения единичной записи табеля");
         }
     }
@@ -261,7 +325,7 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
 
         int totalInserted = 0;
 
-        await using (var connection = new NpgsqlConnection(Arguments.connection)) 
+        await using (var connection = new NpgsqlConnection(Arguments.connection))
         {
             await connection.OpenAsync();
             await using (var transaction = await connection.BeginTransactionAsync())
@@ -303,7 +367,7 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
                     Loges.LoggingProcess(LogLevel.INFO,
                         message: $"Успешно добавлено {totalInserted} новых записей в табель");
 
-                    await LoadTimesheetAsync(MassEditStartDate.DateTime, MassEditEndDate.DateTime);
+                    await RefreshTimesheetAsync();
                 }
                 catch (Exception ex)
                 {
@@ -313,7 +377,6 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
                         message: "Ошибка при массовом добавлении");
                 }
             }
-
         }
     }
 
@@ -327,11 +390,11 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
 
     public async Task LoadTimesheetAsync(DateTime startDate, DateTime endDate)
     {
-        StackPanelHelper.ClearAndRefreshStackPanel<CartTimesheetUserControl>(CartTimesheet, timesheetList);
-
         try
         {
-            string sql = "SELECT t.status, t.notes, t.hours_worked,t.user_id, u.login as user_login FROM public.timesheet t LEFT JOIN public.user u ON t.user_id = u.id WHERE t.work_date BETWEEN @startDate AND @endDate";
+            StackPanelHelper.ClearAndRefreshStackPanel<CartTimesheetUserControl>(CartTimesheet, timesheetList);
+
+            string sql = "SELECT t.status, t.notes, t.hours_worked,t.user_id, u.login as user_login FROM public.timesheet t LEFT JOIN public.user u ON t.user_id = u.id WHERE t.work_date BETWEEN @startDate AND @endDate ORDER BY t.work_date DESC, u.login";
 
             using (var connection = new NpgsqlConnection(Arguments.connection))
             {
@@ -366,7 +429,11 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
 
                 StackPanelHelper.RefreshStackPanelContent<CartTimesheetUserControl>(CartTimesheet, timesheetList);
 
-                if (timesheetList.Count == 0) ItemNotFoundException.Show(CartTimesheet, ErrorLevel.NotFound);
+                if (timesheetList.Count == 0)
+                    ItemNotFoundException.Show(CartTimesheet, ErrorLevel.NotFound);
+                else
+                    Loges.LoggingProcess(LogLevel.INFO,
+                        message: $"Загружено {timesheetList.Count} записей за период: {startDate:dd.MM.yyyy} - {endDate:dd.MM.yyyy}");
             }
         }
         catch (NpgsqlException ex)
