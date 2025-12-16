@@ -24,7 +24,7 @@ private string _error = string.Empty;
                 Error = "Не подключен к базе данных";
                 break;
             case ErrorLevel.NotFound:
-                Error = "Ничего не найдно";
+                Error = "Ничего не найдено";
                 break;
             default:
                 Error = "Неизвестная ошибка";
