@@ -2,6 +2,7 @@
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
 using ReactiveUI;
@@ -12,7 +13,7 @@ using System.Windows.Input;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
-public class RightBoardUserControlViewModel : ViewModelBase
+public class RightBoardUserControlViewModel : ViewModelBase, IRecipient<OpenOrCloseAuthorizationPageStatusMessage>, IRecipient<UserAuthenticationChangedMessage>
 {
     private MainWindowViewModel? mainWindowViewModel { get; set; } = null;
 
@@ -20,14 +21,23 @@ public class RightBoardUserControlViewModel : ViewModelBase
     {
         mainWindowViewModel = _mainWindowViewModel;
 
-        buttons = new ObservableCollection<DashboardButtonViewModel>();
+        buttons = [];
 
         UpdateUI();
 
-        mainWindowViewModel?.LoginStatusChanged += OnLoginStatusChanged;
+        WeakReferenceMessenger.Default.Register<OpenOrCloseAuthorizationPageStatusMessage>(this);
+        StrongReferenceMessenger.Default.Register<UserAuthenticationChangedMessage>(this);
     }
 
-    public StackPanel stackPanel;
+    public void Receive(OpenOrCloseAuthorizationPageStatusMessage message)
+    {
+        if (message.ShouldOpen) OpenPage(authorizationPageUserControlViewModel);
+    }
+
+    public void Receive(UserAuthenticationChangedMessage message)
+    {
+        UpdateUI();
+    }
 
     private readonly AdminPageUserControlViewModel adminPageUserControlViewModel = new();
     private readonly ProductLibraryPageUserControlViewModel productLibraryUserControlViewModel = new();
@@ -38,6 +48,7 @@ public class RightBoardUserControlViewModel : ViewModelBase
     private readonly ProductsManagerPageUserControlViewModel productsManagerPageUserControlViewModel = new();
     private readonly ShipmentsPageUserControlViewModel shipmentsPageUserControlViewModel = new();
     private readonly SalaryCalculationPageUserControlViewModel salaryCalculationPageUserControlViewModel = new();
+    private readonly AuthorizationPageUserControlViewModel authorizationPageUserControlViewModel = new();
 
     public ICommand OpenAdminPanelPageCommand
         => new RelayCommand(() => OpenPage(adminPageUserControlViewModel));
@@ -69,7 +80,7 @@ public class RightBoardUserControlViewModel : ViewModelBase
     public ICommand OpenAuthorizationCommand
         => new RelayCommand(() => {
             if (ManagerCookie.IsUserLoggedIn()) mainWindowViewModel?.ShowProfileUser();
-            else mainWindowViewModel?.ShowAuthorization();
+            else OpenPage(authorizationPageUserControlViewModel);
         });
 
     private object? _objectViewModels = null;
@@ -92,11 +103,6 @@ public class RightBoardUserControlViewModel : ViewModelBase
     { 
         get => _buttons; 
         set => this.RaiseAndSetIfChanged(ref _buttons, value); 
-    }
-
-    private void OnLoginStatusChanged()
-    {
-        UpdateUI();
     }
 
     private bool _isAdministrator;
@@ -178,14 +184,14 @@ public class RightBoardUserControlViewModel : ViewModelBase
         IsAdministratorOrMasterOrManager = (IsAdministrator || IsMaster || IsManager);
         IsAll = (IsAdministrator || IsMaster || IsEmployee || IsManager);
 
-        if (!IsAdministrator && _objectViewModels == adminPageUserControlViewModel) OpenPage(mainWindowViewModel);
-        if (!IsAll && _objectViewModels == workUserPageUserControlViewModel) mainWindowViewModel?.ShowAuthorization();
+        if (!IsAdministrator && _objectViewModels == adminPageUserControlViewModel) OpenPage(authorizationPageUserControlViewModel);
+        if (!IsAll && _objectViewModels == workUserPageUserControlViewModel) OpenPage(authorizationPageUserControlViewModel);
 
         buttons.Clear();
 
         var newButtons = new List<DashboardButtonViewModel>
         {
-            new DashboardButtonViewModel("Admin panel", OpenAdminPanelPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/administrator-64.png"), () => ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsAdministrator),
+            new DashboardButtonViewModel("Admin panel", OpenAdminPanelPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/administrator-64.png"), () => IsAdministrator),
             new DashboardButtonViewModel("Manager", OpenProductsManagerUserPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/administrator-64.png"), () => IsAdministratorOrManager),
             new DashboardButtonViewModel("Timesheet", OpenTimesheetPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/home-64.png"), () => IsAdministratorOrManager),
             new DashboardButtonViewModel("Library product", OpenProductLibraryPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/library-64.png"), () => IsAll),
@@ -215,5 +221,10 @@ public class RightBoardUserControlViewModel : ViewModelBase
         {
             return new Bitmap(stream);
         }
+    }
+
+    ~RightBoardUserControlViewModel()
+    {
+        StrongReferenceMessenger.Default.Unregister<UserAuthenticationChangedMessage>(this);
     }
 }

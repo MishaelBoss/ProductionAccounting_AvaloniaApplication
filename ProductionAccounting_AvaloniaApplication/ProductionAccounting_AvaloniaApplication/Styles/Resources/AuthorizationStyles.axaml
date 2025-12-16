@@ -1,0 +1,50 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Style Selector="TextBox">
+        <Setter Property="Background" Value="#334155"/>
+        <Setter Property="BorderBrush" Value="#475569"/>
+        <Setter Property="Foreground" Value="White"/>
+    </Style>
+
+    <Style Selector="TextBox:pointerover /template/ Border#PART_BorderElement">
+        <Setter Property="Background" Value="#334155"/>
+        <Setter Property="BorderBrush" Value="#6366F1"/>
+    </Style>
+
+    <Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
+        <Setter Property="Background" Value="#334155"/>
+        <Setter Property="BorderBrush" Value="#818CF8"/>
+        <Setter Property="BorderThickness" Value="2"/>
+    </Style>
+
+    <Style Selector="Button.ButtonLogin">
+        <Setter Property="Opacity" Value="1"/>
+        <Setter Property="Background">
+            <LinearGradientBrush StartPoint="0%,50%" EndPoint="100%,50%">
+                <GradientStop Color="#6366F1" Offset="0"/>
+                <GradientStop Color="#8B5CF6" Offset="1"/>
+            </LinearGradientBrush>
+        </Setter>
+        <Setter Property="Foreground" Value="Black"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+
+    <Style Selector="Button.ButtonLogin:pointerover">
+        <Setter Property="Opacity" Value="1"/>
+        <Setter Property="Background" Value="#3D3D3D"/>
+    </Style>
+
+    <Style Selector="Button.ButtonLogin:pressed">
+        <Setter Property="Opacity" Value="1"/>
+        <Setter Property="Background" Value="#3D3D3D"/>
+    </Style>
+
+    <Style Selector="Button.ButtonLogin:disabled">
+        <Setter Property="Opacity" Value="1"/>
+        <Setter Property="Background" Value="#CCCCCC"/>
+        <Setter Property="Cursor" Value="Arrow"/>
+    </Style>
+</Styles>

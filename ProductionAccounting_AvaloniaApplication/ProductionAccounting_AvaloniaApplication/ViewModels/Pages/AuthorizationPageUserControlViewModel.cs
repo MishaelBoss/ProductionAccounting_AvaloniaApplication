@@ -1,14 +1,21 @@
-﻿using Npgsql;
+﻿using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ReactiveUI;
 using System;
 using System.ComponentModel;
 using System.IO;
+using System.Threading.Tasks;
+using System.Windows.Input;
 
-namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
+namespace ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
 
-public class AuthorizationUserControlViewModel : ViewModelBase, INotifyPropertyChanged
+public class AuthorizationPageUserControlViewModel : ViewModelBase, INotifyPropertyChanged
 {
+    public ICommand ConfirmCommand
+        => new RelayCommand(async () => await Authorization());
+
     private string _messageerror = string.Empty;
     public string Messageerror
     {
@@ -20,9 +27,9 @@ public class AuthorizationUserControlViewModel : ViewModelBase, INotifyPropertyC
     public string Login
     {
         get => _login;
-        set 
+        set
         {
-            if (_login != value) 
+            if (_login != value)
             {
                 _login = value;
                 OnPropertyChanged(nameof(Login));
@@ -50,14 +57,13 @@ public class AuthorizationUserControlViewModel : ViewModelBase, INotifyPropertyC
         => !string.IsNullOrEmpty(Login)
         && !string.IsNullOrEmpty(Password);
 
-    public bool Authorization()
+    public async Task Authorization()
     {
         try
         {
             if (string.IsNullOrEmpty(Login) || string.IsNullOrEmpty(Password))
             {
                 Messageerror = "Логин и пароль обязательны";
-                return false;
             }
 
             try
@@ -86,18 +92,16 @@ public class AuthorizationUserControlViewModel : ViewModelBase, INotifyPropertyC
 
                                     ManagerCookie.SaveLoginCookie(id, login, Guid.NewGuid().ToString(), DateTime.Now.AddDays(7), Paths.SharedFolder);
 
-                                    return true;
+                                    StrongReferenceMessenger.Default.Send(new UserAuthenticationChangedMessage());
                                 }
                                 else
                                 {
                                     Messageerror = "Пароль неверный";
-                                    return false;
                                 }
                             }
                             else
                             {
                                 Messageerror = "Пользователь не найден";
-                                return false;
                             }
                         }
                     }
@@ -109,8 +113,14 @@ public class AuthorizationUserControlViewModel : ViewModelBase, INotifyPropertyC
                     ex: ex,
                     message: "Error connecting to database");
                 Messageerror = "Ошибка подключения к базе данных";
-                return false;
             }
+        }
+        catch (PostgresException ex)
+        {
+            Loges.LoggingProcess(level: LogLevel.WARNING,
+                ex: ex,
+                message: "Unexpected error in authorization");
+            Messageerror = "Неожиданная ошибка";
         }
         catch (Exception ex)
         {
@@ -118,7 +128,6 @@ public class AuthorizationUserControlViewModel : ViewModelBase, INotifyPropertyC
                 ex: ex,
                 message: "Unexpected error in authorization");
             Messageerror = "Неожиданная ошибка";
-            return false;
         }
     }
 

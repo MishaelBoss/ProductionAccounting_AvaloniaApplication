@@ -1,0 +1,95 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:vm="using:ProductionAccounting_AvaloniaApplication.ViewModels.Pages"
+             x:DataType="vm:AuthorizationPageUserControlViewModel"
+             mc:Ignorable="d" d:DesignWidth="00" d:DesignHeight="550"
+             x:Class="ProductionAccounting_AvaloniaApplication.Views.Pages.AuthorizationPageUserControlView">
+
+    <UserControl.Styles>
+        <StyleInclude Source="/Styles/Resources/AuthorizationStyles.axaml"/>
+    </UserControl.Styles>
+
+    <Grid>
+         <Border Background="#000000" Opacity="0.5"/>
+
+        <Border Width="420"
+                Height="450"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Background="#FFFFFFE6"
+                CornerRadius="20"
+                BoxShadow="0 10 40 0 #40000000"
+                Padding="40">
+            <StackPanel Spacing="25" VerticalAlignment="Center">
+            
+                <StackPanel Spacing="10" HorizontalAlignment="Center">
+                    <TextBlock Text="Production Accounting"
+                               FontSize="24"
+                               FontWeight="Bold"
+                               Foreground="#1E293B"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock Text="Войдите в систему"
+                               FontSize="16"
+                               Foreground="#64748B"
+                               HorizontalAlignment="Center"/>
+                </StackPanel>
+
+                <TextBlock Text="{Binding Messageerror}"
+                           Foreground="Black"
+                           FontWeight="SemiBold"
+                           HorizontalAlignment="Center"
+                           TextWrapping="Wrap"/>
+
+                <StackPanel Spacing="6">
+                    <TextBlock Text="Логин" 
+                               Foreground="#374151" 
+                               FontWeight="SemiBold"/>
+                    <TextBox Text="{Binding Login}"
+                             Watermark="Введите логин"
+                             Foreground="Black"
+                             HorizontalContentAlignment="Left"
+                             VerticalContentAlignment="Center"
+                             FontSize="14"
+                             Height="48"
+                             Padding="15,0"
+                             CornerRadius="12"
+                             Background="#F8FAFC"
+                             BorderBrush="#CBD5E1"
+                             BorderThickness="1"/>
+                </StackPanel>
+
+                <StackPanel Spacing="6">
+                    <TextBlock Text="Пароль" Foreground="#374151" FontWeight="SemiBold"/>
+                    <TextBox Text="{Binding Password}"
+                             PasswordChar="*"
+                             Watermark="Введите пароль"
+                             Foreground="Black"
+                             HorizontalContentAlignment="Left"
+                             VerticalContentAlignment="Center"
+                             FontSize="14"
+                             Height="48"
+                             Padding="15,0"
+                             CornerRadius="12"
+                             Background="#F8FAFC"
+                             BorderBrush="#CBD5E1"
+                             BorderThickness="1"/>
+                </StackPanel>
+
+                <Button Classes="ButtonLogin" 
+                        Content="Авторизоваться"
+                        Command="{Binding ConfirmCommand}"
+                        IsEnabled="{Binding IsActiveConfirmButton}"
+                        HorizontalAlignment="Stretch"
+                        Height="52"
+                        FontSize="16"
+                        FontWeight="Bold"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        Opacity="1"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+
+</UserControl>
