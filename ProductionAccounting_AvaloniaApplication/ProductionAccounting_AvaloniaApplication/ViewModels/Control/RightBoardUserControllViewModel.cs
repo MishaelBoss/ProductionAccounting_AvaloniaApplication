@@ -184,8 +184,9 @@ public class RightBoardUserControlViewModel : ViewModelBase, IRecipient<OpenOrCl
         IsAdministratorOrMasterOrManager = (IsAdministrator || IsMaster || IsManager);
         IsAll = (IsAdministrator || IsMaster || IsEmployee || IsManager);
 
-        if (!IsAdministrator && _objectViewModels == adminPageUserControlViewModel) OpenPage(authorizationPageUserControlViewModel);
-        if (!IsAll && _objectViewModels == workUserPageUserControlViewModel) OpenPage(authorizationPageUserControlViewModel);
+        // if (!IsAdministrator && _objectViewModels == adminPageUserControlViewModel) OpenPage(authorizationPageUserControlViewModel);
+        // if (!IsAll && _objectViewModels == workUserPageUserControlViewModel) OpenPage(authorizationPageUserControlViewModel);
+        if(!ManagerCookie.IsUserLoggedIn()) OpenPage(authorizationPageUserControlViewModel);
 
         buttons.Clear();
 
