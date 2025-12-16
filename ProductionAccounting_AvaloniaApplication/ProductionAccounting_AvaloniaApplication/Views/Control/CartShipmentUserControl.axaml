@@ -37,17 +37,11 @@
                            FontWeight="SemiBold"
                            Margin="0,0,0,4"/>
 
-                <TextBlock Text="{Binding CustomerName}"
-                           Foreground="#6B7280"
-                           FontSize="13"
-                           FontWeight="Medium"
-                           Margin="0,0,0,8"/>
-
                 <StackPanel Orientation="Horizontal" 
                             Spacing="16">
 
                     <StackPanel Orientation="Horizontal" Spacing="4">
-                        <TextBlock Text="{Binding ShipmentpedWeight, StringFormat='{}{0:F3}'}"
+                        <TextBlock Text="{Binding ShippedQuantity, StringFormat='{}{0:F3}'}"
                                    Foreground="#059669"
                                    FontSize="14"
                                    FontWeight="SemiBold"/>
@@ -89,7 +83,7 @@
                            FontStyle="Italic"
                            TextWrapping="Wrap"
                            MaxWidth="400"
-                           IsVisible="{Binding !!Notes}"/>
+                           IsVisible="{Binding CanNotes}"/>
             </StackPanel>
 
             <StackPanel Grid.Column="2"

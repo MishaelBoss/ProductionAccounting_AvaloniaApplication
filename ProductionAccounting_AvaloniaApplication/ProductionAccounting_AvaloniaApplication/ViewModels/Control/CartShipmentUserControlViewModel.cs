@@ -18,7 +18,7 @@ public class CartShipmentUserControlViewModel : ViewModelBase
     public ICommand DeleteCommand
         => new RelayCommand(() =>
         {
-            var viewModel = new ConfirmDeleteWindowViewModel(Id, ProductName ?? "Заказ без названия", "DELETE FROM public.shipments WHERE id = @id", (() => WeakReferenceMessenger.Default.Send(new RefreshShipmentListMessage())));
+            var viewModel = new ConfirmDeleteWindowViewModel(Id, ProductName ?? "Заказ без названия", "DELETE FROM public.shipments WHERE id = @id", () => WeakReferenceMessenger.Default.Send(new RefreshShipmentListMessage()));
 
             var window = new ConfirmDeleteWindow()
             {
@@ -50,16 +50,16 @@ public class CartShipmentUserControlViewModel : ViewModelBase
     public string StatusDisplay => Status switch
     {
         "formed" => "Сформирована",
-        "confirmed" => "Подтверждена",
         "shipped" => "Отгружена",
+        "delivered" => "доставлено",
         _ => "Неизвестно"
     };
 
     public Brush ButtonColor => Status switch
     {
         "formed" => new SolidColorBrush(Color.Parse("#FFA500")),
-        "confirmed" => new SolidColorBrush(Color.Parse("#007AFF")),
-        "shipped" => new SolidColorBrush(Color.Parse("#34C759")),
+        "shipped" => new SolidColorBrush(Color.Parse("#007AFF")),
+        "delivered" => new SolidColorBrush(Color.Parse("#34C759")),
         _ => new SolidColorBrush(Colors.Gray)
     };
 
@@ -67,11 +67,14 @@ public class CartShipmentUserControlViewModel : ViewModelBase
         => ManagerCookie.IsUserLoggedIn() 
         && ManagerCookie.IsAdministrator;
 
+    public bool CanNotes 
+        => !string.IsNullOrEmpty(Notes);
+
     private async Task ChangeStatus() 
     {
         if(!IsAdministrator) return;
 
-        var newStatus = Status == "formed" ? "confirmed" : "shipped";
+        var newStatus = Status == "formed" ? "shipped" : "delivered";
 
         try
         {
