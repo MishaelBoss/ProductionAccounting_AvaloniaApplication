@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.VisualTree;
+using CommunityToolkit.Mvvm.Messaging;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ProductionAccounting_AvaloniaApplication.ViewModels;
 using ProductionAccounting_AvaloniaApplication.ViewModels.Control;
@@ -32,7 +33,7 @@ public partial class ProfileUserUserControl : UserControl
         
         var parent = this.FindAncestorOfType<MainWindow>()?.DataContext as MainWindowViewModel;
         parent?.CloseProfileUser();
-        parent?.NotifyLoginStatusChanged();
+        StrongReferenceMessenger.Default.Send(new UserAuthenticationChangedMessage());
     }
 
     public async Task RefreshDataAsync()

@@ -93,6 +93,8 @@ public class AuthorizationPageUserControlViewModel : ViewModelBase, INotifyPrope
                                     ManagerCookie.SaveLoginCookie(id, login, Guid.NewGuid().ToString(), DateTime.Now.AddDays(7), Paths.SharedFolder);
 
                                     StrongReferenceMessenger.Default.Send(new UserAuthenticationChangedMessage());
+
+                                    ClearForm();
                                 }
                                 else
                                 {
@@ -129,6 +131,13 @@ public class AuthorizationPageUserControlViewModel : ViewModelBase, INotifyPrope
                 message: "Unexpected error in authorization");
             Messageerror = "Неожиданная ошибка";
         }
+    }
+
+    public void ClearForm()
+    {
+        Messageerror = string.Empty;
+        Login = string.Empty;
+        Password = string.Empty;
     }
 
     public new event PropertyChangedEventHandler? PropertyChanged;
