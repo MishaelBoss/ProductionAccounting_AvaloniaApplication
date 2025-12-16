@@ -72,6 +72,11 @@ public class EmployeeAssignmentMasterSubMarkUserControlViewModel : ViewModelBase
                 }
             }
         }
+        catch (PostgresException ex)
+        {
+            Loges.LoggingProcess(level: LogLevel.WARNING,
+                ex: ex);
+        }
         catch (Exception ex)
         {
             Loges.LoggingProcess(LogLevel.ERROR, ex: ex);
@@ -118,6 +123,11 @@ public class EmployeeAssignmentMasterSubMarkUserControlViewModel : ViewModelBase
                     }
                 }
             }
+        }
+        catch (PostgresException ex)
+        {
+            Loges.LoggingProcess(level: LogLevel.WARNING,
+                ex: ex);
         }
         catch (Exception ex)
         {

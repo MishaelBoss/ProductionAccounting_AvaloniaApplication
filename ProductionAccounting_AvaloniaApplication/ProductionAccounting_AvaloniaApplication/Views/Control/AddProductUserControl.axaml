@@ -57,6 +57,14 @@
 									Width="100" 
 									PlaceholderText="��.���"/>
 
+						<ComboBox   HorizontalAlignment="Center"
+                                    ItemsSource="{Binding Users}"
+                                    SelectedItem="{Binding SelectedUser}"
+                                    DisplayMemberBinding="{Binding FullName}"
+                                    PlaceholderText="Выберите сотрудника"
+                                    FontSize="22"
+                                    Height="70"/>
+
 						<StackPanel Orientation="Vertical"
 									VerticalAlignment="Center"
 									HorizontalAlignment="Center"

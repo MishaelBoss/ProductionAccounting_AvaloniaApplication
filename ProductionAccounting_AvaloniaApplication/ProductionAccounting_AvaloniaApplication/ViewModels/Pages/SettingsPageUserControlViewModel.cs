@@ -255,6 +255,8 @@ public class SettingsPageUserControlViewModel : ViewModelBase, INotifyPropertyCh
         }
         catch (Exception ex)
         {
+            Loges.LoggingProcess(LogLevel.ERROR,
+                $"Connection test failed: {ex.Message}");
             MessageBoxManager.GetMessageBoxStandard("Message", "PostgreSQL connection failed").ShowWindowAsync();
         }
     }

@@ -56,7 +56,7 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
         => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseEmployeeAssignmentMasterSubMarkStatusMessage(true, ProductId)));
 
     public ICommand AddOperationCommand 
-        => new RelayCommand(() => { if (SubProductId.HasValue) WeakReferenceMessenger.Default.Send(new OpenOrCloseAddOperationStatusMessage(true, SubProductId.Value)); });
+        => new RelayCommand(() => { if (SubProductId.HasValue) WeakReferenceMessenger.Default.Send(new OpenOrCloseSubOperationStatusMessage(true, SubProductId.Value)); });
 
     public string Name { get; }
     public double ProductId { get; }
@@ -239,7 +239,11 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
                                                 o.id,
                                                 u.login,
                                                 sp.id,
-                                                COALESCE(pt.status, 'new') AS status
+                                                COALESCE(pt.status, 'new') AS status,
+                                                o.price,
+                                                o.time_required,
+                                                o.description,
+                                                o.operation_code
                                             FROM public.sub_product_operations spo
                                             JOIN public.operation o ON o.id = spo.operation_id
                                             JOIN public.sub_products sp ON sp.id = spo.sub_product_id
@@ -269,7 +273,11 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
                                 OperationId = reader2.GetDouble(6),
                                 UserName = reader2.IsDBNull(7) ? string.Empty : reader2.GetString(7),
                                 SubProductId = reader2.GetDouble(8),
-                                Status = reader2.GetString(9)
+                                Status = reader2.GetString(9),
+                                OperationPrice = reader2.GetDecimal(10),
+                                OperationTime = reader2.GetDecimal(11),
+                                OperationDescription = reader2.GetString(12),
+                                OperationCode = reader2.GetString(13),
                             };
 
                             var userControl = new CartSubProductOperationUserControl()

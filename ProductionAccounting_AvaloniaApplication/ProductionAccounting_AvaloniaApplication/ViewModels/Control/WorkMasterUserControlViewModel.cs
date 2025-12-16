@@ -30,6 +30,8 @@ public class WorkMasterUserControlViewModel : ViewModelBase, INotifyPropertyChan
 
     public async Task LoadTasksAsync()
     {
+        if (!ManagerCookie.IsUserLoggedIn() && (!ManagerCookie.IsMaster || !ManagerCookie.IsAdministrator)) return;
+
         StackPanelHelper.ClearAndRefreshStackPanel<CartProductUserControl>(CartTasks, productList);
 
         try
@@ -50,6 +52,7 @@ public class WorkMasterUserControlViewModel : ViewModelBase, INotifyPropertyChan
                     JOIN public.product p ON p.id = pt.product_id
                     WHERE COALESCE(pt.status, 'new') IN ('new', 'in_progress')
                         AND p.is_active = true
+                        AND pt.assigned_by = @UserId
                     ORDER BY pt.created_at DESC";
 
             using (var connection = new NpgsqlConnection(Arguments.connection))
@@ -57,6 +60,7 @@ public class WorkMasterUserControlViewModel : ViewModelBase, INotifyPropertyChan
                 await connection.OpenAsync();
                 using (var command = new NpgsqlCommand(sql, connection)) 
                 {
+                    command.Parameters.AddWithValue("@UserId", ManagerCookie.GetIdUser ?? 0);
                     using (var reader = await command.ExecuteReaderAsync())
                     {
                         while (await reader.ReadAsync())

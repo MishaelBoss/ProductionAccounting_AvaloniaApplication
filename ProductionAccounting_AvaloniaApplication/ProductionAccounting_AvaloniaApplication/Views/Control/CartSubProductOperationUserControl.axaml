@@ -113,6 +113,16 @@
                             CornerRadius="12"
                             Padding="20,12"
                             IsVisible="{Binding IsAdministratorOrMasterAndCanCompleteTask}"/>
+
+                    <Button Content="Изменить"
+                            Command="{Binding EditCommand}"
+                            Background="#FFC107"
+                            Foreground="#212529"
+                            FontSize="18"
+                            FontWeight="Bold"
+                            CornerRadius="12"
+                            Padding="20,12"
+                            IsVisible="{Binding IsAdministratorOrMasterAndCanCompleteTask}"/>
                 </StackPanel>
             </Grid>
         </Grid>

@@ -6,13 +6,14 @@ using ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
 using ProductionAccounting_AvaloniaApplication.Views.Control;
 using ReactiveUI;
 using System;
+using static Avalonia.Media.Transformation.TransformOperation;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase,
         IRecipient<OpenOrCloseUserStatusMessage>, 
         IRecipient<OpenOrCloseAddDepartmentStatusMessage>, 
-        IRecipient<OpenOrCloseAddOperationStatusMessage>,
+        IRecipient<OpenOrCloseSubOperationStatusMessage>,
         IRecipient<OpenOrCloseProductStatusMessage>, 
         IRecipient<OpenOrCloseAddPositionStatusMessage>, 
         IRecipient<OpenOrCloseAddSubProductStatusMessage>, 
@@ -83,9 +84,9 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
             else CloseAddDepartmentUserControl();
         }
 
-        public void Receive(OpenOrCloseAddOperationStatusMessage message)
+        public void Receive(OpenOrCloseSubOperationStatusMessage message)
         {
-            if (message.ShouldOpen) ShowOperationUsersUserControl(message.SubProductId);
+            if (message.ShouldOpen) ShowOperationUsersUserControl(message.SubProductId, message.SubProductOperationId, message.OperationName, message.OperationCode, message.OperationPrice, message.OperationTime, message.OperationDescription, message.OperationQuantity);
             else CloseOperationUsersUserControl();
         }
 
@@ -251,23 +252,17 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
             }
         }
 
-        public void ShowOperationUsersUserControl(double subProductId)
+        public void ShowOperationUsersUserControl(double subProductId, double subProductOperationId, string operationName, string operationCode, decimal operationPrice, decimal operationTime, string operationDescription, decimal operationQuantity)
         {
             if (ContentCenter != null)
             {
-                var userControl = new AddOperationUserControl() {DataContext = new AddOperationUserControlViewModel(subProductId)};
+                var userControl = new AddOperationUserControl() {DataContext = new AddOperationUserControlViewModel(subProductId, subProductOperationId, operationName, operationCode, operationPrice, operationTime, operationDescription, operationQuantity) };
 
-                if (ContentCenter.Children.Contains(userControl))
-                {
-                    userControl.RefreshData();
-                    return;
-                }
+                if (ContentCenter.Children.Contains(userControl)) return;
 
                 if (userControl.Parent is Panel currentParent) currentParent.Children.Remove(userControl);
                 ContentCenter.Children.Clear();
                 ContentCenter.Children.Add(userControl);
-
-                userControl.RefreshData();
             }
         }
 

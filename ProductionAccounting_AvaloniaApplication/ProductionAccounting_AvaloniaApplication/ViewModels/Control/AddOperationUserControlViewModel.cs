@@ -12,24 +12,39 @@ using System.Windows.Input;
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class AddOperationUserControlViewModel : ViewModelBase
-{
-    private readonly double _subProductId;
-    
-    public AddOperationUserControlViewModel(double subProductId)
+{    
+    public AddOperationUserControlViewModel(double subProductId, 
+        double subProductOperationId = 0, 
+        string operationName = "", 
+        string operationCode = "", 
+        decimal operationPrice = 0, 
+        decimal operationTime = 0,
+        string operationDescription = "",
+        decimal operationQuantity = 0)
     {
-        _subProductId = subProductId;
-        ClearForm();
+        SubProductId = subProductId;
+        SubProductOperationId = subProductOperationId;
+
+        OperationName = operationName ?? string.Empty;
+        OperationCode = operationCode ?? string.Empty;
+        OperationDescription = operationDescription ?? string.Empty;
+
+        OperationPrice = operationPrice > 0 ? operationPrice : 1.0m;
+        OperationTime = operationTime > 0 ? operationTime : 1.0m;
+        OperationQuantity = operationQuantity > 0 ? operationQuantity : 1.0m;
+
+        SelectedUnit = "шт";
     }
 
     public ICommand CancelCommand
-        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseAddOperationStatusMessage(false)) );
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseSubOperationStatusMessage(false)) );
 
     public ICommand ConfirmCommand
         => new RelayCommand(async () => 
         { 
             if ( await SaveAndLinkAsync() ) 
             { 
-                WeakReferenceMessenger.Default.Send(new OpenOrCloseAddOperationStatusMessage(false));
+                WeakReferenceMessenger.Default.Send(new OpenOrCloseSubOperationStatusMessage(false));
             } 
         });
 
@@ -39,6 +54,9 @@ public class AddOperationUserControlViewModel : ViewModelBase
         get => _messageerror;
         set => this.RaiseAndSetIfChanged(ref _messageerror, value);
     }
+
+    private double SubProductId { get; set; }
+    private double SubProductOperationId { get; set; }
 
     private string _operationName = string.Empty;
     public string OperationName
@@ -170,7 +188,7 @@ public class AddOperationUserControlViewModel : ViewModelBase
                 return false;
             }
 
-            double operationId = await CreateOperationAsync();
+            double operationId = await CreateOrEditOperationAsync();
             
             if (operationId > 0)
             {
@@ -201,40 +219,86 @@ public class AddOperationUserControlViewModel : ViewModelBase
         }
     }
 
-    private async Task<double> CreateOperationAsync()
+    private async Task<double> CreateOrEditOperationAsync()
     {
         try
         {
-            string sql = @"INSERT INTO public.operation 
-                      (name, operation_code, price, unit, time_required, description) 
-                      VALUES (@name, @operation_code, @price, @unit, @time_required, @description) 
-                      RETURNING id";
+            bool isNewOperation = SubProductOperationId == 0;
+            double operationId = 0;
 
-            // Также добавляем запись в work_rate
-            string rateSql = @"INSERT INTO public.work_rate 
-                          (work_type, rate, use_tonnage, coefficient) 
-                          VALUES (@work_type, @rate, @use_tonnage, @coefficient)";
+            string sqlAddOperation = "INSERT INTO public.operation (name, operation_code, price, unit, time_required, description) " +
+                "VALUES (@name, @operation_code, @price, @unit, @time_required, @description) RETURNING id";
+
+            string sqlUpdateOperation = "UPDATE public.operation SET name = @name, operation_code = @operation_code, price = @price, unit = @unit, time_required = @time_required, description = @description WHERE id = @operation_id";
+
+            string rateSql = @"INSERT INTO public.work_rate (work_type, rate, use_tonnage, coefficient) " +
+                "VALUES (@work_type, @rate, @use_tonnage, @coefficient)";
 
             using (var connection = new NpgsqlConnection(Arguments.connection))
             {
                 await connection.OpenAsync();
+                if (isNewOperation)
+                {                    
+                    using (var command = new NpgsqlCommand(sqlAddOperation, connection))
+                    {
+                        command.Parameters.AddWithValue("@name", OperationName.Trim());
+                        command.Parameters.AddWithValue("@operation_code", OperationCode.Trim());
+                        command.Parameters.AddWithValue("@price", OperationPrice);
+                        command.Parameters.AddWithValue("@unit", SelectedUnit);
+                        command.Parameters.AddWithValue("@time_required", OperationTime);
+                        command.Parameters.AddWithValue("@description", OperationDescription.Trim());
 
-                // Создаем операцию
-                using (var command = new NpgsqlCommand(sql, connection))
+                        var result = await command.ExecuteScalarAsync();
+                        operationId = result != null && result != DBNull.Value ? Convert.ToDouble(result) : 0;
+                    }
+                }
+                else
                 {
-                    command.Parameters.AddWithValue("@name", OperationName.Trim());
-                    command.Parameters.AddWithValue("@operation_code", OperationCode.Trim());
-                    command.Parameters.AddWithValue("@price", OperationPrice);
-                    command.Parameters.AddWithValue("@unit", SelectedUnit);
-                    command.Parameters.AddWithValue("@time_required", OperationTime);
-                    command.Parameters.AddWithValue("@description", OperationDescription.Trim());
+                    string getOperationIdSql = "SELECT operation_id FROM public.sub_product_operations WHERE id = @id";
+                    using (var getIdCommand = new NpgsqlCommand(getOperationIdSql, connection))
+                    {
+                        getIdCommand.Parameters.AddWithValue("@id", SubProductOperationId);
 
-                    var result = await command.ExecuteScalarAsync();
-                    var operationId = result != null && result != DBNull.Value ? Convert.ToDouble(result) : 0;
+                        var idResult = await getIdCommand.ExecuteScalarAsync();
+
+                        if (idResult == null || idResult == DBNull.Value)
+                        {
+                            Loges.LoggingProcess(LogLevel.WARNING,
+                                $"Не найдена операция для связи ID: {SubProductOperationId}");
+                            return 0;
+                        }
+
+                        operationId = Convert.ToDouble(idResult);
+                    }
 
                     if (operationId > 0)
                     {
-                        // Добавляем тариф
+                        using (var command = new NpgsqlCommand(sqlUpdateOperation, connection))
+                        {
+                            command.Parameters.AddWithValue("@name", OperationName.Trim());
+                            command.Parameters.AddWithValue("@operation_code", OperationCode.Trim());
+                            command.Parameters.AddWithValue("@price", OperationPrice);
+                            command.Parameters.AddWithValue("@unit", SelectedUnit);
+                            command.Parameters.AddWithValue("@time_required", OperationTime);
+                            command.Parameters.AddWithValue("@description", OperationDescription.Trim());
+                            command.Parameters.AddWithValue("@operation_id", operationId);
+
+                            int rowsAffected = await command.ExecuteNonQueryAsync();
+
+                            if (rowsAffected == 0)
+                            {
+                                Loges.LoggingProcess(LogLevel.WARNING,
+                                    $"Не удалось обновить операцию ID: {operationId}");
+                                return 0;
+                            }
+                        }
+                    }
+                }
+
+                if (operationId > 0)
+                {
+                    try
+                    {
                         using (var rateCommand = new NpgsqlCommand(rateSql, connection))
                         {
                             bool useTonnage = SelectedUnit == "кг";
@@ -250,14 +314,28 @@ public class AddOperationUserControlViewModel : ViewModelBase
                             await rateCommand.ExecuteNonQueryAsync();
                         }
                     }
-
-                    return operationId;
+                    catch (Exception ex)
+                    {
+                        Loges.LoggingProcess(LogLevel.WARNING,
+                            $"Error while maintaining the tariff: {ex.Message}");
+                    }
                 }
+
+                return operationId;
             }
+        }
+        catch (PostgresException ex)
+        {
+            Loges.LoggingProcess(LogLevel.ERROR,
+                $"PostgreSQL error: {ex.MessageText}", ex: ex);
+            Messageerror = $"Error DB: {ex.MessageText}";
+            return 0;
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(level: LogLevel.ERROR, ex: ex);
+            Loges.LoggingProcess(LogLevel.ERROR,
+                $"General error: {ex.Message}", ex: ex);
+            Messageerror = $"Error: {ex.Message}";
             return 0;
         }
     }
@@ -266,24 +344,56 @@ public class AddOperationUserControlViewModel : ViewModelBase
     {
         try
         {
-            string sql = @"INSERT INTO public.sub_product_operations (sub_product_id, operation_id, planned_quantity, notes, status) VALUES (@sub_product_id, @operation_id, @quantity, '', 'planned') RETURNING id";
-            
-            using (var connection = new NpgsqlConnection(Arguments.connection))
+            if (SubProductOperationId > 0)
             {
-                await connection.OpenAsync();
-                using (var command = new NpgsqlCommand(sql, connection))
+                string sqlUpdate = "UPDATE public.sub_product_operations " +
+                    "SET planned_quantity = @quantity " +
+                    "WHERE id = @sub_product_operation_id AND operation_id = @operation_id";
+
+                using (var connection = new NpgsqlConnection(Arguments.connection))
                 {
-                    command.Parameters.AddWithValue("@sub_product_id", _subProductId);
-                    command.Parameters.AddWithValue("@operation_id", operationId);
-                    command.Parameters.AddWithValue("@quantity", quantity);
-                    
-                    var result = await command.ExecuteScalarAsync();
+                    await connection.OpenAsync();
+                    using (var command = new NpgsqlCommand(sqlUpdate, connection))
+                    {
+                        command.Parameters.AddWithValue("@sub_product_operation_id", SubProductOperationId);
+                        command.Parameters.AddWithValue("@operation_id", operationId);
+                        command.Parameters.AddWithValue("@quantity", quantity);
 
-                    WeakReferenceMessenger.Default.Send(new RefreshSubProductOperationsMessage(_subProductId));
+                        int rowsAffected = await command.ExecuteNonQueryAsync();
 
-                    return result != null && result != DBNull.Value;
+                        WeakReferenceMessenger.Default.Send(new RefreshSubProductOperationsMessage(SubProductId));
+
+                        return rowsAffected > 0;
+                    }
                 }
             }
+            else
+            {
+                string sqlInsert = "INSERT INTO public.sub_product_operations (sub_product_id, operation_id, planned_quantity, notes, status) " +
+                    "VALUES (@sub_product_id, @operation_id, @quantity, '', 'planned') RETURNING id";
+
+                using (var connection = new NpgsqlConnection(Arguments.connection))
+                {
+                    await connection.OpenAsync();
+                    using (var command = new NpgsqlCommand(sqlInsert, connection))
+                    {
+                        command.Parameters.AddWithValue("@sub_product_id", SubProductId);
+                        command.Parameters.AddWithValue("@operation_id", operationId);
+                        command.Parameters.AddWithValue("@quantity", quantity);
+
+                        var result = await command.ExecuteScalarAsync();
+
+                        WeakReferenceMessenger.Default.Send(new RefreshSubProductOperationsMessage(SubProductId));
+
+                        return result != null && result != DBNull.Value;
+                    }
+                }
+            }
+        }
+        catch (PostgresException ex)
+        {
+            Loges.LoggingProcess(level: LogLevel.WARNING, ex: ex);
+            return false;
         }
         catch (Exception ex)
         {

@@ -17,6 +17,7 @@ public class CartSubProductOperationUserControlViewModel : ViewModelBase
     public double UserId { get; set; }
 
     public string Status { get; set; } = string.Empty;
+    public string OperationCode { get; set; } = string.Empty;
 
     private string _operationName = string.Empty;
     public string OperationName
@@ -31,6 +32,11 @@ public class CartSubProductOperationUserControlViewModel : ViewModelBase
         get => _userName;
         set => this.RaiseAndSetIfChanged(ref _userName, value);
     }
+
+    public string OperationDescription { get; set; } = string.Empty;
+
+    public decimal OperationPrice { get; set; }
+    public decimal OperationTime { get; set; }
 
     private decimal _plannedQuantity;
     public decimal PlannedQuantity
@@ -133,7 +139,7 @@ public class CartSubProductOperationUserControlViewModel : ViewModelBase
         : new(Colors.Cyan);
 
     public ICommand EditCommand 
-        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseEditSubOperationStatusMessage(true, SubProductOperationId)));
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseSubOperationStatusMessage(true, SubProductId, SubProductOperationId, OperationName, OperationCode, OperationPrice, OperationTime, OperationDescription, PlannedQuantity)));
 
     public ICommand DeleteCommand
         => new RelayCommand(() =>
