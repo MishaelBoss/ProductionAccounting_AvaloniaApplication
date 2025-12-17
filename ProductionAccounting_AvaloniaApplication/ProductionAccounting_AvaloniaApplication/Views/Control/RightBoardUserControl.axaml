@@ -28,7 +28,7 @@
             <ScrollViewer Grid.Row="1">
                 <StackPanel Margin="0,16">
                     <StackPanel Margin="0,0,0,24">
-                        <TextBlock Text="Main Menu"
+                        <TextBlock Text="{Binding RightBoardMainMenuText}"
                                   FontSize="12"
                                   FontWeight="Medium"
                                   Foreground="#9CA3AF"
@@ -78,7 +78,7 @@
                                    Stretch="Uniform"
                                    Margin="0,0,12,0"/>
                             <TextBlock Grid.Column="1"
-                                       Text="Settings"
+                                       Text="{Binding RightBoardSettingsText}"
                                        Foreground="White"
                                        VerticalAlignment="Center"/>
                         </Grid>

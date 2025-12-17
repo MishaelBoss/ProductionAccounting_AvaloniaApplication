@@ -5,7 +5,7 @@ using ProductionAccounting_AvaloniaApplication.Models;
 
 namespace ProductionAccounting_AvaloniaApplication.Scripts;
 
-internal abstract class ManagerLocalization
+public class ManagerLocalization
 {
     private LocalizationData? _localizationData;
 
@@ -26,8 +26,9 @@ internal abstract class ManagerLocalization
             var json = File.ReadAllText(localizationPath);
             var settings = new JsonSerializerSettings
             {
-                TypeNameHandling = TypeNameHandling.Auto,
-                NullValueHandling = NullValueHandling.Ignore
+                TypeNameHandling = TypeNameHandling.None,
+                NullValueHandling = NullValueHandling.Ignore,
+                MissingMemberHandling = MissingMemberHandling.Ignore
             };
             _localizationData = JsonConvert.DeserializeObject<LocalizationData>(json, settings);
 
@@ -53,12 +54,22 @@ internal abstract class ManagerLocalization
     }
 
     #region Button
+    public string LoginButton => _localizationData?.AuthorizationUserControl?.Button?.Login ?? string.Empty;
+    public string RightBoardLoginButton => _localizationData?.RightBoardUserControl?.Button?.Login ?? string.Empty;
+    public string RightBoardProfileButton => _localizationData?.RightBoardUserControl?.Button?.Profile ?? string.Empty;
+    public string RightBoardSettingsButton => _localizationData?.RightBoardUserControl?.Button?.Settings ?? string.Empty;
     #endregion
 
     #region Label
     #endregion
 
     #region TextBox
+    public string LogInTextBlock => _localizationData?.AuthorizationUserControl?.TextBlock?.Login ?? string.Empty;
+    public string NameTextBlock => _localizationData?.AuthorizationUserControl?.TextBlock?.Name ?? string.Empty;
+    public string PasswordTextBlock => _localizationData?.AuthorizationUserControl?.TextBlock?.Password ?? string.Empty;
+    public string EnterYourNameTextBlock => _localizationData?.AuthorizationUserControl?.TextBlock?.EnterYourName ?? string.Empty;
+    public string EnterYourPasswordTextBlock => _localizationData?.AuthorizationUserControl?.TextBlock?.EnterYourPassword ?? string.Empty;
+    public string RightBoardMainMenuTextBlock => _localizationData?.RightBoardUserControl?.TextBlock?.MainMenu ?? string.Empty;
     #endregion
 
     #region TextBlock

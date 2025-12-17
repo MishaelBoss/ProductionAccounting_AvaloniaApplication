@@ -170,8 +170,8 @@ public class RightBoardUserControlViewModel : ViewModelBase, IRecipient<OpenOrCl
 
     public void UpdateUI()
     {
-        if (ManagerCookie.IsUserLoggedIn()) ButtonAuthorizationText = "Профиль";
-        else ButtonAuthorizationText = "Войти";
+        if (ManagerCookie.IsUserLoggedIn()) ButtonAuthorizationText = RightBoardProfileText;
+        else ButtonAuthorizationText = RightBoardLoginText;
 
         IsAdministrator = ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsAdministrator;
         IsMaster = ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsMaster;

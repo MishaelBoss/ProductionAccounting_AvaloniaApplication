@@ -1,38 +1,87 @@
-using ProductionAccounting_AvaloniaApplication.Services.Interfaces;
+using Newtonsoft.Json;
 
 namespace ProductionAccounting_AvaloniaApplication.Models;
 
-public class LocalizationData(AuthorizationUserControl _authorizationUserControl) : ILocalizationData
+internal class LocalizationData
 {
-    public IAuthorizationUserControl AuthorizationUserControl { get; set; } = _authorizationUserControl;
+    [JsonProperty("AuthorizationUserControl")]
+    public AuthorizationUserControl AuthorizationUserControl { get; set; }
+    
+    [JsonProperty("RightBoardUserControl")]
+    public RightBoardUserControl RightBoardUserControl { get; set; }
 }
 
-public class AuthorizationUserControl(TextBlock _textBlock, Button _button) : IAuthorizationUserControl
+internal class AuthorizationUserControl
 {
-    public ITextBlock TextBlock { get; set; } = _textBlock;
-    public IButton Button { get; set; } = _button;
+    [JsonProperty("TextBlock")]
+    public TextBlock TextBlock { get; set; }
+
+    [JsonProperty("Button")]
+    public Button Button { get; set; }
 }
 
-public class Common() : ICommon
+internal class RightBoardUserControl
 {
+    [JsonProperty("Button")]
+    public RightBoardButton Button { get; set; }
+    
+    [JsonProperty("TextBlock")]
+    public TextBlock TextBlock { get; set; }
 }
 
-public class Button() : IButton
+internal class RightBoardButton
 {
+    [JsonProperty("AdminPanel")]
+    public string AdminPanel { get; set; }
+    
+    [JsonProperty("Manager")]
+    public string Manager { get; set; }
+    
+    [JsonProperty("Timesheet")]
+    public string Timesheet { get; set; }
+    
+    [JsonProperty("Windows user")]
+    public string WindowsUser { get; set; }
+    
+    [JsonProperty("Shipments")]
+    public string Shipments { get; set; }
+    
+    [JsonProperty("Salary")]
+    public string Salary { get; set; }
+
+    [JsonProperty("Login")]
+    public string Login { get; set; }
+
+    [JsonProperty("Profile")]
+    public string Profile { get; set; }
+
+    [JsonProperty("Settings")]
+    public string Settings { get; set; }
 }
 
-public class Label() : ILabel
+internal class Button
 {
+    [JsonProperty("Login")]
+    public string Login { get; set; }
 }
 
-public class TextBox() : ITextBox
+internal class TextBlock
 {
-}
+    [JsonProperty("Login")]
+    public string Login { get; set; }
 
-public class TextBlock() : ITextBlock
-{
-}
+    [JsonProperty("Name")]
+    public string Name { get; set; }
 
-public class CheckBox() : ICheckBox
-{
+    [JsonProperty("Password")]
+    public string Password { get; set; }
+
+    [JsonProperty("EnterYourName")]
+    public string EnterYourName { get; set; }
+
+    [JsonProperty("EnterYourPassword")]
+    public string EnterYourPassword { get; set; }
+
+    [JsonProperty("MainMenu")]
+    public string MainMenu { get; set; }
 }
