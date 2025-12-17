@@ -36,11 +36,14 @@ internal class RightBoardButton
     
     [JsonProperty("Manager")]
     public string Manager { get; set; }
-    
+
+    [JsonProperty("ReferenceBooks")]
+    public string ReferenceBooks { get; set; }
+
     [JsonProperty("Timesheet")]
     public string Timesheet { get; set; }
     
-    [JsonProperty("Windows user")]
+    [JsonProperty("WindowsUser")]
     public string WindowsUser { get; set; }
     
     [JsonProperty("Shipments")]

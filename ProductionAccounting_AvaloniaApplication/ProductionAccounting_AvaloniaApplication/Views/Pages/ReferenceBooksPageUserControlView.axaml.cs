@@ -1,6 +1,6 @@
 using Avalonia.Controls;
 
-namespace ProductionAccounting_AvaloniaApplication;
+namespace ProductionAccounting_AvaloniaApplication.Views.Pages;
 
 public partial class ReferenceBooksPageUserControlView : UserControl
 {

@@ -58,6 +58,13 @@ public class ManagerLocalization
     public string RightBoardLoginButton => _localizationData?.RightBoardUserControl?.Button?.Login ?? string.Empty;
     public string RightBoardProfileButton => _localizationData?.RightBoardUserControl?.Button?.Profile ?? string.Empty;
     public string RightBoardSettingsButton => _localizationData?.RightBoardUserControl?.Button?.Settings ?? string.Empty;
+    public string RightBoardAdminPanelButton => _localizationData?.RightBoardUserControl?.Button?.AdminPanel ?? string.Empty;
+    public string RightBoardManagerButton => _localizationData?.RightBoardUserControl?.Button?.Manager ?? string.Empty;
+    public string RightBoardReferenceBooksButton => _localizationData?.RightBoardUserControl?.Button?.ReferenceBooks ?? string.Empty;
+    public string RightBoardTimesheetButton => _localizationData?.RightBoardUserControl?.Button?.Timesheet ?? string.Empty;
+    public string RightBoardWindowsUserButton => _localizationData?.RightBoardUserControl?.Button?.WindowsUser ?? string.Empty;
+    public string RightBoardShipmentsButton => _localizationData?.RightBoardUserControl?.Button?.Shipments ?? string.Empty;
+    public string RightBoardSalaryButton => _localizationData?.RightBoardUserControl?.Button?.Salary ?? string.Empty;
     #endregion
 
     #region Label

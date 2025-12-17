@@ -1,16 +1,17 @@
 {
     "RightBoardUserControl": {
-        "Button": {
-            "AdminPanel": "Админ панель",
-            "Manager": "Менеджер",
-            "Timesheet": "Табель учета рабочего времени",
-            "Windows user": "Пользователь Windows",
-            "Shipments": "Отправки",
-            "Salary": "Зарплата",
-            "Login": "Aвторизоваться",
-            "Profile": "Профиль",
-            "Settings": "Настройки"
-        },
+      "Button": {
+        "AdminPanel": "Админ панель",
+        "Manager": "Менеджер",
+        "ReferenceBooks": "Справочники",
+        "Timesheet": "Табель учета рабочего времени",
+        "WindowsUser": "Рабочая область пользователя",
+        "Shipments": "Отправки",
+        "Salary": "Зарплата",
+        "Login": "Aвторизоваться",
+        "Profile": "Профиль",
+        "Settings": "Настройки"
+      },
         "TextBlock": {
             "MainMenu": "Главное меню"
         }

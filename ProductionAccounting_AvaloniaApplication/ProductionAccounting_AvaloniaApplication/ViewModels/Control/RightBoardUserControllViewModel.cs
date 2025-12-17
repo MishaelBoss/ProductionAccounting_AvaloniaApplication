@@ -1,5 +1,4 @@
-﻿using Avalonia.Controls;
-using Avalonia.Media.Imaging;
+﻿using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -40,8 +39,6 @@ public class RightBoardUserControlViewModel : ViewModelBase, IRecipient<OpenOrCl
     }
 
     private readonly AdminPageUserControlViewModel adminPageUserControlViewModel = new();
-    private readonly ProductLibraryPageUserControlViewModel productLibraryUserControlViewModel = new();
-    private readonly UserLibraryPageUserControlViewModel userLibraryUserControlViewModel = new();
     private readonly WorkPageUserControlViewModel workUserPageUserControlViewModel = new();
     private readonly SettingsPageUserControlViewModel settingsPageUserControlViewModel = new();
     private readonly TimesheetPageUserControlViewModel timesheetUserControlPageViewModel = new();
@@ -49,15 +46,13 @@ public class RightBoardUserControlViewModel : ViewModelBase, IRecipient<OpenOrCl
     private readonly ShipmentsPageUserControlViewModel shipmentsPageUserControlViewModel = new();
     private readonly SalaryCalculationPageUserControlViewModel salaryCalculationPageUserControlViewModel = new();
     private readonly AuthorizationPageUserControlViewModel authorizationPageUserControlViewModel = new();
+    private readonly ReferenceBooksPageUserControlViewModel referenceBooksPageUserControlViewModel = new();
 
     public ICommand OpenAdminPanelPageCommand
         => new RelayCommand(() => OpenPage(adminPageUserControlViewModel));
 
-    public ICommand OpenProductLibraryPageCommand
-        => new RelayCommand(() => OpenPage(productLibraryUserControlViewModel));
-
-    public ICommand OpenUserLibraryPageCommand
-        => new RelayCommand(() => OpenPage(userLibraryUserControlViewModel));
+    public ICommand OpenReferenceBooksPageCommand
+        => new RelayCommand(() => OpenPage(referenceBooksPageUserControlViewModel));
 
     public ICommand OpenTimesheetPageCommand
         => new RelayCommand(() => OpenPage(timesheetUserControlPageViewModel));
@@ -184,23 +179,20 @@ public class RightBoardUserControlViewModel : ViewModelBase, IRecipient<OpenOrCl
         IsAdministratorOrMasterOrManager = (IsAdministrator || IsMaster || IsManager);
         IsAll = (IsAdministrator || IsMaster || IsEmployee || IsManager);
 
-        // if (!IsAdministrator && _objectViewModels == adminPageUserControlViewModel) OpenPage(authorizationPageUserControlViewModel);
-        // if (!IsAll && _objectViewModels == workUserPageUserControlViewModel) OpenPage(authorizationPageUserControlViewModel);
         if(!ManagerCookie.IsUserLoggedIn()) OpenPage(authorizationPageUserControlViewModel);
 
         buttons.Clear();
 
         var newButtons = new List<DashboardButtonViewModel>
         {
-            new DashboardButtonViewModel("Admin panel", OpenAdminPanelPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/administrator-64.png"), () => IsAdministrator),
-            new DashboardButtonViewModel("Manager", OpenProductsManagerUserPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/administrator-64.png"), () => IsAdministratorOrManager),
-            new DashboardButtonViewModel("Timesheet", OpenTimesheetPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/home-64.png"), () => IsAdministratorOrManager),
-            new DashboardButtonViewModel("Library product", OpenProductLibraryPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/library-64.png"), () => IsAll),
-            new DashboardButtonViewModel("Library user", OpenUserLibraryPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/library-64.png"), () => IsAll),
-            new DashboardButtonViewModel("Windows user", OpenWorkUserPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/home-64.png"), () => IsAdministratorOrMasterOrEmployee),
-            new DashboardButtonViewModel("Shipments", OpenShipmentsUserPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/home-64.png"), () => IsAdministratorOrMasterOrManager),
+            new DashboardButtonViewModel(RightBoardAdminPanelText, OpenAdminPanelPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/administrator-64.png"), () => IsAdministrator),
+            new DashboardButtonViewModel(RightBoardManagerText, OpenProductsManagerUserPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/administrator-64.png"), () => IsAdministratorOrManager),
+            new DashboardButtonViewModel(RightBoardTimesheetText, OpenTimesheetPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/home-64.png"), () => IsAdministratorOrManager),
+            new DashboardButtonViewModel(RightBoardReferenceBooksText, OpenReferenceBooksPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/library-64.png"), () => IsAll),
+            new DashboardButtonViewModel(RightBoardWindowsUserText, OpenWorkUserPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/home-64.png"), () => IsAdministratorOrMasterOrEmployee),
+            new DashboardButtonViewModel(RightBoardShipmentsText, OpenShipmentsUserPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/home-64.png"), () => IsAdministratorOrMasterOrManager),
             new DashboardButtonViewModel(ButtonAuthorizationText, OpenAuthorizationCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/login-64.png")),
-            new DashboardButtonViewModel("Salary", OpenSalaryUserPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/login-64.png"), () => IsAll),
+            new DashboardButtonViewModel(RightBoardSalaryText, OpenSalaryUserPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/login-64.png"), () => IsAll),
         };
 
         foreach (var button in newButtons)

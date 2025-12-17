@@ -70,9 +70,6 @@
     <Compile Update="Views\Pages\AdminPageUserControlView.axaml.cs">
       <DependentUpon>AdminPageUserControlView.axaml</DependentUpon>
     </Compile>
-    <Compile Update="Views\Pages\ProductLibraryPageUserControlView.axaml.cs">
-      <DependentUpon>ProductLibraryPageUserControlView.axaml</DependentUpon>
-    </Compile>
     <Compile Update="Views\Pages\ReferenceBooksPageUserControlView.axaml.cs">
       <DependentUpon>ReferenceBooksPageUserControlView.axaml</DependentUpon>
     </Compile>
@@ -84,9 +81,6 @@
     </Compile>
     <Compile Update="Views\Pages\TimesheetPageUserControlView.axaml.cs">
       <DependentUpon>TimesheetPageUserControlView.axaml</DependentUpon>
-    </Compile>
-    <Compile Update="Views\Pages\UserLibraryPageUserControlView.axaml.cs">
-      <DependentUpon>UserLibraryPageUserControlView.axaml</DependentUpon>
     </Compile>
     <Compile Update="Views\Pages\WorkPageUserControlView.axaml.cs">
       <DependentUpon>WorkPageUserControlView.axaml</DependentUpon>
