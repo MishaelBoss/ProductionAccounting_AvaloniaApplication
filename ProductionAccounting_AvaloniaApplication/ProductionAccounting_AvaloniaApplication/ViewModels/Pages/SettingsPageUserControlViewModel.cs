@@ -1,10 +1,17 @@
-﻿using CommunityToolkit.Mvvm.Input;
+﻿using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
+using CommunityToolkit.Mvvm.Input;
 using MsBox.Avalonia;
 using Npgsql;
+using ProductionAccounting_AvaloniaApplication.Models;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
 using System.Net.NetworkInformation;
+using System.Text.Json;
 using System.Windows.Input;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
@@ -18,10 +25,12 @@ public class SettingsPageUserControlViewModel : ViewModelBase, INotifyPropertyCh
         Name = Arguments.Database ?? string.Empty;
         User = Arguments.User ?? string.Empty;
         Password = Arguments.Password ?? string.Empty;
+
+        CheckFileLocalization();
     }
 
     public ICommand TestConnectCommand
-        => new RelayCommand(() => TestConnection());
+        => new RelayCommand(TestConnection);
 
     private string _ip = string.Empty;
     public string Ip
@@ -98,73 +107,35 @@ public class SettingsPageUserControlViewModel : ViewModelBase, INotifyPropertyCh
         }
     }
 
-    // private ObservableCollection<ConfigLocalization> _comboBoxItems = [];
-    // public ObservableCollection<ConfigLocalization> ComboBoxItems
-    // {
-    //     get => _comboBoxItems;
-    //     set
-    //     {
-    //         if (_comboBoxItems != value)
-    //         {
-    //             _comboBoxItems = value;
-    //             OnPropertyChanged(nameof(ComboBoxItems));
-    //         }
-    //     }
-    // }
+    private ObservableCollection<ComboBoxLocalization> ComboBoxLocalizations { get; } = [];
 
-    // private ConfigLocalization? _selectedComboBoxItem;
-    // public ConfigLocalization? SelectedComboBoxItem
-    // {
-    //     get => _selectedComboBoxItem;
-    //     set
-    //     {
-    //         if (_selectedComboBoxItem != value)
-    //         {
-    //             _selectedComboBoxItem = value;
-    //             OnPropertyChanged(nameof(SelectedComboBoxItem));
-    //             SelectLanguage();
-    //         }
-    //     }
-    // }
+    private ComboBoxLocalization? _selectedComboBoxLocalization;
+    public ComboBoxLocalization? SelectedComboBoxLocalization
+    {
+        get => _selectedComboBoxLocalization;
+        set
+        {
+            if (_selectedComboBoxLocalization != value)
+            {
+                _selectedComboBoxLocalization = value;
+                OnPropertyChanged(nameof(SelectedComboBoxLocalization));
+                ChangeLocalization();
+            }
+        }
+    }
 
-    // public SettingsPageViewModel() {
-    //     try
-    //     {
-    //         string json = File.ReadAllText(Path.Combine(Paths.Localization, "config.json"));
-    //         var data = JObject.Parse(json);
-    //         foreach (var app in data.Properties())
-    //         {
-    //             if (File.Exists(Path.Combine(Paths.Localization, app.Value.ToString())))
-    //             {
-    //                 var localization = new ConfigLocalization(
-    //                     name: app.Name,
-    //                     path: app.Value.ToString()
-    //                 );
-    //                 ComboBoxItems.Add(localization);
-    //             }
-    //             else continue;
-    //         }
-    //     }
-    //     catch (FileNotFoundException)
-    //     {
-    //         Loges.LoggingProcess(level: LogLevel.ERROR,
-    //             "file not found json");
-    //     }
-    //     catch (JsonException ex)
-    //     {
-    //         Loges.LoggingProcess(level: LogLevel.WARNING,
-    //             ex: ex);
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         Loges.LoggingProcess(level: LogLevel.ERROR,
-    //             ex: ex);
-    //     }
-    // }
-
-    // public void SelectLanguage() {
-    //     ManagerSettingsJson.Change(SelectedComboBoxItem?.Path ?? string.Empty);
-    // }
+    public ICommand RestartApplicationCommand 
+        => new RelayCommand(() => 
+        { 
+            var processPath = Environment.ProcessPath;
+            if(processPath != null)
+            {
+                Process.Start(processPath);
+                
+                if(Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop) desktop.Shutdown();
+                else Environment.Exit(0);
+            }
+        });
 
     public void ChangeServerIp()
     {
@@ -189,6 +160,11 @@ public class SettingsPageUserControlViewModel : ViewModelBase, INotifyPropertyCh
     public void ChangeServerPassword()
     {
         ManagerSettingsJson.Change("Server.Password", Password);
+    }
+
+    public void ChangeLocalization()
+    {
+        ManagerSettingsJson.Change("Language", SelectedComboBoxLocalization?.FileName ?? string.Empty);
     }
 
     private void TestConnection() 
@@ -260,6 +236,47 @@ public class SettingsPageUserControlViewModel : ViewModelBase, INotifyPropertyCh
             MessageBoxManager.GetMessageBoxStandard("Message", "PostgreSQL connection failed").ShowWindowAsync();
         }
     }
+
+    private void CheckFileLocalization()
+    {
+        if (!Directory.Exists(Paths.Localization)) return;
+
+        ComboBoxLocalizations.Clear();
+
+        foreach (string file in Directory.GetFiles(Paths.Localization, "*.json", SearchOption.AllDirectories))
+        {
+            if (File.Exists(file))
+            {
+                string fileName = Path.GetFileName(file);
+
+                var json = File.ReadAllText(Path.Combine(Paths.Localization, fileName));
+                var data = JsonSerializer.Deserialize<LocalizationData>(json);
+
+                var listLocalization = new ComboBoxLocalization
+                (
+                    name: data?.Name ?? string.Empty,
+                    fileName: fileName
+                );
+
+                ComboBoxLocalizations.Add(listLocalization);
+            }
+        }
+
+        string currentLanguageFile = Arguments.PathToLocalization ?? string.Empty;
+        
+        if (!string.IsNullOrEmpty(currentLanguageFile))
+        {
+            foreach (var item in ComboBoxLocalizations)
+            {
+                if (item.FileName == currentLanguageFile)
+                {
+                    SelectedComboBoxLocalization = item;
+                    break;
+                }
+            }
+        }
+    }
+
 
     public new event PropertyChangedEventHandler? PropertyChanged;
     protected void OnPropertyChanged(string propertyName)

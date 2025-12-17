@@ -4,6 +4,9 @@ namespace ProductionAccounting_AvaloniaApplication.Models;
 
 internal class LocalizationData
 {
+    [JsonProperty("Name")]
+    public string Name { get; set; }
+
     [JsonProperty("AuthorizationUserControl")]
     public AuthorizationUserControl AuthorizationUserControl { get; set; }
     

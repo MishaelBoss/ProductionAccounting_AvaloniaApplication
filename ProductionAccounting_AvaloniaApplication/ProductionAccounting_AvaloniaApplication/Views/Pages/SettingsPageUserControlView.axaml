@@ -116,20 +116,20 @@
                                     Padding="15">
                                 <StackPanel Spacing="15">
                                     <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" RowSpacing="10">
-                                        <TextBlock Grid.Row="0" Grid.Column="0"
-                                                   Text="Application Language"
-                                                   FontSize="14" 
-                                                   Opacity="0.8"/>
+                                        <TextBlock  Grid.Row="0" 
+                                                    Grid.Column="0"
+                                                    Text="Application Language"
+                                                    FontSize="14" 
+                                                    Opacity="0.8"/>
                                         
-                                        <ComboBox Grid.Row="1" Grid.Column="0"
-                                                  ItemsSource="{Binding ComboBoxItems}"
-                                                  SelectedItem="{Binding SelectedComboBoxItem}"
-                                                  MinWidth="150"
-                                                  HorizontalAlignment="Left">
+                                        <ComboBox   Grid.Row="1" 
+                                                    Grid.Column="0"
+                                                    ItemsSource="{Binding ComboBoxLocalizations}"
+                                                    SelectedItem="{Binding SelectedComboBoxLocalization}"
+                                                    MinWidth="150"
+                                                    HorizontalAlignment="Left">
                                             <ComboBox.Styles>
                                                 <Style Selector="ComboBox">
-                                                    <Setter Property="Background" Value="{DynamicResource ThemeControlBackgroundBrush}"/>
-                                                    <Setter Property="BorderBrush" Value="{DynamicResource ThemeBorderMidBrush}"/>
                                                     <Setter Property="BorderThickness" Value="1"/>
                                                     <Setter Property="CornerRadius" Value="4"/>
                                                     <Setter Property="Padding" Value="10,8"/>
@@ -141,10 +141,11 @@
                                             </ComboBox.Styles>
                                         </ComboBox>
                                         
-                                        <TextBlock Grid.Row="0" Grid.Column="1"
-                                                   Text="Language Files"
-                                                   FontSize="14" 
-                                                   Opacity="0.8"/>
+                                        <TextBlock  Grid.Row="0" 
+                                                    Grid.Column="1"
+                                                    Text="Language Files"
+                                                    FontSize="14" 
+                                                    Opacity="0.8"/>
                                         
                                         <Button Grid.Row="1" Grid.Column="1"
                                                 Content="Open Language Folder"
@@ -269,10 +270,10 @@
                                                Text="Password"
                                                VerticalAlignment="Center"/>
                                     <Grid Grid.Row="4" Grid.Column="1">
-                                        <TextBox Watermark="••••••••"
+                                        <TextBox Watermark="ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½"
                                                  Text="{Binding Password}"
                                                  Classes="ModernTextBox"
-                                                 PasswordChar="•"/>
+                                                 PasswordChar="ï¿½"/>
                                     </Grid>
                                 </Grid>
                             </Border>
@@ -296,6 +297,7 @@
                                 
                                 <Button Grid.Column="1"
                                         Content="Save Connection"
+                                        Command="{Binding RestartApplicationCommand}"
                                         Classes="ModernButton"
                                         MinWidth="120">
                                     <Button.Styles>
