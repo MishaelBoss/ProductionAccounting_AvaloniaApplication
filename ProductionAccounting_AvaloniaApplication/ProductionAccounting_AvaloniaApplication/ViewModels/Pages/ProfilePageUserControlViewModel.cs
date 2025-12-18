@@ -88,15 +88,36 @@ public class ProfilePageUserControlViewModel : ViewModelBase
             StrongReferenceMessenger.Default.Send(new UserAuthenticationChangedMessage());
         });
 
-    public ProfilePageUserControlViewModel()
+    public ProfilePageUserControlViewModel(double userId)
     {
-        _ = LoadListTypeToComboBoxAsync();
-        _ = LoadDateAsync();
+        LoadDate(userId);
     }
 
-    public async Task LoadListTypeToComboBoxAsync()
+    private void LoadDate(double userId)
     {
-        if (!ManagerCookie.IsUserLoggedIn() && ManagerCookie.GetIdUser != 0) return;
+        _ = LoadListTypeToComboBoxAsync(userId);
+        _ = LoadDateAsync(userId);
+    }
+
+    private double _getIdUser = 0;
+    private double GetIdUser
+    {
+        get => _getIdUser;
+        set 
+        {
+            this.RaiseAndSetIfChanged(ref _getIdUser, value);
+            this.RaisePropertyChanged(nameof(IsOwnProfile));
+        }
+    }
+
+    public bool IsOwnProfile
+        =>  ManagerCookie.IsUserLoggedIn() && 
+        GetIdUser != 0 && 
+        GetIdUser == ManagerCookie.GetIdUser;
+
+    private async Task LoadListTypeToComboBoxAsync(double userId)
+    {
+        if (!ManagerCookie.IsUserLoggedIn()) return;
 
         try
         {
@@ -111,7 +132,7 @@ public class ProfilePageUserControlViewModel : ViewModelBase
                         LEFT JOIN public.departments d ON ud.department_id = d.id
                         LEFT JOIN public.user_to_position up ON up.user_id = utt.user_id
                         LEFT JOIN public.positions p ON up.position_id = p.id
-                        WHERE utt.user_id = @userID";
+                        WHERE utt.user_id = @id";
 
             using (var connection = new NpgsqlConnection(Arguments.connection))
             {
@@ -119,7 +140,7 @@ public class ProfilePageUserControlViewModel : ViewModelBase
 
                 using (var command = new NpgsqlCommand(sql, connection))
                 {
-                    command.Parameters.AddWithValue("@userID", ManagerCookie.GetIdUser ?? 0);
+                    command.Parameters.AddWithValue("@id", userId);
 
                     using (var reader = await command.ExecuteReaderAsync())
                     {
@@ -140,24 +161,24 @@ public class ProfilePageUserControlViewModel : ViewModelBase
         }
     }
 
-    public async Task LoadDateAsync()
+    private async Task LoadDateAsync(double userId)
     {
-        if (!ManagerCookie.IsUserLoggedIn() && ManagerCookie.GetIdUser != 0) return;
+        if (!ManagerCookie.IsUserLoggedIn()) return;
 
         try
         {
-            string sql = @"SELECT login, first_name, last_name, middle_name, email, phone, employee_id FROM public.""user"" WHERE id = @id";
+            string sql = @"SELECT login, first_name, last_name, middle_name, email, phone, employee_id, id FROM public.""user"" WHERE id = @id";
 
             using (var connection = new NpgsqlConnection(Arguments.connection))
             {
                 await connection.OpenAsync();
                 using (var command = new NpgsqlCommand(sql, connection))
                 {
-                    command.Parameters.AddWithValue("@id", ManagerCookie.GetIdUser ?? 0);
+                    command.Parameters.AddWithValue("@id", userId);
 
                     using (var reader = await command.ExecuteReaderAsync())
                     {
-                        while (await reader.ReadAsync())
+                        if (await reader.ReadAsync())
                         {
                             Login = reader.IsDBNull(0) ? "none" : reader.GetString(0);
                             FirstName = reader.IsDBNull(1) ? "none" : reader.GetString(1);
@@ -167,6 +188,8 @@ public class ProfilePageUserControlViewModel : ViewModelBase
                             Phone = reader.IsDBNull(5) ? "none" : reader.GetString(5);
                             Employee = reader.IsDBNull(6) ? "none" : reader.GetString(6);
 
+                            GetIdUser = reader.GetDouble(7);
+
                             EmployeeName = $"{FirstName} {LastName} {MiddleName}";
                         }
                     }
@@ -174,6 +197,12 @@ public class ProfilePageUserControlViewModel : ViewModelBase
             }
         }
         catch (NpgsqlException ex)
+        {
+            Loges.LoggingProcess(LogLevel.CRITICAL,
+                "Connection or request error",
+                ex: ex);
+        }
+        catch (Exception ex)
         {
             Loges.LoggingProcess(LogLevel.CRITICAL,
                 "Connection or request error",
