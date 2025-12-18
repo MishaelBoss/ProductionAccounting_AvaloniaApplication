@@ -5,8 +5,6 @@ using ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 using ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
 using ProductionAccounting_AvaloniaApplication.Views.Control;
 using ReactiveUI;
-using System;
-using static Avalonia.Media.Transformation.TransformOperation;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels
 {
@@ -33,7 +31,6 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
         public Grid? ContentCenter = null;
 
         public RightBoardUserControlViewModel RightBoardUserControlViewModel { get; }
-        private readonly ProfileUserUserControl _profileUser = new();
 
         private readonly ViewPageUserControlViewModel viewPageUserControlViewModel = new();
 
@@ -109,32 +106,6 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
         {
             if (message.ShouldOpen) ShowAddSubProductUserControl(message.TaskId);
             else CloseAddSubProductUserControl();
-        }
-
-        public void ShowProfileUser()
-        {
-            if (ContentCenter != null)
-            {
-                if (ContentCenter.Children.Contains(_profileUser)) {
-                    _ = _profileUser.RefreshDataAsync();
-                    return;
-                }
-
-                if (_profileUser.Parent is Panel currentParent) currentParent.Children.Remove(_profileUser);
-                ContentCenter.Children.Clear();
-                ContentCenter.Children.Add(_profileUser);
-
-                _ = _profileUser.RefreshDataAsync();
-            }
-        }
-
-        public void CloseProfileUser()
-        {
-            if (ContentCenter != null)
-            {
-                ContentCenter.Children.Clear();
-                if (_profileUser.Parent == ContentCenter) ContentCenter.Children.Remove(_profileUser);
-            }
         }
 
         public void ShowAddUsersUserControl(double? id = null, string? login = null, string? firstName = null, string? lastName = null, string? middleName = null, decimal? baseSalary = null, string? email = null, string? phone = null)

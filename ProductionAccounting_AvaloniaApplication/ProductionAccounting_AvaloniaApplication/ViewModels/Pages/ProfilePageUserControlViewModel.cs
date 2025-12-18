@@ -1,15 +1,18 @@
-﻿using Npgsql;
+﻿using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ReactiveUI;
 using System;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
-namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
+namespace ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
 
-public class ProfileUserUserControlViewModel : ViewModelBase
+public class ProfilePageUserControlViewModel : ViewModelBase
 {
     private string _employeeName = string.Empty;
-    public string EmployeeName 
+    public string EmployeeName
     {
         get => _employeeName;
         set => this.RaiseAndSetIfChanged(ref _employeeName, value);
@@ -23,7 +26,7 @@ public class ProfileUserUserControlViewModel : ViewModelBase
     }
 
     private string _firstName = string.Empty;
-    public string FirstName 
+    public string FirstName
     {
         get => _firstName;
         set => this.RaiseAndSetIfChanged(ref _firstName, value);
@@ -78,6 +81,19 @@ public class ProfileUserUserControlViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _phone, value);
     }
 
+    public ICommand LogoutCommand
+        => new RelayCommand(() =>
+        {
+            ManagerCookie.DeleteCookie();
+            StrongReferenceMessenger.Default.Send(new UserAuthenticationChangedMessage());
+        });
+
+    public ProfilePageUserControlViewModel()
+    {
+        _ = LoadListTypeToComboBoxAsync();
+        _ = LoadDateAsync();
+    }
+
     public async Task LoadListTypeToComboBoxAsync()
     {
         if (!ManagerCookie.IsUserLoggedIn() && ManagerCookie.GetIdUser != 0) return;
@@ -119,12 +135,12 @@ public class ProfileUserUserControlViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(level: LogLevel.WARNING, 
+            Loges.LoggingProcess(level: LogLevel.WARNING,
                 ex: ex);
         }
     }
 
-    public async Task LoadDateAsync() 
+    public async Task LoadDateAsync()
     {
         if (!ManagerCookie.IsUserLoggedIn() && ManagerCookie.GetIdUser != 0) return;
 

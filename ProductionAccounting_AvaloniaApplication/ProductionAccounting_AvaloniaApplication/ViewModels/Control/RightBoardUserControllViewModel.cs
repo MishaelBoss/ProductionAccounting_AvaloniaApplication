@@ -47,6 +47,7 @@ public class RightBoardUserControlViewModel : ViewModelBase, IRecipient<OpenOrCl
     private readonly SalaryCalculationPageUserControlViewModel salaryCalculationPageUserControlViewModel = new();
     private readonly AuthorizationPageUserControlViewModel authorizationPageUserControlViewModel = new();
     private readonly ReferenceBooksPageUserControlViewModel referenceBooksPageUserControlViewModel = new();
+    private readonly ProfilePageUserControlViewModel profilePageUserControlViewModel = new();
 
     public ICommand OpenAdminPanelPageCommand
         => new RelayCommand(() => OpenPage(adminPageUserControlViewModel));
@@ -74,7 +75,7 @@ public class RightBoardUserControlViewModel : ViewModelBase, IRecipient<OpenOrCl
 
     public ICommand OpenAuthorizationCommand
         => new RelayCommand(() => {
-            if (ManagerCookie.IsUserLoggedIn()) mainWindowViewModel?.ShowProfileUser();
+            if (ManagerCookie.IsUserLoggedIn()) OpenPage(profilePageUserControlViewModel);
             else OpenPage(authorizationPageUserControlViewModel);
         });
 
@@ -180,6 +181,7 @@ public class RightBoardUserControlViewModel : ViewModelBase, IRecipient<OpenOrCl
         IsAll = (IsAdministrator || IsMaster || IsEmployee || IsManager);
 
         if(!ManagerCookie.IsUserLoggedIn()) OpenPage(authorizationPageUserControlViewModel);
+        if(ManagerCookie.IsUserLoggedIn()) OpenPage(profilePageUserControlViewModel);
 
         buttons.Clear();
 
@@ -191,8 +193,8 @@ public class RightBoardUserControlViewModel : ViewModelBase, IRecipient<OpenOrCl
             new DashboardButtonViewModel(RightBoardReferenceBooksText, OpenReferenceBooksPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/library-64.png"), () => IsAll),
             new DashboardButtonViewModel(RightBoardWindowsUserText, OpenWorkUserPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/home-64.png"), () => IsAdministratorOrMasterOrEmployee),
             new DashboardButtonViewModel(RightBoardShipmentsText, OpenShipmentsUserPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/home-64.png"), () => IsAdministratorOrMasterOrManager),
-            new DashboardButtonViewModel(ButtonAuthorizationText, OpenAuthorizationCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/login-64.png")),
             new DashboardButtonViewModel(RightBoardSalaryText, OpenSalaryUserPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/login-64.png"), () => IsAll),
+            new DashboardButtonViewModel(ButtonAuthorizationText, OpenAuthorizationCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/login-64.png")),
         };
 
         foreach (var button in newButtons)
