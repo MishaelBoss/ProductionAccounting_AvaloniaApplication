@@ -7,11 +7,6 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="850"
              x:Class="ProductionAccounting_AvaloniaApplication.Views.Pages.TimesheetPageUserControlView">
 
-    <!-- Все поля выбора даты теперь используют CalendarDatePicker для полной совместимости 
-         с масштабированием системы (DPI/scaling). Фильтры в верхней части также оптимизированы.
-         Добавлена автоматическая реакция на изменение дат фильтра без необходимости нажимать кнопку "Обновить".
-         Это делает фильтр действительно рабочим и удобным. -->
-
     <Grid Margin="20" 
           RowDefinitions="Auto,20,Auto,30,*">
         
@@ -23,52 +18,22 @@
                         Spacing="20" 
                         VerticalAlignment="Center"
                         HorizontalAlignment="Left">
-                
-<<<<<<< HEAD
-                <!-- Начальная дата фильтра -->
-=======
->>>>>>> 807591833098f881ac272a46f5478354efa55f68
                 <StackPanel Spacing="8">
                     <TextBlock Text="Начальная дата" 
                                FontWeight="SemiBold" 
                                Foreground="White"/>
                     <CalendarDatePicker Width="180"
-                                        SelectedDate="{Binding FilterStartDate, Mode=TwoWay}">
-<<<<<<< HEAD
-                        <!-- Автоматическое обновление при изменении даты -->
-                        <Interaction.Behaviors>
-                            <ia:EventTriggerBehavior EventName="SelectedDateChanged">
-                                <ia:InvokeCommandAction Command="{Binding RefreshTimesheetCommand}"/>
-                            </EventTriggerBehavior>
-                        </Interaction.Behaviors>
-                    </CalendarDatePicker>
+                                        SelectedDate="{Binding FilterStartDate, Mode=TwoWay}"/>
                 </StackPanel>
 
-                <!-- Конечная дата фильтра -->
-=======
-                    </CalendarDatePicker>
-                </StackPanel>
-
->>>>>>> 807591833098f881ac272a46f5478354efa55f68
                 <StackPanel Spacing="8">
                     <TextBlock Text="Конечная дата" 
                                FontWeight="SemiBold" 
                                Foreground="White"/>
                     <CalendarDatePicker Width="180"
-                                        SelectedDate="{Binding FilterEndDate, Mode=TwoWay}">
-<<<<<<< HEAD
-                        <!-- Автоматическое обновление при изменении даты -->
-                        <Interaction.Behaviors>
-                            <ia:EventTriggerBehavior EventName="SelectedDateChanged">
-                                <ia:InvokeCommandAction Command="{Binding RefreshTimesheetCommand}"/>
-                            </EventTriggerBehavior>
-                        </Interaction.Behaviors>
-=======
->>>>>>> 807591833098f881ac272a46f5478354efa55f68
-                    </CalendarDatePicker>
+                                        SelectedDate="{Binding FilterEndDate, Mode=TwoWay}"/>
                 </StackPanel>
 
-                <!-- Кнопка оставлена для ручного обновления (на случай, если нужно) -->
                 <Button Content="Обновить" 
                         Command="{Binding RefreshTimesheetCommand}" 
                         Height="40" 
@@ -80,7 +45,6 @@
             </StackPanel>
         </StackPanel>
         
-        <!-- Остальная часть интерфейса без изменений -->
         <Grid Grid.Row="2" 
               ColumnDefinitions="*,20,*">
             
@@ -243,8 +207,5 @@
             </StackPanel>
         </Border>
     </Grid>
-<<<<<<< HEAD
-=======
 
->>>>>>> 807591833098f881ac272a46f5478354efa55f68
 </UserControl>

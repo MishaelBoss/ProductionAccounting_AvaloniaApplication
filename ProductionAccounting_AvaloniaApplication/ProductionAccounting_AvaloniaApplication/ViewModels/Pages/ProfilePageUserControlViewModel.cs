@@ -1,9 +1,14 @@
-﻿using CommunityToolkit.Mvvm.Input;
+﻿using Avalonia.Controls;
+using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
+using ProductionAccounting_AvaloniaApplication.ViewModels.Control;
+using ProductionAccounting_AvaloniaApplication.Views.Control;
 using ReactiveUI;
 using System;
+using System.Collections.Generic;
+using System.Data;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -81,6 +86,11 @@ public class ProfilePageUserControlViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _phone, value);
     }
 
+    private List<CartTimesheetUserControl> timesheetList = new();
+    public StackPanel TableTimesheetContent { get; set; }
+    private List<CartEmployeeTaskUserControl> tasksList = new();
+    public StackPanel TasksContent { get; set; }
+
     public ICommand LogoutCommand
         => new RelayCommand(() =>
         {
@@ -90,13 +100,17 @@ public class ProfilePageUserControlViewModel : ViewModelBase
 
     public ProfilePageUserControlViewModel(double userId)
     {
-        LoadDate(userId);
+        InitDateUserAsync(userId);
     }
 
-    private void LoadDate(double userId)
+    public async void InitDateUserAsync(double userId)
     {
-        _ = LoadListTypeToComboBoxAsync(userId);
-        _ = LoadDateAsync(userId);
+        if (!ManagerCookie.IsUserLoggedIn()) return;
+
+        await LoadDateAsync(userId);
+        await LoadListTypeToComboBoxAsync(userId);
+        await LoadTimesheet(userId);
+        await LoadTask(userId);
     }
 
     private double _getIdUser = 0;
@@ -206,6 +220,117 @@ public class ProfilePageUserControlViewModel : ViewModelBase
         {
             Loges.LoggingProcess(LogLevel.CRITICAL,
                 "Connection or request error",
+                ex: ex);
+        }
+    }
+
+    private async Task LoadTimesheet(double userId)
+    {
+        StackPanelHelper.ClearAndRefreshStackPanel<CartTimesheetUserControl>(TableTimesheetContent, timesheetList);
+
+        try
+        {
+            string sql = @"SELECT status, notes, hours_worked, work_date FROM public.timesheet WHERE user_id = @userID";
+
+            using (var connection = new NpgsqlConnection(Arguments.connection))
+            {
+                await connection.OpenAsync();
+
+                using (var command = new NpgsqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@userID", userId);
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            var viewModel = new CartTimesheetUserControlViewModel()
+                            {
+                                Status = reader.IsDBNull(0) ? string.Empty : reader.GetString(0),
+                                Notes = reader.IsDBNull(1) ? string.Empty : reader.GetString(1),
+                                HoursWorked = reader.GetDecimal(2),
+                                WorkDate = reader.GetDateTime(3)
+                            };
+
+                            var cartUser = new CartTimesheetUserControl()
+                            {
+                                DataContext = viewModel
+                            };
+
+                            timesheetList.Add(cartUser);
+                        }
+                    }
+                }
+            }
+
+            StackPanelHelper.RefreshStackPanelContent<CartTimesheetUserControl>(TableTimesheetContent, timesheetList);
+        }
+        catch (Exception ex)
+        {
+            Loges.LoggingProcess(level: LogLevel.WARNING,
+                ex: ex);
+        }
+    }
+
+    private async Task LoadTask(double userId)
+    {
+        StackPanelHelper.ClearAndRefreshStackPanel<CartEmployeeTaskUserControl>(TasksContent, tasksList);
+
+        try
+        {
+            string sql = @"
+                    SELECT 
+                        sp.name AS sub_product_name,
+                        o.name AS operation_name,
+                        ta.assigned_quantity,
+                        ta.notes,
+                        ta.status,
+                        ta.id AS assignment_id
+                    FROM public.task_assignments ta
+                    JOIN public.sub_product_operations spo ON spo.id = ta.sub_product_operation_id
+                    JOIN public.sub_products sp ON sp.id = spo.sub_product_id
+                    JOIN public.operation o ON o.id = spo.operation_id
+                    WHERE ta.user_id = @user_id
+                    ORDER BY ta.assigned_at DESC";
+
+            using (var connection = new NpgsqlConnection(Arguments.connection))
+            {
+                await connection.OpenAsync();
+
+                using (var command = new NpgsqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@user_id", userId);
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            var viewModel = new CartEmployeeTaskUserControlViewModel()
+                            {
+                                AssignmentId = reader.GetDouble("assignment_id"),
+                                SubProductName = reader.GetString("sub_product_name"),
+                                OperationName = reader.GetString("operation_name"),
+                                PlannedQuantity = reader.GetDecimal("assigned_quantity"),
+                                Notes = reader.IsDBNull("notes") ? null : reader.GetString("notes"),
+                                Status = reader.GetString("status")
+                            };
+
+                            var cartUser = new CartEmployeeTaskUserControl()
+                            {
+                                DataContext = viewModel
+                            };
+
+                            tasksList.Add(cartUser);
+                        }
+                    }
+                }
+            }
+
+            StackPanelHelper.RefreshStackPanelContent<CartEmployeeTaskUserControl>(TasksContent, tasksList);
+        }
+        catch (Exception ex)
+        {
+            Loges.LoggingProcess(level: LogLevel.WARNING,
                 ex: ex);
         }
     }
