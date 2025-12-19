@@ -38,7 +38,7 @@
 		  		<Button Margin="10,0,0,0"
 		  				Width="32"
 		  				Height="32"
-		  				Click="ReturnList_Click"
+		  				Command="{Binding ReturnListUsersCommand}"
 		  				ToolTip.Tip="�������� ������">
 		  			<Image Source="/Assets/return-64.png"/>
 		  		</Button>
@@ -148,14 +148,6 @@
                                      Orientation="Vertical"/>
                      </ScrollViewer>
                  </Grid>
-
-                 <Grid Grid.Column="1"
-                       IsVisible="{Binding IsProfileView}"
-                       Name="ProfileContent"
-                       Margin="5,10,0,10"
-                       Width="400"
-                       HorizontalAlignment="Stretch"
-                       VerticalAlignment="Stretch"/>
              </Grid>
         </Grid>
     </Grid>

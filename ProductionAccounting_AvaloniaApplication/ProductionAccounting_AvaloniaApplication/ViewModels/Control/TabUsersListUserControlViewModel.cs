@@ -18,28 +18,14 @@ using static ProductionAccounting_AvaloniaApplication.ViewModels.Control.NotFoun
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
-public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyChanged, IRecipient<OpenOrCloseProfileUserStatusMessage>, IRecipient<RefreshUserListMessage>
+public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyChanged, IRecipient<RefreshUserListMessage>
 {
     public TabUsersListUserControlViewModel()
     {
-        WeakReferenceMessenger.Default.Register<OpenOrCloseProfileUserStatusMessage>(this);
         WeakReferenceMessenger.Default.Register<RefreshUserListMessage>(this);
 
         _ = LoadListTypeToComboBoxAsync();
-    }
-
-    public void Receive(OpenOrCloseProfileUserStatusMessage message)
-    {
-        if (message.ShouldOpen)
-        {
-            ShowProfileUserControl(message.UserId);
-            IsProfileView = true;
-        }
-        else 
-        { 
-            CloseProfileUserControl(); 
-            IsProfileView = false;  
-        }
+        GetListUsers();
     }
 
     public void Receive(RefreshUserListMessage message)
@@ -48,9 +34,6 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
     }
 
     public StackPanel? HomeMainContent { get; set; } = null;
-    public Grid? ProfileContent { get; set; } = null;
-
-    private readonly ProfileViewUserControl _profileView = new();
 
     private List<CartUserListUserControl> userList = [];
     private List<double> filteredUserIds = [];
@@ -60,6 +43,9 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
 
     public ICommand DownloadAsyncCommand
         => new RelayCommand(async () => await DownloadListAsync());
+
+    public ICommand ReturnListUsersCommand
+        => new RelayCommand(() => GetListUsers());
 
     private bool _isProfileView = false;
     public bool IsProfileView
@@ -573,33 +559,6 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
             Loges.LoggingProcess(LogLevel.ERROR,
                 "Connection or request error",
                 ex: ex);
-        }
-    }
-
-    public void ShowProfileUserControl(double userID)
-    {
-        if (ProfileContent != null)
-        {
-            if (ProfileContent.Children.Contains(_profileView))
-            {
-                _profileView.RefreshDataAsync(userID);
-                return;
-            }
-
-            if (_profileView.Parent is Panel currentParent) currentParent.Children.Remove(_profileView);
-            ProfileContent.Children.Clear();
-            ProfileContent.Children.Add(_profileView);
-
-            _profileView.RefreshDataAsync(userID);
-        }
-    }
-
-    public void CloseProfileUserControl()
-    {
-        if (ProfileContent != null)
-        {
-            ProfileContent.Children.Clear();
-            if (_profileView.Parent == ProfileContent) ProfileContent.Children.Remove(_profileView);
         }
     }
 

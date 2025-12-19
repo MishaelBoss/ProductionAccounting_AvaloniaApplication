@@ -17,13 +17,6 @@ public partial class TabUsersListUserControl : UserControl
     {
         if (DataContext is not TabUsersListUserControlViewModel viewModel) return;
         viewModel.HomeMainContent = HomeMainContent;
-        viewModel.ProfileContent = ProfileContent;
-        viewModel.GetListUsers();
-    }
-
-    private void ReturnList_Click(object? sender, RoutedEventArgs e)
-    {
-        if (DataContext is not TabUsersListUserControlViewModel viewModel) return;
         viewModel.GetListUsers();
     }
 }

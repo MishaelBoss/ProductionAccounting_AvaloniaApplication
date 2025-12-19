@@ -6,7 +6,7 @@ public class ProductionHistoryViewModel
 {
     public long Id { get; set; }
     public DateTime ProductionDate { get; set; }
-    public decimal? Shift { get; set; }
+    public int? Shift { get; set; }
     public string ProductName { get; set; } = string.Empty;
     public string OperationName { get; set; } = string.Empty;
     public string OperationUnit { get; set; } = string.Empty;

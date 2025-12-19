@@ -287,14 +287,14 @@ public class ProfilePageUserControlViewModel : ViewModelBase
                         SELECT 
                             p.production_date,
                             p.shift,
-                            COALESCE(pr.name, 'Продукт не найден') AS product_name,
-                            COALESCE(o.name, 'Операция не указана') AS operation_name,
-                            COALESCE(o.unit, 'шт') AS operation_unit,
+                            COALESCE(pr.name, 'Продукт не найден'),
+                            COALESCE(o.name, 'Операция не указана'),
+                            COALESCE(o.unit, 'шт'),
                             p.quantity,
                             p.amount,
                             p.tonnage,
                             p.status,
-                            p.notes AS production_notes,
+                            p.notes,
                             p.created_at
                         FROM public.production p
                         LEFT JOIN public.product pr ON pr.id = p.product_id
@@ -319,16 +319,16 @@ public class ProfilePageUserControlViewModel : ViewModelBase
                             var productionItem = new ProductionHistoryViewModel()
                             {
                                 ProductionDate = reader.GetDateTime(0),
-                                Shift = reader.IsDBNull(1) ? null : reader.GetDecimal(1),
+                                Shift = reader.IsDBNull(1) ? (int?)null : reader.GetInt32(1),
                                 ProductName = reader.GetString(2),
-                                OperationName = reader.GetString(2),
-                                OperationUnit = reader.GetString(3),
-                                Quantity = reader.GetDecimal(4),
-                                Amount = reader.IsDBNull(5) ? 0 : reader.GetDecimal(5),
-                                Tonnage = reader.IsDBNull(6) ? 0 : reader.GetDecimal(6),
-                                Status = reader.GetString(7),
-                                Notes = reader.IsDBNull(8) ? string.Empty : reader.GetString(8),
-                                CreatedAt = reader.GetDateTime(9)
+                                OperationName = reader.GetString(3),
+                                OperationUnit = reader.GetString(4),
+                                Quantity = reader.GetDecimal(5),
+                                Amount = reader.IsDBNull(6) ? 0 : reader.GetDecimal(6),
+                                Tonnage = reader.IsDBNull(7) ? 0 : reader.GetDecimal(7),
+                                Status = reader.GetString(8),
+                                Notes = reader.IsDBNull(9) ? string.Empty : reader.GetString(9),
+                                CreatedAt = reader.GetDateTime(10)
                             };
 
                             ProductionHistory.Add(productionItem);
