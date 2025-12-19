@@ -116,6 +116,7 @@
 
                 <Button Content="logout"
                         Command="{Binding LogoutCommand}"
+                        IsVisible="{Binding IsOwnProfile}"
                         VerticalContentAlignment="Center"
                         HorizontalContentAlignment="Center"
                         HorizontalAlignment="Stretch"

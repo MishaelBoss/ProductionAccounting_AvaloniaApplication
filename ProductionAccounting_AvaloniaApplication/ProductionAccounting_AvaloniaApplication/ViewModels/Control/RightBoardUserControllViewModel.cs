@@ -12,7 +12,7 @@ using System.Windows.Input;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
-public class RightBoardUserControlViewModel : ViewModelBase, IRecipient<OpenOrCloseAuthorizationPageStatusMessage>, IRecipient<UserAuthenticationChangedMessage>
+public class RightBoardUserControlViewModel : ViewModelBase, IRecipient<OpenOrCloseAuthorizationPageStatusMessage>, IRecipient<UserAuthenticationChangedMessage>, IRecipient<OpenOrCloseProfileUserStatusMessage>
 {
     private MainWindowViewModel? mainWindowViewModel { get; set; } = null;
 
@@ -25,6 +25,7 @@ public class RightBoardUserControlViewModel : ViewModelBase, IRecipient<OpenOrCl
         UpdateUI();
 
         WeakReferenceMessenger.Default.Register<OpenOrCloseAuthorizationPageStatusMessage>(this);
+        WeakReferenceMessenger.Default.Register<OpenOrCloseProfileUserStatusMessage>(this);
         StrongReferenceMessenger.Default.Register<UserAuthenticationChangedMessage>(this);
     }
 
@@ -38,6 +39,17 @@ public class RightBoardUserControlViewModel : ViewModelBase, IRecipient<OpenOrCl
         UpdateUI();
     }
 
+    public void Receive(OpenOrCloseProfileUserStatusMessage message)
+    {
+        ExecuteOpenProfilePage(message.UserId);
+    }
+
+    public void ExecuteOpenProfilePage(double userId)
+    {
+        var viewModel = new ProfilePageUserControlViewModel(userId);
+        OpenPage(viewModel);
+    }
+
     private readonly AdminPageUserControlViewModel adminPageUserControlViewModel = new();
     private readonly WorkPageUserControlViewModel workUserPageUserControlViewModel = new();
     private readonly SettingsPageUserControlViewModel settingsPageUserControlViewModel = new();
@@ -47,7 +59,6 @@ public class RightBoardUserControlViewModel : ViewModelBase, IRecipient<OpenOrCl
     private readonly SalaryCalculationPageUserControlViewModel salaryCalculationPageUserControlViewModel = new();
     private readonly AuthorizationPageUserControlViewModel authorizationPageUserControlViewModel = new();
     private readonly ReferenceBooksPageUserControlViewModel referenceBooksPageUserControlViewModel = new();
-    private readonly ProfilePageUserControlViewModel profilePageUserControlViewModel = new();
 
     public ICommand OpenAdminPanelPageCommand
         => new RelayCommand(() => OpenPage(adminPageUserControlViewModel));
@@ -75,7 +86,7 @@ public class RightBoardUserControlViewModel : ViewModelBase, IRecipient<OpenOrCl
 
     public ICommand OpenAuthorizationCommand
         => new RelayCommand(() => {
-            if (ManagerCookie.IsUserLoggedIn()) OpenPage(profilePageUserControlViewModel);
+            if (ManagerCookie.IsUserLoggedIn()) ExecuteOpenProfilePage(ManagerCookie.GetIdUser ?? 0);
             else OpenPage(authorizationPageUserControlViewModel);
         });
 
@@ -166,22 +177,22 @@ public class RightBoardUserControlViewModel : ViewModelBase, IRecipient<OpenOrCl
 
     public void UpdateUI()
     {
-        if (ManagerCookie.IsUserLoggedIn()) ButtonAuthorizationText = RightBoardProfileText;
-        else ButtonAuthorizationText = RightBoardLoginText;
+        ButtonAuthorizationText = ManagerCookie.IsUserLoggedIn() ? "Profile" : "Login";
 
-        IsAdministrator = ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsAdministrator;
-        IsMaster = ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsMaster;
-        IsEmployee = ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsEmployee;
-        IsManager = ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsManager;
+        bool isLoggedIn = ManagerCookie.IsUserLoggedIn();
+        IsAdministrator = isLoggedIn && ManagerCookie.IsAdministrator;
+        IsMaster = isLoggedIn && ManagerCookie.IsMaster;
+        IsEmployee = isLoggedIn && ManagerCookie.IsEmployee;
+        IsManager = isLoggedIn && ManagerCookie.IsManager;
 
-        IsAdministratorOrMaster = (IsAdministrator || IsMaster);
-        IsAdministratorOrManager = (IsAdministrator || IsManager);
-        IsAdministratorOrMasterOrEmployee = (IsAdministrator || IsMaster || IsEmployee);
-        IsAdministratorOrMasterOrManager = (IsAdministrator || IsMaster || IsManager);
-        IsAll = (IsAdministrator || IsMaster || IsEmployee || IsManager);
+        IsAdministratorOrMaster = IsAdministrator || IsMaster;
+        IsAdministratorOrManager = IsAdministrator || IsManager;
+        IsAdministratorOrMasterOrEmployee = IsAdministrator || IsMaster || IsEmployee;
+        IsAdministratorOrMasterOrManager = IsAdministrator || IsMaster || IsManager;
+        IsAll = isLoggedIn;
 
-        if(!ManagerCookie.IsUserLoggedIn()) OpenPage(authorizationPageUserControlViewModel);
-        if(ManagerCookie.IsUserLoggedIn()) OpenPage(profilePageUserControlViewModel);
+        if (!isLoggedIn) OpenPage(authorizationPageUserControlViewModel);
+        else ExecuteOpenProfilePage(ManagerCookie.GetIdUser ?? 0);
 
         buttons.Clear();
 

@@ -24,9 +24,6 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
         SelectedMassStatus = Statuses[0];
         SelectedSingleStatus = Statuses[0];
 
-        _filterStartDate = new DateTimeOffset(DateTime.Today);
-        _filterEndDate = new DateTimeOffset(DateTime.Today);
-
         _ = LoadListUsersAsync();
     }
 
@@ -34,8 +31,8 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
 
     private List<CartTimesheetUserControl> timesheetList = [];
 
-    private DateTimeOffset _filterStartDate;
-    public DateTimeOffset FilterStartDate
+    private DateTime _filterStartDate = DateTime.Today;
+    public DateTime FilterStartDate
     {
         get => _filterStartDate;
         set
@@ -47,8 +44,8 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
         }
     }
 
-    private DateTimeOffset _filterEndDate;
-    public DateTimeOffset FilterEndDate
+    private DateTime _filterEndDate = DateTime.Today;
+    public DateTime FilterEndDate
     {
         get => _filterEndDate;
         set
@@ -60,8 +57,8 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
         }
     }
 
-    private DateTimeOffset _selectedDate = new(DateTime.Today);
-    public DateTimeOffset SelectedDate
+    private DateTime _selectedDate = DateTime.Today;
+    public DateTime SelectedDate
     {
         get => _selectedDate;
         set => this.RaiseAndSetIfChanged(ref _selectedDate, value);
@@ -95,15 +92,15 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
         set => this.RaiseAndSetIfChanged(ref _singleNotes, value);
     }
 
-    private DateTimeOffset _massEditStartDate = new(DateTime.Today);
-    public DateTimeOffset MassEditStartDate
+    private DateTime _massEditStartDate = DateTime.Today;
+    public DateTime MassEditStartDate
     {
         get => _massEditStartDate;
         set => this.RaiseAndSetIfChanged(ref _massEditStartDate, value);
     }
 
-    private DateTimeOffset _massEditEndDate = new(DateTime.Today);
-    public DateTimeOffset MassEditEndDate
+    private DateTime _massEditEndDate = DateTime.Today;
+    public DateTime MassEditEndDate
     {
         get => _massEditEndDate;
         set => this.RaiseAndSetIfChanged(ref _massEditEndDate, value);
@@ -205,7 +202,7 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
                 this.RaisePropertyChanged(nameof(FilterEndDate));
             }
 
-            await LoadTimesheetAsync(FilterStartDate.DateTime, FilterEndDate.DateTime);
+            await LoadTimesheetAsync(FilterStartDate, FilterEndDate);
 
             Loges.LoggingProcess(LogLevel.INFO,
                 message: $"Табель обновлен за период: {FilterStartDate:dd.MM.yyyy} - {FilterEndDate:dd.MM.yyyy}");
@@ -281,7 +278,7 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
                 using (var command = new NpgsqlCommand(sql, connection))
                 {
                     command.Parameters.AddWithValue("@userId", SelectedSingleUser.Id);
-                    command.Parameters.AddWithValue("@workDate", SelectedDate.DateTime);
+                    command.Parameters.AddWithValue("@workDate", SelectedDate);
                     command.Parameters.AddWithValue("@status", SelectedSingleStatus.Code);
                     command.Parameters.AddWithValue("@hoursWorked", SelectedSingleStatus.Code == "Я" ? SingleHours : 0);
                     command.Parameters.AddWithValue("@notes", SingleNotes ?? "");
@@ -319,8 +316,8 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
 
         if (!usersToProcess.Any()) return;
 
-        var startDate = MassEditStartDate.DateTime.Date;
-        var endDate = MassEditEndDate.DateTime.Date;
+        var startDate = MassEditStartDate.Date;
+        var endDate = MassEditEndDate.Date;
         if (startDate > endDate) return;
 
         int totalInserted = 0;

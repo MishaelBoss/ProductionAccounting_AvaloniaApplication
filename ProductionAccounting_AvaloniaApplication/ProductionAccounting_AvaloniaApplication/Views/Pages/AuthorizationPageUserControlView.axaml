@@ -30,7 +30,7 @@
                                FontWeight="Bold"
                                Foreground="#1E293B"
                                HorizontalAlignment="Center"/>
-                    <TextBlock Text="Войдите в систему"
+                    <TextBlock Text="{Binding LoginText}"
                                FontSize="16"
                                Foreground="#64748B"
                                HorizontalAlignment="Center"/>
@@ -43,11 +43,11 @@
                            TextWrapping="Wrap"/>
 
                 <StackPanel Spacing="6">
-                    <TextBlock Text="Логин" 
+                    <TextBlock Text="{Binding NameText}" 
                                Foreground="#374151" 
                                FontWeight="SemiBold"/>
                     <TextBox Text="{Binding Login}"
-                             Watermark="Введите логин"
+                             Watermark="{Binding EnterYourNameText}"
                              Foreground="Black"
                              HorizontalContentAlignment="Left"
                              VerticalContentAlignment="Center"
@@ -61,10 +61,10 @@
                 </StackPanel>
 
                 <StackPanel Spacing="6">
-                    <TextBlock Text="Пароль" Foreground="#374151" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding PasswordText}" Foreground="#374151" FontWeight="SemiBold"/>
                     <TextBox Text="{Binding Password}"
                              PasswordChar="*"
-                             Watermark="Введите пароль"
+                             Watermark="{Binding EnterYourPasswordText}"
                              Foreground="Black"
                              HorizontalContentAlignment="Left"
                              VerticalContentAlignment="Center"
@@ -77,8 +77,7 @@
                              BorderThickness="1"/>
                 </StackPanel>
 
-                <Button Classes="ButtonLogin" 
-                        Content="Авторизоваться"
+                <Button Content="{Binding LoginText}"
                         Command="{Binding ConfirmCommand}"
                         IsEnabled="{Binding IsActiveConfirmButton}"
                         HorizontalAlignment="Stretch"

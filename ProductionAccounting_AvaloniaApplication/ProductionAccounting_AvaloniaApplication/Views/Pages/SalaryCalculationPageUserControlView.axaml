@@ -15,7 +15,6 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             
-            <!-- Панель управления -->
             <Border Grid.Row="0"
                     BorderThickness="1"
                     CornerRadius="8"
@@ -44,7 +43,6 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         
-                        <!-- Левая часть - фильтры -->
                         <StackPanel Grid.Column="0">
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -53,7 +51,6 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 
-                                <!-- Период -->
                                 <StackPanel Grid.Column="0" Margin="0,0,15,0">
                                     <TextBlock Text="Период расчета:" 
                                                FontSize="12" 
@@ -102,7 +99,6 @@
                                     </ComboBox>
                                 </StackPanel>
                                 
-                                <!-- Кнопки действий -->
                                 <StackPanel Grid.Column="2" 
                                             Orientation="Horizontal"
                                             VerticalAlignment="Bottom">

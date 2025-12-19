@@ -24,13 +24,17 @@
                         VerticalAlignment="Center"
                         HorizontalAlignment="Left">
                 
+<<<<<<< HEAD
                 <!-- Начальная дата фильтра -->
+=======
+>>>>>>> 807591833098f881ac272a46f5478354efa55f68
                 <StackPanel Spacing="8">
                     <TextBlock Text="Начальная дата" 
                                FontWeight="SemiBold" 
                                Foreground="White"/>
                     <CalendarDatePicker Width="180"
                                         SelectedDate="{Binding FilterStartDate, Mode=TwoWay}">
+<<<<<<< HEAD
                         <!-- Автоматическое обновление при изменении даты -->
                         <Interaction.Behaviors>
                             <ia:EventTriggerBehavior EventName="SelectedDateChanged">
@@ -41,18 +45,26 @@
                 </StackPanel>
 
                 <!-- Конечная дата фильтра -->
+=======
+                    </CalendarDatePicker>
+                </StackPanel>
+
+>>>>>>> 807591833098f881ac272a46f5478354efa55f68
                 <StackPanel Spacing="8">
                     <TextBlock Text="Конечная дата" 
                                FontWeight="SemiBold" 
                                Foreground="White"/>
                     <CalendarDatePicker Width="180"
                                         SelectedDate="{Binding FilterEndDate, Mode=TwoWay}">
+<<<<<<< HEAD
                         <!-- Автоматическое обновление при изменении даты -->
                         <Interaction.Behaviors>
                             <ia:EventTriggerBehavior EventName="SelectedDateChanged">
                                 <ia:InvokeCommandAction Command="{Binding RefreshTimesheetCommand}"/>
                             </EventTriggerBehavior>
                         </Interaction.Behaviors>
+=======
+>>>>>>> 807591833098f881ac272a46f5478354efa55f68
                     </CalendarDatePicker>
                 </StackPanel>
 
@@ -231,4 +243,8 @@
             </StackPanel>
         </Border>
     </Grid>
+<<<<<<< HEAD
+=======
+
+>>>>>>> 807591833098f881ac272a46f5478354efa55f68
 </UserControl>
