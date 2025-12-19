@@ -204,7 +204,6 @@ public class TabWorkshopDepartmentUserControlViewModel : ViewModelBase, IRecipie
         {
             StackPanelHelper.ClearAndRefreshStackPanel<CartWorkshopDepartmentUserControl>(HomeMainContent, workshopDepartmentList);
             ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NoConnectToDB);
-
             Loges.LoggingProcess(LogLevel.CRITICAL,
                 "Connection or request error",
                 ex: ex);
@@ -212,6 +211,7 @@ public class TabWorkshopDepartmentUserControlViewModel : ViewModelBase, IRecipie
         catch (Exception ex)
         {
             StackPanelHelper.ClearAndRefreshStackPanel<CartWorkshopDepartmentUserControl>(HomeMainContent, workshopDepartmentList);
+            ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NoConnectToDB);
             Loges.LoggingProcess(LogLevel.ERROR,
                 "Error loading departments by IDs",
                 ex: ex);

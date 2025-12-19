@@ -8,4 +8,8 @@ public partial class ProfilePageUserControlView : UserControl
     {
         InitializeComponent();
     }
+
+    private void Border_ActualThemeVariantChanged(object? sender, System.EventArgs e)
+    {
+    }
 }

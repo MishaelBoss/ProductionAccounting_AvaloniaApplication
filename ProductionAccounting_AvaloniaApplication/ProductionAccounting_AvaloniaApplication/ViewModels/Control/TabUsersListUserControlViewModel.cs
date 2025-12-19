@@ -413,12 +413,10 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
 
     private async Task SearchUsersAsync(List<double> userIds)
     {
-        //if (!ManagerCookie.IsUserLoggedIn() && !ManagerCookie.IsAdministrator) return;
-
         if (userIds.Count == 0)
         {
             StackPanelHelper.ClearAndRefreshStackPanel<CartUserListUserControl>(HomeMainContent, userList);
-            ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NoConnectToDB);
+            ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NotFound);
             return;
         }
 
@@ -481,7 +479,7 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
 
             StackPanelHelper.RefreshStackPanelContent<CartUserListUserControl>(HomeMainContent, userList);
 
-            if (userList.Count == 0) ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NoConnectToDB);
+            if (userList.Count == 0) ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NotFound);
         }
         catch (NpgsqlException ex)
         {
@@ -495,6 +493,7 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
         catch (Exception ex)
         {
             StackPanelHelper.ClearAndRefreshStackPanel<CartUserListUserControl>(HomeMainContent, userList);
+            ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NoConnectToDB);
             Loges.LoggingProcess(LogLevel.ERROR,
                 "Error loading users by IDs",
                 ex: ex);

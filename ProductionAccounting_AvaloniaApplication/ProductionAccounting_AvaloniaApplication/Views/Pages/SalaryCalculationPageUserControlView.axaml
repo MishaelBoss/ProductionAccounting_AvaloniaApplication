@@ -3,195 +3,122 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:ProductionAccounting_AvaloniaApplication.ViewModels.Pages"
-             xmlns:controls="using:ProductionAccounting_AvaloniaApplication.Views.Control"
              x:DataType="vm:SalaryCalculationPageUserControlViewModel"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="600"
              x:Class="ProductionAccounting_AvaloniaApplication.Views.Pages.SalaryCalculationPageUserControlView">
-    
-    <Grid>
-        <Grid Margin="20">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            
-            <Border Grid.Row="0"
-                    BorderThickness="1"
-                    CornerRadius="8"
-                    Padding="20"
-                    Margin="0,0,0,20">
-                
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    
-                    <StackPanel Grid.Row="0" Margin="0,0,0,20">
-                        <TextBlock Text="Расчет заработной платы" 
-                                   FontSize="24" 
-                                   FontWeight="Bold"/>
-                        <TextBlock Text="Расчет зарплаты сотрудников на основе производственных операций" 
-                                   FontSize="14" 
-                                   Foreground="#666"
-                                   Margin="0,5,0,0"/>
+
+    <Grid Margin="20" RowDefinitions="Auto,*">
+
+        <Border Grid.Row="0"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="20"
+                Margin="0,0,0,20">
+
+            <StackPanel Spacing="20">
+
+                <StackPanel>
+                    <TextBlock Text="Расчет заработной платы"
+                               FontSize="24"
+                               FontWeight="Bold"/>
+                </StackPanel>
+
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="20">
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Период расчета:"
+                                   FontSize="12"
+                                   Foreground="#FFFFFF"
+                                   Margin="0,0,0,5"/>
+                        <Grid ColumnDefinitions="*,Auto,*" ColumnSpacing="8">
+                            <DatePicker SelectedDate="{Binding PeriodStart}"
+                                        HorizontalAlignment="Stretch"/>
+                            <TextBlock Text="—"
+                                       FontSize="16"
+                                       VerticalAlignment="Center"/>
+                            <DatePicker Grid.Column="2"
+                                        SelectedDate="{Binding PeriodEnd}"
+                                        HorizontalAlignment="Stretch"/>
+                        </Grid>
                     </StackPanel>
 
-                    <Grid Grid.Row="1">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        
-                        <StackPanel Grid.Column="0">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                
-                                <StackPanel Grid.Column="0" Margin="0,0,15,0">
-                                    <TextBlock Text="Период расчета:" 
-                                               FontSize="12" 
-                                               Foreground="#666"
-                                               Margin="0,0,0,5"/>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        
-                                        <DatePicker Grid.Column="0" 
-                                                   SelectedDate="{Binding PeriodStart}"
-                                                   
-                                                   HorizontalAlignment="Stretch"/>
-                                        
-                                        <TextBlock Grid.Column="1" 
-                                                   Text="—" 
-                                                   FontSize="14"
-                                                   VerticalAlignment="Center"
-                                                   HorizontalAlignment="Center"
-                                                   Margin="10,0"/>
-                                        
-                                        <DatePicker Grid.Column="2" 
-                                                   SelectedDate="{Binding PeriodEnd}"
-                                                   
-                                                   HorizontalAlignment="Stretch"/>
-                                    </Grid>
-                                </StackPanel>
-                                
-                                <StackPanel Grid.Column="1" Margin="0,0,15,0">
-                                    <TextBlock Text="Сотрудник:" 
-                                               FontSize="12" 
-                                               Foreground="#666"
-                                               Margin="0,0,0,5"/>
-                                    <ComboBox ItemsSource="{Binding Users}"
-                                              SelectedItem="{Binding SelectedUser, Mode=TwoWay}"
-                                              HorizontalAlignment="Stretch"
-                                              MinWidth="250">
-                                        <ComboBox.ItemTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding DisplayName}"/>
-                                            </DataTemplate>
-                                        </ComboBox.ItemTemplate>
-                                    </ComboBox>
-                                </StackPanel>
-                                
-                                <StackPanel Grid.Column="2" 
-                                            Orientation="Horizontal"
-                                            VerticalAlignment="Bottom">
-                                    <Button Content="Рассчитать" 
-                                            Command="{Binding CalculateSalaryCommand}"
-                                            Background="#2196F3"
-                                            Foreground="White"
-                                            FontWeight="SemiBold"
-                                            Padding="20,10"
-                                            Margin="0,0,10,0"/>
-                                    
-                                    <Button Content="Экспорт" 
-                                            Command="{Binding GenerateReportCommand}"
-                                            Background="#4CAF50"
-                                            Foreground="White"
-                                            FontWeight="SemiBold"
-                                            Padding="20,10"/>
-                                </StackPanel>
-                                
-                            </Grid>
-                        </StackPanel>
-                        
-                    </Grid>
-                    
-                </Grid>
-                
-            </Border>
-            
-            <!-- Результаты расчета -->
-            <Border Grid.Row="1"
-                    BorderThickness="1"
-                    CornerRadius="8"
-                    Padding="20">
-                
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    
-                    <!-- Заголовок результатов -->
-                    <DockPanel Grid.Row="0" Margin="0,0,0,15">
-                        <TextBlock Text="Результаты расчета" 
-                                   FontSize="18" 
-                                   FontWeight="SemiBold"
-                                   DockPanel.Dock="Left"/>
-                        
-                        <TextBlock Text="{Binding PeriodStart, StringFormat='Период: {0:dd.MM.yyyy}'}"
-                                   FontSize="14"
-                                   Foreground="#666"
-                                   DockPanel.Dock="Right"/>
-                        <TextBlock Text=" — " 
-                                   FontSize="14"
-                                   Foreground="#666"
-                                   DockPanel.Dock="Right"/>
-                        <TextBlock Text="{Binding PeriodEnd, StringFormat='Период: {0:dd.MM.yyyy}'}"
-                                   FontSize="14"
-                                   Foreground="#666"
-                                   DockPanel.Dock="Right"/>
-                    </DockPanel>
-                    
-                    <ScrollViewer Grid.Row="1"
-                                  VerticalScrollBarVisibility="Auto">
-                        <StackPanel>
-                            <StackPanel Name="SalaryContent"/>
-                            
-                            <Border IsVisible="{Binding #SalaryContent}"
-                                    Background="Transparent"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    Padding="40">
-                                <StackPanel HorizontalAlignment="Center">
-                                    <PathIcon Data="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"
-                                              Foreground="#999"
-                                              Width="48"
-                                              Height="48"
-                                              Margin="0,0,0,15"/>
-                                    <TextBlock Text="Нет данных для отображения" 
-                                               FontSize="16" 
-                                               Foreground="#999"
-                                               HorizontalAlignment="Center"/>
-                                    <TextBlock Text="Выберите период и нажмите 'Рассчитать'" 
-                                               FontSize="14" 
-                                               Foreground="#999"
-                                               HorizontalAlignment="Center"
-                                               Margin="0,5,0,0"/>
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
-                    </ScrollViewer>
-                </Grid>
-            </Border>
-        </Grid>
-    </Grid>
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="Сотрудник:"
+                                   FontSize="12"
+                                   Foreground="#FFFFFF"
+                                   Margin="0,0,0,5"/>
+                        <ComboBox ItemsSource="{Binding Users}"
+                                  SelectedItem="{Binding SelectedUser, Mode=TwoWay}"
+                                  HorizontalAlignment="Stretch">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding DisplayName}"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
 
+                    <StackPanel Grid.Column="2"
+                                VerticalAlignment="Bottom"
+                                Spacing="10">
+                        <Button Content="Рассчитать"
+                                Command="{Binding CalculateSalaryCommand}"
+                                Background="#2196F3"
+                                Foreground="White"
+                                FontWeight="SemiBold"
+                                Padding="24,12"
+                                MinWidth="140"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Center"/>
+                        <Button Content="Экспорт"
+                                Command="{Binding GenerateReportCommand}"
+                                Background="#4CAF50"
+                                Foreground="White"
+                                FontWeight="SemiBold"
+                                Padding="24,12"
+                                MinWidth="140"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Center"/>
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="1"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="20">
+
+            <Grid RowDefinitions="Auto,*">
+                <DockPanel Margin="0,0,0,15">
+                    <TextBlock Text="Результаты расчета"
+                               FontSize="18"
+                               FontWeight="SemiBold"
+                               DockPanel.Dock="Left"/>
+                </DockPanel>
+
+                <ScrollViewer Grid.Row="1">
+                    <StackPanel>
+                        <StackPanel x:Name="SalaryContent"/>
+
+                        <Border IsVisible="{Binding ElementName=SalaryContent}"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Padding="40">
+                            <StackPanel HorizontalAlignment="Center" Spacing="12">
+                                <PathIcon Data="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"
+                                          Width="64" Height="64" Foreground="#999999"/>
+                                <TextBlock Text="Нет данных для отображения"
+                                           FontSize="16"
+                                           Foreground="#999999"/>
+                                <TextBlock Text="Выберите период и нажмите 'Рассчитать'"
+                                           FontSize="14"
+                                           Foreground="#999999"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+    </Grid>
 </UserControl>

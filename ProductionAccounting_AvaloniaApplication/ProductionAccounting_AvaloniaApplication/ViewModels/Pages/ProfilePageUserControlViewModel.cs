@@ -1,14 +1,11 @@
-﻿using Avalonia.Controls;
-using CommunityToolkit.Mvvm.Input;
+﻿using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ProductionAccounting_AvaloniaApplication.ViewModels.Control;
-using ProductionAccounting_AvaloniaApplication.Views.Control;
 using ReactiveUI;
 using System;
-using System.Collections.Generic;
-using System.Data;
+using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -86,10 +83,19 @@ public class ProfilePageUserControlViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _phone, value);
     }
 
-    private List<CartTimesheetUserControl> timesheetList = new();
-    public StackPanel TableTimesheetContent { get; set; }
-    private List<CartEmployeeTaskUserControl> tasksList = new();
-    public StackPanel TasksContent { get; set; }
+    private ObservableCollection<CartTimesheetUserControlViewModel> _tables = [];
+    public ObservableCollection<CartTimesheetUserControlViewModel> Tables
+    {
+        get => _tables;
+        set => this.RaiseAndSetIfChanged(ref _tables, value);
+    }
+
+    private ObservableCollection<ProductionHistoryViewModel> _productionHistory = [];
+    public ObservableCollection<ProductionHistoryViewModel> ProductionHistory
+    {
+        get => _productionHistory;
+        set => this.RaiseAndSetIfChanged(ref _productionHistory, value);
+    }
 
     public ICommand LogoutCommand
         => new RelayCommand(() =>
@@ -110,7 +116,7 @@ public class ProfilePageUserControlViewModel : ViewModelBase
         await LoadDateAsync(userId);
         await LoadListTypeToComboBoxAsync(userId);
         await LoadTimesheet(userId);
-        await LoadTask(userId);
+        await LoadProductionHistory(userId);
     }
 
     private double _getIdUser = 0;
@@ -226,8 +232,6 @@ public class ProfilePageUserControlViewModel : ViewModelBase
 
     private async Task LoadTimesheet(double userId)
     {
-        StackPanelHelper.ClearAndRefreshStackPanel<CartTimesheetUserControl>(TableTimesheetContent, timesheetList);
-
         try
         {
             string sql = @"SELECT status, notes, hours_worked, work_date FROM public.timesheet WHERE user_id = @userID";
@@ -242,6 +246,8 @@ public class ProfilePageUserControlViewModel : ViewModelBase
 
                     using (var reader = await command.ExecuteReaderAsync())
                     {
+                        Tables.Clear();
+
                         while (await reader.ReadAsync())
                         {
                             var viewModel = new CartTimesheetUserControlViewModel()
@@ -252,18 +258,19 @@ public class ProfilePageUserControlViewModel : ViewModelBase
                                 WorkDate = reader.GetDateTime(3)
                             };
 
-                            var cartUser = new CartTimesheetUserControl()
-                            {
-                                DataContext = viewModel
-                            };
-
-                            timesheetList.Add(cartUser);
+                            Tables.Add(viewModel);
                         }
                     }
                 }
             }
 
-            StackPanelHelper.RefreshStackPanelContent<CartTimesheetUserControl>(TableTimesheetContent, timesheetList);
+            this.RaisePropertyChanged(nameof(Tables));
+        }
+        catch (NpgsqlException ex)
+        {
+            Loges.LoggingProcess(LogLevel.CRITICAL,
+                "Connection or request error",
+                ex: ex);
         }
         catch (Exception ex)
         {
@@ -272,26 +279,28 @@ public class ProfilePageUserControlViewModel : ViewModelBase
         }
     }
 
-    private async Task LoadTask(double userId)
+    private async Task LoadProductionHistory(double userId)
     {
-        StackPanelHelper.ClearAndRefreshStackPanel<CartEmployeeTaskUserControl>(TasksContent, tasksList);
-
         try
         {
             string sql = @"
-                    SELECT 
-                        sp.name AS sub_product_name,
-                        o.name AS operation_name,
-                        ta.assigned_quantity,
-                        ta.notes,
-                        ta.status,
-                        ta.id AS assignment_id
-                    FROM public.task_assignments ta
-                    JOIN public.sub_product_operations spo ON spo.id = ta.sub_product_operation_id
-                    JOIN public.sub_products sp ON sp.id = spo.sub_product_id
-                    JOIN public.operation o ON o.id = spo.operation_id
-                    WHERE ta.user_id = @user_id
-                    ORDER BY ta.assigned_at DESC";
+                        SELECT 
+                            p.production_date,
+                            p.shift,
+                            COALESCE(pr.name, 'Продукт не найден') AS product_name,
+                            COALESCE(o.name, 'Операция не указана') AS operation_name,
+                            COALESCE(o.unit, 'шт') AS operation_unit,
+                            p.quantity,
+                            p.amount,
+                            p.tonnage,
+                            p.status,
+                            p.notes AS production_notes,
+                            p.created_at
+                        FROM public.production p
+                        LEFT JOIN public.product pr ON pr.id = p.product_id
+                        LEFT JOIN public.operation o ON o.id = p.operation_id
+                        WHERE p.user_id = @user_id
+                        ORDER BY p.production_date DESC, p.created_at DESC";
 
             using (var connection = new NpgsqlConnection(Arguments.connection))
             {
@@ -303,30 +312,38 @@ public class ProfilePageUserControlViewModel : ViewModelBase
 
                     using (var reader = await command.ExecuteReaderAsync())
                     {
+                        ProductionHistory.Clear();
+
                         while (await reader.ReadAsync())
                         {
-                            var viewModel = new CartEmployeeTaskUserControlViewModel()
+                            var productionItem = new ProductionHistoryViewModel()
                             {
-                                AssignmentId = reader.GetDouble("assignment_id"),
-                                SubProductName = reader.GetString("sub_product_name"),
-                                OperationName = reader.GetString("operation_name"),
-                                PlannedQuantity = reader.GetDecimal("assigned_quantity"),
-                                Notes = reader.IsDBNull("notes") ? null : reader.GetString("notes"),
-                                Status = reader.GetString("status")
+                                ProductionDate = reader.GetDateTime(0),
+                                Shift = reader.IsDBNull(1) ? null : reader.GetDecimal(1),
+                                ProductName = reader.GetString(2),
+                                OperationName = reader.GetString(2),
+                                OperationUnit = reader.GetString(3),
+                                Quantity = reader.GetDecimal(4),
+                                Amount = reader.IsDBNull(5) ? 0 : reader.GetDecimal(5),
+                                Tonnage = reader.IsDBNull(6) ? 0 : reader.GetDecimal(6),
+                                Status = reader.GetString(7),
+                                Notes = reader.IsDBNull(8) ? string.Empty : reader.GetString(8),
+                                CreatedAt = reader.GetDateTime(9)
                             };
 
-                            var cartUser = new CartEmployeeTaskUserControl()
-                            {
-                                DataContext = viewModel
-                            };
-
-                            tasksList.Add(cartUser);
+                            ProductionHistory.Add(productionItem);
                         }
                     }
                 }
             }
 
-            StackPanelHelper.RefreshStackPanelContent<CartEmployeeTaskUserControl>(TasksContent, tasksList);
+            this.RaisePropertyChanged(nameof(ProductionHistory));
+        }
+        catch (NpgsqlException ex)
+        {
+            Loges.LoggingProcess(LogLevel.CRITICAL,
+                "Connection or request error",
+                ex: ex);
         }
         catch (Exception ex)
         {

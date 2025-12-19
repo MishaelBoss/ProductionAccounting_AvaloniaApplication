@@ -40,21 +40,6 @@ public class TabOperationUserControlViewModel : ViewModelBase, INotifyPropertyCh
     public ICommand RefreshAsyncCommand
         => new RelayCommand(() => GetList());
 
-    /*
-        private bool _isOperationView = false;
-        public bool IsOperationView
-        {
-            get => _isOperationView;
-            set
-            {
-                if (_isOperationView != value)
-                {
-                    _isOperationView = value;
-                    OnPropertyChanged(nameof(IsOperationView));
-                }
-            }
-        }*/
-
     private string _search = string.Empty;
     public string Search
     {

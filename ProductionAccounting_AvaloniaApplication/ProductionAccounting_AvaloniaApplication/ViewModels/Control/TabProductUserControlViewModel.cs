@@ -283,6 +283,7 @@ public class TabProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
         catch (Exception ex)
         {
             StackPanelHelper.ClearAndRefreshStackPanel<CartProductUserControl>(HomeMainContent, productList);
+            ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NoConnectToDB);
             Loges.LoggingProcess(LogLevel.ERROR,
                 "Error loading users by IDs",
                 ex: ex);

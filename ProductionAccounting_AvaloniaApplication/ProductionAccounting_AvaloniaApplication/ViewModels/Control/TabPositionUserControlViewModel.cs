@@ -204,7 +204,6 @@ public class TabPositionUserControlViewModel : ViewModelBase, IRecipient<Refresh
         {
             StackPanelHelper.ClearAndRefreshStackPanel<CartPositionUserControl>(HomeMainContent, positionList);
             ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NoConnectToDB);
-
             Loges.LoggingProcess(LogLevel.CRITICAL,
                 "Connection or request error",
                 ex: ex);
@@ -212,6 +211,7 @@ public class TabPositionUserControlViewModel : ViewModelBase, IRecipient<Refresh
         catch (Exception ex)
         {
             StackPanelHelper.ClearAndRefreshStackPanel<CartPositionUserControl>(HomeMainContent, positionList);
+            ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NoConnectToDB);
             Loges.LoggingProcess(LogLevel.ERROR,
                 "Error loading positions by IDs",
                 ex: ex);
