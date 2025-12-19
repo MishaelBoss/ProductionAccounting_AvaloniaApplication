@@ -1,4 +1,4 @@
-<Window xmlns="https://github.com/avaloniaui"
+﻿<Window xmlns="https://github.com/avaloniaui"
         xmlns:controls="using:ProductionAccounting_AvaloniaApplication.Views.Control"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:ProductionAccounting_AvaloniaApplication.ViewModels"
@@ -19,14 +19,26 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <Grid ColumnDefinitions="240, *">
-        
-        <Grid Grid.Column="0"
-              ZIndex="1">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="240" MinWidth="220" MaxWidth="300"/>
+            <ColumnDefinition Width="1"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Column="0" 
+              ZIndex="1"
+              MinWidth="200">
             <controls:RightBoardUserControl DataContext="{Binding RightBoardUserControlViewModel}" />
         </Grid>
-        
-        <Grid Grid.Column="1">
+
+        <GridSplitter Grid.Column="1"
+                      Width="5"
+                      HorizontalAlignment="Stretch"
+                      Background="#FFAAAAAA"
+                      ResizeDirection="Columns"/>
+
+        <Grid Grid.Column="2">
             <Grid Name="ContentCenter" ZIndex="1"/>
             <ContentControl Content="{Binding CurrentPage}"/>
         </Grid>

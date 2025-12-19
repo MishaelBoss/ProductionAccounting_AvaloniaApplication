@@ -43,7 +43,6 @@
                                                 IsVisible="{Binding IsVisible}"
                                                 Margin="12,2">
                                             <Grid ColumnDefinitions="Auto,*" 
-                                                  Width="200"
                                                   HorizontalAlignment="Stretch">
                                                 <Image Grid.Column="0"
                                                        Width="21"
