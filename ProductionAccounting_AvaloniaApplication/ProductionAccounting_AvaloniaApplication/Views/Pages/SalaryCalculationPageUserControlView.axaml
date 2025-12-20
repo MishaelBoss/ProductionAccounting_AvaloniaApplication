@@ -72,9 +72,9 @@
                                 MinWidth="140"
                                 HorizontalAlignment="Stretch"
                                 HorizontalContentAlignment="Center"/>
-                        <Button Content="Экспорт"
-                                Command="{Binding GenerateReportCommand}"
-                                Background="#4CAF50"
+                        <Button Content="Экспорт в PDF"
+                                Command="{Binding ExportToPdfCommand}"
+                                Background="#FF9800"
                                 Foreground="White"
                                 FontWeight="SemiBold"
                                 Padding="24,12"

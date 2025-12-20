@@ -1,17 +1,21 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.Input;
 using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Models;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 using ProductionAccounting_AvaloniaApplication.Views.Control;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -47,6 +51,37 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
         set => this.RaiseAndSetIfChanged(ref _users, value);
     }
 
+    private decimal _grandTotalGross;
+    public decimal GrandTotalGross
+    {
+        get => _grandTotalGross;
+        set => this.RaiseAndSetIfChanged(ref _grandTotalGross, value);
+    }
+
+    private decimal _grandTotalTax;
+    public decimal GrandTotalTax
+    {
+        get => _grandTotalTax;
+        set => this.RaiseAndSetIfChanged(ref _grandTotalTax, value);
+    }
+
+    private decimal _grandTotalNet;
+    public decimal GrandTotalNet
+    {
+        get => _grandTotalNet;
+        set => this.RaiseAndSetIfChanged(ref _grandTotalNet, value);
+    }
+
+    private IStorageProvider? _storageProvider;
+    public IStorageProvider? StorageProvider
+    {
+        get => _storageProvider;
+        set => this.RaiseAndSetIfChanged(ref _storageProvider, value);
+    }
+
+    public ICommand ExportToPdfCommand
+        => new AsyncRelayCommand(ExportToPdfAsync);
+
     public StackPanel? SalaryContent { get; set; } = null;
 
     private readonly List<SalaryRecordUserControl> salaryList = [];
@@ -54,14 +89,13 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
     public ICommand CalculateSalaryCommand
         => new RelayCommand(async () => await CalculateSalaryAsync());
 
-    public ICommand GenerateReportCommand
-        => new RelayCommand(async () => await GenerateReportAsync());
-
     public ICommand LoadUsersCommand
         => new RelayCommand(async () => await LoadUsersAsync());
 
     public SalaryCalculationPageUserControlViewModel()
     {
+        QuestPDF.Settings.License = LicenseType.Community;
+        
         _ = LoadUsersAsync();
     }
 
@@ -204,7 +238,6 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
                     var amount = reader.GetDecimal(12);
                     var formula = reader.GetString(13);
 
-                    // Добавляем запись производства
                     var recordVm = new SalaryRecordUserControlViewModel
                     {
                         EmployeeName = employeeName,
@@ -225,7 +258,6 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
                     var control = new SalaryRecordUserControl { DataContext = recordVm };
                     salaryList.Add(control);
 
-                    // Накопление итогов по сотруднику
                     if (!userFinalSalary.TryGetValue(userId, out var summary))
                     {
                         summary = new UserFinalSalarySummary
@@ -245,7 +277,6 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
                 }
             }
 
-            // Финальный расчёт НДФЛ и "на руки"
             decimal grandTotalGross = 0m;
             decimal grandTotalTax = 0m;
             decimal grandTotalNet = 0m;
@@ -253,14 +284,13 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
             foreach (var summary in userFinalSalary.Values)
             {
                 summary.TotalGross = summary.BaseSalary + summary.ProductionAmount;
-                summary.TaxNDFL = Math.Round(summary.TotalGross * 0.13m, 2); // НДФЛ 13% на 2025 год
+                summary.TaxNDFL = Math.Round(summary.TotalGross * 0.13m, 2);
                 summary.NetSalary = summary.TotalGross - summary.TaxNDFL;
 
                 grandTotalGross += summary.TotalGross;
                 grandTotalTax += summary.TaxNDFL;
                 grandTotalNet += summary.NetSalary;
 
-                // Добавляем блок итога по сотруднику
                 var summaryVm = new SalaryRecordUserControlViewModel
                 {
                     EmployeeName = $"{summary.EmployeeName} — ИТОГО",
@@ -275,7 +305,10 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
                 salaryList.Add(new SalaryRecordUserControl { DataContext = summaryVm });
             }
 
-            // Общий итог
+            GrandTotalGross = grandTotalGross;
+            GrandTotalTax = grandTotalTax;
+            GrandTotalNet = grandTotalNet;
+
             if (userFinalSalary.Count > 0)
             {
                 var totalVm = new SalaryRecordUserControlViewModel
@@ -306,8 +339,8 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
     {
         var stackPanel = new StackPanel
         {
-            HorizontalAlignment = HorizontalAlignment.Center,
-            VerticalAlignment = VerticalAlignment.Center,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
             Margin = new Thickness(0, 40, 0, 0)
         };
 
@@ -315,7 +348,7 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
         {
             Text = "📊",
             FontSize = 48,
-            HorizontalAlignment = HorizontalAlignment.Center,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
             Margin = new Thickness(0, 0, 0, 20)
         });
 
@@ -323,8 +356,8 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
         {
             Text = "Данные не найдены",
             FontSize = 18,
-            FontWeight = FontWeight.Bold,
-            HorizontalAlignment = HorizontalAlignment.Center,
+            FontWeight = Avalonia.Media.FontWeight.Bold,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
             Margin = new Thickness(0, 0, 0, 10)
         });
 
@@ -338,10 +371,10 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
                 "3. Нет тарифов в таблице work_rate\n" +
                 "4. Нет записей в таблице production",
             FontSize = 14,
-            Foreground = new SolidColorBrush(Color.Parse("#666666")),
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.Parse("#666666")),
             TextWrapping = TextWrapping.Wrap,
             TextAlignment = TextAlignment.Left,
-            HorizontalAlignment = HorizontalAlignment.Center,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
             Margin = new Thickness(0, 0, 0, 20)
         };
         stackPanel.Children.Add(description);
@@ -349,7 +382,7 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
         var checkButton = new Avalonia.Controls.Button
         {
             Content = "Проверить базу данных",
-            HorizontalAlignment = HorizontalAlignment.Center,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
             Padding = new Thickness(20, 10),
             Margin = new Thickness(0, 0, 0, 10)
         };
@@ -359,7 +392,7 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
 
         SalaryContent?.Children.Add(stackPanel);
     }
-    
+
     private async Task CheckDatabaseStatus()
     {
         try
@@ -479,65 +512,170 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
         }
     }
 
-    private async Task GenerateReportAsync()
+    private async Task ExportToPdfAsync()
     {
+        Console.WriteLine("=== Кнопка Экспорт в PDF нажата ===");
+
+        if (salaryList.Count == 0 || StorageProvider == null)
+        {
+            Console.WriteLine("Нет данных или StorageProvider null");
+            return;
+        }
+
         try
         {
-            var sql = @"
-                SELECT 
-                    u.id,
-                    u.first_name,
-                    u.last_name,
-                    u.middle_name,
-                    u.base_salary,
-                    SUM(CASE 
-                        WHEN wr.use_tonnage THEN 
-                            wr.rate * COALESCE(p.tonnage, 0) / 1000 * p.quantity * wr.coefficient
-                        ELSE 
-                            wr.rate * p.quantity
-                    END) AS production_amount,
-                    SUM(CASE 
-                        WHEN wr.use_tonnage THEN 
-                            wr.rate * COALESCE(p.tonnage, 0) / 1000 * p.quantity * wr.coefficient
-                        ELSE 
-                            wr.rate * p.quantity
-                    END) + u.base_salary AS total_amount
-                FROM public.user u
-                LEFT JOIN public.production p ON p.user_id = u.id 
-                    AND p.production_date BETWEEN @startDate AND @endDate
-                    AND p.status = 'issued'
-                LEFT JOIN public.operation o ON o.id = p.operation_id
-                LEFT JOIN public.work_rate wr ON wr.work_type = o.name
-                WHERE u.is_active = true
-            ";
+            Console.WriteLine("Открытие диалога сохранения...");
 
-            if (SelectedUser != null && SelectedUser.Id > 0)
+            var file = await StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
             {
-                sql += " AND u.id = @userId";
+                Title = "Сохранить отчёт по зарплате",
+                DefaultExtension = "pdf",
+                SuggestedFileName = $"Зарплата_{PeriodStart.DateTime:dd-MM-yyyy}_{PeriodEnd.DateTime:dd-MM-yyyy}.pdf"
+            });
+
+            if (file == null)
+            {
+                Console.WriteLine("Пользователь отменил");
+                return;
             }
 
-            sql += @" 
-                GROUP BY u.id, u.first_name, u.last_name, u.middle_name, u.base_salary
-                ORDER BY u.last_name, u.first_name
-            ";
+            Console.WriteLine($"Файл выбран: {file.Name}");
 
-            using var connection = new NpgsqlConnection(Arguments.Connection);
-            await connection.OpenAsync();
-            using var command = new NpgsqlCommand(sql, connection);
-            command.Parameters.AddWithValue("@startDate", PeriodStart.DateTime);
-            command.Parameters.AddWithValue("@endDate", PeriodEnd.DateTime);
+            using var memoryStream = new MemoryStream();
 
-            if (SelectedUser != null && SelectedUser.Id > 0)
+            Document.Create(container =>
             {
-                command.Parameters.AddWithValue("@userId", SelectedUser.Id);
-            }
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.A4);
+                    page.Margin(40);
+                    page.PageColor(QuestPDF.Helpers.Colors.White);
+                    page.DefaultTextStyle(x => x.FontSize(9));
 
-            using var reader = await command.ExecuteReaderAsync();
-            Loges.LoggingProcess(LogLevel.INFO, "Отчет сгенерирован");
+                    page.Header()
+                        .Text("Отчёт по расчёту заработной платы")
+                        .FontSize(18)
+                        .Bold()
+                        .AlignCenter();
+
+                    page.Content()
+                        .PaddingVertical(15)
+                        .Column(column =>
+                        {
+                            column.Item().Text($"Период: {PeriodStart.DateTime:dd.MM.yyyy} – {PeriodEnd.DateTime:dd.MM.yyyy}");
+                            column.Item().Text($"Сотрудник: {SelectedUser?.DisplayName ?? "Все сотрудники"}");
+                            column.Item().PaddingBottom(10);
+
+                            column.Item().Text("Детали операций")
+                                .FontSize(12)
+                                .Bold();
+
+                            column.Item().PaddingBottom(5);
+
+                            column.Item().Table(table =>
+                            {
+                                table.ColumnsDefinition(columns =>
+                                {
+                                    columns.ConstantColumn(140);
+                                    columns.ConstantColumn(60);
+                                    columns.ConstantColumn(60);
+                                    columns.ConstantColumn(70);
+                                });
+
+                                table.Header(header =>
+                                {
+                                    header.Cell().Text("Сотрудник / Операция").Bold();
+                                    header.Cell().Text("Дата").Bold();
+                                    header.Cell().Text("Кол-во").Bold();
+                                    header.Cell().Text("Сумма").Bold();
+                                });
+
+                                foreach (var record in salaryList)
+                                {
+                                    var vm = record.DataContext as SalaryRecordUserControlViewModel;
+                                    if (vm == null || vm.IsSummary || vm.IsTotal) continue;
+
+                                    table.Cell().Text(vm.EmployeeName).FontSize(8);
+                                    table.Cell().Text(vm.ProductionDate.ToString("dd.MM.yyyy")).FontSize(8);
+                                    table.Cell().Text($"{vm.Quantity:N2} {vm.Unit}").FontSize(8);
+                                    table.Cell().Text(vm.Amount.ToString("N2") + " ₽").FontSize(8);
+                                }
+                            });
+
+                            column.Item().PaddingTop(20);
+                            column.Item().Text("Итоги по сотрудникам")
+                                .FontSize(12)
+                                .Bold();
+
+                            column.Item().PaddingBottom(5);
+
+                            column.Item().Table(table =>
+                            {
+                                table.ColumnsDefinition(columns =>
+                                {
+                                    columns.ConstantColumn(140);
+                                    columns.ConstantColumn(60);
+                                    columns.ConstantColumn(70);
+                                    columns.ConstantColumn(60);
+                                    columns.ConstantColumn(60);
+                                    columns.ConstantColumn(60);
+                                });
+
+                                table.Header(header =>
+                                {
+                                    header.Cell().Text("Сотрудник").Bold();
+                                    header.Cell().Text("Оклад").Bold();
+                                    header.Cell().Text("Производство").Bold();
+                                    header.Cell().Text("Всего").Bold();
+                                    header.Cell().Text("НДФЛ").Bold();
+                                    header.Cell().Text("К выдаче").Bold();
+                                });
+
+                                foreach (var record in salaryList)
+                                {
+                                    var vm = record.DataContext as SalaryRecordUserControlViewModel;
+                                    if (vm == null || !vm.IsSummary) continue;
+
+                                    table.Cell().Text(vm.EmployeeName).FontSize(8);
+                                    table.Cell().Text(vm.BaseSalary.ToString("N2") + " ₽").FontSize(8);
+                                    table.Cell().Text(vm.ProductionAmount.ToString("N2") + " ₽").FontSize(8);
+                                    table.Cell().Text(vm.TotalGross.ToString("N2") + " ₽").FontSize(8);
+                                    table.Cell().Text(vm.TaxNDFL.ToString("N2") + " ₽").FontSize(8);
+                                    table.Cell().Text(vm.NetSalary.ToString("N2") + " ₽").FontSize(8);
+                                }
+                            });
+
+                            column.Item().PaddingTop(20);
+                            column.Item().Text("Общий итог")
+                                .FontSize(14)
+                                .Bold();
+
+                            column.Item().Text($"Всего начислено: {GrandTotalGross:N2} ₽");
+                            column.Item().Text($"НДФЛ: {GrandTotalTax:N2} ₽");
+                            column.Item().Text($"К выдаче: {GrandTotalNet:N2} ₽")
+                                .FontSize(12)
+                                .Bold();
+                        });
+
+                    page.Footer()
+                        .AlignCenter()
+                        .Text($"Сгенерировано {DateTime.Now:dd.MM.yyyy HH:mm}")
+                        .FontSize(8);
+                });
+            })
+            .GeneratePdf(memoryStream);
+
+            memoryStream.Position = 0;
+
+            await using var fileStream = await file.OpenWriteAsync();
+            await memoryStream.CopyToAsync(fileStream);
+
+            Console.WriteLine("PDF успешно сохранён!");
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(LogLevel.ERROR, "Ошибка генерации отчета", ex: ex);
+            Console.WriteLine($"Ошибка экспорта PDF: {ex.Message}");
+            Loges.LoggingProcess(LogLevel.ERROR, "Ошибка экспорта PDF", ex: ex);
         }
     }
 

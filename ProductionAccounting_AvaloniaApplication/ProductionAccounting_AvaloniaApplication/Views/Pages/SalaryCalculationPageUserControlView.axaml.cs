@@ -10,6 +10,17 @@ public partial class SalaryCalculationPageUserControlView : UserControl
     {
         InitializeComponent();
         Loaded += OnLoaded;
+
+        this.AttachedToVisualTree += (s, e) =>
+        {
+            if (DataContext is SalaryCalculationPageUserControlViewModel vm)
+            {
+                if (TopLevel.GetTopLevel(this) is TopLevel topLevel)
+                {
+                    vm.StorageProvider = topLevel.StorageProvider;
+                }
+            }
+        };
     }
 
     private void OnLoaded(object? sender, RoutedEventArgs e) 

@@ -4,6 +4,7 @@ using Avalonia.Markup.Xaml;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ProductionAccounting_AvaloniaApplication.ViewModels;
 using ProductionAccounting_AvaloniaApplication.Views;
+using QuestPDF.Infrastructure;
 
 namespace ProductionAccounting_AvaloniaApplication
 {
@@ -18,6 +19,7 @@ namespace ProductionAccounting_AvaloniaApplication
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
+                QuestPDF.Settings.License = LicenseType.Community;
                 InitializeFolderAndFile.Initialize();
                 ManagerSettingsJson.InitializeSettings();
                 ManagerCookie.IsUserLoggedIn();
