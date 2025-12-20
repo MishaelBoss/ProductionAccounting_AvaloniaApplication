@@ -5,6 +5,12 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class SalaryRecordUserControlViewModel : ViewModelBase
 {
+    public decimal BaseSalary { get; set; } = 0m;
+    public decimal ProductionAmount { get; set; } = 0m;
+    public decimal TotalGross { get; set; } = 0m;
+    public decimal TaxNDFL { get; set; } = 0m;
+    public decimal NetSalary { get; set; } = 0m;
+
     private string _employeeName = "";
     public string EmployeeName
     {
@@ -108,7 +114,7 @@ public class SalaryRecordUserControlViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _useTonnage, value);
     }
 
-     public void UpdateDisplayProperties()
+    public void UpdateDisplayProperties()
     {
         this.RaisePropertyChanged(nameof(ShowDetails));
         this.RaisePropertyChanged(nameof(ShowSummary));
