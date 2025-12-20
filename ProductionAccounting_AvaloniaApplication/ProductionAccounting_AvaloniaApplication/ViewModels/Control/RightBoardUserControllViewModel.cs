@@ -228,5 +228,7 @@ public class RightBoardUserControlViewModel : ViewModelBase, IRecipient<OpenOrCl
     ~RightBoardUserControlViewModel()
     {
         StrongReferenceMessenger.Default.Unregister<UserAuthenticationChangedMessage>(this);
+        WeakReferenceMessenger.Default.Unregister<OpenOrCloseAuthorizationPageStatusMessage>(this);
+        WeakReferenceMessenger.Default.Unregister<OpenOrCloseProfileUserStatusMessage>(this);
     }
 }
