@@ -15,8 +15,8 @@ public class ProfileViewUserControlViewModel : ViewModelBase
     public StackPanel? TableUserContent { get; set; } = null;
     public StackPanel? TasksUserContent { get; set; } = null;
 
-    private List<CartTimesheetUserControl> timesheetList = [];
-    private List<CartEmployeeTaskUserControl> tasksList = [];
+    private readonly List<CartTimesheetUserControl> timesheetList = [];
+    private readonly List<CartEmployeeTaskUserControl> tasksList = [];
 
     private double _userID = 0;
     public double UserID
@@ -125,29 +125,23 @@ public class ProfileViewUserControlViewModel : ViewModelBase
         {
             string sql = @"SELECT login, first_name, last_name, middle_name, email, phone, employee_id, is_active, password FROM public.""user"" WHERE id = @id";
 
-            using (var connection = new NpgsqlConnection(Arguments.connection))
-            {
-                await connection.OpenAsync();
-                using (var command = new NpgsqlCommand(sql, connection))
-                {
-                    command.Parameters.AddWithValue("@id", UserID);
+            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await connection.OpenAsync();
+            using var command = new NpgsqlCommand(sql, connection);
+            command.Parameters.AddWithValue("@id", UserID);
 
-                    using (var reader = await command.ExecuteReaderAsync())
-                    {
-                        if (await reader.ReadAsync())
-                        {
-                            Login = reader.IsDBNull(0) ? "none" : reader.GetString(0);
-                            FirstName = reader.IsDBNull(1) ? "none" : reader.GetString(1);
-                            LastName = reader.IsDBNull(2) ? "none" : reader.GetString(2);
-                            MiddleName = reader.IsDBNull(3) ? "none" : reader.GetString(3);
-                            Email = reader.IsDBNull(4) ? "none" : reader.GetString(4);
-                            Phone = reader.IsDBNull(5) ? "none" : reader.GetString(5);
-                            Employee = reader.IsDBNull(6) ? "none" : reader.GetString(6);
-                            IsActive = reader.IsDBNull(7) ? "none" : reader.GetBoolean(7).ToString();
-                            Password = reader.IsDBNull(8) ? "none" : reader.GetString(8);
-                        }
-                    }
-                }
+            using var reader = await command.ExecuteReaderAsync();
+            if (await reader.ReadAsync())
+            {
+                Login = reader.IsDBNull(0) ? "none" : reader.GetString(0);
+                FirstName = reader.IsDBNull(1) ? "none" : reader.GetString(1);
+                LastName = reader.IsDBNull(2) ? "none" : reader.GetString(2);
+                MiddleName = reader.IsDBNull(3) ? "none" : reader.GetString(3);
+                Email = reader.IsDBNull(4) ? "none" : reader.GetString(4);
+                Phone = reader.IsDBNull(5) ? "none" : reader.GetString(5);
+                Employee = reader.IsDBNull(6) ? "none" : reader.GetString(6);
+                IsActive = reader.IsDBNull(7) ? "none" : reader.GetBoolean(7).ToString();
+                Password = reader.IsDBNull(8) ? "none" : reader.GetString(8);
             }
         }
         catch (NpgsqlException ex)
@@ -175,24 +169,18 @@ public class ProfileViewUserControlViewModel : ViewModelBase
                         LEFT JOIN public.positions p ON up.position_id = p.id
                         WHERE utt.user_id = @userID";
 
-            using (var connection = new NpgsqlConnection(Arguments.connection))
+            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await connection.OpenAsync();
+
+            using var command = new NpgsqlCommand(sql, connection);
+            command.Parameters.AddWithValue("@userID", UserID);
+
+            using var reader = await command.ExecuteReaderAsync();
+            if (await reader.ReadAsync())
             {
-                await connection.OpenAsync();
-
-                using (var command = new NpgsqlCommand(sql, connection))
-                {
-                    command.Parameters.AddWithValue("@userID", UserID);
-
-                    using (var reader = await command.ExecuteReaderAsync())
-                    {
-                        if (await reader.ReadAsync())
-                        {
-                            UserType = reader.IsDBNull(0) ? "none" : reader.GetString(0);
-                            Department = reader.IsDBNull(1) ? "none" : reader.GetString(1);
-                            Position = reader.IsDBNull(2) ? "none" : reader.GetString(2);
-                        }
-                    }
-                }
+                UserType = reader.IsDBNull(0) ? "none" : reader.GetString(0);
+                Department = reader.IsDBNull(1) ? "none" : reader.GetString(1);
+                Position = reader.IsDBNull(2) ? "none" : reader.GetString(2);
             }
         }
         catch (Exception ex)
@@ -210,34 +198,30 @@ public class ProfileViewUserControlViewModel : ViewModelBase
         {
             string sql = @"SELECT status, notes, hours_worked, work_date FROM public.timesheet WHERE user_id = @userID";
 
-            using (var connection = new NpgsqlConnection(Arguments.connection))
+            using (var connection = new NpgsqlConnection(Arguments.Connection))
             {
                 await connection.OpenAsync();
 
-                using (var command = new NpgsqlCommand(sql, connection))
+                using var command = new NpgsqlCommand(sql, connection);
+                command.Parameters.AddWithValue("@userID", UserID);
+
+                using var reader = await command.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
                 {
-                    command.Parameters.AddWithValue("@userID", UserID);
-
-                    using (var reader = await command.ExecuteReaderAsync())
+                    var viewModel = new CartTimesheetUserControlViewModel()
                     {
-                        while (await reader.ReadAsync())
-                        {
-                            var viewModel = new CartTimesheetUserControlViewModel()
-                            {
-                                Status = reader.IsDBNull(0) ? string.Empty : reader.GetString(0),
-                                Notes = reader.IsDBNull(1) ? string.Empty : reader.GetString(1),
-                                HoursWorked = reader.GetDecimal(2),
-                                WorkDate = reader.GetDateTime(3)
-                            };
+                        Status = reader.IsDBNull(0) ? string.Empty : reader.GetString(0),
+                        Notes = reader.IsDBNull(1) ? string.Empty : reader.GetString(1),
+                        HoursWorked = reader.GetDecimal(2),
+                        WorkDate = reader.GetDateTime(3)
+                    };
 
-                            var cartUser = new CartTimesheetUserControl()
-                            {
-                                DataContext = viewModel
-                            };
+                    var cartUser = new CartTimesheetUserControl()
+                    {
+                        DataContext = viewModel
+                    };
 
-                            timesheetList.Add(cartUser);
-                        }
-                    }
+                    timesheetList.Add(cartUser);
                 }
             }
 
@@ -271,36 +255,32 @@ public class ProfileViewUserControlViewModel : ViewModelBase
                         WHERE ta.user_id = @user_id
                         ORDER BY ta.assigned_at DESC";
 
-            using (var connection = new NpgsqlConnection(Arguments.connection))
+            using (var connection = new NpgsqlConnection(Arguments.Connection))
             {
                 await connection.OpenAsync();
 
-                using (var command = new NpgsqlCommand(sql, connection))
+                using var command = new NpgsqlCommand(sql, connection);
+                command.Parameters.AddWithValue("@user_id", UserID);
+
+                using var reader = await command.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
                 {
-                    command.Parameters.AddWithValue("@user_id", UserID);
-
-                    using (var reader = await command.ExecuteReaderAsync())
+                    var viewModel = new CartEmployeeTaskUserControlViewModel()
                     {
-                        while (await reader.ReadAsync())
-                        {
-                            var viewModel = new CartEmployeeTaskUserControlViewModel()
-                            {
-                                AssignmentId = reader.GetDouble("assignment_id"),
-                                SubProductName = reader.GetString("sub_product_name"),
-                                OperationName = reader.GetString("operation_name"),
-                                PlannedQuantity = reader.GetDecimal("assigned_quantity"),
-                                Notes = reader.IsDBNull("notes") ? null : reader.GetString("notes"),
-                                Status = reader.GetString("status")
-                            };
+                        AssignmentId = reader.GetDouble("assignment_id"),
+                        SubProductName = reader.GetString("sub_product_name"),
+                        OperationName = reader.GetString("operation_name"),
+                        PlannedQuantity = reader.GetDecimal("assigned_quantity"),
+                        Notes = reader.IsDBNull("notes") ? null : reader.GetString("notes"),
+                        Status = reader.GetString("status")
+                    };
 
-                            var cartUser = new CartEmployeeTaskUserControl()
-                            {
-                                DataContext = viewModel
-                            };
+                    var cartUser = new CartEmployeeTaskUserControl()
+                    {
+                        DataContext = viewModel
+                    };
 
-                            tasksList.Add(cartUser);
-                        }
-                    }
+                    tasksList.Add(cartUser);
                 }
             }
 

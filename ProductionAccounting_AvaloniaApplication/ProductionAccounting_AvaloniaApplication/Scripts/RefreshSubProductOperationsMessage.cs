@@ -1,11 +1,6 @@
 ﻿namespace ProductionAccounting_AvaloniaApplication.Scripts;
 
-public class RefreshSubProductOperationsMessage
+public class RefreshSubProductOperationsMessage(double subProductId)
 {
-    public double SubProductId { get; }
-
-    public RefreshSubProductOperationsMessage(double subProductId)
-    {
-        SubProductId = subProductId;
-    }
+    public double SubProductId { get; } = subProductId;
 }

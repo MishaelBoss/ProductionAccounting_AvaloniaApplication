@@ -38,10 +38,10 @@ public class AddProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
         _ = LoadListUsersAsync();
     }
 
-    public ICommand CancelCommand
+    private static ICommand CancelCommand
         => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseProductStatusMessage(false)) );
 
-    public ICommand ConfirmCommand
+    private ICommand ConfirmCommand
         => new RelayCommand(async () => await SaveAsync());
 
     public double? Id { get; set; }
@@ -127,11 +127,11 @@ public class AddProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
             }
         }
     }
-    public List<string> AvailableUnits { get; } = new List<string>
-    {
+    public List<string> AvailableUnits { get; } =
+    [
         "кг",
         "шт"
-    };
+    ];
 
     private string _selectedUnit = string.Empty;
     public string SelectedUnit
@@ -230,26 +230,22 @@ public class AddProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
                                     OR ut.type_user = 'Мастер'
                                 ORDER BY u.last_name, u.first_name";
 
-            using (var connection = new NpgsqlConnection(Arguments.connection))
+            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await connection.OpenAsync();
+
+            using var command = new NpgsqlCommand(sqlUsers, connection);
+            using var reader = await command.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
             {
-                await connection.OpenAsync();
+                var user = new ComboBoxUser(
+                    reader.GetDouble(0),
+                    reader.GetString(1),
+                    reader.GetString(2),
+                    reader.GetString(3),
+                    reader.GetString(4)
+                );
 
-                using (var command = new NpgsqlCommand(sqlUsers, connection))
-                using (var reader = await command.ExecuteReaderAsync())
-                {
-                    while (await reader.ReadAsync())
-                    {
-                        var user = new ComboBoxUser(
-                            reader.GetDouble(0),
-                            reader.GetString(1),
-                            reader.GetString(2),
-                            reader.GetString(3),
-                            reader.GetString(4)
-                        );
-
-                        Users.Add(user);
-                    }
-                }
+                Users.Add(user);
             }
         }
         catch (PostgresException ex)
@@ -285,86 +281,82 @@ public class AddProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
                 if (Id == 0) sql = addProductSql;
                 else sql = updateProductSql;
 
-                using (var connection = new NpgsqlConnection(Arguments.connection))
+                using var connection = new NpgsqlConnection(Arguments.Connection);
+                await connection.OpenAsync();
+                using var command = new NpgsqlCommand(sql, connection);
+                try
                 {
-                    await connection.OpenAsync();
-                    using (var command = new NpgsqlCommand(sql, connection))
+                    if (Id == 0)
                     {
                         try
                         {
-                            if (Id == 0)
-                            {
-                                try
-                                {
-                                    command.Parameters.AddWithValue("@name", ProductName.Trim());
-                                    command.Parameters.AddWithValue("@article", ProductArticle?.Trim() ?? "");
-                                    command.Parameters.AddWithValue("@desc", ProductDescription?.Trim() ?? "");
-                                    command.Parameters.AddWithValue("@priceUnit", ProductPricePerUnit);
-                                    command.Parameters.AddWithValue("@priceKg", ProductPricePerKg);
-                                    command.Parameters.AddWithValue("@unit", SelectedUnit);
-                                    command.Parameters.AddWithValue("@categoryId", DBNull.Value);
-                                    command.Parameters.AddWithValue("@mark", ProductMark?.Trim() ?? "");
-                                    command.Parameters.AddWithValue("@coefficient", ProductCoefficient);
+                            command.Parameters.AddWithValue("@name", ProductName.Trim());
+                            command.Parameters.AddWithValue("@article", ProductArticle?.Trim() ?? "");
+                            command.Parameters.AddWithValue("@desc", ProductDescription?.Trim() ?? "");
+                            command.Parameters.AddWithValue("@priceUnit", ProductPricePerUnit);
+                            command.Parameters.AddWithValue("@priceKg", ProductPricePerKg);
+                            command.Parameters.AddWithValue("@unit", SelectedUnit);
+                            command.Parameters.AddWithValue("@categoryId", DBNull.Value);
+                            command.Parameters.AddWithValue("@mark", ProductMark?.Trim() ?? "");
+                            command.Parameters.AddWithValue("@coefficient", ProductCoefficient);
 
-                                    var result = await command.ExecuteScalarAsync();
+                            var result = await command.ExecuteScalarAsync();
 
-                                    if (result == null || result == DBNull.Value) return;
+                            if (result == null || result == DBNull.Value) return;
 
-                                    double newProductId = Convert.ToDouble(result);
+                            double newProductId = Convert.ToDouble(result);
 
-                                    await CreateTaskForMasterAsync(newProductId);
-                                }
-                                catch (PostgresException ex) 
-                                {
-                                    Loges.LoggingProcess(level: LogLevel.WARNING,
-                                        ex: ex);
-                                }
-                                catch (Exception ex) 
-                                {
-                                    Loges.LoggingProcess(level: LogLevel.WARNING,
-                                        ex: ex);
-                                }
-                            }
-                            else 
-                            {
-                                try
-                                {
-                                    command.Parameters.AddWithValue("@id", Id ?? 0);
-                                    command.Parameters.AddWithValue("@name", ProductName.Trim());
-                                    command.Parameters.AddWithValue("@article", ProductArticle?.Trim() ?? "");
-                                    command.Parameters.AddWithValue("@desc", ProductDescription?.Trim() ?? "");
-                                    command.Parameters.AddWithValue("@priceUnit", ProductPricePerUnit);
-                                    command.Parameters.AddWithValue("@priceKg", ProductPricePerKg);
-                                    command.Parameters.AddWithValue("@unit", SelectedUnit);
-                                    command.Parameters.AddWithValue("@categoryId", DBNull.Value);
-                                    command.Parameters.AddWithValue("@mark", ProductMark?.Trim() ?? "");
-                                    command.Parameters.AddWithValue("@coefficient", ProductCoefficient);
-
-                                    await command.ExecuteNonQueryAsync();
-                                }
-                                catch (PostgresException ex)
-                                {
-                                    Loges.LoggingProcess(level: LogLevel.WARNING,
-                                        ex: ex);
-                                }
-                                catch (Exception ex)
-                                {
-                                    Loges.LoggingProcess(level: LogLevel.WARNING,
-                                        ex: ex);
-                                }
-                            }
-
-                            WeakReferenceMessenger.Default.Send(new RefreshProductListMessage());
-                            WeakReferenceMessenger.Default.Send(new OpenOrCloseProductStatusMessage(false));
-
-                            ClearForm();
+                            await CreateTaskForMasterAsync(newProductId);
+                        }
+                        catch (PostgresException ex)
+                        {
+                            Loges.LoggingProcess(level: LogLevel.WARNING,
+                                ex: ex);
                         }
                         catch (Exception ex)
                         {
-                            Loges.LoggingProcess(level: LogLevel.ERROR,
+                            Loges.LoggingProcess(level: LogLevel.WARNING,
                                 ex: ex);
                         }
                     }
+                    else
+                    {
+                        try
+                        {
+                            command.Parameters.AddWithValue("@id", Id ?? 0);
+                            command.Parameters.AddWithValue("@name", ProductName.Trim());
+                            command.Parameters.AddWithValue("@article", ProductArticle?.Trim() ?? "");
+                            command.Parameters.AddWithValue("@desc", ProductDescription?.Trim() ?? "");
+                            command.Parameters.AddWithValue("@priceUnit", ProductPricePerUnit);
+                            command.Parameters.AddWithValue("@priceKg", ProductPricePerKg);
+                            command.Parameters.AddWithValue("@unit", SelectedUnit);
+                            command.Parameters.AddWithValue("@categoryId", DBNull.Value);
+                            command.Parameters.AddWithValue("@mark", ProductMark?.Trim() ?? "");
+                            command.Parameters.AddWithValue("@coefficient", ProductCoefficient);
+
+                            await command.ExecuteNonQueryAsync();
+                        }
+                        catch (PostgresException ex)
+                        {
+                            Loges.LoggingProcess(level: LogLevel.WARNING,
+                                ex: ex);
+                        }
+                        catch (Exception ex)
+                        {
+                            Loges.LoggingProcess(level: LogLevel.WARNING,
+                                ex: ex);
+                        }
+                    }
+
+                    WeakReferenceMessenger.Default.Send(new RefreshProductListMessage());
+                    WeakReferenceMessenger.Default.Send(new OpenOrCloseProductStatusMessage(false));
+
+                    ClearForm();
+                }
+                catch (Exception ex)
+                {
+                    Loges.LoggingProcess(level: LogLevel.ERROR,
+                        ex: ex);
                 }
             }
             catch (Exception ex)
@@ -391,20 +383,16 @@ public class AddProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
         {
             string sql = "INSERT INTO public.product_tasks (product_id, created_by, assigned_by) " +
                 "VALUES (@pid, @created_by, @assigned_by)";
-            using (var connection = new NpgsqlConnection(Arguments.connection))
-            {
-                await connection.OpenAsync();
-                using (var command = new NpgsqlCommand(sql, connection))
-                {
-                    command.Parameters.AddWithValue("@pid", productId);
-                    command.Parameters.AddWithValue("@created_by", ManagerCookie.GetIdUser ?? 0);
-                    command.Parameters.AddWithValue("@assigned_by", SelectedUser!.Id);
+            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await connection.OpenAsync();
+            using var command = new NpgsqlCommand(sql, connection);
+            command.Parameters.AddWithValue("@pid", productId);
+            command.Parameters.AddWithValue("@created_by", ManagerCookie.GetIdUser ?? 0);
+            command.Parameters.AddWithValue("@assigned_by", SelectedUser!.Id);
 
-                    MessageBoxManager.GetMessageBoxStandard("sad", SelectedUser!.Id.ToString());
+            MessageBoxManager.GetMessageBoxStandard("sad", SelectedUser!.Id.ToString());
 
-                    await command.ExecuteNonQueryAsync();
-                }
-            }
+            await command.ExecuteNonQueryAsync();
         }
         catch (PostgresException ex)
         {

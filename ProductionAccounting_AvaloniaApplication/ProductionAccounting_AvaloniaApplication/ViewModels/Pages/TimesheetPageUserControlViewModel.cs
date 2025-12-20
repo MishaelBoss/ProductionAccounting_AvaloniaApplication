@@ -9,7 +9,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using static ProductionAccounting_AvaloniaApplication.ViewModels.Control.NotFoundUserControlViewModel;
@@ -29,7 +28,7 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
 
     public StackPanel? CartTimesheet { get; set; } = null;
 
-    private List<CartTimesheetUserControl> timesheetList = [];
+    private readonly List<CartTimesheetUserControl> timesheetList = [];
 
     private DateTime _filterStartDate = DateTime.Today;
     public DateTime FilterStartDate
@@ -230,25 +229,23 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
 
             string sqlUsers = "SELECT id, first_name, last_name, middle_name, login FROM public.user WHERE is_active = true ORDER BY last_name, first_name";
 
-            using (var connection = new NpgsqlConnection(Arguments.connection))
+            using (var connection = new NpgsqlConnection(Arguments.Connection))
             {
                 await connection.OpenAsync();
 
-                using (var command = new NpgsqlCommand(sqlUsers, connection))
-                using (var reader = await command.ExecuteReaderAsync())
+                using var command = new NpgsqlCommand(sqlUsers, connection);
+                using var reader = await command.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
                 {
-                    while (await reader.ReadAsync())
-                    {
-                        var user = new ComboBoxUser(
-                            reader.GetDouble(0),
-                            reader.GetString(1),
-                            reader.GetString(2),
-                            reader.GetString(3),
-                            reader.GetString(4)
-                        );
+                    var user = new ComboBoxUser(
+                        reader.GetDouble(0),
+                        reader.GetString(1),
+                        reader.GetString(2),
+                        reader.GetString(3),
+                        reader.GetString(4)
+                    );
 
-                        ComboBoxUsers.Add(user);
-                    }
+                    ComboBoxUsers.Add(user);
                 }
             }
 
@@ -272,26 +269,22 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
                 "ON CONFLICT (user_id, work_date) " +
                 "DO UPDATE SET status = EXCLUDED.status, hours_worked = EXCLUDED.hours_worked, notes = EXCLUDED.notes, updated_by = @createdBy, updated_at = @createdAt";
 
-            using (var connection = new NpgsqlConnection(Arguments.connection))
-            {
-                await connection.OpenAsync();
-                using (var command = new NpgsqlCommand(sql, connection))
-                {
-                    command.Parameters.AddWithValue("@userId", SelectedSingleUser.Id);
-                    command.Parameters.AddWithValue("@workDate", SelectedDate);
-                    command.Parameters.AddWithValue("@status", SelectedSingleStatus.Code);
-                    command.Parameters.AddWithValue("@hoursWorked", SelectedSingleStatus.Code == "Я" ? SingleHours : 0);
-                    command.Parameters.AddWithValue("@notes", SingleNotes ?? "");
-                    command.Parameters.AddWithValue("@createdBy", ManagerCookie.GetIdUser ?? 0);
-                    command.Parameters.AddWithValue("@createdAt", DateTime.Now);
+            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await connection.OpenAsync();
+            using var command = new NpgsqlCommand(sql, connection);
+            command.Parameters.AddWithValue("@userId", SelectedSingleUser.Id);
+            command.Parameters.AddWithValue("@workDate", SelectedDate);
+            command.Parameters.AddWithValue("@status", SelectedSingleStatus.Code);
+            command.Parameters.AddWithValue("@hoursWorked", SelectedSingleStatus.Code == "Я" ? SingleHours : 0);
+            command.Parameters.AddWithValue("@notes", SingleNotes ?? "");
+            command.Parameters.AddWithValue("@createdBy", ManagerCookie.GetIdUser ?? 0);
+            command.Parameters.AddWithValue("@createdAt", DateTime.Now);
 
-                    await command.ExecuteNonQueryAsync();
+            await command.ExecuteNonQueryAsync();
 
-                    ClearSingleForm();
+            ClearSingleForm();
 
-                    await RefreshTimesheetAsync();
-                }
-            }
+            await RefreshTimesheetAsync();
         }
         catch (Exception ex)
         {
@@ -312,9 +305,9 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
 
         if (SelectedMassStatus == null) return;
 
-        var usersToProcess = ApplyToAllUsers ? ComboBoxUsers.ToList() : (SelectedSingleUser != null ? new List<ComboBoxUser> { SelectedSingleUser } : new());
+        var usersToProcess = ApplyToAllUsers ? [.. ComboBoxUsers] : (SelectedSingleUser != null ? new List<ComboBoxUser> { SelectedSingleUser } : []);
 
-        if (!usersToProcess.Any()) return;
+        if (usersToProcess.Count == 0) return;
 
         var startDate = MassEditStartDate.Date;
         var endDate = MassEditEndDate.Date;
@@ -322,58 +315,54 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
 
         int totalInserted = 0;
 
-        await using (var connection = new NpgsqlConnection(Arguments.connection))
+        await using var connection = new NpgsqlConnection(Arguments.Connection);
+        await connection.OpenAsync();
+        await using var transaction = await connection.BeginTransactionAsync();
+        try
         {
-            await connection.OpenAsync();
-            await using (var transaction = await connection.BeginTransactionAsync())
+            string sql = @"INSERT INTO public.timesheet (user_id, work_date, status, hours_worked, notes, created_by)" +
+            "VALUES (@userId, @workDate, @status, @hoursWorked, @notes, @createdBy) ON CONFLICT (user_id, work_date) DO NOTHING";
+
+            await using var command = new NpgsqlCommand(sql, connection, transaction);
+
+            foreach (var user in usersToProcess)
             {
-                try
+                var currentDate = startDate;
+                while (currentDate <= endDate)
                 {
-                    string sql = @"INSERT INTO public.timesheet (user_id, work_date, status, hours_worked, notes, created_by)" +
-                    "VALUES (@userId, @workDate, @status, @hoursWorked, @notes, @createdBy) ON CONFLICT (user_id, work_date) DO NOTHING";
-
-                    await using var command = new NpgsqlCommand(sql, connection, transaction);
-
-                    foreach (var user in usersToProcess)
+                    if (ExcludeWeekends && (currentDate.DayOfWeek == DayOfWeek.Saturday || currentDate.DayOfWeek == DayOfWeek.Sunday))
                     {
-                        var currentDate = startDate;
-                        while (currentDate <= endDate)
-                        {
-                            if (ExcludeWeekends && (currentDate.DayOfWeek == DayOfWeek.Saturday || currentDate.DayOfWeek == DayOfWeek.Sunday))
-                            {
-                                currentDate = currentDate.AddDays(1);
-                                continue;
-                            }
-
-                            command.Parameters.Clear();
-                            command.Parameters.AddWithValue("@userId", user.Id);
-                            command.Parameters.AddWithValue("@workDate", currentDate);
-                            command.Parameters.AddWithValue("@status", SelectedMassStatus.Code);
-                            command.Parameters.AddWithValue("@hoursWorked", SelectedMassStatus.Code == "Я" ? MassEditHours : 0m);
-                            command.Parameters.AddWithValue("@notes", $"Массовое добавление: {SelectedMassStatus.Name}");
-                            command.Parameters.AddWithValue("@createdBy", ManagerCookie.GetIdUser ?? 0);
-
-                            int affected = await command.ExecuteNonQueryAsync();
-                            if (affected > 0) totalInserted++;
-
-                            currentDate = currentDate.AddDays(1);
-                        }
+                        currentDate = currentDate.AddDays(1);
+                        continue;
                     }
 
-                    await transaction.CommitAsync();
-                    Loges.LoggingProcess(LogLevel.INFO,
-                        message: $"Успешно добавлено {totalInserted} новых записей в табель");
+                    command.Parameters.Clear();
+                    command.Parameters.AddWithValue("@userId", user.Id);
+                    command.Parameters.AddWithValue("@workDate", currentDate);
+                    command.Parameters.AddWithValue("@status", SelectedMassStatus.Code);
+                    command.Parameters.AddWithValue("@hoursWorked", SelectedMassStatus.Code == "Я" ? MassEditHours : 0m);
+                    command.Parameters.AddWithValue("@notes", $"Массовое добавление: {SelectedMassStatus.Name}");
+                    command.Parameters.AddWithValue("@createdBy", ManagerCookie.GetIdUser ?? 0);
 
-                    await RefreshTimesheetAsync();
-                }
-                catch (Exception ex)
-                {
-                    await transaction.RollbackAsync();
-                    Loges.LoggingProcess(LogLevel.ERROR,
-                        ex: ex,
-                        message: "Ошибка при массовом добавлении");
+                    int affected = await command.ExecuteNonQueryAsync();
+                    if (affected > 0) totalInserted++;
+
+                    currentDate = currentDate.AddDays(1);
                 }
             }
+
+            await transaction.CommitAsync();
+            Loges.LoggingProcess(LogLevel.INFO,
+                message: $"Успешно добавлено {totalInserted} новых записей в табель");
+
+            await RefreshTimesheetAsync();
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            Loges.LoggingProcess(LogLevel.ERROR,
+                ex: ex,
+                message: "Ошибка при массовом добавлении");
         }
     }
 
@@ -393,45 +382,41 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
 
             string sql = "SELECT t.status, t.notes, t.hours_worked,t.user_id, u.login as user_login FROM public.timesheet t LEFT JOIN public.user u ON t.user_id = u.id WHERE t.work_date BETWEEN @startDate AND @endDate ORDER BY t.work_date DESC, u.login";
 
-            using (var connection = new NpgsqlConnection(Arguments.connection))
+            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await connection.OpenAsync();
+
+            using (var command = new NpgsqlCommand(sql, connection))
             {
-                await connection.OpenAsync();
+                command.Parameters.AddWithValue("@startDate", startDate.Date);
+                command.Parameters.AddWithValue("@endDate", endDate.Date);
 
-                using (var command = new NpgsqlCommand(sql, connection))
+                using var reader = await command.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
                 {
-                    command.Parameters.AddWithValue("@startDate", startDate.Date);
-                    command.Parameters.AddWithValue("@endDate", endDate.Date);
-
-                    using (var reader = await command.ExecuteReaderAsync())
+                    var viewModel = new CartTimesheetUserControlViewModel()
                     {
-                        while (await reader.ReadAsync())
-                        {
-                            var viewModel = new CartTimesheetUserControlViewModel()
-                            {
-                                Status = reader.IsDBNull(0) ? string.Empty : reader.GetString(0),
-                                Notes = reader.IsDBNull(1) ? string.Empty : reader.GetString(1),
-                                HoursWorked = reader.GetDecimal(2),
-                                Login = reader.IsDBNull(4) ? string.Empty : reader.GetString(4)
-                            };
+                        Status = reader.IsDBNull(0) ? string.Empty : reader.GetString(0),
+                        Notes = reader.IsDBNull(1) ? string.Empty : reader.GetString(1),
+                        HoursWorked = reader.GetDecimal(2),
+                        Login = reader.IsDBNull(4) ? string.Empty : reader.GetString(4)
+                    };
 
-                            var cartUser = new CartTimesheetUserControl()
-                            {
-                                DataContext = viewModel
-                            };
+                    var cartUser = new CartTimesheetUserControl()
+                    {
+                        DataContext = viewModel
+                    };
 
-                            timesheetList.Add(cartUser);
-                        }
-                    }
+                    timesheetList.Add(cartUser);
                 }
-
-                StackPanelHelper.RefreshStackPanelContent<CartTimesheetUserControl>(CartTimesheet, timesheetList);
-
-                if (timesheetList.Count == 0)
-                    ItemNotFoundException.Show(CartTimesheet, ErrorLevel.NotFound);
-                else
-                    Loges.LoggingProcess(LogLevel.INFO,
-                        message: $"Загружено {timesheetList.Count} записей за период: {startDate:dd.MM.yyyy} - {endDate:dd.MM.yyyy}");
             }
+
+            StackPanelHelper.RefreshStackPanelContent<CartTimesheetUserControl>(CartTimesheet, timesheetList);
+
+            if (timesheetList.Count == 0)
+                ItemNotFoundException.Show(CartTimesheet, ErrorLevel.NotFound);
+            else
+                Loges.LoggingProcess(LogLevel.INFO,
+                    message: $"Загружено {timesheetList.Count} записей за период: {startDate:dd.MM.yyyy} - {endDate:dd.MM.yyyy}");
         }
         catch (NpgsqlException ex)
         {

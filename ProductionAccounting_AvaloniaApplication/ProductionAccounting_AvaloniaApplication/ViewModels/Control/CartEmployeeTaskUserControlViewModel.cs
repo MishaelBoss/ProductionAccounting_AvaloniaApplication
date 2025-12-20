@@ -62,7 +62,7 @@ public class CartEmployeeTaskUserControlViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _notes, value);
     }
 
-    private string _status = "assigned";
+    private readonly string _status = "assigned";
     public string Status
     {
         get => _status;

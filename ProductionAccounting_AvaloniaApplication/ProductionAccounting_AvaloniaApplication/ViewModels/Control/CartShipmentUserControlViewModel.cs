@@ -63,11 +63,11 @@ public class CartShipmentUserControlViewModel : ViewModelBase
         _ => new SolidColorBrush(Colors.Gray)
     };
 
-    public bool IsAdministrator
+    private static bool IsAdministrator
         => ManagerCookie.IsUserLoggedIn() 
         && ManagerCookie.IsAdministrator;
 
-    public bool CanNotes 
+    private bool CanNotes 
         => !string.IsNullOrEmpty(Notes);
 
     private async Task ChangeStatus() 
@@ -80,21 +80,17 @@ public class CartShipmentUserControlViewModel : ViewModelBase
         {
             var sql = @"UPDATE public.shipments SET status = @newStatus WHERE id = @id";
 
-            using (var connection = new NpgsqlConnection(Arguments.connection))
-            {
-                await connection.OpenAsync();
-                using (var command = new NpgsqlCommand(sql, connection))
-                {
-                    command.Parameters.AddWithValue("@newStatus", newStatus);
-                    command.Parameters.AddWithValue("@id", Id);
-                    await command.ExecuteNonQueryAsync();
+            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await connection.OpenAsync();
+            using var command = new NpgsqlCommand(sql, connection);
+            command.Parameters.AddWithValue("@newStatus", newStatus);
+            command.Parameters.AddWithValue("@id", Id);
+            await command.ExecuteNonQueryAsync();
 
-                    Status = newStatus;
-                    OnStatusChanged();
+            Status = newStatus;
+            OnStatusChanged();
 
-                    WeakReferenceMessenger.Default.Send(new RefreshShipmentListMessage());
-                }
-            }
+            WeakReferenceMessenger.Default.Send(new RefreshShipmentListMessage());
         }
         catch (Exception ex) 
         {

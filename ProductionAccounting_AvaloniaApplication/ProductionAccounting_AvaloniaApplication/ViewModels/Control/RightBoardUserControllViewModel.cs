@@ -14,11 +14,11 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class RightBoardUserControlViewModel : ViewModelBase, IRecipient<OpenOrCloseAuthorizationPageStatusMessage>, IRecipient<UserAuthenticationChangedMessage>, IRecipient<OpenOrCloseProfileUserStatusMessage>
 {
-    private MainWindowViewModel? mainWindowViewModel { get; set; } = null;
+    private MainWindowViewModel? MainWindowViewModel { get; set; } = null;
 
     public RightBoardUserControlViewModel(MainWindowViewModel _mainWindowViewModel)
     {
-        mainWindowViewModel = _mainWindowViewModel;
+        MainWindowViewModel = _mainWindowViewModel;
 
         UpdateUI();
 
@@ -92,7 +92,7 @@ public class RightBoardUserControlViewModel : ViewModelBase, IRecipient<OpenOrCl
 
     private void OpenPage(ViewModelBase ViewModel)
     {
-        mainWindowViewModel?.CurrentPage = ViewModel;
+        MainWindowViewModel?.CurrentPage = ViewModel;
         _objectViewModels = ViewModel;
     }
 
@@ -104,7 +104,7 @@ public class RightBoardUserControlViewModel : ViewModelBase, IRecipient<OpenOrCl
     }
 
     private ObservableCollection<DashboardButtonViewModel> _buttons = [];
-    public ObservableCollection<DashboardButtonViewModel> buttons 
+    public ObservableCollection<DashboardButtonViewModel> Buttons
     { 
         get => _buttons; 
         set => this.RaiseAndSetIfChanged(ref _buttons, value); 
@@ -192,39 +192,37 @@ public class RightBoardUserControlViewModel : ViewModelBase, IRecipient<OpenOrCl
         if (!isLoggedIn) OpenPage(authorizationPageUserControlViewModel);
         else ExecuteOpenProfilePage(ManagerCookie.GetIdUser ?? 0);
 
-        buttons.Clear();
+        Buttons.Clear();
 
         var newButtons = new List<DashboardButtonViewModel>
         {
-            new DashboardButtonViewModel(RightBoardAdminPanelText, OpenAdminPanelPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/administrator-64.png"), () => IsAdministrator),
-            new DashboardButtonViewModel(RightBoardManagerText, OpenProductsManagerUserPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/administrator-64.png"), () => IsAdministratorOrManager),
-            new DashboardButtonViewModel(RightBoardTimesheetText, OpenTimesheetPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/home-64.png"), () => IsAdministratorOrManager),
-            new DashboardButtonViewModel(RightBoardReferenceBooksText, OpenReferenceBooksPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/library-64.png"), () => IsAll),
-            new DashboardButtonViewModel(RightBoardWindowsUserText, OpenWorkUserPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/home-64.png"), () => IsAdministratorOrMasterOrEmployee),
-            new DashboardButtonViewModel(RightBoardShipmentsText, OpenShipmentsUserPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/home-64.png"), () => IsAdministratorOrMasterOrManager),
-            new DashboardButtonViewModel(RightBoardSalaryText, OpenSalaryUserPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/login-64.png"), () => IsAll),
-            new DashboardButtonViewModel(ButtonAuthorizationText, OpenAuthorizationCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/login-64.png")),
+            new(RightBoardAdminPanelText, OpenAdminPanelPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/administrator-64.png"), () => IsAdministrator),
+            new(RightBoardManagerText, OpenProductsManagerUserPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/administrator-64.png"), () => IsAdministratorOrManager),
+            new (RightBoardTimesheetText, OpenTimesheetPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/home-64.png"), () => IsAdministratorOrManager),
+            new (RightBoardReferenceBooksText, OpenReferenceBooksPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/library-64.png"), () => IsAll),
+            new (RightBoardWindowsUserText, OpenWorkUserPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/home-64.png"), () => IsAdministratorOrMasterOrEmployee),
+            new (RightBoardShipmentsText, OpenShipmentsUserPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/home-64.png"), () => IsAdministratorOrMasterOrManager),
+            new (RightBoardSalaryText, OpenSalaryUserPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/login-64.png"), () => IsAll),
+            new (ButtonAuthorizationText, OpenAuthorizationCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/login-64.png")),
         };
 
         foreach (var button in newButtons)
         {
-            buttons.Add(button);
+            Buttons.Add(button);
         }
 
-        this.RaisePropertyChanged(nameof(buttons));
+        this.RaisePropertyChanged(nameof(Buttons));
         
-        foreach (var button in buttons)
+        foreach (var button in Buttons)
         {
             button.UpdateVisibility();
         }
     }
 
-    private Bitmap LoadBitmap(string uriString)
+    private static Bitmap LoadBitmap(string uriString)
     {
-        using (var stream = AssetLoader.Open(new Uri(uriString)))
-        {
-            return new Bitmap(stream);
-        }
+        using var stream = AssetLoader.Open(new Uri(uriString));
+        return new Bitmap(stream);
     }
 
     ~RightBoardUserControlViewModel()

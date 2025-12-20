@@ -26,7 +26,7 @@ public class ShipmentsPageUserControlViewModel : ViewModelBase, IRecipient<Refre
 
     public StackPanel? CartShipment { get; set; } = null;
 
-    private List<CartShipmentUserControl> shipmentsList = [];
+    private readonly List<CartShipmentUserControl> shipmentsList = [];
 
     public ICommand RefreshCommand
         => new RelayCommand(async () => await LoadShipmentsAsync());
@@ -57,38 +57,35 @@ public class ShipmentsPageUserControlViewModel : ViewModelBase, IRecipient<Refre
                     JOIN public.product p ON p.id = pt.product_id
                     ORDER BY s.created_at DESC";
 
-            using (var connection = new NpgsqlConnection(Arguments.connection))
+            using (var connection = new NpgsqlConnection(Arguments.Connection))
             {
                 await connection.OpenAsync();
-                using (var command = new NpgsqlCommand(sql, connection))
+                using var command = new NpgsqlCommand(sql, connection);
+                using var reader = await command.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
                 {
-                    using (var reader = await command.ExecuteReaderAsync()) {
-                        while (await reader.ReadAsync())
-                        {
-                            var viewModel = new CartShipmentUserControlViewModel()
-                            {
-                                Id = reader.IsDBNull(0) ? 0 : reader.GetDouble(0),
-                                ProductTaskId = reader.IsDBNull(1) ? 0 : reader.GetDouble(1),
-                                ProductId = reader.IsDBNull(2) ? 0 : reader.GetDouble(2),
-                                ProductName = reader.IsDBNull(3) ? string.Empty : reader.GetString(3),
-                                Article = reader.IsDBNull(4) ? string.Empty : reader.GetString(4),
-                                PlannedQuantity = reader.IsDBNull(5) ? 0 : reader.GetDecimal(5),
-                                ShippedQuantity = reader.IsDBNull(6) ? 0 : reader.GetDecimal(6),
-                                ShipmentpedWeight = reader.IsDBNull(7) ? 0 : reader.GetDecimal(7),
-                                ShipmentDate = reader.IsDBNull(8) ? DateTime.UtcNow : reader.GetFieldValue<DateTime>(8),
-                                Status = reader.IsDBNull(9) ? string.Empty : reader.GetString(9),
-                                Notes = reader.IsDBNull(10) ? string.Empty : reader.GetString(10),
-                                CreateAt = reader.IsDBNull(12) ? DateTime.UtcNow : reader.GetFieldValue<DateTime>(12),
-                            };
+                    var viewModel = new CartShipmentUserControlViewModel()
+                    {
+                        Id = reader.IsDBNull(0) ? 0 : reader.GetDouble(0),
+                        ProductTaskId = reader.IsDBNull(1) ? 0 : reader.GetDouble(1),
+                        ProductId = reader.IsDBNull(2) ? 0 : reader.GetDouble(2),
+                        ProductName = reader.IsDBNull(3) ? string.Empty : reader.GetString(3),
+                        Article = reader.IsDBNull(4) ? string.Empty : reader.GetString(4),
+                        PlannedQuantity = reader.IsDBNull(5) ? 0 : reader.GetDecimal(5),
+                        ShippedQuantity = reader.IsDBNull(6) ? 0 : reader.GetDecimal(6),
+                        ShipmentpedWeight = reader.IsDBNull(7) ? 0 : reader.GetDecimal(7),
+                        ShipmentDate = reader.IsDBNull(8) ? DateTime.UtcNow : reader.GetFieldValue<DateTime>(8),
+                        Status = reader.IsDBNull(9) ? string.Empty : reader.GetString(9),
+                        Notes = reader.IsDBNull(10) ? string.Empty : reader.GetString(10),
+                        CreateAt = reader.IsDBNull(12) ? DateTime.UtcNow : reader.GetFieldValue<DateTime>(12),
+                    };
 
-                            var userControl = new CartShipmentUserControl()
-                            { 
-                                DataContext = viewModel,
-                            };
+                    var userControl = new CartShipmentUserControl()
+                    {
+                        DataContext = viewModel,
+                    };
 
-                            shipmentsList.Add(userControl);
-                        }
-                    }
+                    shipmentsList.Add(userControl);
                 }
             }
 

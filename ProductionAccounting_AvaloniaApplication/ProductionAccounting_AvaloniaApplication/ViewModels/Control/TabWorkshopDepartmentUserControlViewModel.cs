@@ -28,10 +28,10 @@ public class TabWorkshopDepartmentUserControlViewModel : ViewModelBase, IRecipie
 
     public StackPanel? HomeMainContent { get; set; } = null;
 
-    private List<CartWorkshopDepartmentUserControl> workshopDepartmentList = [];
+    private readonly List<CartWorkshopDepartmentUserControl> workshopDepartmentList = [];
     private List<double> filteredWorkshopDepartmentIds = [];
 
-    public ICommand DownloadAsyncCommand
+    public static ICommand DownloadAsyncCommand
         => new RelayCommand(async () => await DownloadListAsync());
 
     public ICommand RefreshAsyncCommand
@@ -95,37 +95,31 @@ public class TabWorkshopDepartmentUserControlViewModel : ViewModelBase, IRecipie
 
         try
         {
-            using (var connection = new NpgsqlConnection(Arguments.connection))
+            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await connection.OpenAsync();
+
+            var sql = "SELECT DISTINCT id FROM public.departments WHERE 1=1";
+
+            var parameters = new List<NpgsqlParameter>();
+
+            if (!string.IsNullOrWhiteSpace(Search) && Search != "%")
             {
-                await connection.OpenAsync();
+                sql += " AND type ILIKE @search";
+                parameters.Add(new NpgsqlParameter("@search", $"%{Search}%"));
+            }
 
-                var sql = "SELECT DISTINCT id FROM public.departments WHERE 1=1";
+            using var command = new NpgsqlCommand(sql, connection);
+            foreach (var param in parameters)
+            {
+                command.Parameters.Add(param);
+            }
 
-                var parameters = new List<NpgsqlParameter>();
-
-                if (!string.IsNullOrWhiteSpace(Search) && Search != "%")
+            using var reader = await command.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                if (!reader.IsDBNull(0))
                 {
-                    sql += " AND type ILIKE @search";
-                    parameters.Add(new NpgsqlParameter("@search", $"%{Search}%"));
-                }
-
-                using (var command = new NpgsqlCommand(sql, connection))
-                {
-                    foreach (var param in parameters)
-                    {
-                        command.Parameters.Add(param);
-                    }
-
-                    using (var reader = await command.ExecuteReaderAsync())
-                    {
-                        while (await reader.ReadAsync())
-                        {
-                            if (!reader.IsDBNull(0))
-                            {
-                                userIds.Add(reader.GetDouble(0));
-                            }
-                        }
-                    }
+                    userIds.Add(reader.GetDouble(0));
                 }
             }
         }
@@ -164,35 +158,31 @@ public class TabWorkshopDepartmentUserControlViewModel : ViewModelBase, IRecipie
 
             string sql = $"SELECT id, type FROM public.departments operation WHERE id IN ({string.Join(", ", paramNames)})";
 
-            using (var connection = new NpgsqlConnection(Arguments.connection))
+            using (var connection = new NpgsqlConnection(Arguments.Connection))
             {
                 await connection.OpenAsync();
-                using (var command = new NpgsqlCommand(sql, connection))
+                using var command = new NpgsqlCommand(sql, connection);
+
+                foreach (var param in parameters)
                 {
+                    command.Parameters.Add(param);
+                }
 
-                    foreach (var param in parameters)
+                using var reader = await command.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                {
+                    var viewModel = new CartWorkshopDepartmentUserControlViewModel
                     {
-                        command.Parameters.Add(param);
-                    }
+                        Id = reader.IsDBNull(0) ? 0 : reader.GetDouble(0),
+                        Type = reader.IsDBNull(1) ? string.Empty : reader.GetString(1)
+                    };
 
-                    using (var reader = await command.ExecuteReaderAsync())
+                    var userControl = new CartWorkshopDepartmentUserControl
                     {
-                        while (await reader.ReadAsync())
-                        {
-                            var viewModel = new CartWorkshopDepartmentUserControlViewModel
-                            {
-                                Id = reader.IsDBNull(0) ? 0 : reader.GetDouble(0),
-                                Type = reader.IsDBNull(1) ? string.Empty : reader.GetString(1)
-                            };
+                        DataContext = viewModel
+                    };
 
-                            var userControl = new CartWorkshopDepartmentUserControl
-                            {
-                                DataContext = viewModel
-                            };
-
-                            workshopDepartmentList.Add(userControl);
-                        }
-                    }
+                    workshopDepartmentList.Add(userControl);
                 }
             }
 
@@ -218,7 +208,7 @@ public class TabWorkshopDepartmentUserControlViewModel : ViewModelBase, IRecipie
         }
     }
 
-    public async Task DownloadListAsync()
+    private static async Task DownloadListAsync()
     {
         if (!ManagerCookie.IsUserLoggedIn()) return;
 
@@ -226,46 +216,40 @@ public class TabWorkshopDepartmentUserControlViewModel : ViewModelBase, IRecipie
         {
             string sql = "SELECT * FROM public.departments";
 
-            using (var connection = new NpgsqlConnection(Arguments.connection))
+            using var connection = new NpgsqlConnection(Arguments.Connection);
+            connection.Open();
+
+            using var command = new NpgsqlCommand(sql, connection);
+            using var reader = await command.ExecuteReaderAsync();
+            var fileSave = Path.Combine(Path.Combine(Paths.DestinationPathDB("AdminPanel", "WorkshopsDepartments")), Files.DBEquipments);
+
+            using (var writer = new StreamWriter(fileSave))
             {
-                connection.Open();
-
-                using (var command = new NpgsqlCommand(sql, connection))
+                for (int i = 0; i < reader.FieldCount; i++)
                 {
-                    using (var reader = await command.ExecuteReaderAsync())
+                    writer.Write(reader.GetName(i));
+                    if (i < reader.FieldCount - 1)
                     {
-                        var fileSave = Path.Combine(Path.Combine(Paths.DestinationPathDB("AdminPanel", "WorkshopsDepartments")), Files.DBEquipments);
-
-                        using (var writer = new StreamWriter(fileSave))
-                        {
-                            for (int i = 0; i < reader.FieldCount; i++)
-                            {
-                                writer.Write(reader.GetName(i));
-                                if (i < reader.FieldCount - 1)
-                                {
-                                    writer.Write(",");
-                                }
-                            }
-                            writer.WriteLine();
-
-                            while (reader.Read())
-                            {
-                                for (int i = 0; i < reader.FieldCount; i++)
-                                {
-                                    writer.Write(reader.GetValue(i).ToString());
-                                    if (i < reader.FieldCount - 1)
-                                    {
-                                        writer.Write(",");
-                                    }
-                                }
-                                writer.WriteLine();
-                            }
-                        }
-
-                        if (Arguments.OpenAfterDownloading) Process.Start(new ProcessStartInfo { FileName = fileSave, UseShellExecute = true });
+                        writer.Write(",");
                     }
                 }
+                writer.WriteLine();
+
+                while (reader.Read())
+                {
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        writer.Write(reader.GetValue(i).ToString());
+                        if (i < reader.FieldCount - 1)
+                        {
+                            writer.Write(",");
+                        }
+                    }
+                    writer.WriteLine();
+                }
             }
+
+            if (Arguments.OpenAfterDownloading) Process.Start(new ProcessStartInfo { FileName = fileSave, UseShellExecute = true });
         }
         catch (NpgsqlException ex)
         {

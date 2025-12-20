@@ -37,7 +37,7 @@ public class CartWorkshopDepartmentUserControlViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _type, value);
     }
 
-    public bool IsVisibleButtonDelete
+    private static bool IsVisibleButtonDelete
         => ManagerCookie.IsUserLoggedIn()
         && ManagerCookie.IsAdministrator;
 }

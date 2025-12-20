@@ -12,10 +12,10 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class AddDepartmentUserControlViewModel : ViewModelBase, INotifyPropertyChanged
 {
-    public ICommand CancelCommand
+    private static ICommand CancelCommand
         => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseAddDepartmentStatusMessage(false)) );
 
-    public ICommand ConfirmCommand
+    private ICommand ConfirmCommand
         => new RelayCommand(async () => 
         { 
             if ( await SaveAsync() ) 
@@ -63,25 +63,21 @@ public class AddDepartmentUserControlViewModel : ViewModelBase, INotifyPropertyC
             {
                 string sql = "INSERT INTO public.departments (type) VALUES (@type)";
 
-                using (var connection = new NpgsqlConnection(Arguments.connection))
+                using var connection = new NpgsqlConnection(Arguments.Connection);
+                await connection.OpenAsync();
+                using var command = new NpgsqlCommand(sql, connection);
+                try
                 {
-                    await connection.OpenAsync();
-                    using (var command = new NpgsqlCommand(sql, connection))
-                    {
-                        try
-                        {
-                            command.Parameters.AddWithValue("@type", Department);
-                            await command.ExecuteNonQueryAsync();
+                    command.Parameters.AddWithValue("@type", Department);
+                    await command.ExecuteNonQueryAsync();
 
-                            return true;
-                        }
-                        catch (Exception ex)
-                        {
-                            Loges.LoggingProcess(level: LogLevel.ERROR,
-                                ex: ex);
-                            return false;
-                        }
-                    }
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Loges.LoggingProcess(level: LogLevel.ERROR,
+                        ex: ex);
+                    return false;
                 }
             }
             catch (Exception ex)

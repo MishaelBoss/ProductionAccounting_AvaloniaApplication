@@ -28,13 +28,13 @@ public class TabOperationUserControlViewModel : ViewModelBase, INotifyPropertyCh
 
     public StackPanel? HomeMainContent { get; set; } = null;
 
-    private List<CartOperationUserControl> operationList = [];
+    private readonly List<CartOperationUserControl> operationList = [];
     private List<double> filteredOperationIds = [];
 
     public ICommand ResetFiltersCommand
         => new RelayCommand(() => ResetFilters());
 
-    public ICommand DownloadAsyncCommand
+    public static ICommand DownloadAsyncCommand
         => new RelayCommand(async () => await DownloadListAsync());
 
     public ICommand RefreshAsyncCommand
@@ -135,49 +135,43 @@ public class TabOperationUserControlViewModel : ViewModelBase, INotifyPropertyCh
 
         try
         {
-            using (var connection = new NpgsqlConnection(Arguments.connection))
+            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await connection.OpenAsync();
+
+            var sql = "SELECT DISTINCT id FROM public.operation WHERE 1=1";
+
+            var parameters = new List<NpgsqlParameter>();
+
+            if (!ShowActive || !ShowInactive)
             {
-                await connection.OpenAsync();
-
-                var sql = "SELECT DISTINCT id FROM public.operation WHERE 1=1";
-
-                var parameters = new List<NpgsqlParameter>();
-
-                if (!ShowActive || !ShowInactive)
+                if (ShowActive && !ShowInactive)
                 {
-                    if (ShowActive && !ShowInactive)
-                    {
-                        sql += " AND is_active = true";
-                    }
-                    else if (!ShowActive && ShowInactive)
-                    {
-                        sql += " AND is_active = false";
-                    }
+                    sql += " AND is_active = true";
                 }
-
-                if (!string.IsNullOrWhiteSpace(Search) && Search != "%")
+                else if (!ShowActive && ShowInactive)
                 {
-                    sql += " AND name ILIKE @search";
-                    parameters.Add(new NpgsqlParameter("@search", $"%{Search}%"));
+                    sql += " AND is_active = false";
                 }
+            }
 
-                using (var command = new NpgsqlCommand(sql, connection))
+            if (!string.IsNullOrWhiteSpace(Search) && Search != "%")
+            {
+                sql += " AND name ILIKE @search";
+                parameters.Add(new NpgsqlParameter("@search", $"%{Search}%"));
+            }
+
+            using var command = new NpgsqlCommand(sql, connection);
+            foreach (var param in parameters)
+            {
+                command.Parameters.Add(param);
+            }
+
+            using var reader = await command.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                if (!reader.IsDBNull(0))
                 {
-                    foreach (var param in parameters)
-                    {
-                        command.Parameters.Add(param);
-                    }
-
-                    using (var reader = await command.ExecuteReaderAsync())
-                    {
-                        while (await reader.ReadAsync())
-                        {
-                            if (!reader.IsDBNull(0))
-                            {
-                                userIds.Add(reader.GetDouble(0));
-                            }
-                        }
-                    }
+                    userIds.Add(reader.GetDouble(0));
                 }
             }
         }
@@ -216,38 +210,34 @@ public class TabOperationUserControlViewModel : ViewModelBase, INotifyPropertyCh
 
             string sql = $"SELECT id, name, operation_code, price, unit FROM public.operation WHERE id IN ({string.Join(", ", paramNames)})";
 
-            using (var connection = new NpgsqlConnection(Arguments.connection))
+            using (var connection = new NpgsqlConnection(Arguments.Connection))
             {
                 await connection.OpenAsync();
-                using (var command = new NpgsqlCommand(sql, connection))
+                using var command = new NpgsqlCommand(sql, connection);
+
+                foreach (var param in parameters)
                 {
+                    command.Parameters.Add(param);
+                }
 
-                    foreach (var param in parameters)
+                using var reader = await command.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                {
+                    var viewModel = new CartOperationUserControlViewModel
                     {
-                        command.Parameters.Add(param);
-                    }
+                        OperationID = reader.IsDBNull(0) ? 0 : reader.GetDouble(0),
+                        Name = reader.IsDBNull(1) ? string.Empty : reader.GetString(1),
+                        OperationCode = reader.IsDBNull(2) ? string.Empty : reader.GetString(2),
+                        Price = reader.IsDBNull(3) ? string.Empty : reader.GetDecimal(3).ToString(),
+                        Unit = reader.IsDBNull(4) ? string.Empty : reader.GetString(4),
+                    };
 
-                    using (var reader = await command.ExecuteReaderAsync())
+                    var userControl = new CartOperationUserControl
                     {
-                        while (await reader.ReadAsync())
-                        {
-                            var viewModel = new CartOperationUserControlViewModel
-                            {
-                                OperationID = reader.IsDBNull(0) ? 0 : reader.GetDouble(0),
-                                Name = reader.IsDBNull(1) ? string.Empty : reader.GetString(1),
-                                OperationCode = reader.IsDBNull(2) ? string.Empty : reader.GetString(2),
-                                Price = reader.IsDBNull(3) ? string.Empty : reader.GetDecimal(3).ToString(),
-                                Unit = reader.IsDBNull(4) ? string.Empty : reader.GetString(4),
-                            };
+                        DataContext = viewModel
+                    };
 
-                            var userControl = new CartOperationUserControl
-                            {
-                                DataContext = viewModel
-                            };
-
-                            operationList.Add(userControl);
-                        }
-                    }
+                    operationList.Add(userControl);
                 }
             }
 
@@ -273,7 +263,7 @@ public class TabOperationUserControlViewModel : ViewModelBase, INotifyPropertyCh
         }
     }
 
-    public async Task DownloadListAsync()
+    private static async Task DownloadListAsync()
     {
         if (!ManagerCookie.IsUserLoggedIn()) return;
 
@@ -281,46 +271,40 @@ public class TabOperationUserControlViewModel : ViewModelBase, INotifyPropertyCh
         {
             string sql = "SELECT * FROM public.operation";
 
-            using (var connection = new NpgsqlConnection(Arguments.connection))
+            using var connection = new NpgsqlConnection(Arguments.Connection);
+            connection.Open();
+
+            using var command = new NpgsqlCommand(sql, connection);
+            using var reader = await command.ExecuteReaderAsync();
+            var fileSave = Path.Combine(Path.Combine(Paths.DestinationPathDB("AdminPanel", "Operations")), Files.DBEquipments);
+
+            using (var writer = new StreamWriter(fileSave))
             {
-                connection.Open();
-
-                using (var command = new NpgsqlCommand(sql, connection))
+                for (int i = 0; i < reader.FieldCount; i++)
                 {
-                    using (var reader = await command.ExecuteReaderAsync())
+                    writer.Write(reader.GetName(i));
+                    if (i < reader.FieldCount - 1)
                     {
-                        var fileSave = Path.Combine(Path.Combine(Paths.DestinationPathDB("AdminPanel", "Operations")), Files.DBEquipments);
-
-                        using (var writer = new StreamWriter(fileSave))
-                        {
-                            for (int i = 0; i < reader.FieldCount; i++)
-                            {
-                                writer.Write(reader.GetName(i));
-                                if (i < reader.FieldCount - 1)
-                                {
-                                    writer.Write(",");
-                                }
-                            }
-                            writer.WriteLine();
-
-                            while (reader.Read())
-                            {
-                                for (int i = 0; i < reader.FieldCount; i++)
-                                {
-                                    writer.Write(reader.GetValue(i).ToString());
-                                    if (i < reader.FieldCount - 1)
-                                    {
-                                        writer.Write(",");
-                                    }
-                                }
-                                writer.WriteLine();
-                            }
-                        }
-
-                        if (Arguments.OpenAfterDownloading) Process.Start(new ProcessStartInfo { FileName = fileSave, UseShellExecute = true });
+                        writer.Write(",");
                     }
                 }
+                writer.WriteLine();
+
+                while (reader.Read())
+                {
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        writer.Write(reader.GetValue(i).ToString());
+                        if (i < reader.FieldCount - 1)
+                        {
+                            writer.Write(",");
+                        }
+                    }
+                    writer.WriteLine();
+                }
             }
+
+            if (Arguments.OpenAfterDownloading) Process.Start(new ProcessStartInfo { FileName = fileSave, UseShellExecute = true });
         }
         catch (NpgsqlException ex)
         {

@@ -1,11 +1,6 @@
 namespace ProductionAccounting_AvaloniaApplication.Scripts;
 
-public class OpenOrCloseAddDepartmentStatusMessage
+public class OpenOrCloseAddDepartmentStatusMessage(bool shouldOpen)
 {
-    public bool ShouldOpen { get; }
-
-    public OpenOrCloseAddDepartmentStatusMessage(bool shouldOpen)
-    {
-        ShouldOpen = shouldOpen;
-    }
+    public bool ShouldOpen { get; } = shouldOpen;
 }

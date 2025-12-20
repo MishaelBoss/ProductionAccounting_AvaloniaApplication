@@ -97,7 +97,7 @@ public class ProfilePageUserControlViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _productionHistory, value);
     }
 
-    public ICommand LogoutCommand
+    public static ICommand LogoutCommand
         => new RelayCommand(() =>
         {
             ManagerCookie.DeleteCookie();
@@ -154,24 +154,18 @@ public class ProfilePageUserControlViewModel : ViewModelBase
                         LEFT JOIN public.positions p ON up.position_id = p.id
                         WHERE utt.user_id = @id";
 
-            using (var connection = new NpgsqlConnection(Arguments.connection))
+            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await connection.OpenAsync();
+
+            using var command = new NpgsqlCommand(sql, connection);
+            command.Parameters.AddWithValue("@id", userId);
+
+            using var reader = await command.ExecuteReaderAsync();
+            if (await reader.ReadAsync())
             {
-                await connection.OpenAsync();
-
-                using (var command = new NpgsqlCommand(sql, connection))
-                {
-                    command.Parameters.AddWithValue("@id", userId);
-
-                    using (var reader = await command.ExecuteReaderAsync())
-                    {
-                        if (await reader.ReadAsync())
-                        {
-                            //UserType = reader.IsDBNull(0) ? "none" : reader.GetString(0);
-                            Department = reader.IsDBNull(1) ? "none" : reader.GetString(1);
-                            Position = reader.IsDBNull(2) ? "none" : reader.GetString(2);
-                        }
-                    }
-                }
+                //UserType = reader.IsDBNull(0) ? "none" : reader.GetString(0);
+                Department = reader.IsDBNull(1) ? "none" : reader.GetString(1);
+                Position = reader.IsDBNull(2) ? "none" : reader.GetString(2);
             }
         }
         catch (Exception ex)
@@ -189,31 +183,25 @@ public class ProfilePageUserControlViewModel : ViewModelBase
         {
             string sql = @"SELECT login, first_name, last_name, middle_name, email, phone, employee_id, id FROM public.""user"" WHERE id = @id";
 
-            using (var connection = new NpgsqlConnection(Arguments.connection))
+            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await connection.OpenAsync();
+            using var command = new NpgsqlCommand(sql, connection);
+            command.Parameters.AddWithValue("@id", userId);
+
+            using var reader = await command.ExecuteReaderAsync();
+            if (await reader.ReadAsync())
             {
-                await connection.OpenAsync();
-                using (var command = new NpgsqlCommand(sql, connection))
-                {
-                    command.Parameters.AddWithValue("@id", userId);
+                Login = reader.IsDBNull(0) ? "none" : reader.GetString(0);
+                FirstName = reader.IsDBNull(1) ? "none" : reader.GetString(1);
+                LastName = reader.IsDBNull(2) ? "none" : reader.GetString(2);
+                MiddleName = reader.IsDBNull(3) ? "none" : reader.GetString(3);
+                Email = reader.IsDBNull(4) ? "none" : reader.GetString(4);
+                Phone = reader.IsDBNull(5) ? "none" : reader.GetString(5);
+                Employee = reader.IsDBNull(6) ? "none" : reader.GetString(6);
 
-                    using (var reader = await command.ExecuteReaderAsync())
-                    {
-                        if (await reader.ReadAsync())
-                        {
-                            Login = reader.IsDBNull(0) ? "none" : reader.GetString(0);
-                            FirstName = reader.IsDBNull(1) ? "none" : reader.GetString(1);
-                            LastName = reader.IsDBNull(2) ? "none" : reader.GetString(2);
-                            MiddleName = reader.IsDBNull(3) ? "none" : reader.GetString(3);
-                            Email = reader.IsDBNull(4) ? "none" : reader.GetString(4);
-                            Phone = reader.IsDBNull(5) ? "none" : reader.GetString(5);
-                            Employee = reader.IsDBNull(6) ? "none" : reader.GetString(6);
+                GetIdUser = reader.GetDouble(7);
 
-                            GetIdUser = reader.GetDouble(7);
-
-                            EmployeeName = $"{FirstName} {LastName} {MiddleName}";
-                        }
-                    }
-                }
+                EmployeeName = $"{FirstName} {LastName} {MiddleName}";
             }
         }
         catch (NpgsqlException ex)
@@ -236,31 +224,27 @@ public class ProfilePageUserControlViewModel : ViewModelBase
         {
             string sql = @"SELECT status, notes, hours_worked, work_date FROM public.timesheet WHERE user_id = @userID";
 
-            using (var connection = new NpgsqlConnection(Arguments.connection))
+            using (var connection = new NpgsqlConnection(Arguments.Connection))
             {
                 await connection.OpenAsync();
 
-                using (var command = new NpgsqlCommand(sql, connection))
+                using var command = new NpgsqlCommand(sql, connection);
+                command.Parameters.AddWithValue("@userID", userId);
+
+                using var reader = await command.ExecuteReaderAsync();
+                Tables.Clear();
+
+                while (await reader.ReadAsync())
                 {
-                    command.Parameters.AddWithValue("@userID", userId);
-
-                    using (var reader = await command.ExecuteReaderAsync())
+                    var viewModel = new CartTimesheetUserControlViewModel()
                     {
-                        Tables.Clear();
+                        Status = reader.IsDBNull(0) ? string.Empty : reader.GetString(0),
+                        Notes = reader.IsDBNull(1) ? string.Empty : reader.GetString(1),
+                        HoursWorked = reader.GetDecimal(2),
+                        WorkDate = reader.GetDateTime(3)
+                    };
 
-                        while (await reader.ReadAsync())
-                        {
-                            var viewModel = new CartTimesheetUserControlViewModel()
-                            {
-                                Status = reader.IsDBNull(0) ? string.Empty : reader.GetString(0),
-                                Notes = reader.IsDBNull(1) ? string.Empty : reader.GetString(1),
-                                HoursWorked = reader.GetDecimal(2),
-                                WorkDate = reader.GetDateTime(3)
-                            };
-
-                            Tables.Add(viewModel);
-                        }
-                    }
+                    Tables.Add(viewModel);
                 }
             }
 
@@ -302,38 +286,34 @@ public class ProfilePageUserControlViewModel : ViewModelBase
                         WHERE p.user_id = @user_id
                         ORDER BY p.production_date DESC, p.created_at DESC";
 
-            using (var connection = new NpgsqlConnection(Arguments.connection))
+            using (var connection = new NpgsqlConnection(Arguments.Connection))
             {
                 await connection.OpenAsync();
 
-                using (var command = new NpgsqlCommand(sql, connection))
+                using var command = new NpgsqlCommand(sql, connection);
+                command.Parameters.AddWithValue("@user_id", userId);
+
+                using var reader = await command.ExecuteReaderAsync();
+                ProductionHistory.Clear();
+
+                while (await reader.ReadAsync())
                 {
-                    command.Parameters.AddWithValue("@user_id", userId);
-
-                    using (var reader = await command.ExecuteReaderAsync())
+                    var productionItem = new ProductionHistoryViewModel()
                     {
-                        ProductionHistory.Clear();
+                        ProductionDate = reader.GetDateTime(0),
+                        Shift = reader.IsDBNull(1) ? (int?)null : reader.GetInt32(1),
+                        ProductName = reader.GetString(2),
+                        OperationName = reader.GetString(3),
+                        OperationUnit = reader.GetString(4),
+                        Quantity = reader.GetDecimal(5),
+                        Amount = reader.IsDBNull(6) ? 0 : reader.GetDecimal(6),
+                        Tonnage = reader.IsDBNull(7) ? 0 : reader.GetDecimal(7),
+                        Status = reader.GetString(8),
+                        Notes = reader.IsDBNull(9) ? string.Empty : reader.GetString(9),
+                        CreatedAt = reader.GetDateTime(10)
+                    };
 
-                        while (await reader.ReadAsync())
-                        {
-                            var productionItem = new ProductionHistoryViewModel()
-                            {
-                                ProductionDate = reader.GetDateTime(0),
-                                Shift = reader.IsDBNull(1) ? (int?)null : reader.GetInt32(1),
-                                ProductName = reader.GetString(2),
-                                OperationName = reader.GetString(3),
-                                OperationUnit = reader.GetString(4),
-                                Quantity = reader.GetDecimal(5),
-                                Amount = reader.IsDBNull(6) ? 0 : reader.GetDecimal(6),
-                                Tonnage = reader.IsDBNull(7) ? 0 : reader.GetDecimal(7),
-                                Status = reader.GetString(8),
-                                Notes = reader.IsDBNull(9) ? string.Empty : reader.GetString(9),
-                                CreatedAt = reader.GetDateTime(10)
-                            };
-
-                            ProductionHistory.Add(productionItem);
-                        }
-                    }
+                    ProductionHistory.Add(productionItem);
                 }
             }
 

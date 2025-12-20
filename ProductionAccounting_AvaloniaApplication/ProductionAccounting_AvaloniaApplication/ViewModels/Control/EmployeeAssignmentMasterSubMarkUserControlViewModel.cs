@@ -44,33 +44,29 @@ public class EmployeeAssignmentMasterSubMarkUserControlViewModel : ViewModelBase
     public bool CanAssign
         =>  SelectedEmployee != null;
 
-    public ICommand AssignCommand 
+    private ICommand AssignCommand 
         => new RelayCommand(async () => await AssignAsync());
 
-    public ICommand CancelCommand
+    private static ICommand CancelCommand
         => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseEmployeeAssignmentMasterSubMarkStatusMessage(false)));
 
     private async Task AssignAsync()
     {
         try
         {
-            using (var connection = new NpgsqlConnection(Arguments.connection)) 
-            {
-                await connection.OpenAsync();
+            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await connection.OpenAsync();
 
-                string sql = "UPDATE public.sub_product_operations SET assigned_to_user_id = @assigned_to_user_id WHERE id = @id";
+            string sql = "UPDATE public.sub_product_operations SET assigned_to_user_id = @assigned_to_user_id WHERE id = @id";
 
-                using (var command = new NpgsqlCommand(sql, connection)) 
-                {
-                    command.Parameters.AddWithValue("@assigned_to_user_id", SelectedEmployee!.Id);
-                    command.Parameters.AddWithValue("id", Id);
+            using var command = new NpgsqlCommand(sql, connection);
+            command.Parameters.AddWithValue("@assigned_to_user_id", SelectedEmployee!.Id);
+            command.Parameters.AddWithValue("id", Id);
 
-                    await command.ExecuteNonQueryAsync();
+            await command.ExecuteNonQueryAsync();
 
-                    WeakReferenceMessenger.Default.Send(new RefreshSubProductOperationsMessage(SubProductId));
-                    WeakReferenceMessenger.Default.Send(new OpenOrCloseEmployeeAssignmentMasterSubMarkStatusMessage(false));
-                }
-            }
+            WeakReferenceMessenger.Default.Send(new RefreshSubProductOperationsMessage(SubProductId));
+            WeakReferenceMessenger.Default.Send(new OpenOrCloseEmployeeAssignmentMasterSubMarkStatusMessage(false));
         }
         catch (PostgresException ex)
         {
@@ -102,26 +98,22 @@ public class EmployeeAssignmentMasterSubMarkUserControlViewModel : ViewModelBase
                                 WHERE u.is_active = true AND ut.type_user = 'Сотрудник'
                                 ORDER BY u.last_name, u.first_name";
 
-            using (var connection = new NpgsqlConnection(Arguments.connection))
+            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await connection.OpenAsync();
+
+            using var command = new NpgsqlCommand(sqlUsers, connection);
+            using var reader = await command.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
             {
-                await connection.OpenAsync();
+                var user = new ComboBoxUser(
+                    reader.GetDouble(0),
+                    reader.GetString(1),
+                    reader.GetString(2),
+                    reader.GetString(3),
+                    reader.GetString(4)
+                );
 
-                using (var command = new NpgsqlCommand(sqlUsers, connection))
-                using (var reader = await command.ExecuteReaderAsync())
-                {
-                    while (await reader.ReadAsync())
-                    {
-                        var user = new ComboBoxUser(
-                            reader.GetDouble(0),
-                            reader.GetString(1),
-                            reader.GetString(2),
-                            reader.GetString(3),
-                            reader.GetString(4)
-                        );
-
-                        Employees.Add(user);
-                    }
-                }
+                Employees.Add(user);
             }
         }
         catch (PostgresException ex)

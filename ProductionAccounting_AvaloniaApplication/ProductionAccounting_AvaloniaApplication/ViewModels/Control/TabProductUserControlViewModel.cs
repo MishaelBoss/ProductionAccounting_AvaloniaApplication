@@ -28,16 +28,16 @@ public class TabProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
 
     public StackPanel? HomeMainContent { get; set; } = null;
 
-    private List<CartProductUserControl> productList = [];
+    private readonly List<CartProductUserControl> productList = [];
     private List<double> filteredProductIds = [];
 
-    public ICommand ResetFiltersCommand
+    private ICommand ResetFiltersCommand
         => new RelayCommand(() => ResetFilters());
 
-    public ICommand DownloadAsyncCommand
+    private static ICommand DownloadAsyncCommand
         => new RelayCommand(async () => await DownloadListAsync());
 
-    public ICommand RefreshAsyncCommand
+    private ICommand RefreshAsyncCommand
         => new RelayCommand(() => GetList());
 
     private string _search = string.Empty;
@@ -128,49 +128,43 @@ public class TabProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
 
         try
         {
-            using (var connection = new NpgsqlConnection(Arguments.connection))
+            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await connection.OpenAsync();
+
+            var sql = "SELECT DISTINCT id FROM public.product WHERE 1=1";
+
+            var parameters = new List<NpgsqlParameter>();
+
+            if (!ShowActive || !ShowInactive)
             {
-                await connection.OpenAsync();
-
-                var sql = "SELECT DISTINCT id FROM public.product WHERE 1=1";
-
-                var parameters = new List<NpgsqlParameter>();
-
-                if (!ShowActive || !ShowInactive)
+                if (ShowActive && !ShowInactive)
                 {
-                    if (ShowActive && !ShowInactive)
-                    {
-                        sql += " AND is_active = true";
-                    }
-                    else if (!ShowActive && ShowInactive)
-                    {
-                        sql += " AND is_active = false";
-                    }
+                    sql += " AND is_active = true";
                 }
-
-                if (!string.IsNullOrWhiteSpace(Search) && Search != "%")
+                else if (!ShowActive && ShowInactive)
                 {
-                    sql += " AND name ILIKE @search";
-                    parameters.Add(new NpgsqlParameter("@search", $"%{Search}%"));
+                    sql += " AND is_active = false";
                 }
+            }
 
-                using (var command = new NpgsqlCommand(sql, connection))
+            if (!string.IsNullOrWhiteSpace(Search) && Search != "%")
+            {
+                sql += " AND name ILIKE @search";
+                parameters.Add(new NpgsqlParameter("@search", $"%{Search}%"));
+            }
+
+            using var command = new NpgsqlCommand(sql, connection);
+            foreach (var param in parameters)
+            {
+                command.Parameters.Add(param);
+            }
+
+            using var reader = await command.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                if (!reader.IsDBNull(0))
                 {
-                    foreach (var param in parameters)
-                    {
-                        command.Parameters.Add(param);
-                    }
-
-                    using (var reader = await command.ExecuteReaderAsync())
-                    {
-                        while (await reader.ReadAsync())
-                        {
-                            if (!reader.IsDBNull(0))
-                            {
-                                userIds.Add(reader.GetDouble(0));
-                            }
-                        }
-                    }
+                    userIds.Add(reader.GetDouble(0));
                 }
             }
         }
@@ -224,48 +218,44 @@ public class TabProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
                     WHERE p.id IN ({string.Join(", ", paramNames)}) 
                     ORDER BY pt.created_at DESC";
 
-            using (var connection = new NpgsqlConnection(Arguments.connection))
+            using (var connection = new NpgsqlConnection(Arguments.Connection))
             {
                 await connection.OpenAsync();
-                using (var command = new NpgsqlCommand(sql, connection))
+                using var command = new NpgsqlCommand(sql, connection);
+
+                foreach (var param in parameters)
                 {
-
-                    foreach (var param in parameters)
-                    {
-                        command.Parameters.Add(param);
-                    }
-
-                    using (var reader = await command.ExecuteReaderAsync())
-                    {
-                        while (await reader.ReadAsync())
-                        {
-                            var viewModel = new CartProductUserControlViewModel
-                            {
-                                Id = reader.GetDouble(0),
-                                ProductId = reader.GetDouble(1),
-                                ProductName = reader.GetString(2),
-                                Mark = reader.GetString(3),
-                                Article = reader.GetString(4),
-                                Unit = reader.GetString(5),
-                                PricePerUnit = reader.GetDecimal(6),
-                                PricePerUnitKg = reader.GetDecimal(7),
-                                Coefficient = reader.GetDecimal(8),
-                                Status = reader.GetString(9),
-                                CreatedAt = reader.GetDateTime(10),
-                                Description = reader.GetString(11),
-                            };
-
-                            var userControl = new CartProductUserControl
-                            {
-                                DataContext = viewModel
-                            };
-
-                            productList.Add(userControl);
-                        }
-
-                        if (productList.FirstOrDefault()?.DataContext is CartProductUserControlViewModel vm) await vm.CheckIsTaskCanBeCompleted();
-                    }
+                    command.Parameters.Add(param);
                 }
+
+                using var reader = await command.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                {
+                    var viewModel = new CartProductUserControlViewModel
+                    {
+                        Id = reader.GetDouble(0),
+                        ProductId = reader.GetDouble(1),
+                        ProductName = reader.GetString(2),
+                        Mark = reader.GetString(3),
+                        Article = reader.GetString(4),
+                        Unit = reader.GetString(5),
+                        PricePerUnit = reader.GetDecimal(6),
+                        PricePerUnitKg = reader.GetDecimal(7),
+                        Coefficient = reader.GetDecimal(8),
+                        Status = reader.GetString(9),
+                        CreatedAt = reader.GetDateTime(10),
+                        Description = reader.GetString(11),
+                    };
+
+                    var userControl = new CartProductUserControl
+                    {
+                        DataContext = viewModel
+                    };
+
+                    productList.Add(userControl);
+                }
+
+                if (productList.FirstOrDefault()?.DataContext is CartProductUserControlViewModel vm) await vm.CheckIsTaskCanBeCompleted();
             }
 
             StackPanelHelper.RefreshStackPanelContent<CartProductUserControl>(HomeMainContent, productList);
@@ -290,7 +280,7 @@ public class TabProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
         }
     }
 
-    public async Task DownloadListAsync()
+    private static async Task DownloadListAsync()
     {
         if (!ManagerCookie.IsUserLoggedIn()) return;
 
@@ -312,64 +302,58 @@ public class TabProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
                         ) pt ON p.id = pt.product_id
                         ORDER BY p.name";
 
-            using (var connection = new NpgsqlConnection(Arguments.connection))
+            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await connection.OpenAsync();
+
+            using var command = new NpgsqlCommand(sql, connection);
+            using var reader = await command.ExecuteReaderAsync();
+            var destinationPath = Paths.DestinationPathDB("AdminPanel", "Products");
+            Directory.CreateDirectory(destinationPath);
+
+            var fileSave = Path.Combine(destinationPath, Files.DBEquipments);
+
+            using (var writer = new StreamWriter(fileSave))
             {
-                await connection.OpenAsync();
-
-                using (var command = new NpgsqlCommand(sql, connection))
+                for (int i = 0; i < reader.FieldCount; i++)
                 {
-                    using (var reader = await command.ExecuteReaderAsync())
+                    writer.Write(reader.GetName(i));
+                    if (i < reader.FieldCount - 1)
                     {
-                        var destinationPath = Paths.DestinationPathDB("AdminPanel", "Products");
-                        Directory.CreateDirectory(destinationPath);
-
-                        var fileSave = Path.Combine(destinationPath, Files.DBEquipments);
-
-                        using (var writer = new StreamWriter(fileSave))
-                        {
-                            for (int i = 0; i < reader.FieldCount; i++)
-                            {
-                                writer.Write(reader.GetName(i));
-                                if (i < reader.FieldCount - 1)
-                                {
-                                    writer.Write(",");
-                                }
-                            }
-                            await writer.WriteLineAsync();
-
-                            while (await reader.ReadAsync())
-                            {
-                                for (int i = 0; i < reader.FieldCount; i++)
-                                {
-                                    var value = reader.GetValue(i);
-                                    var stringValue = value?.ToString() ?? "";
-
-                                    if (stringValue.Contains(",") || stringValue.Contains("\"") || stringValue.Contains("\n"))
-                                    {
-                                        stringValue = $"\"{stringValue.Replace("\"", "\"\"")}\"";
-                                    }
-
-                                    await writer.WriteAsync(stringValue);
-
-                                    if (i < reader.FieldCount - 1)
-                                    {
-                                        await writer.WriteAsync(",");
-                                    }
-                                }
-                                await writer.WriteLineAsync();
-                            }
-                        }
-
-                        if (Arguments.OpenAfterDownloading)
-                        {
-                            Process.Start(new ProcessStartInfo
-                            {
-                                FileName = fileSave,
-                                UseShellExecute = true
-                            });
-                        }
+                        writer.Write(",");
                     }
                 }
+                await writer.WriteLineAsync();
+
+                while (await reader.ReadAsync())
+                {
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        var value = reader.GetValue(i);
+                        var stringValue = value?.ToString() ?? "";
+
+                        if (stringValue.Contains(',') || stringValue.Contains('\"') || stringValue.Contains('\n'))
+                        {
+                            stringValue = $"\"{stringValue.Replace("\"", "\"\"")}\"";
+                        }
+
+                        await writer.WriteAsync(stringValue);
+
+                        if (i < reader.FieldCount - 1)
+                        {
+                            await writer.WriteAsync(",");
+                        }
+                    }
+                    await writer.WriteLineAsync();
+                }
+            }
+
+            if (Arguments.OpenAfterDownloading)
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = fileSave,
+                    UseShellExecute = true
+                });
             }
         }
         catch (NpgsqlException ex)

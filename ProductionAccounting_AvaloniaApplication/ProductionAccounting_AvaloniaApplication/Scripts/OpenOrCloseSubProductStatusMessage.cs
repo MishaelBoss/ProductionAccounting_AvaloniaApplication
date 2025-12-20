@@ -1,13 +1,7 @@
 ﻿namespace ProductionAccounting_AvaloniaApplication.Scripts;
 
-public class OpenOrCloseSubProductStatusMessage
+public class OpenOrCloseSubProductStatusMessage(bool shouldOpen, double? subProductId = null)
 {
-    public bool ShouldOpen { get; }
-    public double SubProductId { get; }
-
-    public OpenOrCloseSubProductStatusMessage(bool shouldOpen, double? subProductId = null)
-    {
-        ShouldOpen = shouldOpen;
-        SubProductId = subProductId ?? 0;
-    }
+    public bool ShouldOpen { get; } = shouldOpen;
+    public double SubProductId { get; } = subProductId ?? 0;
 }

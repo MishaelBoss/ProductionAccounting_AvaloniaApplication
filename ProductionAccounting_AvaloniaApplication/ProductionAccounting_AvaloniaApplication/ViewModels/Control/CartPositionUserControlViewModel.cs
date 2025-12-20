@@ -37,7 +37,7 @@ public class CartPositionUserControlViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _type, value);
     }
 
-    public bool IsAdministrator
+    private static bool IsAdministrator
         => ManagerCookie.IsUserLoggedIn() 
         && ManagerCookie.IsAdministrator;
 }

@@ -84,10 +84,10 @@ public class CartSubProductUserControlViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _operations, value);
     }
 
-    public bool IsNullNotes
+    private bool IsNullNotes
         => !string.IsNullOrEmpty(Notes);
 
-    public bool IsAdministrator
+    private static bool IsAdministrator
         => ManagerCookie.IsUserLoggedIn()
         && ManagerCookie.IsAdministrator;
 }

@@ -7,15 +7,15 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
 
 public class AdminPageUserControlViewModel : ViewModelBase
 {
-    public ICommand OpenAddUsers
+    public static ICommand OpenAddUsers
         => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseUserStatusMessage(true)));
 
-    public ICommand OpenDepartmentCommand
+    public static ICommand OpenDepartmentCommand
         => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseAddDepartmentStatusMessage(true)));
 
-    public ICommand OpenPositionCommand
+    public static ICommand OpenPositionCommand
         => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseAddPositionStatusMessage(true)));
 
-    public ICommand AddProductCommand
+    public static ICommand AddProductCommand
         => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseProductStatusMessage(true)));
 }

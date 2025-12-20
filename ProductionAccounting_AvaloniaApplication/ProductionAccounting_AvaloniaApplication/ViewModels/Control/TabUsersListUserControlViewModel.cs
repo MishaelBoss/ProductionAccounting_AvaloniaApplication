@@ -35,16 +35,16 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
 
     public StackPanel? HomeMainContent { get; set; } = null;
 
-    private List<CartUserListUserControl> userList = [];
+    private readonly List<CartUserListUserControl> userList = [];
     private List<double> filteredUserIds = [];
 
-    public ICommand ResetFiltersCommand
+    private ICommand ResetFiltersCommand
         => new RelayCommand(() => ResetFilters());
 
-    public ICommand DownloadAsyncCommand
+    private static ICommand DownloadAsyncCommand
         => new RelayCommand(async () => await DownloadListAsync());
 
-    public ICommand ReturnListUsersCommand
+    private ICommand ReturnListUsersCommand
         => new RelayCommand(() => GetListUsers());
 
     private bool _isProfileView = false;
@@ -260,11 +260,10 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
 
         try
         {
-            using (var connection = new NpgsqlConnection(Arguments.connection))
-            {
-                await connection.OpenAsync();
+            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await connection.OpenAsync();
 
-                var sql = @"
+            var sql = @"
                         SELECT DISTINCT u.id
                         FROM public.""user"" u
                         LEFT JOIN public.user_to_user_type utt ON u.id = utt.user_id
@@ -275,61 +274,56 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
                         LEFT JOIN public.positions p ON up.position_id = p.id
                         WHERE 1=1";
 
-                var parameters = new List<NpgsqlParameter>();
+            var parameters = new List<NpgsqlParameter>();
 
-                if (!ShowActiveUsers || !ShowInactiveUsers)
+            if (!ShowActiveUsers || !ShowInactiveUsers)
+            {
+                if (ShowActiveUsers && !ShowInactiveUsers)
                 {
-                    if (ShowActiveUsers && !ShowInactiveUsers)
-                    {
-                        sql += " AND u.is_active = true";
-                    }
-                    else if (!ShowActiveUsers && ShowInactiveUsers)
-                    {
-                        sql += " AND u.is_active = false";
-                    }
+                    sql += " AND u.is_active = true";
                 }
-
-                if (!string.IsNullOrWhiteSpace(Search) && Search != "%")
+                else if (!ShowActiveUsers && ShowInactiveUsers)
                 {
-                    sql += " AND u.login ILIKE @search";
-                    parameters.Add(new NpgsqlParameter("@search", $"%{Search}%"));
+                    sql += " AND u.is_active = false";
                 }
+            }
 
-                if (FilterByRole && SelectedComboBoxItem != null)
+            if (!string.IsNullOrWhiteSpace(Search) && Search != "%")
+            {
+                sql += " AND u.login ILIKE @search";
+                parameters.Add(new NpgsqlParameter("@search", $"%{Search}%"));
+            }
+
+            if (FilterByRole && SelectedComboBoxItem != null)
+            {
+                sql += " AND ut.id = @roleId";
+                parameters.Add(new NpgsqlParameter("@roleId", SelectedComboBoxItem.Id));
+            }
+
+            if (FilterByDepartment && SelectedComboBoxItemDepartment != null)
+            {
+                sql += " AND d.id = @departmentId";
+                parameters.Add(new NpgsqlParameter("@departmentId", SelectedComboBoxItemDepartment.Id));
+            }
+
+            if (FilterByPosition && SelectedComboBoxItemPosition != null)
+            {
+                sql += " AND p.id = @positionId";
+                parameters.Add(new NpgsqlParameter("@positionId", SelectedComboBoxItemPosition.Id));
+            }
+
+            using var command = new NpgsqlCommand(sql, connection);
+            foreach (var param in parameters)
+            {
+                command.Parameters.Add(param);
+            }
+
+            using var reader = await command.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                if (!reader.IsDBNull(0))
                 {
-                    sql += " AND ut.id = @roleId";
-                    parameters.Add(new NpgsqlParameter("@roleId", SelectedComboBoxItem.Id));
-                }
-
-                if (FilterByDepartment && SelectedComboBoxItemDepartment != null)
-                {
-                    sql += " AND d.id = @departmentId";
-                    parameters.Add(new NpgsqlParameter("@departmentId", SelectedComboBoxItemDepartment.Id));
-                }
-
-                if (FilterByPosition && SelectedComboBoxItemPosition != null)
-                {
-                    sql += " AND p.id = @positionId";
-                    parameters.Add(new NpgsqlParameter("@positionId", SelectedComboBoxItemPosition.Id));
-                }
-
-                using (var command = new NpgsqlCommand(sql, connection))
-                {
-                    foreach (var param in parameters)
-                    {
-                        command.Parameters.Add(param);
-                    }
-
-                    using (var reader = await command.ExecuteReaderAsync())
-                    {
-                        while (await reader.ReadAsync())
-                        {
-                            if (!reader.IsDBNull(0))
-                            {
-                                userIds.Add(reader.GetDouble(0));
-                            }
-                        }
-                    }
+                    userIds.Add(reader.GetDouble(0));
                 }
             }
         }
@@ -349,44 +343,42 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
             string sqlDepartments = "SELECT id, type FROM public.departments";
             string sqlPositions = "SELECT id, type FROM public.positions";
 
-            using (var connection = new NpgsqlConnection(Arguments.connection))
+            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await connection.OpenAsync();
+
+            using (var command = new NpgsqlCommand(sqlUserTypes, connection))
+            using (var reader = await command.ExecuteReaderAsync())
             {
-                await connection.OpenAsync();
-
-                using (var command = new NpgsqlCommand(sqlUserTypes, connection))
-                using (var reader = await command.ExecuteReaderAsync())
+                while (await reader.ReadAsync())
                 {
-                    while (await reader.ReadAsync())
-                    {
-                        ComboBoxItems.Add(new ComboBoxTypeRolsUser(
-                            reader.GetDouble(0),
-                            reader.GetString(1)
-                        ));
-                    }
+                    ComboBoxItems.Add(new ComboBoxTypeRolsUser(
+                        reader.GetDouble(0),
+                        reader.GetString(1)
+                    ));
                 }
+            }
 
-                using (var command = new NpgsqlCommand(sqlDepartments, connection))
-                using (var reader = await command.ExecuteReaderAsync())
+            using (var command = new NpgsqlCommand(sqlDepartments, connection))
+            using (var reader = await command.ExecuteReaderAsync())
+            {
+                while (await reader.ReadAsync())
                 {
-                    while (await reader.ReadAsync())
-                    {
-                        ComboBoxItemsDepartments.Add(new ComboBoxTypeDepartmentUser(
-                            reader.GetDouble(0),
-                            reader.GetString(1)
-                        ));
-                    }
+                    ComboBoxItemsDepartments.Add(new ComboBoxTypeDepartmentUser(
+                        reader.GetDouble(0),
+                        reader.GetString(1)
+                    ));
                 }
+            }
 
-                using (var command = new NpgsqlCommand(sqlPositions, connection))
-                using (var reader = await command.ExecuteReaderAsync())
+            using (var command = new NpgsqlCommand(sqlPositions, connection))
+            using (var reader = await command.ExecuteReaderAsync())
+            {
+                while (await reader.ReadAsync())
                 {
-                    while (await reader.ReadAsync())
-                    {
-                        ComboBoxItemsPositions.Add(new ComboBoxTypePositionUser(
-                            reader.GetDouble(0),
-                            reader.GetString(1)
-                        ));
-                    }
+                    ComboBoxItemsPositions.Add(new ComboBoxTypePositionUser(
+                        reader.GetDouble(0),
+                        reader.GetString(1)
+                    ));
                 }
             }
         }
@@ -422,44 +414,40 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
 
             string sql = @$"SELECT * FROM public.user WHERE id IN ({string.Join(", ", paramNames)}) AND id NOT IN ({ManagerCookie.GetIdUser})";
 
-            using (var connection = new NpgsqlConnection(Arguments.connection))
+            using (var connection = new NpgsqlConnection(Arguments.Connection))
             {
                 await connection.OpenAsync();
-                using (var command = new NpgsqlCommand(sql, connection))
+                using var command = new NpgsqlCommand(sql, connection);
+
+                foreach (var param in parameters)
                 {
+                    command.Parameters.Add(param);
+                }
 
-                    foreach (var param in parameters)
+                using var reader = await command.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                {
+                    var userViewModel = new CartUserListUserControlViewModel
                     {
-                        command.Parameters.Add(param);
-                    }
+                        UserID = reader.IsDBNull(0) ? 0 : reader.GetDouble(0),
+                        Password = reader.IsDBNull(1) ? string.Empty : reader.GetString(1),
+                        FirstName = reader.IsDBNull(2) ? string.Empty : reader.GetString(2),
+                        LastName = reader.IsDBNull(3) ? string.Empty : reader.GetString(3),
+                        MiddleName = reader.IsDBNull(4) ? string.Empty : reader.GetString(4),
+                        DateJoined = reader.IsDBNull(5) ? string.Empty : reader.GetDateTime(5).ToString("yyyy-MM-dd"),
+                        Login = reader.IsDBNull(6) ? string.Empty : reader.GetString(6),
+                        BaseSalary = reader.IsDBNull(7) ? 0m : reader.GetDecimal(7),
+                        Email = reader.IsDBNull(8) ? string.Empty : reader.GetString(8),
+                        Phone = reader.IsDBNull(9) ? string.Empty : reader.GetString(9),
+                        IsActive = reader.IsDBNull(10) || reader.GetBoolean(10),
+                    };
 
-                    using (var reader = await command.ExecuteReaderAsync())
+                    var userControl = new CartUserListUserControl
                     {
-                        while (await reader.ReadAsync())
-                        {
-                            var userViewModel = new CartUserListUserControlViewModel
-                            {
-                                UserID = reader.IsDBNull(0) ? 0 : reader.GetDouble(0),
-                                Password = reader.IsDBNull(1) ? string.Empty : reader.GetString(1),
-                                FirstName = reader.IsDBNull(2) ? string.Empty : reader.GetString(2),
-                                LastName = reader.IsDBNull(3) ? string.Empty : reader.GetString(3),
-                                MiddleName = reader.IsDBNull(4) ? string.Empty : reader.GetString(4),
-                                DateJoined = reader.IsDBNull(5) ? string.Empty : reader.GetDateTime(5).ToString("yyyy-MM-dd"),
-                                Login = reader.IsDBNull(6) ? string.Empty : reader.GetString(6),
-                                BaseSalary = reader.IsDBNull(7) ? 0m : reader.GetDecimal(7),
-                                Email = reader.IsDBNull(8) ? string.Empty : reader.GetString(8),
-                                Phone = reader.IsDBNull(9) ? string.Empty : reader.GetString(9),
-                                IsActive = reader.IsDBNull(10) ? true : reader.GetBoolean(10),
-                            };
+                        DataContext = userViewModel
+                    };
 
-                            var userControl = new CartUserListUserControl
-                            {
-                                DataContext = userViewModel
-                            };
-
-                            userList.Add(userControl);
-                        }
-                    }
+                    userList.Add(userControl);
                 }
             }
 
@@ -499,7 +487,7 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
         Search = string.Empty;
     }
 
-    public async Task DownloadListAsync()
+    public static async Task DownloadListAsync()
     {
         if (!ManagerCookie.IsUserLoggedIn()) return;
 
@@ -507,46 +495,40 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
         {
             string sql = "SELECT * FROM public.user";
 
-            using (var connection = new NpgsqlConnection(Arguments.connection))
+            using var connection = new NpgsqlConnection(Arguments.Connection);
+            connection.Open();
+
+            using var command = new NpgsqlCommand(sql, connection);
+            using var reader = await command.ExecuteReaderAsync();
+            var fileSave = Path.Combine(Path.Combine(Paths.DestinationPathDB("AdminPanel", "UsersList")), Files.DBEquipments);
+
+            using (var writer = new StreamWriter(fileSave))
             {
-                connection.Open();
-
-                using (var command = new NpgsqlCommand(sql, connection))
+                for (int i = 0; i < reader.FieldCount; i++)
                 {
-                    using (var reader = await command.ExecuteReaderAsync())
+                    writer.Write(reader.GetName(i));
+                    if (i < reader.FieldCount - 1)
                     {
-                        var fileSave = Path.Combine(Path.Combine(Paths.DestinationPathDB("AdminPanel", "UsersList")), Files.DBEquipments);
-
-                        using (var writer = new StreamWriter(fileSave))
-                        {
-                            for (int i = 0; i < reader.FieldCount; i++)
-                            {
-                                writer.Write(reader.GetName(i));
-                                if (i < reader.FieldCount - 1)
-                                {
-                                    writer.Write(",");
-                                }
-                            }
-                            writer.WriteLine();
-
-                            while (reader.Read())
-                            {
-                                for (int i = 0; i < reader.FieldCount; i++)
-                                {
-                                    writer.Write(reader.GetValue(i).ToString());
-                                    if (i < reader.FieldCount - 1)
-                                    {
-                                        writer.Write(",");
-                                    }
-                                }
-                                writer.WriteLine();
-                            }
-                        }
-
-                        if (Arguments.OpenAfterDownloading) Process.Start(new ProcessStartInfo { FileName = fileSave, UseShellExecute = true });
+                        writer.Write(",");
                     }
                 }
+                writer.WriteLine();
+
+                while (reader.Read())
+                {
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        writer.Write(reader.GetValue(i).ToString());
+                        if (i < reader.FieldCount - 1)
+                        {
+                            writer.Write(",");
+                        }
+                    }
+                    writer.WriteLine();
+                }
             }
+
+            if (Arguments.OpenAfterDownloading) Process.Start(new ProcessStartInfo { FileName = fileSave, UseShellExecute = true });
         }
         catch (NpgsqlException ex)
         {

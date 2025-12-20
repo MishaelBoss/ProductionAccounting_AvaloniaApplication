@@ -12,9 +12,9 @@ public class CartOperationUserControlViewModel : ViewModelBase
         => new RelayCommand(() =>
         {
             string[] deleteQueries =
-            {
+            [
                 "DELETE FROM public.production WHERE product_id = @id"
-            };
+            ];
 
 
             var viewModel = new ConfirmDeleteWindowViewModel(OperationID, Name, "DELETE FROM public.operation WHERE id = @id", (() => WeakReferenceMessenger.Default.Send(new RefreshOperationListMessage())), deleteQueries);
@@ -64,7 +64,7 @@ public class CartOperationUserControlViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _unit, value);
     }
 
-    public bool IsAdministrator
+    private static bool IsAdministrator
         => ManagerCookie.IsUserLoggedIn() 
         && ManagerCookie.IsAdministrator;
 }

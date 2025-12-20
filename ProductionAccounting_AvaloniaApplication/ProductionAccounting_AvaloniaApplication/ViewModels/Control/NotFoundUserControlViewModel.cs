@@ -18,17 +18,11 @@ private string _error = string.Empty;
 
     public NotFoundUserControlViewModel(ErrorLevel level)
     {
-        switch (level)
+        Error = level switch
         {
-            case ErrorLevel.NoConnectToDB:
-                Error = "Не подключен к базе данных";
-                break;
-            case ErrorLevel.NotFound:
-                Error = "Ничего не найдено";
-                break;
-            default:
-                Error = "Неизвестная ошибка";
-                break;
-        }
+            ErrorLevel.NoConnectToDB => "Не подключен к базе данных",
+            ErrorLevel.NotFound => "Ничего не найдено",
+            _ => "Неизвестная ошибка",
+        };
     }
 }

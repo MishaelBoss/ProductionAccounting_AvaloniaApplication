@@ -58,7 +58,7 @@ class Arguments
 
     private static string? _connectionString;
 
-    public static string connection
+    public static string Connection
     {
         get
         {

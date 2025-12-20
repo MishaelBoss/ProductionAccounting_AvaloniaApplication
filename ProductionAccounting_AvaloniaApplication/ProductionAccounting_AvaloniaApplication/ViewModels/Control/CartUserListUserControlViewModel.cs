@@ -108,7 +108,7 @@ public class CartUserListUserControlViewModel : ViewModelBase, INotifyPropertyCh
         }
     }
 
-    public bool IsAdministrator
+    private static bool IsAdministrator
         => ManagerCookie.IsUserLoggedIn()
         && ManagerCookie.IsAdministrator;
 
@@ -117,17 +117,13 @@ public class CartUserListUserControlViewModel : ViewModelBase, INotifyPropertyCh
         {
             string sqlUserTypes = "UPDATE public.user SET is_active = @is_active WHERE id = @id";
 
-            using (var connection = new NpgsqlConnection(Arguments.connection))
-            {
-                await connection.OpenAsync();
+            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await connection.OpenAsync();
 
-                using (var command = new NpgsqlCommand(sqlUserTypes, connection))
-                {
-                    command.Parameters.AddWithValue("@id", UserID);
-                    command.Parameters.AddWithValue("@is_active", IsActive);
-                    command.ExecuteNonQuery();
-                }
-            }
+            using var command = new NpgsqlCommand(sqlUserTypes, connection);
+            command.Parameters.AddWithValue("@id", UserID);
+            command.Parameters.AddWithValue("@is_active", IsActive);
+            command.ExecuteNonQuery();
         }
         catch (Exception ex)
         {

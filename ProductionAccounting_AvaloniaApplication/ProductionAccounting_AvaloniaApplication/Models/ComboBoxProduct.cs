@@ -8,7 +8,6 @@ public class ComboBoxProduct(double id, string title, string article, string mar
     public string Title { get; set; } = title;
     public string Article { get; set; } = article;
     public string Mark { get; set; } = mark;
-    //public string WorkType { get; set; } = workType;
     public decimal Coefficient { get; set; } = coefficient;
     public decimal PricePerUnit { get; set; } = pricePerUnit;
     public decimal PricePerKg { get; set; } = pricePerKg;

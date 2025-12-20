@@ -13,10 +13,10 @@ public class WorkPageUserControlViewModel : ViewModelBase, INotifyPropertyChange
     private readonly WorkUserControl _workUser = new();
     private readonly WorkMasterUserControl _workMaster = new();
 
-    public string Greeting 
+    public static string Greeting 
         => $"Добро пожаловать, {ManagerCookie.GetFirstName} {ManagerCookie.GetLastName}!";
 
-    public DateTime CurrentDate 
+    public static DateTime CurrentDate 
         => DateTime.Now;
 
     public void ShowWork() 

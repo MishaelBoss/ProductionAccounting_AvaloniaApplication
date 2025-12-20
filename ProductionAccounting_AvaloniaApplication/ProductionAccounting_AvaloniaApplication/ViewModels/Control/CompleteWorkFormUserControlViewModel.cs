@@ -46,17 +46,17 @@ public class CompleteWorkFormUserControlViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _notes, value);
     }
 
-    public ICommand ConfirmCommand 
+    private ICommand ConfirmCommand 
         => new RelayCommand(async () => await ConfirmCompleteAsync());
 
-    public ICommand CancelCommand
+    private static ICommand CancelCommand
         => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseCompleteWorkFormStatusMessage(false)));
 
     private async Task ConfirmCompleteAsync()
     {
         try
         {
-            using (var connection = new NpgsqlConnection(Arguments.connection))
+            using (var connection = new NpgsqlConnection(Arguments.Connection))
             {
                 await connection.OpenAsync();
 
@@ -72,14 +72,12 @@ public class CompleteWorkFormUserControlViewModel : ViewModelBase
                 using (var rateCommand = new NpgsqlCommand(rateSql, connection))
                 {
                     rateCommand.Parameters.AddWithValue("@operation_id", OperationId);
-                    using (var reader = await rateCommand.ExecuteReaderAsync())
+                    using var reader = await rateCommand.ExecuteReaderAsync();
+                    if (await reader.ReadAsync())
                     {
-                        if (await reader.ReadAsync())
-                        {
-                            rate = reader.GetDecimal(0);
-                            useTonnage = reader.GetBoolean(1);
-                            coefficient = reader.GetDecimal(2);
-                        }
+                        rate = reader.GetDecimal(0);
+                        useTonnage = reader.GetBoolean(1);
+                        coefficient = reader.GetDecimal(2);
                     }
                 }
 
@@ -134,13 +132,11 @@ public class CompleteWorkFormUserControlViewModel : ViewModelBase
                                         JOIN public.sub_product_operations spo ON spo.sub_product_id = sp.id
                                         WHERE spo.id = @sub_product_op_id";
 
-                        using (var tonnageCommand = new NpgsqlCommand(tonnageSql, connection))
-                        {
-                            tonnageCommand.Parameters.AddWithValue("@sub_product_op_id", SubProductOperationId);
-                            var tonnageResult = await tonnageCommand.ExecuteScalarAsync();
-                            var tonnage = tonnageResult != null && tonnageResult != DBNull.Value ? Convert.ToDecimal(tonnageResult) : 0;
-                            command.Parameters.AddWithValue("@tonnage", tonnage);
-                        }
+                        using var tonnageCommand = new NpgsqlCommand(tonnageSql, connection);
+                        tonnageCommand.Parameters.AddWithValue("@sub_product_op_id", SubProductOperationId);
+                        var tonnageResult = await tonnageCommand.ExecuteScalarAsync();
+                        var tonnage = tonnageResult != null && tonnageResult != DBNull.Value ? Convert.ToDecimal(tonnageResult) : 0;
+                        command.Parameters.AddWithValue("@tonnage", tonnage);
                     }
                     else
                     {
@@ -154,12 +150,10 @@ public class CompleteWorkFormUserControlViewModel : ViewModelBase
                                SET completed_quantity = completed_quantity + @qty 
                                WHERE id = @op_id";
 
-                using (var command2 = new NpgsqlCommand(sqlUpdate, connection))
-                {
-                    command2.Parameters.AddWithValue("@qty", CompletedToday);
-                    command2.Parameters.AddWithValue("@op_id", SubProductOperationId);
-                    await command2.ExecuteNonQueryAsync();
-                }
+                using var command2 = new NpgsqlCommand(sqlUpdate, connection);
+                command2.Parameters.AddWithValue("@qty", CompletedToday);
+                command2.Parameters.AddWithValue("@op_id", SubProductOperationId);
+                await command2.ExecuteNonQueryAsync();
             }
 
             WeakReferenceMessenger.Default.Send(new RefreshEmployeeTasksMessage());

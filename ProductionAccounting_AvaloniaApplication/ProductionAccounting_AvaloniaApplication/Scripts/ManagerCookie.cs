@@ -52,106 +52,100 @@ public class ManagerCookie
 
             if (!Internet.ConnectToDataBase()) return false;
 
-            using (var connection = new NpgsqlConnection(Arguments.connection))
+            using var connection = new NpgsqlConnection(Arguments.Connection);
+            connection.Open();
+
+            double? id = 0;
+            string? login = string.Empty;
+            string? first_name = string.Empty;
+            string? last_name = string.Empty;
+            string? middle_name = string.Empty;
+            double? user_type_id = 0;
+            string? user_type_name = string.Empty;
+
+            try
             {
-                connection.Open();
-
-                double? id = 0;
-                string? login = string.Empty;
-                string? first_name = string.Empty;
-                string? last_name = string.Empty;
-                string? middle_name = string.Empty;
-                double? user_type_id = 0;
-                string? user_type_name = string.Empty;
-
-                try
+                string sql1 = "SELECT id, login, first_name, last_name, middle_name FROM public.\"user\" WHERE id = @id AND is_active = true";
+                using (var command = new NpgsqlCommand(sql1, connection))
                 {
-                    string sql1 = "SELECT id, login, first_name, last_name, middle_name FROM public.\"user\" WHERE id = @id AND is_active = true";
-                    using (var command = new NpgsqlCommand(sql1, connection))
+                    command.Parameters.AddWithValue("@id", data.Id);
+
+                    using var reader = command.ExecuteReader();
+                    if (reader.Read())
                     {
-                        command.Parameters.AddWithValue("@id", data.Id);
+                        id = reader.IsDBNull(0) ? 0 : reader.GetDouble(0);
+                        login = reader.IsDBNull(1) ? string.Empty : reader.GetString(1);
+                        first_name = reader.IsDBNull(2) ? string.Empty : reader.GetString(2);
+                        last_name = reader.IsDBNull(3) ? string.Empty : reader.GetString(3);
+                        middle_name = reader.IsDBNull(4) ? string.Empty : reader.GetString(4);
 
-                        using (var reader = command.ExecuteReader())
-                        {
-                            if (reader.Read())
-                            {
-                                id = reader.IsDBNull(0) ? 0 : reader.GetDouble(0);
-                                login = reader.IsDBNull(1) ? string.Empty : reader.GetString(1);
-                                first_name = reader.IsDBNull(2) ? string.Empty : reader.GetString(2);
-                                last_name = reader.IsDBNull(3) ? string.Empty : reader.GetString(3);
-                                middle_name = reader.IsDBNull(4) ? string.Empty : reader.GetString(4);
-
-                                GetIdUser = id;
-                                GetLogin = login;
-                                GetFirstName = first_name;
-                                GetLastName = last_name;
-                                GetMiddleName = middle_name;
-                            }
-                            else 
-                            {
-                                Loges.LoggingProcess(level: LogLevel.ERROR,
-                                        "No found user");
-                                return false;
-                            }
-                        }
+                        GetIdUser = id;
+                        GetLogin = login;
+                        GetFirstName = first_name;
+                        GetLastName = last_name;
+                        GetMiddleName = middle_name;
                     }
-
-                    string sql2 = "SELECT user_type_id FROM public.\"user_to_user_type\" WHERE user_id = @id";
-                    using (var command = new NpgsqlCommand(sql2, connection))
+                    else
                     {
-                        command.Parameters.AddWithValue("@id", data.Id);
-
-                        using (var reader = command.ExecuteReader())
-                        {
-                            if (reader.Read())
-                            {
-                                user_type_id = reader.IsDBNull(0) ? 0 : reader.GetDouble(0);
-
-                                CurrentUserTypeId = user_type_id;
-
-                                IsAdministrator = user_type_id == 1;
-                                IsManager = user_type_id == 2;
-                                IsMaster = user_type_id == 3;
-                                IsEmployee = user_type_id == 4;
-
-                            }
-                            else
-                            {
-                                user_type_id = 0;
-                                CurrentUserTypeId = null;
-                                IsAdministrator = false;
-                                IsManager = false;
-                                IsMaster = false;
-                                IsEmployee= false;
-                            }
-                        }
+                        Loges.LoggingProcess(level: LogLevel.ERROR,
+                                "No found user");
+                        return false;
                     }
-
-/*                    if (user_type_id > 0)
-                    {
-                        string sql3 = "SELECT type_user FROM public.\"user_type\" WHERE id = @id";
-                        using (var command = new NpgsqlCommand(sql3, connection))
-                        {
-                            command.Parameters.AddWithValue("@id", user_type_id);
-
-                            using (var reader = command.ExecuteReader())
-                            {
-                                if (reader.Read())
-                                {
-                                    user_type_name = reader.IsDBNull(0) ? string.Empty : reader.GetString(0);
-                                }
-                            }
-                        }
-                    }*/
-
-                    return login == data.Username;
                 }
-                catch (Exception ex)
+
+                string sql2 = "SELECT user_type_id FROM public.\"user_to_user_type\" WHERE user_id = @id";
+                using (var command = new NpgsqlCommand(sql2, connection))
                 {
-                    Loges.LoggingProcess(level: LogLevel.ERROR,
-                        ex: ex);
-                    return false;
+                    command.Parameters.AddWithValue("@id", data.Id);
+
+                    using var reader = command.ExecuteReader();
+                    if (reader.Read())
+                    {
+                        user_type_id = reader.IsDBNull(0) ? 0 : reader.GetDouble(0);
+
+                        CurrentUserTypeId = user_type_id;
+
+                        IsAdministrator = user_type_id == 1;
+                        IsManager = user_type_id == 2;
+                        IsMaster = user_type_id == 3;
+                        IsEmployee = user_type_id == 4;
+
+                    }
+                    else
+                    {
+                        user_type_id = 0;
+                        CurrentUserTypeId = null;
+                        IsAdministrator = false;
+                        IsManager = false;
+                        IsMaster = false;
+                        IsEmployee = false;
+                    }
                 }
+
+                /*                    if (user_type_id > 0)
+                                    {
+                                        string sql3 = "SELECT type_user FROM public.\"user_type\" WHERE id = @id";
+                                        using (var command = new NpgsqlCommand(sql3, connection))
+                                        {
+                                            command.Parameters.AddWithValue("@id", user_type_id);
+
+                                            using (var reader = command.ExecuteReader())
+                                            {
+                                                if (reader.Read())
+                                                {
+                                                    user_type_name = reader.IsDBNull(0) ? string.Empty : reader.GetString(0);
+                                                }
+                                            }
+                                        }
+                                    }*/
+
+                return login == data.Username;
+            }
+            catch (Exception ex)
+            {
+                Loges.LoggingProcess(level: LogLevel.ERROR,
+                    ex: ex);
+                return false;
             }
         }
         catch (Exception ex)

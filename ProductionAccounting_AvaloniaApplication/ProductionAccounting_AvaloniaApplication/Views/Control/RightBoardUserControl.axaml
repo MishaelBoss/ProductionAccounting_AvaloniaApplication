@@ -35,7 +35,7 @@
                                   Margin="24,0,24,8"/>
                         
                         <StackPanel>
-                            <ItemsControl ItemsSource="{Binding buttons}">
+                            <ItemsControl ItemsSource="{Binding Buttons}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <Button Classes="MenuItemButton"

@@ -124,7 +124,7 @@ public class SettingsPageUserControlViewModel : ViewModelBase, INotifyPropertyCh
         }
     }
 
-    public ICommand RestartApplicationCommand 
+    public static ICommand RestartApplicationCommand 
         => new RelayCommand(() => 
         { 
             var processPath = Environment.ProcessPath;
@@ -181,25 +181,23 @@ public class SettingsPageUserControlViewModel : ViewModelBase, INotifyPropertyCh
                 return;
             }
 
-            using (var ping = new Ping())
+            using var ping = new Ping();
+            string hostName = Ip;
+            PingReply reply = ping.Send(hostName, 3000);
+
+
+            if (reply is { Status: IPStatus.Success })
             {
-                string hostName = Ip;
-                PingReply reply = ping.Send(hostName, 3000);
+                Loges.LoggingProcess(level: LogLevel.INFO,
+                    message: $"Address: {reply.Address}");
 
+                Loges.LoggingProcess(level: LogLevel.INFO,
+                    message: $"Roundtrip time: {reply.RoundtripTime}");
 
-                if (reply is { Status: IPStatus.Success })
-                {
-                    Loges.LoggingProcess(level: LogLevel.INFO,
-                        message: $"Address: {reply.Address}");
+                Loges.LoggingProcess(level: LogLevel.INFO,
+                    message: $"Time to live: {reply.Options?.Ttl}");
 
-                    Loges.LoggingProcess(level: LogLevel.INFO,
-                        message: $"Roundtrip time: {reply.RoundtripTime}");
-
-                    Loges.LoggingProcess(level: LogLevel.INFO,
-                        message: $"Time to live: {reply.Options?.Ttl}");
-
-                    TestPostgreSqlConnection();
-                }
+                TestPostgreSqlConnection();
             }
         }
         catch (PingException pex)
@@ -218,16 +216,12 @@ public class SettingsPageUserControlViewModel : ViewModelBase, INotifyPropertyCh
     {
         try
         {
-            using (var connection = new NpgsqlConnection($"Server={Ip};Port={Port};Database={Name};User Id={User};Password={Password};Timeout=10"))
-            {
-                connection.Open();
+            using var connection = new NpgsqlConnection($"Server={Ip};Port={Port};Database={Name};User Id={User};Password={Password};Timeout=10");
+            connection.Open();
 
-                using (var cmd = new NpgsqlCommand("SELECT 1", connection))
-                {
-                    var result = cmd.ExecuteScalar();
-                    MessageBoxManager.GetMessageBoxStandard("Message", "PostgreSQL connection test successful").ShowWindowAsync();
-                }
-            }
+            using var cmd = new NpgsqlCommand("SELECT 1", connection);
+            var result = cmd.ExecuteScalar();
+            MessageBoxManager.GetMessageBoxStandard("Message", "PostgreSQL connection test successful").ShowWindowAsync();
         }
         catch (Exception ex)
         {

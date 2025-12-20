@@ -9,14 +9,9 @@ using System.Windows.Input;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
-public class AddSubProductUserControlViewModel : ViewModelBase, INotifyPropertyChanged
+public class AddSubProductUserControlViewModel(double taskId) : ViewModelBase, INotifyPropertyChanged
 {
-    public AddSubProductUserControlViewModel(double taskId)
-    {
-        TaskId = taskId;
-    }
-
-    public double TaskId { get; }
+    public double TaskId { get; } = taskId;
 
     private string? _title = string.Empty;
     public string? Title 
@@ -63,13 +58,13 @@ public class AddSubProductUserControlViewModel : ViewModelBase, INotifyPropertyC
         }
     }
 
-    public bool CanSaveCurrentSubProduct
+    private bool CanSaveCurrentSubProduct
         => !string.IsNullOrWhiteSpace(Title) && PlannedQuantity > 0;
 
-    public ICommand SaveCurrentSubProductCommand
+    private ICommand SaveCurrentSubProductCommand
         => new RelayCommand(async () => await SaveCurrentSubProductAsync());
 
-    public ICommand CancelCommand
+    private static ICommand CancelCommand
         => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseAddSubProductStatusMessage(false)));
 
     private async Task SaveCurrentSubProductAsync()
@@ -78,27 +73,21 @@ public class AddSubProductUserControlViewModel : ViewModelBase, INotifyPropertyC
         {
             string sql = "INSERT INTO public.sub_products (product_task_id, name, planned_quantity, notes) VALUES (@task_id, @name, @qty, @notes)";
 
-            using (var connection = new NpgsqlConnection(Arguments.connection))
-            {
-                await connection.OpenAsync();
+            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await connection.OpenAsync();
 
-                using (var command = new NpgsqlCommand(sql, connection)) 
-                {
-                    command.Parameters.AddWithValue("@task_id", TaskId);
-                    command.Parameters.AddWithValue("@name", Title ?? string.Empty);
-                    command.Parameters.AddWithValue("@qty", PlannedQuantity ?? 1);
-                    command.Parameters.AddWithValue("@notes", Notes ?? "");
+            using var command = new NpgsqlCommand(sql, connection);
+            command.Parameters.AddWithValue("@task_id", TaskId);
+            command.Parameters.AddWithValue("@name", Title ?? string.Empty);
+            command.Parameters.AddWithValue("@qty", PlannedQuantity ?? 1);
+            command.Parameters.AddWithValue("@notes", Notes ?? "");
 
-                    await command.ExecuteNonQueryAsync();
+            await command.ExecuteNonQueryAsync();
 
-                    //await LoadSubProductAsync();
+            WeakReferenceMessenger.Default.Send(new RefreshSubProductListMessage());
+            WeakReferenceMessenger.Default.Send(new OpenOrCloseAddSubProductStatusMessage(false));
 
-                    WeakReferenceMessenger.Default.Send(new RefreshSubProductListMessage());
-                    WeakReferenceMessenger.Default.Send(new OpenOrCloseAddSubProductStatusMessage(false));
-
-                    ClearForm();
-                }
-            }
+            ClearForm();
         }
         catch (Exception ex)
         {

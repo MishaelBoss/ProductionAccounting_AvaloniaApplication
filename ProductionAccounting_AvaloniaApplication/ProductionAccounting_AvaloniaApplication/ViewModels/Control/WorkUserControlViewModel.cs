@@ -25,7 +25,7 @@ public class WorkUserControlViewModel : ViewModelBase, INotifyPropertyChanging, 
 
     public StackPanel? CartTasks { get; set; } = null;
 
-    private List<CartEmployeeTaskUserControl> tasksList = [];
+    private readonly List<CartEmployeeTaskUserControl> tasksList = [];
 
     public async Task LoadTodayAsync()
     {
@@ -52,39 +52,35 @@ public class WorkUserControlViewModel : ViewModelBase, INotifyPropertyChanging, 
                             AND spo.completed_quantity < spo.planned_quantity
                         ORDER BY spo.created_at DESC";
 
-            using (var connection = new NpgsqlConnection(Arguments.connection))
+            using (var connection = new NpgsqlConnection(Arguments.Connection))
             {
                 await connection.OpenAsync();
 
-                using (var command = new NpgsqlCommand(sql, connection))
+                using var command = new NpgsqlCommand(sql, connection);
+                command.Parameters.AddWithValue("@user_id", ManagerCookie.GetIdUser ?? 0);
+
+                using var reader = await command.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
                 {
-                    command.Parameters.AddWithValue("@user_id", ManagerCookie.GetIdUser ?? 0);
-
-                    using (var reader = await command.ExecuteReaderAsync())
+                    var viewModel = new CartEmployeeTaskUserControlViewModel()
                     {
-                        while (await reader.ReadAsync())
-                        {
-                            var viewModel = new CartEmployeeTaskUserControlViewModel()
-                            {
-                                SubProductOperationId = reader.GetDouble("sub_product_operation_id"),
-                                SubProductName = reader.GetString("sub_product_name"),
-                                OperationName = reader.GetString("operation_name"),
-                                PlannedQuantity = reader.GetDecimal("planned_quantity"),
-                                CompletedQuantity = reader.GetDecimal("completed_quantity"),
-                                Notes = reader.IsDBNull("notes") ? null : reader.GetString("notes"),
-                                ProductId = reader.GetDouble("product_id"),
-                                OperationId = reader.GetDouble("operation_id"),
-                                UserId = reader.GetDouble("assigned_to_user_id")
-                            };
+                        SubProductOperationId = reader.GetDouble("sub_product_operation_id"),
+                        SubProductName = reader.GetString("sub_product_name"),
+                        OperationName = reader.GetString("operation_name"),
+                        PlannedQuantity = reader.GetDecimal("planned_quantity"),
+                        CompletedQuantity = reader.GetDecimal("completed_quantity"),
+                        Notes = reader.IsDBNull("notes") ? null : reader.GetString("notes"),
+                        ProductId = reader.GetDouble("product_id"),
+                        OperationId = reader.GetDouble("operation_id"),
+                        UserId = reader.GetDouble("assigned_to_user_id")
+                    };
 
-                            var cartUser = new CartEmployeeTaskUserControl()
-                            {
-                                DataContext = viewModel
-                            };
+                    var cartUser = new CartEmployeeTaskUserControl()
+                    {
+                        DataContext = viewModel
+                    };
 
-                            tasksList.Add(cartUser);
-                        }
-                    }
+                    tasksList.Add(cartUser);
                 }
             }
 

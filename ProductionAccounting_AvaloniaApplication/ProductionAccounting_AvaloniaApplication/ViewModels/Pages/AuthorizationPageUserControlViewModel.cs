@@ -13,7 +13,7 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
 
 public class AuthorizationPageUserControlViewModel : ViewModelBase, INotifyPropertyChanged
 {
-    public ICommand ConfirmCommand
+    private ICommand ConfirmCommand
         => new RelayCommand(async () => await Authorization());
 
     private string _messageerror = string.Empty;
@@ -70,43 +70,37 @@ public class AuthorizationPageUserControlViewModel : ViewModelBase, INotifyPrope
             {
                 string query = @"SELECT id, login, last_name, first_name, middle_name, password FROM public.""user"" WHERE login = @login";
 
-                using (var connection = new NpgsqlConnection(Arguments.connection))
+                using var connection = new NpgsqlConnection(Arguments.Connection);
+                connection.Open();
+                using var command = new NpgsqlCommand(query, connection);
+                command.Parameters.AddWithValue("@login", Login);
+
+                using var reader = command.ExecuteReader();
+                if (reader.Read())
                 {
-                    connection.Open();
-                    using (var command = new NpgsqlCommand(query, connection))
+                    double id = reader.GetDouble(0);
+                    string login = reader.GetString(1);
+                    string password = reader.GetString(5);
+
+                    if (password == Password)
                     {
-                        command.Parameters.AddWithValue("@login", Login);
+                        if (!Directory.Exists(Paths.SharedFolder))
+                            Directory.CreateDirectory(Paths.SharedFolder);
 
-                        using (var reader = command.ExecuteReader())
-                        {
-                            if (reader.Read())
-                            {
-                                double id = reader.GetDouble(0);
-                                string login = reader.GetString(1);
-                                string password = reader.GetString(5);
+                        ManagerCookie.SaveLoginCookie(id, login, Guid.NewGuid().ToString(), DateTime.Now.AddDays(7), Paths.SharedFolder);
 
-                                if (password == Password)
-                                {
-                                    if (!Directory.Exists(Paths.SharedFolder))
-                                        Directory.CreateDirectory(Paths.SharedFolder);
+                        StrongReferenceMessenger.Default.Send(new UserAuthenticationChangedMessage());
 
-                                    ManagerCookie.SaveLoginCookie(id, login, Guid.NewGuid().ToString(), DateTime.Now.AddDays(7), Paths.SharedFolder);
-
-                                    StrongReferenceMessenger.Default.Send(new UserAuthenticationChangedMessage());
-
-                                    ClearForm();
-                                }
-                                else
-                                {
-                                    Messageerror = "Пароль неверный";
-                                }
-                            }
-                            else
-                            {
-                                Messageerror = "Пользователь не найден";
-                            }
-                        }
+                        ClearForm();
                     }
+                    else
+                    {
+                        Messageerror = "Пароль неверный";
+                    }
+                }
+                else
+                {
+                    Messageerror = "Пользователь не найден";
                 }
             }
             catch (Exception ex)

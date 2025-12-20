@@ -1,13 +1,7 @@
 ﻿namespace ProductionAccounting_AvaloniaApplication.Scripts;
 
-public class OpenOrCloseProfileUserStatusMessage
+public class OpenOrCloseProfileUserStatusMessage(bool shouldOpen, double? userId = null)
 {
-    public bool ShouldOpen { get; }
-    public double UserId { get; }
-
-    public OpenOrCloseProfileUserStatusMessage(bool shouldOpen, double? userId = null)
-    {
-        ShouldOpen = shouldOpen;
-        UserId = userId ?? 0;
-    }
+    public bool ShouldOpen { get; } = shouldOpen;
+    public double UserId { get; } = userId ?? 0;
 }

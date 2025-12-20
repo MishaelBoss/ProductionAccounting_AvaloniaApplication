@@ -26,7 +26,7 @@ public class WorkMasterUserControlViewModel : ViewModelBase, INotifyPropertyChan
 
     public StackPanel? CartTasks { get; set; } = null;
 
-    private List<CartProductUserControl> productList = [];
+    private readonly List<CartProductUserControl> productList = [];
 
     public async Task LoadTasksAsync()
     {
@@ -55,41 +55,37 @@ public class WorkMasterUserControlViewModel : ViewModelBase, INotifyPropertyChan
                         AND pt.assigned_by = @UserId
                     ORDER BY pt.created_at DESC";
 
-            using (var connection = new NpgsqlConnection(Arguments.connection))
+            using (var connection = new NpgsqlConnection(Arguments.Connection))
             {
                 await connection.OpenAsync();
-                using (var command = new NpgsqlCommand(sql, connection)) 
+                using var command = new NpgsqlCommand(sql, connection);
+                command.Parameters.AddWithValue("@UserId", ManagerCookie.GetIdUser ?? 0);
+                using var reader = await command.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
                 {
-                    command.Parameters.AddWithValue("@UserId", ManagerCookie.GetIdUser ?? 0);
-                    using (var reader = await command.ExecuteReaderAsync())
+                    var viewModel = new CartProductUserControlViewModel()
                     {
-                        while (await reader.ReadAsync())
-                        {
-                            var viewModel = new CartProductUserControlViewModel()
-                            {
-                                Id = reader.GetDouble(0),
-                                ProductId = reader.GetDouble(1),
-                                ProductName = reader.GetString(2),
-                                Mark = reader.GetString(3),
-                                Article = reader.GetString(4),
-                                Unit = reader.GetString(5),
-                                PricePerUnit = reader.GetDecimal(6),
-                                Coefficient = reader.GetDecimal(7),
-                                Status = reader.GetString(8),
-                                CreatedAt = reader.GetDateTime(9)
-                            };
+                        Id = reader.GetDouble(0),
+                        ProductId = reader.GetDouble(1),
+                        ProductName = reader.GetString(2),
+                        Mark = reader.GetString(3),
+                        Article = reader.GetString(4),
+                        Unit = reader.GetString(5),
+                        PricePerUnit = reader.GetDecimal(6),
+                        Coefficient = reader.GetDecimal(7),
+                        Status = reader.GetString(8),
+                        CreatedAt = reader.GetDateTime(9)
+                    };
 
-                            var userControl = new CartProductUserControl()
-                            {
-                                DataContext = viewModel,
-                            };
+                    var userControl = new CartProductUserControl()
+                    {
+                        DataContext = viewModel,
+                    };
 
-                            productList.Add(userControl);
-                        }
-
-                        if (productList.FirstOrDefault()?.DataContext is CartProductUserControlViewModel vm) await vm.CheckIsTaskCanBeCompleted();
-                    }
+                    productList.Add(userControl);
                 }
+
+                if (productList.FirstOrDefault()?.DataContext is CartProductUserControlViewModel vm) await vm.CheckIsTaskCanBeCompleted();
             }
 
             StackPanelHelper.RefreshStackPanelContent<CartProductUserControl>(CartTasks, productList);
