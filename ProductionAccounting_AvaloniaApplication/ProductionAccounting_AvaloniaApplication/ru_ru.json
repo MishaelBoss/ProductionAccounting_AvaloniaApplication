@@ -28,5 +28,17 @@
         "Button": {
             "Login": "Войти"
         }
+    },
+    "ProfilePageUserControlView": 
+    {
+        "TabItem": 
+        {
+            "Tables": "Табель",
+            "ProductionHistory": "История производства"
+        },
+        "Button": 
+        {
+            "Logout": "Выйти"
+        }
     }
 }

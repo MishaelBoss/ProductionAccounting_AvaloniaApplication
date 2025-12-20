@@ -22,10 +22,6 @@
         <Setter Property="Foreground" Value="White"/>
     </Style>
 
-    <Style Selector="Border.SettingsSection">
-        <!-- Стиль для скрытия/показа секций -->
-    </Style>
-
     <Style Selector="TextBox.ModernTextBox">
         <Setter Property="Background" Value="{DynamicResource ThemeControlBackgroundBrush}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource ThemeBorderMidBrush}"/>

@@ -65,6 +65,7 @@ public class ManagerLocalization
     public string RightBoardWindowsUserButton => _localizationData?.RightBoardUserControl?.Button?.WindowsUser ?? string.Empty;
     public string RightBoardShipmentsButton => _localizationData?.RightBoardUserControl?.Button?.Shipments ?? string.Empty;
     public string RightBoardSalaryButton => _localizationData?.RightBoardUserControl?.Button?.Salary ?? string.Empty;
+    public string ProfilePageLogoutButton => _localizationData?.ProfilePageUserControlView?.Button?.Logout ?? string.Empty;
     #endregion
 
     #region Label
@@ -80,6 +81,11 @@ public class ManagerLocalization
     #endregion
 
     #region TextBlock
+    #endregion
+
+    #region TabItem
+    public string ProfilePageTablesTabItem => _localizationData?.ProfilePageUserControlView?.TabItem?.Tables ?? string.Empty;
+    public string ProfilePageProductionHistoryTabItem => _localizationData?.ProfilePageUserControlView?.TabItem?.ProductionHistory ?? string.Empty;
     #endregion
 
     #region CheckBox

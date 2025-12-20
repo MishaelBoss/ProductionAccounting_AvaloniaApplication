@@ -12,6 +12,9 @@ internal class LocalizationData
     
     [JsonProperty("RightBoardUserControl")]
     public RightBoardUserControl RightBoardUserControl { get; set; }
+
+    [JsonProperty("ProfilePageUserControlView")]
+    public ProfilePageUserControlView ProfilePageUserControlView { get; set; }
 }
 
 internal class AuthorizationUserControl
@@ -30,6 +33,15 @@ internal class RightBoardUserControl
     
     [JsonProperty("TextBlock")]
     public TextBlock TextBlock { get; set; }
+}
+
+internal class ProfilePageUserControlView
+{
+    [JsonProperty("Button")]
+    public Button Button { get; set; }
+    
+    [JsonProperty("TabItem")]
+    public TabItem TabItem { get; set; }
 }
 
 internal class RightBoardButton
@@ -69,6 +81,9 @@ internal class Button
 {
     [JsonProperty("Login")]
     public string Login { get; set; }
+
+    [JsonProperty("Logout")]
+    public string Logout { get; set; }
 }
 
 internal class TextBlock
@@ -90,4 +105,13 @@ internal class TextBlock
 
     [JsonProperty("MainMenu")]
     public string MainMenu { get; set; }
+}
+
+internal class TabItem
+{
+    [JsonProperty("Tables")]
+    public string Tables { get; set; }
+
+    [JsonProperty("ProductionHistory")]
+    public string ProductionHistory { get; set; }
 }

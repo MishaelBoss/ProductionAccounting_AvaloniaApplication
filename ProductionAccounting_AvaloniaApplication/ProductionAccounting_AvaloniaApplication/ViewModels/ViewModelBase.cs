@@ -34,4 +34,10 @@ public class ViewModelBase : ReactiveObject
     public string RightBoardSettingsText => _localization.RightBoardSettingsButton;
     public string RightBoardMainMenuText => _localization.RightBoardMainMenuTextBlock;
     #endregion
+
+    #region ProfilePageUserControlView
+    public string ProfilePageLogoutText => _localization.ProfilePageLogoutButton;
+    public string ProfilePageTablesText => _localization.ProfilePageTablesTabItem;
+    public string ProfilePageProductionHistoryText => _localization.ProfilePageProductionHistoryTabItem;
+    #endregion
 }

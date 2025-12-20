@@ -7,6 +7,10 @@
           mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
           x:Class="ProductionAccounting_AvaloniaApplication.Views.Pages.ProfilePageUserControlView">
 
+    <UserControl.Styles>
+        <StyleInclude Source="/Styles/Controls/ProfilePageStyles.axaml"/>
+    </UserControl.Styles>
+
     <ScrollViewer  Padding="0,20,0,0">
         <StackPanel Spacing="20"
                     HorizontalAlignment="Center" 
@@ -29,27 +33,27 @@
                                 Background="#3A3A3D"
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center">
-                            <TextBlock Text="{Binding Login}"
-                                       FontSize="32"
-                                       FontWeight="SemiBold"
-                                       Foreground="#FFFFFF"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"/>
+                            <TextBlock  Text="{Binding Login}"
+                                        FontSize="32"
+                                        FontWeight="SemiBold"
+                                        Foreground="#FFFFFF"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"/>
                         </Border>
 
-                        <TextBlock Text="{Binding EmployeeName}"
-                                   FontSize="24"
-                                   FontWeight="SemiBold"
-                                   Foreground="White"
-                                   HorizontalAlignment="Center"/>
-                        <TextBlock Text="{Binding Position}"
-                                   FontSize="14"
-                                   Foreground="#BBBBBB"
-                                   HorizontalAlignment="Center"/>
+                        <TextBlock  Text="{Binding EmployeeName}"
+                                    FontSize="24"
+                                    FontWeight="SemiBold"
+                                    Foreground="White"
+                                    HorizontalAlignment="Center"/>
+                        <TextBlock  Text="{Binding Position}"
+                                    FontSize="14"
+                                    Foreground="#BBBBBB"
+                                    HorizontalAlignment="Center"/>
                     </StackPanel>
 
-                    <ItemsControl Grid.Row="1" 
-                                  Margin="0,30,0,20">
+                    <ItemsControl   Grid.Row="1" 
+                                    Margin="0,30,0,20">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <StackPanel Spacing="14"/>
@@ -60,13 +64,13 @@
                                 CornerRadius="10"
                                 Padding="14">
                             <Grid ColumnDefinitions="Auto,*">
-                                <PathIcon Data="{StaticResource PersonRegular}"
-                                          Foreground="#AAAAAA"
-                                          Width="20"/>
-                                <TextBlock Grid.Column="1" 
-                                           Margin="12,0,0,0" 
-                                           Text="{Binding Employee}" 
-                                           Foreground="White"/>
+                                <PathIcon   Data="{StaticResource PersonRegular}"
+                                            Foreground="#AAAAAA"
+                                            Width="20"/>
+                                <TextBlock  Grid.Column="1" 
+                                            Margin="12,0,0,0" 
+                                            Text="{Binding Employee}" 
+                                            Foreground="White"/>
                             </Grid>
                         </Border>
 
@@ -74,13 +78,13 @@
                                 CornerRadius="10"
                                 Padding="14">
                             <Grid ColumnDefinitions="Auto,*">
-                                <PathIcon Data="{StaticResource BuildingRegular}"
-                                          Foreground="#AAAAAA"
-                                          Width="20"/>
-                                <TextBlock Grid.Column="1"
-                                           Margin="12,0,0,0" 
-                                           Text="{Binding Department}"
-                                           Foreground="White"/>
+                                <PathIcon   Data="{StaticResource BuildingRegular}"
+                                            Foreground="#AAAAAA"
+                                            Width="20"/>
+                                <TextBlock  Grid.Column="1"
+                                            Margin="12,0,0,0" 
+                                            Text="{Binding Department}"
+                                            Foreground="White"/>
                             </Grid>
                         </Border>
 
@@ -88,13 +92,13 @@
                                 CornerRadius="10" 
                                 Padding="14">
                             <Grid ColumnDefinitions="Auto,*">
-                                <PathIcon Data="{StaticResource MailRegular}"
-                                          Foreground="#AAAAAA"
-                                          Width="20"/>
-                                <TextBlock Grid.Column="1"
-                                           Margin="12,0,0,0" 
-                                           Text="{Binding Email}"
-                                           Foreground="White"/>
+                                <PathIcon   Data="{StaticResource MailRegular}"
+                                            Foreground="#AAAAAA"
+                                            Width="20"/>
+                                <TextBlock  Grid.Column="1"
+                                            Margin="12,0,0,0" 
+                                            Text="{Binding Email}"
+                                            Foreground="White"/>
                             </Grid>
                         </Border>
 
@@ -102,13 +106,13 @@
                                 CornerRadius="10" 
                                 Padding="14">
                             <Grid ColumnDefinitions="Auto,*">
-                                <PathIcon Data="{StaticResource PhoneRegular}"
-                                          Foreground="#AAAAAA" 
-                                          Width="20"/>
-                                <TextBlock Grid.Column="1" 
-                                           Margin="12,0,0,0" 
-                                           Text="{Binding Phone}"
-                                           Foreground="White"/>
+                                <PathIcon   Data="{StaticResource PhoneRegular}"
+                                            Foreground="#AAAAAA" 
+                                            Width="20"/>
+                                <TextBlock  Grid.Column="1" 
+                                            Margin="12,0,0,0" 
+                                            Text="{Binding Phone}"
+                                            Foreground="White"/>
                             </Grid>
                         </Border>
                     </ItemsControl>
@@ -118,7 +122,7 @@
                                 Spacing="12" 
                                 Margin="0,10,0,0">
 
-                        <Button Content="logout"
+                        <Button Content="{Binding ProfilePageLogoutText}"
                                 Command="{Binding LogoutCommand}"
                                 IsVisible="{Binding IsOwnProfile}"
                                 VerticalContentAlignment="Center"
@@ -140,9 +144,10 @@
                     VerticalAlignment="Top"
                     Padding="30"
                     MaxHeight="500">
-                 <ScrollViewer Margin="10">
+                <ScrollViewer Margin="10">
                     <TabControl Margin="5">
-                       <TabItem Header="Tables">
+                        <TabItem    Header="{Binding ProfilePageTablesText}"
+                                    Classes="TabItem">
                             <ItemsControl ItemsSource="{Binding Tables}">
 								<ItemsControl.ItemTemplate>
                                     <DataTemplate>
@@ -161,9 +166,9 @@
 					                                    CornerRadius="10"
 					                                    Background="Gray"
 					                                    Margin="0,0,16,0">
-				                                    <Image Source="/Assets/message-64.png"
-					                                       Width="22"
-					                                       Height="22"/>
+				                                    <Image  Source="/Assets/message-64.png"
+					                                        Width="22"
+					                                        Height="22"/>
 			                                    </Border>
 
 			                                    <StackPanel Grid.Column="1"
@@ -207,18 +212,19 @@
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
-                       </TabItem>
-                       <TabItem Header="ProductionHistory">
-                           <ItemsControl ItemsSource="{Binding ProductionHistory}">
-                               <ItemsControl.ItemTemplate>
-                                   <DataTemplate>
-                                       <Border CornerRadius="12"
-                                               Background="LightGray"
-                                               BorderBrush="#E1E5E9"
-                                               BorderThickness="1"
-                                               Margin="5">
+                        </TabItem>
+                        <TabItem    Header="{Binding ProfilePageProductionHistoryText}"
+                                    Foreground="#ebe9e9ff">
+                            <ItemsControl ItemsSource="{Binding ProductionHistory}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border CornerRadius="12"
+                                                Background="LightGray"
+                                                BorderBrush="#E1E5E9"
+                                                BorderThickness="1"
+                                                Margin="5">
 
-                                           <Grid Margin="15"
+                                            <Grid Margin="15"
                                                  ColumnDefinitions="Auto, *">
 
                                                 <Border Grid.Column="0"
@@ -227,66 +233,66 @@
 					                                    CornerRadius="10"
 					                                    Background="Gray"
 					                                    Margin="0,0,16,0">
-				                                    <Image Source="/Assets/product-64.png"
-					                                       Width="22"
-					                                       Height="22"/>
+				                                    <Image  Source="/Assets/product-64.png"
+					                                        Width="22"
+					                                        Height="22"/>
 			                                    </Border>
 
-                                               <StackPanel Grid.Column="1"
-                                                           VerticalAlignment="Center"
-                                                           Margin="0,0,15,0">
+                                                <StackPanel  Grid.Column="1"
+                                                            VerticalAlignment="Center"
+                                                            Margin="0,0,15,0">
 
-                                                   <Grid ColumnDefinitions="*, Auto">
-                                                       <StackPanel Grid.Column="0">
-                                                           <TextBlock Text="{Binding ProductName}"
-                                                                      Foreground="#1A1D21"
-                                                                      FontSize="16"
-                                                                      FontWeight="SemiBold"
-                                                                      Margin="0,0,0,2"/>
-                                                           <TextBlock Text="{Binding OperationName}"
-                                                                      Foreground="#6B7280"
-                                                                      FontSize="13"
-                                                                      FontWeight="Medium"
-                                                                      Margin="0,0,0,4"/>
-                                                       </StackPanel>
+                                                    <Grid ColumnDefinitions="*, Auto">
+                                                        <StackPanel Grid.Column="0">
+                                                            <TextBlock Text="{Binding ProductName}"
+                                                                        Foreground="#1A1D21"
+                                                                        FontSize="16"
+                                                                        FontWeight="SemiBold"
+                                                                        Margin="0,0,0,2"/>
+                                                            <TextBlock Text="{Binding OperationName}"
+                                                                        Foreground="#6B7280"
+                                                                        FontSize="13"
+                                                                        FontWeight="Medium"
+                                                                        Margin="0,0,0,4"/>
+                                                        </StackPanel>
 
-                                                       <StackPanel Grid.Column="1"
-                                                                   HorizontalAlignment="Right">
-                                                           <TextBlock Text="{Binding Quantity, StringFormat='{}{0} шт'}"
-                                                                      Foreground="#1A1D21"
-                                                                      FontSize="14"
-                                                                      FontWeight="SemiBold"/>
-                                                       </StackPanel>
-                                                   </Grid>
+                                                        <StackPanel Grid.Column="1"
+                                                                    HorizontalAlignment="Right">
+                                                            <TextBlock  Text="{Binding Quantity, StringFormat='{}{0} шт'}"
+                                                                        Foreground="#1A1D21"
+                                                                        FontSize="14"
+                                                                        FontWeight="SemiBold"/>
+                                                        </StackPanel>
+                                                    </Grid>
 
-                                                   <StackPanel Orientation="Horizontal"
-                                                               Spacing="10"
-                                                               Margin="0,4,0,0">
-                                                       <TextBlock Text="{Binding ProductionDate, StringFormat='{} {0:dd.MM.yy}'}"
-                                                                  Foreground="#6B7280"
-                                                                  FontSize="10"/>
-                                                       <TextBlock Text="{Binding ShiftDisplay}"
-                                                                  Foreground="#6B7280"
-                                                                  FontSize="10"/>
-                                                       <Border CornerRadius="4"
-                                                               Padding="4,2"
-                                                               Background="{Binding StatusColor}">
-                                                           <TextBlock Text="{Binding Status}"
-                                                                      Foreground="White"
-                                                                      FontSize="10"
-                                                                      FontWeight="Medium"/>
-                                                       </Border>
-                                                   </StackPanel>
+                                                    <StackPanel Orientation="Horizontal"
+                                                                Spacing="10"
+                                                                Margin="0,4,0,0">
+                                                        <TextBlock Text="{Binding ProductionDate, StringFormat='{} {0:dd.MM.yy}'}"
+                                                                    Foreground="#6B7280"
+                                                                    FontSize="10"/>
+                                                        <TextBlock Text="{Binding ShiftDisplay}"
+                                                                    Foreground="#6B7280"
+                                                                    FontSize="10"/>
+                                                        <Border CornerRadius="4"
+                                                                Padding="4,2"
+                                                                Background="{Binding StatusColor}">
+                                                            <TextBlock Text="{Binding Status}"
+                                                                        Foreground="White"
+                                                                        FontSize="10"
+                                                                        FontWeight="Medium"/>
+                                                        </Border>
+                                                    </StackPanel>
 
-                                               </StackPanel>
-                                           </Grid>
-                                       </Border>
-                                   </DataTemplate>
-                               </ItemsControl.ItemTemplate>
-                           </ItemsControl>
-                       </TabItem>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </TabItem>
                     </TabControl>
-                 </ScrollViewer>
+                </ScrollViewer>
             </Border>
         </StackPanel>
     </ScrollViewer>
