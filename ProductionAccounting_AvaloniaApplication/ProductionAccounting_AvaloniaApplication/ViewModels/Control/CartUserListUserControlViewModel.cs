@@ -84,8 +84,8 @@ public class CartUserListUserControlViewModel : ViewModelBase, INotifyPropertyCh
     }
 
     public decimal BaseSalary { get; set; }
-    public string Email { get; set; }
-    public string Phone { get; set; }
+    public string Email { get; set; } = string.Empty;
+    public string Phone { get; set; } = string.Empty;
 
     private string _dateJoined = string.Empty;
     public string DateJoined { 

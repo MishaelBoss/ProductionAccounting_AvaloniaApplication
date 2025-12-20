@@ -128,7 +128,8 @@ public class CartProductUserControlViewModel : ViewModelBase, INotifyPropertyCha
                 {
                     command.Parameters.AddWithValue("@task_id", Id);
 
-                    CanCompleteTask = (bool)await command.ExecuteScalarAsync();
+                    var result = await command.ExecuteScalarAsync();
+                    CanCompleteTask = result != null ? Convert.ToBoolean(result) : false;
                 }
             }
         }

@@ -66,6 +66,8 @@ public class ManagerLocalization
     public string RightBoardShipmentsButton => _localizationData?.RightBoardUserControl?.Button?.Shipments ?? string.Empty;
     public string RightBoardSalaryButton => _localizationData?.RightBoardUserControl?.Button?.Salary ?? string.Empty;
     public string ProfilePageLogoutButton => _localizationData?.ProfilePageUserControlView?.Button?.Logout ?? string.Empty;
+    public string SettingsPageTestConnectionButton => _localizationData?.SettingsPageUserControlView?.Button?.TestConnection ?? string.Empty;
+    public string SettingsPageRestartButton => _localizationData?.SettingsPageUserControlView?.Button?.Restart ?? string.Empty;
     #endregion
 
     #region Label
@@ -78,6 +80,12 @@ public class ManagerLocalization
     public string EnterYourNameTextBlock => _localizationData?.AuthorizationUserControl?.TextBlock?.EnterYourName ?? string.Empty;
     public string EnterYourPasswordTextBlock => _localizationData?.AuthorizationUserControl?.TextBlock?.EnterYourPassword ?? string.Empty;
     public string RightBoardMainMenuTextBlock => _localizationData?.RightBoardUserControl?.TextBlock?.MainMenu ?? string.Empty;
+    public string SettingsPageFileSettingsTextBlock => _localizationData?.SettingsPageUserControlView?.TextBlock?.FileSettings ?? string.Empty;
+    public string SettingsPageLogsTextBlock => _localizationData?.SettingsPageUserControlView?.TextBlock?.Logs ?? string.Empty;
+    public string SettingsPageLanguageTextBlock => _localizationData?.SettingsPageUserControlView?.TextBlock?.Language ?? string.Empty;
+    public string SettingsPageUpdatesTextBlock => _localizationData?.SettingsPageUserControlView?.TextBlock?.Updates ?? string.Empty;
+    public string SettingsPageCheckForApplicationUpdatesTextBlock => _localizationData?.SettingsPageUserControlView?.TextBlock?.CheckForApplicationUpdates ?? string.Empty;
+    public string SettingsPageDatabaseConnectionTextBlock => _localizationData?.SettingsPageUserControlView?.TextBlock?.DatabaseConnection ?? string.Empty;
     #endregion
 
     #region TextBlock

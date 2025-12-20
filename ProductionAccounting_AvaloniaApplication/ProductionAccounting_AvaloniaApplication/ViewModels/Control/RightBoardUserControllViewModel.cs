@@ -20,8 +20,6 @@ public class RightBoardUserControlViewModel : ViewModelBase, IRecipient<OpenOrCl
     {
         mainWindowViewModel = _mainWindowViewModel;
 
-        buttons = [];
-
         UpdateUI();
 
         WeakReferenceMessenger.Default.Register<OpenOrCloseAuthorizationPageStatusMessage>(this);
@@ -105,7 +103,7 @@ public class RightBoardUserControlViewModel : ViewModelBase, IRecipient<OpenOrCl
         set => this.RaiseAndSetIfChanged(ref _buttonAuthorizationText, value);
     }
 
-    private ObservableCollection<DashboardButtonViewModel> _buttons;
+    private ObservableCollection<DashboardButtonViewModel> _buttons = [];
     public ObservableCollection<DashboardButtonViewModel> buttons 
     { 
         get => _buttons; 

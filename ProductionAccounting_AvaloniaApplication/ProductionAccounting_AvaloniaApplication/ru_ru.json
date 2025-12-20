@@ -1,44 +1,55 @@
 {
-    "Name": "Russia",
-    "RightBoardUserControl": {
-        "Button": {
-            "AdminPanel": "Админ панель",
-            "Manager": "Менеджер",
-            "ReferenceBooks": "Справочники",
-            "Timesheet": "Табель учета рабочего времени",
-            "WindowsUser": "Рабочая область пользователя",
-            "Shipments": "Отправки",
-            "Salary": "Зарплата",
-            "Login": "Aвторизоваться",
-            "Profile": "Профиль",
-            "Settings": "Настройки"
-        },
-        "TextBlock": {
-            "MainMenu": "Главное меню"
-        }
+  "Name": "Russia",
+  "RightBoardUserControl": {
+    "Button": {
+      "AdminPanel": "Админ панель",
+      "Manager": "Менеджер",
+      "ReferenceBooks": "Справочники",
+      "Timesheet": "Табель учета рабочего времени",
+      "WindowsUser": "Рабочая область пользователя",
+      "Shipments": "Отправки",
+      "Salary": "Зарплата",
+      "Login": "Aвторизоваться",
+      "Profile": "Профиль",
+      "Settings": "Настройки"
     },
-    "AuthorizationUserControl": {
-        "TextBlock": {
-            "Login": "Авторизуйтесь",
-            "Name": "Имя:",
-            "Password": "Пароль:",
-            "EnterYourName": "Введите свое имя",
-            "EnterYourPassword": "Введите свой пароль"
-        },
-        "Button": {
-            "Login": "Войти"
-        }
-    },
-    "ProfilePageUserControlView": 
-    {
-        "TabItem": 
-        {
-            "Tables": "Табель",
-            "ProductionHistory": "История производства"
-        },
-        "Button": 
-        {
-            "Logout": "Выйти"
-        }
+    "TextBlock": {
+      "MainMenu": "Главное меню"
     }
+  },
+  "AuthorizationUserControl": {
+    "TextBlock": {
+      "Login": "Авторизуйтесь",
+      "Name": "Имя:",
+      "Password": "Пароль:",
+      "EnterYourName": "Введите свое имя",
+      "EnterYourPassword": "Введите свой пароль"
+    },
+    "Button": {
+      "Login": "Войти"
+    }
+  },
+  "ProfilePageUserControlView": {
+    "TabItem": {
+      "Tables": "Табель",
+      "ProductionHistory": "История производства"
+    },
+    "Button": {
+      "Logout": "Выйти"
+    }
+  },
+  "SettingsPageUserControlView": {
+    "TextBlock": {
+      "FileSettings": "Файл с настройками",
+      "Logs": "Логи",
+      "Language": "Локализация",
+      "Updates": "Обновления",
+      "CheckForApplicationUpdates": "Проверьте наличие обновлений приложения",
+      "DatabaseConnection": "Подключение к базе данных"
+    },
+    "Button": {
+      "TestConnection": "Тестовое подключение",
+      "Restart": "Перезапустить"
+    }
+  }
 }

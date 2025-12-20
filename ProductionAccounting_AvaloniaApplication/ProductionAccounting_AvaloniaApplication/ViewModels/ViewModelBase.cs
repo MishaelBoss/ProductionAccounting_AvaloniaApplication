@@ -40,4 +40,15 @@ public class ViewModelBase : ReactiveObject
     public string ProfilePageTablesText => _localization.ProfilePageTablesTabItem;
     public string ProfilePageProductionHistoryText => _localization.ProfilePageProductionHistoryTabItem;
     #endregion
+
+    #region SettingsPage
+    public string SettingsPageFileSettingsText => _localization.SettingsPageFileSettingsTextBlock;
+    public string SettingsPageLogsTextBlock => _localization.SettingsPageLogsTextBlock;
+    public string SettingsPageLanguageText => _localization.SettingsPageLanguageTextBlock;
+    public string SettingsPageUpdatesText => _localization.SettingsPageUpdatesTextBlock;
+    public string SettingsPageCheckForApplicationUpdatesText => _localization.SettingsPageCheckForApplicationUpdatesTextBlock;
+    public string SettingsPageDatabaseConnectionText => _localization.SettingsPageDatabaseConnectionTextBlock;
+    public string SettingsPageTestConnectionText => _localization.SettingsPageTestConnectionButton;
+    public string SettingsPageRestartText => _localization.SettingsPageRestartButton;
+    #endregion
 }

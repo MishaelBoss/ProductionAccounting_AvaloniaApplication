@@ -22,7 +22,7 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="240" MinWidth="220" MaxWidth="300"/>
-            <ColumnDefinition Width="1"/>
+            <ColumnDefinition Width="2"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
@@ -33,7 +33,7 @@
         </Grid>
 
         <GridSplitter Grid.Column="1"
-                      Width="5"
+                      Width="2"
                       HorizontalAlignment="Stretch"
                       Background="#FFAAAAAA"
                       ResizeDirection="Columns"/>
