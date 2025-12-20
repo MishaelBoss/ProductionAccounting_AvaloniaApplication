@@ -46,10 +46,10 @@ public class CompleteWorkFormUserControlViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _notes, value);
     }
 
-    private ICommand ConfirmCommand 
+    public ICommand ConfirmCommand 
         => new RelayCommand(async () => await ConfirmCompleteAsync());
 
-    private static ICommand CancelCommand
+    public static ICommand CancelCommand
         => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseCompleteWorkFormStatusMessage(false)));
 
     private async Task ConfirmCompleteAsync()

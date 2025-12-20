@@ -12,27 +12,6 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class CartProductUserControlViewModel : ViewModelBase, INotifyPropertyChanged
 {
-    public ICommand DeleteCommand
-        => new RelayCommand(() =>
-        {
-            string[] deleteQueries =
-            [
-                "DELETE FROM public.shipments WHERE product_id = @id",
-                "DELETE FROM public.production WHERE product_id = @id"
-            ];
-
-            var viewModel = new ConfirmDeleteWindowViewModel(ProductId, ProductName, "DELETE FROM public.product WHERE id = @id", () => WeakReferenceMessenger.Default.Send(new RefreshProductListMessage()), deleteQueries);
-
-            var window = new ConfirmDeleteWindow()
-            {
-                DataContext = viewModel,
-            };
-
-            viewModel.SetWindow(window);
-
-            window.Show();
-        });
-
     public ICommand OpenPruductViewCommand
         => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseProductViewStatusMessage(true, ProductName, Id, Mark, Coefficient, Notes, Status)));
 
@@ -102,11 +81,32 @@ public class CartProductUserControlViewModel : ViewModelBase, INotifyPropertyCha
         }
     }
 
-    private static bool IsAdministratorOrMasterAndManager
+    public ICommand DeleteCommand
+        => new RelayCommand(() =>
+        {
+            string[] deleteQueries =
+            [
+                "DELETE FROM public.shipments WHERE product_id = @id",
+                    "DELETE FROM public.production WHERE product_id = @id"
+            ];
+
+            var viewModel = new ConfirmDeleteWindowViewModel(ProductId, ProductName, "DELETE FROM public.product WHERE id = @id", () => WeakReferenceMessenger.Default.Send(new RefreshProductListMessage()), deleteQueries);
+
+            var window = new ConfirmDeleteWindow()
+            {
+                DataContext = viewModel,
+            };
+
+            viewModel.SetWindow(window);
+
+            window.Show();
+        });
+
+    public static bool IsAdministratorOrMasterAndManager
         => ManagerCookie.IsUserLoggedIn()
         && (ManagerCookie.IsAdministrator || ManagerCookie.IsMaster || ManagerCookie.IsManager);
 
-    private bool IsAdministratorOrMasterAndCanCompleteTask
+    public bool IsAdministratorOrMasterAndCanCompleteTask
         => IsAdministratorOrMasterAndManager 
         && CanCompleteTask
         && Status != "completed";

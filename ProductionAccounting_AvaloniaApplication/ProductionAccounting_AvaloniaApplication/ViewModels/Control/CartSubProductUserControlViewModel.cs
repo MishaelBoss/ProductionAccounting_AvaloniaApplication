@@ -10,24 +10,6 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class CartSubProductUserControlViewModel : ViewModelBase
 {
-    public ICommand DeleteCommand
-        => new RelayCommand(() =>
-        {
-            var viewModel = new ConfirmDeleteWindowViewModel(Id ?? 0, Name ?? string.Empty, "DELETE FROM public.sub_products WHERE id = @id", () => WeakReferenceMessenger.Default.Send(new RefreshSubProductListMessage()));
-
-            var window = new ConfirmDeleteWindow()
-            {
-                DataContext = viewModel,
-            };
-
-            viewModel.SetWindow(window);
-
-            window.Show();
-        });
-
-    public ICommand ViewCommand
-        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseSubProductStatusMessage(true, Id)));
-
     private double? _id;
     public double? Id
     {
@@ -84,10 +66,28 @@ public class CartSubProductUserControlViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _operations, value);
     }
 
-    private bool IsNullNotes
+    public ICommand DeleteCommand
+        => new RelayCommand(() =>
+        {
+            var viewModel = new ConfirmDeleteWindowViewModel(Id ?? 0, Name ?? string.Empty, "DELETE FROM public.sub_products WHERE id = @id", () => WeakReferenceMessenger.Default.Send(new RefreshSubProductListMessage()));
+
+            var window = new ConfirmDeleteWindow()
+            {
+                DataContext = viewModel,
+            };
+
+            viewModel.SetWindow(window);
+
+            window.Show();
+        });
+
+    public ICommand ViewCommand
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseSubProductStatusMessage(true, Id)));
+
+    public bool IsNullNotes
         => !string.IsNullOrEmpty(Notes);
 
-    private static bool IsAdministrator
+    public static bool IsAdministrator
         => ManagerCookie.IsUserLoggedIn()
         && ManagerCookie.IsAdministrator;
 }

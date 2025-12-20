@@ -92,56 +92,56 @@ public class CartSubProductOperationUserControlViewModel : ViewModelBase
         }
     }
 
-    private bool IsAssigned 
+    public bool IsAssigned 
         => AssignedToUserId.HasValue;
-        
-    private bool IsAssignedToMe 
+
+    public bool IsAssignedToMe 
         => AssignedToUserId == ManagerCookie.GetIdUser;
 
-    private bool CanSubmit 
+    public bool CanSubmit 
         => IsAssignedToMe 
         && !IsCompleted;
-    private bool IsCompleted
+    public bool IsCompleted
         => CompletedQuantity >= PlannedQuantity;
 
-    private bool CanAssign 
+    public bool CanAssign 
         => !IsAssigned 
         && !IsCompleted;
 
-    private static bool IsAdministratorOrMasterAndManager
+    public static bool IsAdministratorOrMasterAndManager
         => ManagerCookie.IsUserLoggedIn()
         && (ManagerCookie.IsAdministrator || ManagerCookie.IsMaster || ManagerCookie.IsManager);
 
-    private bool CanAssignTest
+    public bool CanAssignTest
         => IsAdministratorOrMasterAndManager 
         && IsAssigned 
         && !IsAssignedToMe
         && !IsCompleted;
 
-    private bool IsAdministratorOrMasterAndCanCompleteTask
+    public bool IsAdministratorOrMasterAndCanCompleteTask
         => IsAdministratorOrMasterAndManager 
         && Status != "completed";
 
-    private string StatusButtonText 
+    public string StatusButtonText 
         => IsAssigned ? "Переназначить" 
         : "Назначить";
 
-    private string StatusText 
+    public string StatusText 
         => IsCompleted ? "Готово" 
         : IsAssignedToMe ? "Ваша задача" 
         : IsAssigned ? "Занято" 
         : "Ожидает";
 
-    private SolidColorBrush StatusColor 
+    public SolidColorBrush StatusColor 
         => IsCompleted ? new(Colors.LimeGreen)
         : IsAssignedToMe ? new(Colors.Orange)
         : IsAssigned ? new(Colors.Gray)
         : new(Colors.Cyan);
 
-    private ICommand EditCommand 
+    public ICommand EditCommand 
         => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseSubOperationStatusMessage(true, SubProductId, SubProductOperationId, OperationName, OperationCode, OperationPrice, OperationTime, OperationDescription, PlannedQuantity)));
 
-    private ICommand DeleteCommand
+    public ICommand DeleteCommand
         => new RelayCommand(() =>
         {
             var viewModel = new ConfirmDeleteWindowViewModel(SubProductOperationId, OperationName ?? string.Empty, "DELETE FROM public.sub_product_operations WHERE id = @id", (() => WeakReferenceMessenger.Default.Send(new RefreshSubProductOperationsMessage(SubProductId))));
@@ -156,9 +156,9 @@ public class CartSubProductOperationUserControlViewModel : ViewModelBase
             window.Show();
         });
 
-    private ICommand AssignCommand 
+    public ICommand AssignCommand 
         => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseEmployeeAssignmentMasterSubMarkStatusMessage(true, SubProductOperationId, SubProductId)));
 
-    private ICommand OpenSubmitWorkForAnEmployeeCommand
+    public ICommand OpenSubmitWorkForAnEmployeeCommand
         => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseCompleteWorkFormStatusMessage(true, OperationName, PlannedQuantity, ProductId, OperationId, SubProductOperationId, AssignedToUserId)));
 }

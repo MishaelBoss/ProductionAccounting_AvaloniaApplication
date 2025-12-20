@@ -12,19 +12,6 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class AddDepartmentUserControlViewModel : ViewModelBase, INotifyPropertyChanged
 {
-    private static ICommand CancelCommand
-        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseAddDepartmentStatusMessage(false)) );
-
-    private ICommand ConfirmCommand
-        => new RelayCommand(async () => 
-        { 
-            if ( await SaveAsync() ) 
-            { 
-                WeakReferenceMessenger.Default.Send(new RefreshDepartmentListMessage());
-                WeakReferenceMessenger.Default.Send(new OpenOrCloseAddDepartmentStatusMessage(false));
-            } 
-        });
-
     private string _messageerror = string.Empty;
     public string Messageerror
     {
@@ -47,16 +34,22 @@ public class AddDepartmentUserControlViewModel : ViewModelBase, INotifyPropertyC
         }
     }
 
+    public static ICommand CancelCommand
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseAddDepartmentStatusMessage(false)));
+
+    public ICommand ConfirmCommand
+        => new RelayCommand(async () => await SaveAsync());
+
     public bool IsActiveConfirmButton 
         => !string.IsNullOrEmpty(Department);
 
-    public async Task<bool> SaveAsync() {
+    public async Task SaveAsync() {
         try
         {
             if (string.IsNullOrEmpty(Department))
             {
                 Messageerror = "Не все поля заполнены";
-                return false;
+                return;
             }
 
             try
@@ -71,13 +64,13 @@ public class AddDepartmentUserControlViewModel : ViewModelBase, INotifyPropertyC
                     command.Parameters.AddWithValue("@type", Department);
                     await command.ExecuteNonQueryAsync();
 
-                    return true;
+                    WeakReferenceMessenger.Default.Send(new RefreshDepartmentListMessage());
+                    WeakReferenceMessenger.Default.Send(new OpenOrCloseAddDepartmentStatusMessage(false));
                 }
                 catch (Exception ex)
                 {
                     Loges.LoggingProcess(level: LogLevel.ERROR,
                         ex: ex);
-                    return false;
                 }
             }
             catch (Exception ex)
@@ -85,14 +78,12 @@ public class AddDepartmentUserControlViewModel : ViewModelBase, INotifyPropertyC
                 Loges.LoggingProcess(level: LogLevel.WARNING,
                     ex: ex);
                 Messageerror = "Неизвестная ошибка";
-                return false;
             }
         }
         catch (Exception ex)
         {
             Loges.LoggingProcess(level: LogLevel.WARNING,
                 ex: ex);
-            return false;
         }
     }
 

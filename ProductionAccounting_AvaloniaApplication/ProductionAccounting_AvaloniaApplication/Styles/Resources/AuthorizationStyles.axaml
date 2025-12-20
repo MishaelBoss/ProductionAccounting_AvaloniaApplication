@@ -21,30 +21,39 @@
     <Style Selector="Button.ButtonLogin">
         <Setter Property="Opacity" Value="1"/>
         <Setter Property="Background">
-            <LinearGradientBrush StartPoint="0%,50%" EndPoint="100%,50%">
+            <LinearGradientBrush StartPoint="0,0.5" EndPoint="1,0.5">
                 <GradientStop Color="#6366F1" Offset="0"/>
                 <GradientStop Color="#8B5CF6" Offset="1"/>
             </LinearGradientBrush>
         </Setter>
-        <Setter Property="Foreground" Value="Black"/>
+        <Setter Property="Foreground" Value="White"/>
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="CornerRadius" Value="12"/>
         <Setter Property="Cursor" Value="Hand"/>
     </Style>
 
-    <Style Selector="Button.ButtonLogin:pointerover">
-        <Setter Property="Opacity" Value="1"/>
-        <Setter Property="Background" Value="#3D3D3D"/>
+    <Style Selector="Button.ButtonLogin:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background">
+            <LinearGradientBrush StartPoint="0,0.5" EndPoint="1,0.5">
+                <GradientStop Color="#4F46E5" Offset="0"/>
+                <GradientStop Color="#7C3AED" Offset="1"/>
+            </LinearGradientBrush>
+        </Setter>
+        <Setter Property="Opacity" Value="0.9"/>
     </Style>
 
-    <Style Selector="Button.ButtonLogin:pressed">
-        <Setter Property="Opacity" Value="1"/>
-        <Setter Property="Background" Value="#3D3D3D"/>
+    <Style Selector="Button.ButtonLogin:pressed /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background">
+            <LinearGradientBrush StartPoint="0,0.5" EndPoint="1,0.5">
+                <GradientStop Color="#4338CA" Offset="0"/>
+                <GradientStop Color="#6D28D9" Offset="1"/>
+            </LinearGradientBrush>
+        </Setter>
+        <Setter Property="Opacity" Value="0.8"/>
     </Style>
 
-    <Style Selector="Button.ButtonLogin:disabled">
-        <Setter Property="Opacity" Value="1"/>
-        <Setter Property="Background" Value="#CCCCCC"/>
-        <Setter Property="Cursor" Value="Arrow"/>
+    <Style Selector="Button.ButtonLogin:disabled /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="Black"/>
+        <Setter Property="Opacity" Value="0.6"/>
     </Style>
 </Styles>

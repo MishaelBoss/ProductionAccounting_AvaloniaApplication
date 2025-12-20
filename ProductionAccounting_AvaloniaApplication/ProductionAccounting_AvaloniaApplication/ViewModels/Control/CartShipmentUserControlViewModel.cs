@@ -12,6 +12,23 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class CartShipmentUserControlViewModel : ViewModelBase
 {
+    public double Id { get; set; }
+    public double ProductTaskId { get; set; }
+    public double ProductId { get; set; }
+
+    public string ProductName { get; set; } = string.Empty;
+    public string Article { get; set; } = string.Empty;
+    public string Status { get; set; } = string.Empty;
+    public string Notes { get; set; } = string.Empty;
+    public string CreateByName { get; set; } = string.Empty;
+
+    public decimal? ShipmentpedWeight { get; set; }
+    public decimal? ShippedQuantity { get; set; }
+    public decimal? PlannedQuantity { get; set; }
+
+    public DateTime ShipmentDate { get; set; }
+    public DateTime CreateAt { get; set; }
+
     public ICommand ChangeStatusCommand
         => new RelayCommand(async () => await ChangeStatus());
 
@@ -30,23 +47,6 @@ public class CartShipmentUserControlViewModel : ViewModelBase
             window.Show();
         });
 
-    public double Id { get; set; }
-    public double ProductTaskId { get; set; }
-    public double ProductId { get; set; }
-
-    public string ProductName { get; set; } = string.Empty;
-    public string Article { get; set; } = string.Empty;
-    public string Status { get; set; } = string.Empty;
-    public string Notes { get; set; } = string.Empty;
-    public string CreateByName { get; set; } = string.Empty;
-
-    public decimal? ShipmentpedWeight { get; set; }
-    public decimal? ShippedQuantity { get; set; }
-    public decimal? PlannedQuantity { get; set; }
-
-    public DateTime ShipmentDate { get; set; }
-    public DateTime CreateAt { get; set; }
-
     public string StatusDisplay => Status switch
     {
         "formed" => "Сформирована",
@@ -63,11 +63,11 @@ public class CartShipmentUserControlViewModel : ViewModelBase
         _ => new SolidColorBrush(Colors.Gray)
     };
 
-    private static bool IsAdministrator
+    public static bool IsAdministrator
         => ManagerCookie.IsUserLoggedIn() 
         && ManagerCookie.IsAdministrator;
 
-    private bool CanNotes 
+    public bool CanNotes 
         => !string.IsNullOrEmpty(Notes);
 
     private async Task ChangeStatus() 

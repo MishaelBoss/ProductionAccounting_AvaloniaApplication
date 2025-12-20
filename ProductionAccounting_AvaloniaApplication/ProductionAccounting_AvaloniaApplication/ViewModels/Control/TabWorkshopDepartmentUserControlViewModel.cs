@@ -16,6 +16,21 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class TabWorkshopDepartmentUserControlViewModel : ViewModelBase, IRecipient<RefreshDepartmentListMessage>
 {
+    private string _search = string.Empty;
+    public string Search
+    {
+        get => _search;
+        set
+        {
+            if (_search != value)
+            {
+                _search = value;
+                OnPropertyChanged(nameof(Search));
+                PerformSearchList();
+            }
+        }
+    }
+
     public TabWorkshopDepartmentUserControlViewModel()
     {
         WeakReferenceMessenger.Default.Register<RefreshDepartmentListMessage>(this);
@@ -36,21 +51,6 @@ public class TabWorkshopDepartmentUserControlViewModel : ViewModelBase, IRecipie
 
     public ICommand RefreshAsyncCommand
         => new RelayCommand(() => GetList());
-
-    private string _search = string.Empty;
-    public string Search
-    {
-        get => _search;
-        set
-        {
-            if (_search != value)
-            {
-                _search = value;
-                OnPropertyChanged(nameof(Search));
-                PerformSearchList();
-            }
-        }
-    }
 
     private async void PerformSearchList()
     {

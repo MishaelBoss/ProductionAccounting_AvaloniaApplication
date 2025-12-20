@@ -14,25 +14,6 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChanged
 {
-    private static ICommand CancelCommand
-        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseUserStatusMessage(false)) );
-
-    private ICommand ConfirmCommand
-        => new RelayCommand(async () => await SaveAsync());
-
-    public AddUsersUserControlViewModel(double? id = null, string? login = null, string? firstName = null, string? lastName = null, string? middleName = null, decimal? baseSalary = null, string? email = null, string? phone = null)
-    {
-        Id = id ?? 0;
-        Login = login ?? string.Empty;
-        FirstUsername = firstName ?? string.Empty;
-        LastUsername = lastName ?? string.Empty;
-        MiddleName = middleName ?? string.Empty;
-        BaseSalary = baseSalary ?? 1.0m;
-        Email = email ?? string.Empty;
-        Phone = phone ?? string.Empty;
-        _ = LoadListTypeToComboBoxAsync();
-    }
-
     public double Id { get; }
 
     private string _messageerror = string.Empty;
@@ -211,7 +192,26 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
         }
     }
 
-    private bool IsActiveConfirmButton
+    public AddUsersUserControlViewModel(double? id = null, string? login = null, string? firstName = null, string? lastName = null, string? middleName = null, decimal? baseSalary = null, string? email = null, string? phone = null)
+    {
+        Id = id ?? 0;
+        Login = login ?? string.Empty;
+        FirstUsername = firstName ?? string.Empty;
+        LastUsername = lastName ?? string.Empty;
+        MiddleName = middleName ?? string.Empty;
+        BaseSalary = baseSalary ?? 1.0m;
+        Email = email ?? string.Empty;
+        Phone = phone ?? string.Empty;
+        _ = LoadListTypeToComboBoxAsync();
+    }
+
+    public static ICommand CancelCommand
+    => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseUserStatusMessage(false)));
+
+    public ICommand ConfirmCommand
+        => new RelayCommand(async () => await SaveAsync());
+
+    public bool IsActiveConfirmButton
         => SelectedComboBoxItem != null 
         && SelectedComboBoxItemDepartment != null 
         && SelectedComboBoxItemPosition != null
@@ -283,6 +283,7 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
                 || SelectedComboBoxItem == null || SelectedComboBoxItemDepartment == null || SelectedComboBoxItemPosition == null)
             {
                 Messageerror = "Не все поля заполнены";
+                return;
             }
 
             try

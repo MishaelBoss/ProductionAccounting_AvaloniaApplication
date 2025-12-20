@@ -12,39 +12,6 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class CartUserListUserControlViewModel : ViewModelBase, INotifyPropertyChanged
 {
-    public ICommand CopyPasswordCommand
-        => new RelayCommand(() => TextCopy.ClipboardService.SetText(Password));
-
-    public ICommand EditCommand
-        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseUserStatusMessage(true, _userID, Login, FirstName, LastName, MiddleName, BaseSalary, Email, Phone)));
-
-    public ICommand ViewCommand
-        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseProfileUserStatusMessage(true, _userID)));
-
-    public ICommand DeleteCommand
-        => new RelayCommand(() =>
-        {
-            string[] deleteQueries =
-            [
-                "DELETE FROM public.timesheet WHERE user_id = @id",
-                "DELETE FROM public.user_to_user_type WHERE user_id = @id",
-                "DELETE FROM public.user_to_departments WHERE user_id = @id",
-                "DELETE FROM public.user_to_position WHERE user_id = @id",
-                "DELETE FROM public.production WHERE user_id = @id"
-            ];
-
-            var viewModel = new ConfirmDeleteWindowViewModel(UserID, Login, "DELETE FROM public.user WHERE id = @id", () => WeakReferenceMessenger.Default.Send(new RefreshUserListMessage()), deleteQueries);
-
-            var window = new ConfirmDeleteWindow()
-            {
-                DataContext = viewModel,
-            };
-
-            viewModel.SetWindow(window);
-
-            window.Show();
-        });
-
     private double _userID = 0;
     public double UserID
     {
@@ -107,8 +74,41 @@ public class CartUserListUserControlViewModel : ViewModelBase, INotifyPropertyCh
             }
         }
     }
+    public ICommand CopyPasswordCommand
+    => new RelayCommand(() => TextCopy.ClipboardService.SetText(Password));
 
-    private static bool IsAdministrator
+    public ICommand EditCommand
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseUserStatusMessage(true, _userID, Login, FirstName, LastName, MiddleName, BaseSalary, Email, Phone)));
+
+    public ICommand ViewCommand
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseProfileUserStatusMessage(true, _userID)));
+
+    public ICommand DeleteCommand
+        => new RelayCommand(() =>
+        {
+            string[] deleteQueries =
+            [
+                "DELETE FROM public.timesheet WHERE user_id = @id",
+                "DELETE FROM public.user_to_user_type WHERE user_id = @id",
+                "DELETE FROM public.user_to_departments WHERE user_id = @id",
+                "DELETE FROM public.user_to_position WHERE user_id = @id",
+                "DELETE FROM public.production WHERE user_id = @id"
+            ];
+
+            var viewModel = new ConfirmDeleteWindowViewModel(UserID, Login, "DELETE FROM public.user WHERE id = @id", () => WeakReferenceMessenger.Default.Send(new RefreshUserListMessage()), deleteQueries);
+
+            var window = new ConfirmDeleteWindow()
+            {
+                DataContext = viewModel,
+            };
+
+            viewModel.SetWindow(window);
+
+            window.Show();
+        });
+
+
+    public static bool IsAdministrator
         => ManagerCookie.IsUserLoggedIn()
         && ManagerCookie.IsAdministrator;
 

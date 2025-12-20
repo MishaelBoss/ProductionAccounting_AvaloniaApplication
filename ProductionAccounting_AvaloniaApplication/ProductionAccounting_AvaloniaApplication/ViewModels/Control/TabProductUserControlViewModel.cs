@@ -18,28 +18,6 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class TabProductUserControlViewModel : ViewModelBase, INotifyPropertyChanged, IRecipient<RefreshProductListMessage>
 {
-    public TabProductUserControlViewModel()
-    {
-        WeakReferenceMessenger.Default.Register<RefreshProductListMessage>(this);
-    }
-
-    public void Receive(RefreshProductListMessage message)
-        => GetList();
-
-    public StackPanel? HomeMainContent { get; set; } = null;
-
-    private readonly List<CartProductUserControl> productList = [];
-    private List<double> filteredProductIds = [];
-
-    private ICommand ResetFiltersCommand
-        => new RelayCommand(() => ResetFilters());
-
-    private static ICommand DownloadAsyncCommand
-        => new RelayCommand(async () => await DownloadListAsync());
-
-    private ICommand RefreshAsyncCommand
-        => new RelayCommand(() => GetList());
-
     private string _search = string.Empty;
     public string Search
     {
@@ -84,6 +62,28 @@ public class TabProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
             }
         }
     }
+
+    public TabProductUserControlViewModel()
+    {
+        WeakReferenceMessenger.Default.Register<RefreshProductListMessage>(this);
+    }
+
+    public void Receive(RefreshProductListMessage message)
+        => GetList();
+
+    public StackPanel? HomeMainContent { get; set; } = null;
+
+    private readonly List<CartProductUserControl> productList = [];
+    private List<double> filteredProductIds = [];
+
+    public ICommand ResetFiltersCommand
+        => new RelayCommand(() => ResetFilters());
+
+    public static ICommand DownloadAsyncCommand
+        => new RelayCommand(async () => await DownloadListAsync());
+
+    public ICommand RefreshAsyncCommand
+        => new RelayCommand(() => GetList());
 
     private async void PerformSearchList()
     {

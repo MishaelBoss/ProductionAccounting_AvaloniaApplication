@@ -4,16 +4,15 @@ using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ReactiveUI;
 using System;
-using System.ComponentModel;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
 
-public class AuthorizationPageUserControlViewModel : ViewModelBase, INotifyPropertyChanged
+public class AuthorizationPageUserControlViewModel : ViewModelBase
 {
-    private ICommand ConfirmCommand
+    public ICommand ConfirmCommand
         => new RelayCommand(async () => await Authorization());
 
     private string _messageerror = string.Empty;
@@ -29,12 +28,8 @@ public class AuthorizationPageUserControlViewModel : ViewModelBase, INotifyPrope
         get => _login;
         set
         {
-            if (_login != value)
-            {
-                _login = value;
-                OnPropertyChanged(nameof(Login));
-                OnPropertyChanged(nameof(IsActiveConfirmButton));
-            }
+            this.RaiseAndSetIfChanged(ref _login, value);
+            this.RaisePropertyChanged(nameof(IsActiveConfirmButton));
         }
     }
 
@@ -44,12 +39,8 @@ public class AuthorizationPageUserControlViewModel : ViewModelBase, INotifyPrope
         get => _password;
         set
         {
-            if (_password != value)
-            {
-                _password = value;
-                OnPropertyChanged(nameof(Password));
-                OnPropertyChanged(nameof(IsActiveConfirmButton));
-            }
+            this.RaiseAndSetIfChanged(ref _password, value);
+            this.RaisePropertyChanged(nameof(IsActiveConfirmButton));
         }
     }
 
@@ -64,6 +55,7 @@ public class AuthorizationPageUserControlViewModel : ViewModelBase, INotifyPrope
             if (string.IsNullOrEmpty(Login) || string.IsNullOrEmpty(Password))
             {
                 Messageerror = "Логин и пароль обязательны";
+                return;
             }
 
             try
@@ -133,8 +125,4 @@ public class AuthorizationPageUserControlViewModel : ViewModelBase, INotifyPrope
         Login = string.Empty;
         Password = string.Empty;
     }
-
-    public new event PropertyChangedEventHandler? PropertyChanged;
-    protected void OnPropertyChanged(string propertyName)
-        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }

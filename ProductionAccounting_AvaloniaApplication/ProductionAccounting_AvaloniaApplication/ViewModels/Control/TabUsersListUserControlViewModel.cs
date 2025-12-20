@@ -20,33 +20,6 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyChanged, IRecipient<RefreshUserListMessage>
 {
-    public TabUsersListUserControlViewModel()
-    {
-        WeakReferenceMessenger.Default.Register<RefreshUserListMessage>(this);
-
-        _ = LoadListTypeToComboBoxAsync();
-        GetListUsers();
-    }
-
-    public void Receive(RefreshUserListMessage message)
-    {
-        GetListUsers();
-    }
-
-    public StackPanel? HomeMainContent { get; set; } = null;
-
-    private readonly List<CartUserListUserControl> userList = [];
-    private List<double> filteredUserIds = [];
-
-    private ICommand ResetFiltersCommand
-        => new RelayCommand(() => ResetFilters());
-
-    private static ICommand DownloadAsyncCommand
-        => new RelayCommand(async () => await DownloadListAsync());
-
-    private ICommand ReturnListUsersCommand
-        => new RelayCommand(() => GetListUsers());
-
     private bool _isProfileView = false;
     public bool IsProfileView
     {
@@ -216,6 +189,33 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
             }
         }
     }
+
+    public TabUsersListUserControlViewModel()
+    {
+        WeakReferenceMessenger.Default.Register<RefreshUserListMessage>(this);
+
+        _ = LoadListTypeToComboBoxAsync();
+        GetListUsers();
+    }
+
+    public void Receive(RefreshUserListMessage message)
+    {
+        GetListUsers();
+    }
+
+    public StackPanel? HomeMainContent { get; set; } = null;
+
+    private readonly List<CartUserListUserControl> userList = [];
+    private List<double> filteredUserIds = [];
+
+    public ICommand ResetFiltersCommand
+        => new RelayCommand(() => ResetFilters());
+
+    public static ICommand DownloadAsyncCommand
+        => new RelayCommand(async () => await DownloadListAsync());
+
+    public ICommand ReturnListUsersCommand
+        => new RelayCommand(() => GetListUsers());
 
     private async void PerformSearchListUsers()
     {

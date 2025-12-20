@@ -16,48 +16,6 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyChanged, IRecipient<RefreshSubProductListMessage>, IRecipient<OpenOrCloseSubProductStatusMessage>, IRecipient<RefreshSubProductOperationsMessage>
 {
-    public ProductViewUserControlViewModel(string name, double productId, string mark, decimal coefficient, string notes, string status) 
-    {
-        Name = name;
-        ProductId = productId;
-        Mark = mark;
-        Coefficient = coefficient;
-        Notes = notes;
-        Status = status;
-
-        WeakReferenceMessenger.Default.RegisterAll(this);
-    }
-
-    public void Receive(RefreshSubProductListMessage message)
-    {
-        _ = LoadSubProductAsync();
-    }
-
-    public void Receive(OpenOrCloseSubProductStatusMessage message)
-    {
-        LoadSubProductViewAsync(message.SubProductId);
-    }
-
-    public void Receive(RefreshSubProductOperationsMessage message)
-    {
-        _ = LoadDateSubOperationAsync(message.SubProductId);
-    }
-
-    public StackPanel? SubProductContent { get; set; } = null;
-    public StackPanel? SubProductOperation { get; set; } = null;
-
-    private readonly List<CartSubProductUserControl> subProductList = [];
-    private readonly List<CartSubProductOperationUserControl> subProductOperationList = [];
-
-    public ICommand AddSubProductCommand
-        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseAddSubProductStatusMessage(true, ProductId)));
-
-    public ICommand OpenEmployeeAssignmentMasterSubMarkUserControlViewModelCommand
-        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseEmployeeAssignmentMasterSubMarkStatusMessage(true, ProductId)));
-
-    public ICommand AddOperationCommand 
-        => new RelayCommand(() => { if (SubProductId.HasValue) WeakReferenceMessenger.Default.Send(new OpenOrCloseSubOperationStatusMessage(true, SubProductId.Value)); });
-
     public string Name { get; }
     public double ProductId { get; }
     public string Mark { get; }
@@ -100,13 +58,57 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
         set => this.RaiseAndSetIfChanged(ref _subProductNotes, value);
     }
 
-    private static bool IsAdministratorOrMasterAndManager
+    public ProductViewUserControlViewModel(string name, double productId, string mark, decimal coefficient, string notes, string status)
+    {
+        Name = name;
+        ProductId = productId;
+        Mark = mark;
+        Coefficient = coefficient;
+        Notes = notes;
+        Status = status;
+
+        WeakReferenceMessenger.Default.RegisterAll(this);
+    }
+
+    public void Receive(RefreshSubProductListMessage message)
+    {
+        _ = LoadSubProductAsync();
+    }
+
+    public void Receive(OpenOrCloseSubProductStatusMessage message)
+    {
+        LoadSubProductViewAsync(message.SubProductId);
+    }
+
+    public void Receive(RefreshSubProductOperationsMessage message)
+    {
+        _ = LoadDateSubOperationAsync(message.SubProductId);
+    }
+
+    public StackPanel? SubProductContent { get; set; } = null;
+    public StackPanel? SubProductOperation { get; set; } = null;
+
+    private readonly List<CartSubProductUserControl> subProductList = [];
+    private readonly List<CartSubProductOperationUserControl> subProductOperationList = [];
+
+    public ICommand AddSubProductCommand
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseAddSubProductStatusMessage(true, ProductId)));
+
+    public ICommand OpenEmployeeAssignmentMasterSubMarkUserControlViewModelCommand
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseEmployeeAssignmentMasterSubMarkStatusMessage(true, ProductId)));
+
+    public ICommand AddOperationCommand
+        => new RelayCommand(() => { if (SubProductId.HasValue) WeakReferenceMessenger.Default.Send(new OpenOrCloseSubOperationStatusMessage(true, SubProductId.Value)); });
+
+
+    public static bool IsAdministratorOrMasterAndManager
         => ManagerCookie.IsUserLoggedIn()
         && (ManagerCookie.IsAdministrator || ManagerCookie.IsMaster || ManagerCookie.IsManager);
 
-    private bool IsAdministratorOrMasterAndCanCompleteTask
+    public bool IsAdministratorOrMasterAndCanCompleteTask
         => IsAdministratorOrMasterAndManager 
         && Status != "completed";
+
     public async Task LoadSubProductAsync()
     {
         StackPanelHelper.ClearAndRefreshStackPanel<CartSubProductUserControl>(SubProductContent, subProductList);
@@ -165,7 +167,7 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
         }
     }
 
-    public async void LoadSubProductViewAsync(double subProductId)
+    private async void LoadSubProductViewAsync(double subProductId)
     {
         await LoadDateSubProductAsync(subProductId);
         await LoadDateSubOperationAsync(subProductId);

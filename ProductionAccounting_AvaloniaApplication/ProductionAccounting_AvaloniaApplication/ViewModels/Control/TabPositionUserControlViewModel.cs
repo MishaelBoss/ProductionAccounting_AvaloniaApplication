@@ -16,6 +16,21 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class TabPositionUserControlViewModel : ViewModelBase, IRecipient<RefreshPositionListMessage>
 {
+    private string _search = string.Empty;
+    public string Search
+    {
+        get => _search;
+        set
+        {
+            if (_search != value)
+            {
+                _search = value;
+                OnPropertyChanged(nameof(Search));
+                PerformSearchList();
+            }
+        }
+    }
+
     public TabPositionUserControlViewModel()
     {
         WeakReferenceMessenger.Default.Register<RefreshPositionListMessage>(this);
@@ -31,26 +46,11 @@ public class TabPositionUserControlViewModel : ViewModelBase, IRecipient<Refresh
     private readonly List<CartPositionUserControl> positionList = [];
     private List<double> filteredPositionIds = [];
 
-    private static ICommand DownloadAsyncCommand
+    public static ICommand DownloadAsyncCommand
         => new RelayCommand(async () => await DownloadListAsync());
 
-    private ICommand RefreshAsyncCommand
+    public ICommand RefreshAsyncCommand
         => new RelayCommand(() => GetList());
-
-    private string _search = string.Empty;
-    public string Search
-    {
-        get => _search;
-        set
-        {
-            if (_search != value)
-            {
-                _search = value;
-                OnPropertyChanged(nameof(Search));
-                PerformSearchList();
-            }
-        }
-    }
 
     private async void PerformSearchList()
     {

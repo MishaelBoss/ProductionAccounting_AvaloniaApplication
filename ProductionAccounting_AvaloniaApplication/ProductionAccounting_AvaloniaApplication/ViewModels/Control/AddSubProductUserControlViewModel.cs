@@ -58,13 +58,13 @@ public class AddSubProductUserControlViewModel(double taskId) : ViewModelBase, I
         }
     }
 
-    private bool CanSaveCurrentSubProduct
+    public bool CanSaveCurrentSubProduct
         => !string.IsNullOrWhiteSpace(Title) && PlannedQuantity > 0;
 
-    private ICommand SaveCurrentSubProductCommand
+    public ICommand SaveCurrentSubProductCommand
         => new RelayCommand(async () => await SaveCurrentSubProductAsync());
 
-    private static ICommand CancelCommand
+    public static ICommand CancelCommand
         => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseAddSubProductStatusMessage(false)));
 
     private async Task SaveCurrentSubProductAsync()

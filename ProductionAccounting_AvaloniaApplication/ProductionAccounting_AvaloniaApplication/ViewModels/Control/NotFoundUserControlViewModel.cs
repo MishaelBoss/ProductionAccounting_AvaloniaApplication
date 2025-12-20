@@ -4,7 +4,7 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class NotFoundUserControlViewModel : ViewModelBase
 {
-private string _error = string.Empty;
+    private string _error = string.Empty;
     public string Error {
         get => _error;
         set => this.RaiseAndSetIfChanged(ref _error, value);

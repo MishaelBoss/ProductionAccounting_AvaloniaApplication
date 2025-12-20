@@ -18,10 +18,6 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
 
 public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyPropertyChanged
 {
-    public StackPanel? SalaryContent { get; set; } = null;
-
-    private readonly List<SalaryRecordUserControl> salaryList = [];
-
     private DateTimeOffset _periodStart = new(DateTime.Now.AddMonths(-1));
     public DateTimeOffset PeriodStart
     {
@@ -49,6 +45,10 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
         get => _users;
         set => this.RaiseAndSetIfChanged(ref _users, value);
     }
+
+    public StackPanel? SalaryContent { get; set; } = null;
+
+    private readonly List<SalaryRecordUserControl> salaryList = [];
 
     public ICommand CalculateSalaryCommand
         => new RelayCommand(async () => await CalculateSalaryAsync());

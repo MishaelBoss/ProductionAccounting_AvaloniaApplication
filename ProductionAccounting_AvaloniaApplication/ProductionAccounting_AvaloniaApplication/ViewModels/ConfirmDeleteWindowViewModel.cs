@@ -14,13 +14,13 @@ public class ConfirmDeleteWindowViewModel(double id, string title, string delete
     private readonly string deleteSql = deleteSql;
     private readonly string[]? additionalQueries = additionalQueries;
 
+    public double Id { get; set; } = id;
+    public string Title { get; set; } = title;
+
     public void SetWindow(ConfirmDeleteWindow _window)
     {
         window = _window;
     }
-
-    public double Id { get; set; } = id;
-    public string Title { get; set; } = title;
 
     public ICommand CancelCommand
         => new RelayCommand(() => window?.Close());

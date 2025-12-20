@@ -12,42 +12,7 @@ using System.Windows.Input;
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class AddOperationUserControlViewModel : ViewModelBase
-{    
-    public AddOperationUserControlViewModel(double subProductId, 
-        double subProductOperationId = 0, 
-        string operationName = "", 
-        string operationCode = "", 
-        decimal operationPrice = 0, 
-        decimal operationTime = 0,
-        string operationDescription = "",
-        decimal operationQuantity = 0)
-    {
-        SubProductId = subProductId;
-        SubProductOperationId = subProductOperationId;
-
-        OperationName = operationName ?? string.Empty;
-        OperationCode = operationCode ?? string.Empty;
-        OperationDescription = operationDescription ?? string.Empty;
-
-        OperationPrice = operationPrice > 0 ? operationPrice : 1.0m;
-        OperationTime = operationTime > 0 ? operationTime : 1.0m;
-        OperationQuantity = operationQuantity > 0 ? operationQuantity : 1.0m;
-
-        SelectedUnit = "шт";
-    }
-
-    private static ICommand CancelCommand
-        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseSubOperationStatusMessage(false)) );
-
-    private ICommand ConfirmCommand
-        => new RelayCommand(async () => 
-        { 
-            if ( await SaveAndLinkAsync() ) 
-            { 
-                WeakReferenceMessenger.Default.Send(new OpenOrCloseSubOperationStatusMessage(false));
-            } 
-        });
-
+{
     private string _messageerror = string.Empty;
     public string Messageerror
     {
@@ -169,6 +134,35 @@ public class AddOperationUserControlViewModel : ViewModelBase
         }
     }
 
+    public AddOperationUserControlViewModel(double subProductId,
+    double subProductOperationId = 0,
+    string operationName = "",
+    string operationCode = "",
+    decimal operationPrice = 0,
+    decimal operationTime = 0,
+    string operationDescription = "",
+    decimal operationQuantity = 0)
+    {
+        SubProductId = subProductId;
+        SubProductOperationId = subProductOperationId;
+
+        OperationName = operationName ?? string.Empty;
+        OperationCode = operationCode ?? string.Empty;
+        OperationDescription = operationDescription ?? string.Empty;
+
+        OperationPrice = operationPrice > 0 ? operationPrice : 1.0m;
+        OperationTime = operationTime > 0 ? operationTime : 1.0m;
+        OperationQuantity = operationQuantity > 0 ? operationQuantity : 1.0m;
+
+        SelectedUnit = "шт";
+    }
+
+    public static ICommand CancelCommand
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseSubOperationStatusMessage(false)));
+
+    public ICommand ConfirmCommand
+        => new RelayCommand(async () => await SaveAndLinkAsync());
+
     public bool IsActiveConfirmButton
         => !string.IsNullOrWhiteSpace(SelectedUnit)
         && !string.IsNullOrWhiteSpace(OperationName)
@@ -178,14 +172,14 @@ public class AddOperationUserControlViewModel : ViewModelBase
         && !string.IsNullOrWhiteSpace(OperationDescription)
         && OperationQuantity > 0;
 
-    private async Task<bool> SaveAndLinkAsync()
+    private async Task SaveAndLinkAsync()
     {
         try
         {
             if (!IsActiveConfirmButton) 
             {
                 Messageerror = "Заполните все обязательные поля";
-                return false;
+                return;
             }
 
             double operationId = await CreateOrEditOperationAsync();
@@ -197,25 +191,22 @@ public class AddOperationUserControlViewModel : ViewModelBase
                 if (linked)
                 {
                     Messageerror = string.Empty;
-                    return true;
+                    WeakReferenceMessenger.Default.Send(new OpenOrCloseSubOperationStatusMessage(false));
                 }
                 else
                 {
                     Messageerror = "Ошибка при связывании операции с подмаркой";
-                    return false;
                 }
             }
             else
             {
                 Messageerror = "Ошибка при создании операции";
-                return false;
             }
         }
         catch (Exception ex)
         {
             Loges.LoggingProcess(level: LogLevel.ERROR, ex: ex);
             Messageerror = $"Ошибка: {ex.Message}";
-            return false;
         }
     }
 

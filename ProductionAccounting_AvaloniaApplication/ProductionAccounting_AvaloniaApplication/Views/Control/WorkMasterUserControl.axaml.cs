@@ -19,8 +19,4 @@ public partial class WorkMasterUserControl : UserControl
         viewModel.CartTasks = CartTasks;
         await viewModel.LoadTasksAsync();
     }
-
-    private void ProfileContent_ActualThemeVariantChanged(object? sender, System.EventArgs e)
-    {
-    }
 }

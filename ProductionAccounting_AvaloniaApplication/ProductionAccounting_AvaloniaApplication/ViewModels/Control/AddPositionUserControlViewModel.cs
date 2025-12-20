@@ -11,20 +11,7 @@ using System.Windows.Input;
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class AddPositionUserControlViewModel : ViewModelBase, INotifyPropertyChanged
-{
-    private static ICommand CancelCommand
-        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseAddPositionStatusMessage(false)) );
-
-    private ICommand ConfirmCommand
-        => new RelayCommand(async () => 
-        { 
-            if ( await SaveAsync() ) 
-            { 
-                WeakReferenceMessenger.Default.Send(new RefreshPositionListMessage());
-                WeakReferenceMessenger.Default.Send(new OpenOrCloseAddPositionStatusMessage(false));
-            } 
-        });
-        
+{       
     private string _messageerror = string.Empty;
     public string Messageerror
     {
@@ -47,17 +34,23 @@ public class AddPositionUserControlViewModel : ViewModelBase, INotifyPropertyCha
         }
     }
 
+    public static ICommand CancelCommand
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseAddPositionStatusMessage(false)));
+
+    public ICommand ConfirmCommand
+        => new RelayCommand(async () => await SaveAsync());
+
     public bool IsActiveConfirmButton
         => !string.IsNullOrEmpty(Position);
 
-    public async Task<bool> SaveAsync()
+    public async Task SaveAsync()
     {
         try
         {
             if (string.IsNullOrEmpty(Position))
             {
                 Messageerror = "Не все поля заполнены";
-                return false;
+                return;
             }
 
             try
@@ -72,13 +65,13 @@ public class AddPositionUserControlViewModel : ViewModelBase, INotifyPropertyCha
                     command.Parameters.AddWithValue("@type", Position);
                     await command.ExecuteNonQueryAsync();
 
-                    return true;
+                    WeakReferenceMessenger.Default.Send(new RefreshPositionListMessage());
+                    WeakReferenceMessenger.Default.Send(new OpenOrCloseAddPositionStatusMessage(false));
                 }
                 catch (Exception ex)
                 {
                     Loges.LoggingProcess(level: LogLevel.ERROR,
                         ex: ex);
-                    return false;
                 }
             }
             catch (Exception ex)
@@ -86,14 +79,12 @@ public class AddPositionUserControlViewModel : ViewModelBase, INotifyPropertyCha
                 Loges.LoggingProcess(level: LogLevel.WARNING,
                     ex: ex);
                 Messageerror = "Неизвестная ошибка";
-                return false;
             }
         }
         catch (Exception ex)
         {
             Loges.LoggingProcess(level: LogLevel.WARNING,
                 ex: ex);
-            return false;
         }
     }
 

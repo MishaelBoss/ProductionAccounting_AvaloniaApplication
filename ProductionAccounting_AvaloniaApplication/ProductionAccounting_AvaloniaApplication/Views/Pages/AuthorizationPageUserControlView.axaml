@@ -12,8 +12,6 @@
     </UserControl.Styles>
 
     <Grid>
-         <Border Background="#000000" Opacity="0.5"/>
-
         <Border Width="420"
                 Height="450"
                 HorizontalAlignment="Center"
@@ -37,10 +35,11 @@
                 </StackPanel>
 
                 <TextBlock Text="{Binding Messageerror}"
-                           Foreground="Black"
+                           Foreground="#DC2626"
                            FontWeight="SemiBold"
                            HorizontalAlignment="Center"
-                           TextWrapping="Wrap"/>
+                           TextWrapping="Wrap"
+                           TextAlignment="Center"/>
 
                 <StackPanel Spacing="6">
                     <TextBlock Text="{Binding NameText}" 
@@ -61,7 +60,9 @@
                 </StackPanel>
 
                 <StackPanel Spacing="6">
-                    <TextBlock Text="{Binding PasswordText}" Foreground="#374151" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding PasswordText}" 
+                               Foreground="#374151" 
+                               FontWeight="SemiBold"/>
                     <TextBox Text="{Binding Password}"
                              PasswordChar="*"
                              Watermark="{Binding EnterYourPasswordText}"
@@ -86,7 +87,7 @@
                         FontWeight="Bold"
                         HorizontalContentAlignment="Center"
                         VerticalContentAlignment="Center"
-                        Opacity="1"/>
+                        Classes="ButtonLogin"/>
             </StackPanel>
         </Border>
     </Grid>

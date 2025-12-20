@@ -8,27 +8,6 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class CartOperationUserControlViewModel : ViewModelBase
 {
-    public ICommand DeleteCommand
-        => new RelayCommand(() =>
-        {
-            string[] deleteQueries =
-            [
-                "DELETE FROM public.production WHERE product_id = @id"
-            ];
-
-
-            var viewModel = new ConfirmDeleteWindowViewModel(OperationID, Name, "DELETE FROM public.operation WHERE id = @id", (() => WeakReferenceMessenger.Default.Send(new RefreshOperationListMessage())), deleteQueries);
-
-            var window = new ConfirmDeleteWindow()
-            {
-                DataContext = viewModel,
-            };
-
-            viewModel.SetWindow(window);
-
-            window.Show();
-        });
-
     private double _operationID = 0;
     public double OperationID
     {
@@ -64,7 +43,28 @@ public class CartOperationUserControlViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _unit, value);
     }
 
-    private static bool IsAdministrator
+    public ICommand DeleteCommand
+        => new RelayCommand(() =>
+        {
+            string[] deleteQueries =
+            [
+                "DELETE FROM public.production WHERE product_id = @id"
+            ];
+
+
+            var viewModel = new ConfirmDeleteWindowViewModel(OperationID, Name, "DELETE FROM public.operation WHERE id = @id", (() => WeakReferenceMessenger.Default.Send(new RefreshOperationListMessage())), deleteQueries);
+
+            var window = new ConfirmDeleteWindow()
+            {
+                DataContext = viewModel,
+            };
+
+            viewModel.SetWindow(window);
+
+            window.Show();
+        });
+
+    public static bool IsAdministrator
         => ManagerCookie.IsUserLoggedIn() 
         && ManagerCookie.IsAdministrator;
 }

@@ -44,10 +44,10 @@ public class EmployeeAssignmentMasterSubMarkUserControlViewModel : ViewModelBase
     public bool CanAssign
         =>  SelectedEmployee != null;
 
-    private ICommand AssignCommand 
+    public ICommand AssignCommand 
         => new RelayCommand(async () => await AssignAsync());
 
-    private static ICommand CancelCommand
+    public static ICommand CancelCommand
         => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseEmployeeAssignmentMasterSubMarkStatusMessage(false)));
 
     private async Task AssignAsync()
@@ -79,7 +79,7 @@ public class EmployeeAssignmentMasterSubMarkUserControlViewModel : ViewModelBase
         }
     }
 
-    public async Task LoadListUsersAsync()
+    private async Task LoadListUsersAsync()
     {
         try
         {

@@ -16,34 +16,6 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class AddProductUserControlViewModel : ViewModelBase, INotifyPropertyChanged
 {
-    public AddProductUserControlViewModel(
-        double? id = null, 
-        string? productName = null, 
-        string? productArticle = null, 
-        string? productDescription = null,
-        decimal? productPricePerUnit = 0, 
-        decimal? productPricePerKg = null,
-        string? productMark = null,
-        decimal? productCoefficient = null) 
-    { 
-        Id = id;
-        ProductName = productName ?? string.Empty;
-        ProductArticle = productArticle ?? string.Empty;
-        ProductDescription = productDescription ?? string.Empty;
-        ProductPricePerUnit = productPricePerUnit ?? 1.0m;
-        ProductPricePerKg = productPricePerKg ?? 1.0m;
-        ProductMark = productMark ?? string.Empty;
-        ProductCoefficient = productCoefficient ?? 1.0m;
-
-        _ = LoadListUsersAsync();
-    }
-
-    private static ICommand CancelCommand
-        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseProductStatusMessage(false)) );
-
-    private ICommand ConfirmCommand
-        => new RelayCommand(async () => await SaveAsync());
-
     public double? Id { get; set; }
         
     private string _messageerror = string.Empty;
@@ -195,7 +167,35 @@ public class AddProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
         }
     }
 
-    private bool DesignedFields 
+    public AddProductUserControlViewModel(
+    double? id = null,
+    string? productName = null,
+    string? productArticle = null,
+    string? productDescription = null,
+    decimal? productPricePerUnit = 0,
+    decimal? productPricePerKg = null,
+    string? productMark = null,
+    decimal? productCoefficient = null)
+    {
+        Id = id;
+        ProductName = productName ?? string.Empty;
+        ProductArticle = productArticle ?? string.Empty;
+        ProductDescription = productDescription ?? string.Empty;
+        ProductPricePerUnit = productPricePerUnit ?? 1.0m;
+        ProductPricePerKg = productPricePerKg ?? 1.0m;
+        ProductMark = productMark ?? string.Empty;
+        ProductCoefficient = productCoefficient ?? 1.0m;
+
+        _ = LoadListUsersAsync();
+    }
+
+    public static ICommand CancelCommand
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseProductStatusMessage(false)));
+
+    public ICommand ConfirmCommand
+        => new RelayCommand(async () => await SaveAsync());
+
+    public bool DesignedFields 
         => !string.IsNullOrEmpty(ProductName)
         && !string.IsNullOrEmpty(ProductArticle)
         && !string.IsNullOrEmpty(ProductDescription)

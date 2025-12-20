@@ -8,6 +8,20 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class CartPositionUserControlViewModel : ViewModelBase
 {
+    private double _id = 0;
+    public double Id
+    {
+        get => _id;
+        set => this.RaiseAndSetIfChanged(ref _id, value);
+    }
+
+    private string _type = string.Empty;
+    public string Type
+    {
+        get => _type;
+        set => this.RaiseAndSetIfChanged(ref _type, value);
+    }
+
     public ICommand DeleteCommand
         => new RelayCommand(() =>
         {
@@ -23,21 +37,7 @@ public class CartPositionUserControlViewModel : ViewModelBase
             window.Show();
         });
 
-    private double _id = 0;
-    public double Id
-    {
-        get => _id;
-        set => this.RaiseAndSetIfChanged(ref _id, value);
-    }
-
-    private string _type = string.Empty;
-    public string Type
-    {
-        get => _type;
-        set => this.RaiseAndSetIfChanged(ref _type, value);
-    }
-
-    private static bool IsAdministrator
+    public static bool IsAdministrator
         => ManagerCookie.IsUserLoggedIn() 
         && ManagerCookie.IsAdministrator;
 }
