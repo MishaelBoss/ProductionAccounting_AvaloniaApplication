@@ -18,6 +18,24 @@
         <Setter Property="BorderThickness" Value="2"/>
     </Style>
 
+    <Style Selector="Button.Eye">
+		<Setter Property="Width" Value="40"/>
+		<Setter Property="Height" Value="40"/>
+		<Setter Property="VerticalAlignment" Value="Center"/>
+		<Setter Property="Background" Value="Gray"/>
+		<Setter Property="BorderThickness" Value="0"/>
+    </Style>
+
+    <Style Selector="Button.Eye:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+		<Setter Property="Background" Value="Gray"/>
+		<Setter Property="Opacity" Value="0.9"/>
+    </Style>
+
+    <Style Selector="Button.Eye:pressed /template/ ContentPresenter#PART_ContentPresenter">
+		<Setter Property="Background" Value="Gray"/>
+		<Setter Property="Opacity" Value="0.7"/>
+    </Style>
+
     <Style Selector="Button.ButtonLogin">
         <Setter Property="Opacity" Value="1"/>
         <Setter Property="Background">

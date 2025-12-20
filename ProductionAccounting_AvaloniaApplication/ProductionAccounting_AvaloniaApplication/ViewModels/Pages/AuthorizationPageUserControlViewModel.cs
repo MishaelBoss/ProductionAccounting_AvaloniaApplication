@@ -1,4 +1,7 @@
-﻿using CommunityToolkit.Mvvm.Input;
+﻿using Avalonia;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
+using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
@@ -12,9 +15,6 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
 
 public class AuthorizationPageUserControlViewModel : ViewModelBase
 {
-    public ICommand ConfirmCommand
-        => new RelayCommand(async () => await Authorization());
-
     private string _messageerror = string.Empty;
     public string Messageerror
     {
@@ -44,11 +44,44 @@ public class AuthorizationPageUserControlViewModel : ViewModelBase
         }
     }
 
+    private Bitmap? _eyeIcon;
+    public Bitmap? EyeIcon
+    {
+        get => _eyeIcon;
+        set => this.RaiseAndSetIfChanged(ref _eyeIcon, value);
+    }
+
+    private bool _isPasswordVisible = false;
+    public bool IsPasswordVisible
+    {
+        get => _isPasswordVisible;
+        set => this.RaiseAndSetIfChanged(ref _isPasswordVisible, value);
+    }
+
+    public AuthorizationPageUserControlViewModel()
+    {
+        UpdateEyeIcon();
+    }
+
+    public ICommand TogglePasswordVisibilityCommand
+        => new RelayCommand(() => { IsPasswordVisible = !IsPasswordVisible; UpdateEyeIcon(); });
+
+    public ICommand ConfirmCommand
+        => new RelayCommand(async () => await Authorization());
+
     public bool IsActiveConfirmButton
         => !string.IsNullOrEmpty(Login)
         && !string.IsNullOrEmpty(Password);
 
-    public async Task Authorization()
+    private void UpdateEyeIcon()
+    {
+        var uri = new Uri(IsPasswordVisible ? "avares://ProductionAccounting_AvaloniaApplication/Assets/eye-show-64.png" : "avares://ProductionAccounting_AvaloniaApplication/Assets/eye-hide-64.png");
+
+        using var stream = AssetLoader.Open(uri);
+        EyeIcon = new Bitmap(stream);
+    }
+
+    private async Task Authorization()
     {
         try
         {
