@@ -417,7 +417,7 @@ public class TabUsersListUserControlViewModel : ViewModelBase, IRecipient<Refres
                 {
                     var userViewModel = new CartUserListUserControlViewModel
                     {
-                        UserID = reader.IsDBNull(0) ? 0 : reader.GetDouble(0),
+                        UserId = reader.IsDBNull(0) ? 0 : reader.GetDouble(0),
                         Password = reader.IsDBNull(1) ? string.Empty : reader.GetString(1),
                         FirstName = reader.IsDBNull(2) ? string.Empty : reader.GetString(2),
                         LastName = reader.IsDBNull(3) ? string.Empty : reader.GetString(3),

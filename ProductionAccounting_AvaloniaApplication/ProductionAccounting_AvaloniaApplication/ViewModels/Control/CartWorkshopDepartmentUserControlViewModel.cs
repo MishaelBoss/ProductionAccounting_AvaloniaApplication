@@ -3,12 +3,14 @@ using CommunityToolkit.Mvvm.Messaging;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ReactiveUI;
 using System.Windows.Input;
+using JetBrains.Annotations;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class CartWorkshopDepartmentUserControlViewModel : ViewModelBase
 {
-    private double _id = 0;
+    private double _id;
+    [UsedImplicitly]
     public double Id
     {
         get => _id;
@@ -16,6 +18,7 @@ public class CartWorkshopDepartmentUserControlViewModel : ViewModelBase
     }
 
     private string _type = string.Empty;
+    [UsedImplicitly]
     public string Type
     {
         get => _type;

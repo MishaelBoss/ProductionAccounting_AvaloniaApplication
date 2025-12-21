@@ -1,5 +1,6 @@
 ﻿using ReactiveUI;
 using System;
+using JetBrains.Annotations;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
@@ -34,6 +35,7 @@ public class CartTimesheetUserControlViewModel : ViewModelBase
     }
 
     private DateTimeOffset? _workDate;
+    [UsedImplicitly]
     public DateTimeOffset? WorkDate
     {
         get => _workDate;
