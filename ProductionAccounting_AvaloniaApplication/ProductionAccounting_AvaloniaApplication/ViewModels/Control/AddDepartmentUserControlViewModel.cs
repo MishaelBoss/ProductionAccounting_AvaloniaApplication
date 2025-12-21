@@ -25,12 +25,8 @@ public class AddDepartmentUserControlViewModel : ViewModelBase, INotifyPropertyC
         get => _department;
         set 
         {
-            if (_department != value) 
-            {
-                _department = value;
-                OnPropertyChanged(nameof(Department));
-                OnPropertyChanged(nameof(IsActiveConfirmButton));
-            }
+            this.RaiseAndSetIfChanged(ref _department, value);
+            this.RaisePropertyChanged(nameof(IsActiveConfirmButton));
         }
     }
 
@@ -44,41 +40,41 @@ public class AddDepartmentUserControlViewModel : ViewModelBase, INotifyPropertyC
         => !string.IsNullOrEmpty(Department);
 
     public async Task SaveAsync() {
+
+        if (string.IsNullOrEmpty(Department))
+        {
+            Messageerror = "Не все поля заполнены";
+            return;
+        }
+
         try
         {
-            if (string.IsNullOrEmpty(Department))
-            {
-                Messageerror = "Не все поля заполнены";
-                return;
-            }
+            const string sql = "INSERT INTO public.departments (type) VALUES (@type)";
 
-            try
-            {
-                string sql = "INSERT INTO public.departments (type) VALUES (@type)";
+            await using var connection = new NpgsqlConnection(Arguments.Connection);
+            await connection.OpenAsync();
+            await using var command = new NpgsqlCommand(sql, connection);
 
-                using var connection = new NpgsqlConnection(Arguments.Connection);
-                await connection.OpenAsync();
-                using var command = new NpgsqlCommand(sql, connection);
-                try
-                {
-                    command.Parameters.AddWithValue("@type", Department);
-                    await command.ExecuteNonQueryAsync();
+            command.Parameters.AddWithValue("@type", Department);
+            await command.ExecuteNonQueryAsync();
 
-                    WeakReferenceMessenger.Default.Send(new RefreshDepartmentListMessage());
-                    WeakReferenceMessenger.Default.Send(new OpenOrCloseAddDepartmentStatusMessage(false));
-                }
-                catch (Exception ex)
-                {
-                    Loges.LoggingProcess(level: LogLevel.Error,
-                        ex: ex);
-                }
-            }
-            catch (Exception ex)
-            {
-                Loges.LoggingProcess(level: LogLevel.Warning,
-                    ex: ex);
-                Messageerror = "Неизвестная ошибка";
-            }
+            WeakReferenceMessenger.Default.Send(new RefreshDepartmentListMessage());
+            WeakReferenceMessenger.Default.Send(new OpenOrCloseAddDepartmentStatusMessage(false));
+        }
+        catch (PostgresException ex)
+        {
+            Loges.LoggingProcess(
+                level: LogLevel.Warning,
+                ex: ex,
+                message: $"Error DB (SQLState: {ex.SqlState}): {ex.MessageText}");
+
+            Loges.LoggingProcess(
+                level: LogLevel.Warning,
+                ex: ex,
+                message: $"Error DB (Detail: {ex.Detail})");
+
+            Loges.LoggingProcess(level: LogLevel.Warning,
+                ex: ex);
         }
         catch (Exception ex)
         {
@@ -86,8 +82,4 @@ public class AddDepartmentUserControlViewModel : ViewModelBase, INotifyPropertyC
                 ex: ex);
         }
     }
-
-    public new event PropertyChangedEventHandler? PropertyChanged;
-    protected void OnPropertyChanged(string propertyName)
-        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }
