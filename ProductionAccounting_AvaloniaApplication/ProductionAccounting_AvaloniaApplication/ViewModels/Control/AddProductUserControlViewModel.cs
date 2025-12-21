@@ -7,19 +7,17 @@ using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using JetBrains.Annotations;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
-public class AddProductUserControlViewModel : ViewModelBase, INotifyPropertyChanged
+public class AddProductUserControlViewModel : ViewModelBase
 {
     private double? Id { get; }
         
     private string _messageerror = string.Empty;
-    [UsedImplicitly]
     public string Messageerror
     {
         get => _messageerror;

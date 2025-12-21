@@ -3,6 +3,10 @@
   <component name="AvaloniaProject">
     <option name="projectPerEditor">
       <map>
+        <entry key="ProductionAccounting_AvaloniaApplication/Styles/Resources/RightBoardStyles.axaml" value="ProductionAccounting_AvaloniaApplication/ProductionAccounting_AvaloniaApplication.csproj" />
+        <entry key="ProductionAccounting_AvaloniaApplication/Views/Control/AddDepartmentUserControl.axaml" value="ProductionAccounting_AvaloniaApplication/ProductionAccounting_AvaloniaApplication.csproj" />
+        <entry key="ProductionAccounting_AvaloniaApplication/Views/Control/AddOperationUserControl.axaml" value="ProductionAccounting_AvaloniaApplication/ProductionAccounting_AvaloniaApplication.csproj" />
+        <entry key="ProductionAccounting_AvaloniaApplication/Views/Control/AddPositionUserControl.axaml" value="ProductionAccounting_AvaloniaApplication/ProductionAccounting_AvaloniaApplication.csproj" />
         <entry key="ProductionAccounting_AvaloniaApplication/Views/Control/AddProductUserControl.axaml" value="ProductionAccounting_AvaloniaApplication/ProductionAccounting_AvaloniaApplication.csproj" />
         <entry key="ProductionAccounting_AvaloniaApplication/Views/Control/CartEmployeeTaskUserControl.axaml" value="ProductionAccounting_AvaloniaApplication/ProductionAccounting_AvaloniaApplication.csproj" />
         <entry key="ProductionAccounting_AvaloniaApplication/Views/Control/CartPositionUserControl.axaml" value="ProductionAccounting_AvaloniaApplication/ProductionAccounting_AvaloniaApplication.csproj" />

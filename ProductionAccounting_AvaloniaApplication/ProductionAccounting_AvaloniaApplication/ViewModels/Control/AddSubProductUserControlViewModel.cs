@@ -14,6 +14,13 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 public class AddSubProductUserControlViewModel(double taskId) : ViewModelBase
 {
     private double TaskId { get; } = taskId;
+    
+    private string _messageerror = string.Empty;
+    public string Messageerror
+    {
+        get => _messageerror;
+        set => this.RaiseAndSetIfChanged(ref _messageerror, value);
+    }
 
     private string? _title;
     [UsedImplicitly]
@@ -75,6 +82,12 @@ public class AddSubProductUserControlViewModel(double taskId) : ViewModelBase
 
     private async Task SaveCurrentSubProductAsync()
     {
+        if (string.IsNullOrEmpty(Title) || PlannedQuantity == 0 )
+        {
+            Messageerror = "Не все поля заполнены";
+            return;
+        }
+        
         try
         {
             const string sql = "INSERT INTO public.sub_products (product_task_id, name, planned_quantity, notes) VALUES (@task_id, @name, @qty, @notes)";
@@ -97,6 +110,8 @@ public class AddSubProductUserControlViewModel(double taskId) : ViewModelBase
         }
         catch (PostgresException ex)
         {
+            Messageerror = "Ошибка базы данных";
+            
             Loges.LoggingProcess(
                 level: LogLevel.Warning,
                 ex: ex,
@@ -112,6 +127,7 @@ public class AddSubProductUserControlViewModel(double taskId) : ViewModelBase
         }
         catch (Exception ex)
         {
+            Messageerror = "Неизвестная ошибка";
             Loges.LoggingProcess(LogLevel.Error, 
                 ex: ex);
         }

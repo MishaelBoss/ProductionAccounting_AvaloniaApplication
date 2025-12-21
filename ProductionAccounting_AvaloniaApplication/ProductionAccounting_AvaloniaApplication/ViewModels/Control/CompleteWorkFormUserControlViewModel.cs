@@ -23,6 +23,13 @@ public class CompleteWorkFormUserControlViewModel : ViewModelBase
         Loges.LoggingProcess(LogLevel.Info,
                 $"taskName: {taskName} assignedQuantity: {plannedQuantity} productId: {productId} operationId: {operationId} subProductOperationId: {subProductOperationId} userId {userId}");
     }
+    
+    private string _messageerror = string.Empty;
+    public string Messageerror
+    {
+        get => _messageerror;
+        set => this.RaiseAndSetIfChanged(ref _messageerror, value);
+    }
 
     public string TaskName;
     public decimal PlannedQuantity;
@@ -64,6 +71,12 @@ public class CompleteWorkFormUserControlViewModel : ViewModelBase
 
     private async Task ConfirmCompleteAsync()
     {
+        if (CompletedToday == 0)
+        {
+            Messageerror = "Вы не указали количество сделанных работ";
+            return;
+        }
+
         try
         {
             await using (var connection = new NpgsqlConnection(Arguments.Connection))
@@ -171,10 +184,12 @@ public class CompleteWorkFormUserControlViewModel : ViewModelBase
         }
         catch (NpgsqlException ex)
         {
+            Messageerror = "Ошибка базы данных";
             Loges.LoggingProcess(LogLevel.Critical, "Connection or request error", ex: ex);
         }
         catch (Exception ex)
         {
+            Messageerror = "Неизвестная ошибка";
             Loges.LoggingProcess(LogLevel.Warning, "Error loading users by IDs", ex: ex);
         }
     }

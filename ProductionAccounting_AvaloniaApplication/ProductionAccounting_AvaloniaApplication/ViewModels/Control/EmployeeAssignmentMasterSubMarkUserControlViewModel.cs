@@ -5,14 +5,14 @@ using ProductionAccounting_AvaloniaApplication.Models;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using System;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using JetBrains.Annotations;
+using ReactiveUI;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
-public class EmployeeAssignmentMasterSubMarkUserControlViewModel : ViewModelBase, INotifyPropertyChanged
+public class EmployeeAssignmentMasterSubMarkUserControlViewModel : ViewModelBase
 {
     public EmployeeAssignmentMasterSubMarkUserControlViewModel(double id, double subProductId)
     {
@@ -20,6 +20,13 @@ public class EmployeeAssignmentMasterSubMarkUserControlViewModel : ViewModelBase
         SubProductId = subProductId;
 
         _ = LoadListUsersAsync();
+    }
+    
+    private string _messageerror = string.Empty;
+    public string Messageerror
+    {
+        get => _messageerror;
+        set => this.RaiseAndSetIfChanged(ref _messageerror, value);
     }
 
     private double Id { get; }
@@ -34,10 +41,8 @@ public class EmployeeAssignmentMasterSubMarkUserControlViewModel : ViewModelBase
         get => _selectedEmployee;
         set
         {
-            if (_selectedEmployee == value) return;
-            _selectedEmployee = value;
-            OnPropertyChanged(nameof(SelectedEmployee));
-            OnPropertyChanged(nameof(CanAssign));
+            this.RaiseAndSetIfChanged(ref _selectedEmployee, value);
+            this.RaisePropertyChanged(nameof(CanAssign));
         }
     }
 
@@ -64,6 +69,12 @@ public class EmployeeAssignmentMasterSubMarkUserControlViewModel : ViewModelBase
 
     private async Task AssignAsync()
     {
+        if (SelectedEmployee?.Id == 0)
+        {
+            Messageerror = "Не все поля заполнены";
+            return;
+        }
+
         try
         {
             await using var connection = new NpgsqlConnection(Arguments.Connection);
@@ -83,12 +94,17 @@ public class EmployeeAssignmentMasterSubMarkUserControlViewModel : ViewModelBase
         }
         catch (PostgresException ex)
         {
+            Messageerror = "Ошибка базы данных";
+
             Loges.LoggingProcess(level: LogLevel.Warning,
                 ex: ex);
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(LogLevel.Error, ex: ex);
+            Messageerror = "Неизвестная ошибка";
+
+            Loges.LoggingProcess(level: LogLevel.Error, 
+                ex: ex);
         }
     }
 
@@ -140,9 +156,4 @@ public class EmployeeAssignmentMasterSubMarkUserControlViewModel : ViewModelBase
                 ex: ex);
         }
     }
-
-
-    public new event PropertyChangedEventHandler? PropertyChanged;
-    private void OnPropertyChanged(string propertyName)
-        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }

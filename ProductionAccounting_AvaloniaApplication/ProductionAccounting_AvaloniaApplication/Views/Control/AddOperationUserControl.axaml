@@ -56,9 +56,6 @@
 
                         <TextBlock Grid.Row="5" Grid.Column="0" Text="Описание:" VerticalAlignment="Center" />
                         <TextBox Grid.Row="5" Grid.Column="1" Watermark="Введите описание операции" Text="{Binding OperationDescription}" />
-
-                        <TextBlock Grid.Row="6" Grid.Column="0" Text="Phone:" VerticalAlignment="Center" />
-                        <TextBox Grid.Row="6" Grid.Column="1" Watermark="+7 (999) 123-45-67" Text="{Binding Phone}" />
                     </Grid>
 
                     <StackPanel Spacing="12">
