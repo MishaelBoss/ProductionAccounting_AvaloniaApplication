@@ -19,6 +19,7 @@ public class AddProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
     private double? Id { get; }
         
     private string _messageerror = string.Empty;
+    [UsedImplicitly]
     public string Messageerror
     {
         get => _messageerror;
@@ -26,67 +27,62 @@ public class AddProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
     }
 
     private string _productName = string.Empty;
+    [UsedImplicitly]
     public string ProductName
     {
         get => _productName;
         set
         {
-            if (_productName == value) return;
-            _productName = value;
-            OnPropertyChanged(nameof(ProductName));
-            OnPropertyChanged(nameof(IsActiveConfirmButton));
+            this.RaiseAndSetIfChanged(ref _productName, value);
+            this.RaisePropertyChanged(nameof(IsActiveConfirmButton));
         }
     }
 
     private string _productArticle = string.Empty;
+    [UsedImplicitly]
     public string ProductArticle
     {
         get => _productArticle;
         set
         {
-            if (_productArticle == value) return;
-            _productArticle = value;
-            OnPropertyChanged(nameof(ProductArticle));
-            OnPropertyChanged(nameof(IsActiveConfirmButton));
+            this.RaiseAndSetIfChanged(ref _productArticle, value);
+            this.RaisePropertyChanged(nameof(IsActiveConfirmButton));
         }
     }
 
     private string _productDescription = string.Empty;
+    [UsedImplicitly]
     public string ProductDescription
     {
         get => _productDescription;
         set
         {
-            if (_productDescription == value) return;
-            _productDescription = value;
-            OnPropertyChanged(nameof(ProductDescription));
-            OnPropertyChanged(nameof(IsActiveConfirmButton));
+            this.RaiseAndSetIfChanged(ref _productDescription, value);
+            this.RaisePropertyChanged(nameof(IsActiveConfirmButton));
         }
     }
 
     private decimal _productPricePerUnit;
+    [UsedImplicitly]
     public decimal ProductPricePerUnit
     {
         get => _productPricePerUnit;
         set
         {
-            if (_productPricePerUnit == value) return;
-            _productPricePerUnit = value;
-            OnPropertyChanged(nameof(ProductPricePerUnit));
-            OnPropertyChanged(nameof(IsActiveConfirmButton));
+            this.RaiseAndSetIfChanged(ref _productPricePerUnit, value);
+            this.RaisePropertyChanged(nameof(IsActiveConfirmButton));
         }
     }
 
     private decimal _productPricePerKg;
+    [UsedImplicitly]
     public decimal ProductPricePerKg
     {
         get => _productPricePerKg;
         set
         {
-            if (_productPricePerKg == value) return;
-            _productPricePerKg = value;
-            OnPropertyChanged(nameof(ProductPricePerKg));
-            OnPropertyChanged(nameof(IsActiveConfirmButton));
+            this.RaiseAndSetIfChanged(ref _productPricePerKg, value);
+            this.RaisePropertyChanged(nameof(IsActiveConfirmButton));
         }
     }
     
@@ -97,41 +93,38 @@ public class AddProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
     ];
 
     private string? _selectedUnit;
+    [UsedImplicitly]
     public string? SelectedUnit
     {
         get => _selectedUnit;
         set
         {
-            if (_selectedUnit == value) return;
-            _selectedUnit = value;
-            OnPropertyChanged(nameof(SelectedUnit));
-            OnPropertyChanged(nameof(IsActiveConfirmButton));
+            this.RaiseAndSetIfChanged(ref _selectedUnit, value);
+            this.RaisePropertyChanged(nameof(IsActiveConfirmButton));
         }
     }
 
     private string _productMark = string.Empty;
+    [UsedImplicitly]
     public string ProductMark
     {
         get => _productMark;
         set
         {
-            if (_productMark == value) return;
-            _productMark = value;
-            OnPropertyChanged(nameof(ProductMark));
-            OnPropertyChanged(nameof(IsActiveConfirmButton));
+            this.RaiseAndSetIfChanged(ref _productMark, value);
+            this.RaisePropertyChanged(nameof(IsActiveConfirmButton));
         }
     }
 
     private decimal _productCoefficient = 1.0m;
+    [UsedImplicitly]
     public decimal ProductCoefficient
     {
         get => _productCoefficient;
         set
         {
-            if (_productCoefficient == value) return;
-            _productCoefficient = value;
-            OnPropertyChanged(nameof(ProductCoefficient));
-            OnPropertyChanged(nameof(IsActiveConfirmButton));
+            this.RaiseAndSetIfChanged(ref _productCoefficient, value);
+            this.RaisePropertyChanged(nameof(IsActiveConfirmButton));
         }
     }
 
@@ -139,15 +132,14 @@ public class AddProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
     public ObservableCollection<ComboBoxUser> Users { get; } = [];
     
     private ComboBoxUser? _selectedUser;
+    [UsedImplicitly]
     public ComboBoxUser? SelectedUser
     {
         get => _selectedUser;
         set
         {
-            if (_selectedUser == value) return;
-            _selectedUser = value;
-            OnPropertyChanged(nameof(SelectedUser));
-            OnPropertyChanged(nameof(IsActiveConfirmButton));
+            this.RaiseAndSetIfChanged(ref _selectedUser, value);
+            this.RaisePropertyChanged(nameof(IsActiveConfirmButton));
         }
     }
 
@@ -375,8 +367,4 @@ public class AddProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
         SelectedUnit = AvailableUnits[0]; 
         SelectedUser = null;
     }
-
-    public new event PropertyChangedEventHandler? PropertyChanged;
-    private void OnPropertyChanged(string propertyName)
-        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }

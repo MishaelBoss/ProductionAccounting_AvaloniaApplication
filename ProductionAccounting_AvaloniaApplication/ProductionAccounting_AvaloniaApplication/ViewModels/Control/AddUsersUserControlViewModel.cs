@@ -36,12 +36,8 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
         get => _selectedComboBoxItem;
         set
         {
-            if (_selectedComboBoxItem != value)
-            {
-                _selectedComboBoxItem = value;
-                OnPropertyChanged(nameof(SelectedComboBoxItem));
-                OnPropertyChanged(nameof(IsActiveConfirmButton));
-            }
+            this.RaiseAndSetIfChanged(ref _selectedComboBoxItem, value);
+            this.RaisePropertyChanged(nameof(IsActiveConfirmButton));
         }
     }
 
@@ -58,12 +54,8 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
         get => _selectedComboBoxItemDepartment;
         set
         {
-            if (_selectedComboBoxItemDepartment != value)
-            {
-                _selectedComboBoxItemDepartment = value;
-                OnPropertyChanged(nameof(SelectedComboBoxItemDepartment));
-                OnPropertyChanged(nameof(IsActiveConfirmButton));
-            }
+            this.RaiseAndSetIfChanged(ref _selectedComboBoxItemDepartment, value);
+            this.RaisePropertyChanged(nameof(IsActiveConfirmButton));
         }
     }
 
@@ -80,12 +72,8 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
         get => _selectedComboBoxItemPosition;
         set
         {
-            if (_selectedComboBoxItemPosition != value)
-            {
-                _selectedComboBoxItemPosition = value;
-                OnPropertyChanged(nameof(SelectedComboBoxItemPosition));
-                OnPropertyChanged(nameof(IsActiveConfirmButton));
-            }
+            this.RaiseAndSetIfChanged(ref _selectedComboBoxItemPosition, value);
+            this.RaisePropertyChanged(nameof(IsActiveConfirmButton));
         }
     }
 
@@ -95,12 +83,8 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
         get => _login;
         set
         {
-            if (_login != value)
-            {
-                _login = value;
-                OnPropertyChanged(nameof(Login));
-                OnPropertyChanged(nameof(IsActiveConfirmButton));
-            }
+            this.RaiseAndSetIfChanged(ref _login, value);
+            this.RaisePropertyChanged(nameof(IsActiveConfirmButton));
         }
     }
 
@@ -110,12 +94,8 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
         get => _firstUsername;
         set
         {
-            if (_firstUsername != value)
-            {
-                _firstUsername = value;
-                OnPropertyChanged(nameof(FirstUsername));
-                OnPropertyChanged(nameof(IsActiveConfirmButton));
-            }
+            this.RaiseAndSetIfChanged(ref _firstUsername, value);
+            this.RaisePropertyChanged(nameof(IsActiveConfirmButton));
         }
     }
 
@@ -125,83 +105,58 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
         get => _lastUsername;
         set
         {
-            if (_lastUsername != value)
-            {
-                _lastUsername = value;
-                OnPropertyChanged(nameof(LastUsername));
-                OnPropertyChanged(nameof(IsActiveConfirmButton));
-            }
+            this.RaiseAndSetIfChanged(ref _lastUsername, value);
+            this.RaisePropertyChanged(nameof(IsActiveConfirmButton));
         }
     }
 
-    private string _middle_name = string.Empty;
+    private string _middleName = string.Empty;
     public string MiddleName
     {
-        get => _middle_name;
+        get => _middleName;
         set
         {
-            if (_middle_name != value)
-            {
-                _middle_name = value;
-                OnPropertyChanged(nameof(MiddleName));
-                OnPropertyChanged(nameof(IsActiveConfirmButton));
-            }
+            this.RaiseAndSetIfChanged(ref _middleName, value);
+            this.RaisePropertyChanged(nameof(IsActiveConfirmButton));
         }
     }
 
-    private decimal _baseSalary = 0;
+    private decimal _baseSalary;
     public decimal BaseSalary 
     {
         get => _baseSalary;
         set 
         {
-            if (_baseSalary != value) 
-            {
-                _baseSalary = value;
-                OnPropertyChanged(nameof(BaseSalary));
-                OnPropertyChanged(nameof(IsActiveConfirmButton));
-            }
+            this.RaiseAndSetIfChanged(ref _baseSalary, value);
+            this.RaisePropertyChanged(nameof(IsActiveConfirmButton));
         }
     }
 
-    private string _email = string.Empty;
+    private string _email;
     public string Email
     {
         get => _email;
-        set
-        {
-            if (_email != value)
-            {
-                _email = value;
-                OnPropertyChanged(nameof(Email));
-            }
-        }
+        set => this.RaiseAndSetIfChanged(ref _email, value);
     }
 
-    private string _phone = string.Empty;
+    private string _phone;
     public string Phone
     {
         get => _phone;
-        set
-        {
-            if (_phone != value)
-            {
-                _phone = value;
-                OnPropertyChanged(nameof(Phone));
-            }
-        }
+        set => this.RaiseAndSetIfChanged(ref _phone, value);
     }
 
     public AddUsersUserControlViewModel(double? id = null, string? login = null, string? firstName = null, string? lastName = null, string? middleName = null, decimal? baseSalary = null, string? email = null, string? phone = null)
     {
         Id = id ?? 0;
-        Login = login ?? string.Empty;
+        Login = login;
         FirstUsername = firstName ?? string.Empty;
         LastUsername = lastName ?? string.Empty;
         MiddleName = middleName ?? string.Empty;
         BaseSalary = baseSalary ?? 1.0m;
         Email = email ?? string.Empty;
         Phone = phone ?? string.Empty;
+
         _ = LoadListTypeToComboBoxAsync();
     }
 
@@ -400,7 +355,7 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
         }
     }
 
-    public void ClearForm()
+    private void ClearForm()
     {
         Messageerror = string.Empty;
         ComboBoxItems.Clear();
@@ -410,8 +365,4 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
         BaseSalary = 0;
         Login = string.Empty;
     }
-
-    public new event PropertyChangedEventHandler? PropertyChanged;
-    protected void OnPropertyChanged(string propertyName)
-        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }

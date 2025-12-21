@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Messaging;
 using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
+using ReactiveUI;
 using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
@@ -13,18 +14,14 @@ public class AddSubProductUserControlViewModel(double taskId) : ViewModelBase, I
 {
     public double TaskId { get; } = taskId;
 
-    private string? _title = string.Empty;
+    private string? _title;
     public string? Title 
     {
         get => _title;
         set 
         {
-            if (_title != value) 
-            {
-                _title = value;
-                OnPropertyChanged(nameof(Title));
-                OnPropertyChanged(nameof(CanSaveCurrentSubProduct));
-            }
+            this.RaiseAndSetIfChanged(ref _title, value);
+            this.RaisePropertyChanged(nameof(CanSaveCurrentSubProduct));
         }
     }
 
@@ -34,32 +31,25 @@ public class AddSubProductUserControlViewModel(double taskId) : ViewModelBase, I
         get => _plannedQuantity;
         set
         {
-            if (_plannedQuantity != value)
-            {
-                _plannedQuantity = value;
-                OnPropertyChanged(nameof(PlannedQuantity));
-                OnPropertyChanged(nameof(CanSaveCurrentSubProduct));
-            }
+            this.RaiseAndSetIfChanged(ref _plannedQuantity, value);
+            this.RaisePropertyChanged(nameof(CanSaveCurrentSubProduct));
         }
     }
 
-    private string? _notes = string.Empty;
+    private string? _notes;
     public string? Notes
     {
         get => _notes;
         set
         {
-            if (_notes != value)
-            {
-                _notes = value;
-                OnPropertyChanged(nameof(Notes));
-                OnPropertyChanged(nameof(CanSaveCurrentSubProduct));
-            }
+            this.RaiseAndSetIfChanged(ref _notes, value);
+            this.RaisePropertyChanged(nameof(CanSaveCurrentSubProduct));
         }
     }
 
     public bool CanSaveCurrentSubProduct
-        => !string.IsNullOrWhiteSpace(Title) && PlannedQuantity > 0;
+        => !string.IsNullOrWhiteSpace(Title)
+        && PlannedQuantity > 0;
 
     public ICommand SaveCurrentSubProductCommand
         => new RelayCommand(async () => await SaveCurrentSubProductAsync());
@@ -71,12 +61,12 @@ public class AddSubProductUserControlViewModel(double taskId) : ViewModelBase, I
     {
         try
         {
-            string sql = "INSERT INTO public.sub_products (product_task_id, name, planned_quantity, notes) VALUES (@task_id, @name, @qty, @notes)";
+            const string sql = "INSERT INTO public.sub_products (product_task_id, name, planned_quantity, notes) VALUES (@task_id, @name, @qty, @notes)";
 
-            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await using var connection = new NpgsqlConnection(Arguments.Connection);
             await connection.OpenAsync();
 
-            using var command = new NpgsqlCommand(sql, connection);
+            await using var command = new NpgsqlCommand(sql, connection);
             command.Parameters.AddWithValue("@task_id", TaskId);
             command.Parameters.AddWithValue("@name", Title ?? string.Empty);
             command.Parameters.AddWithValue("@qty", PlannedQuantity ?? 1);
@@ -89,9 +79,25 @@ public class AddSubProductUserControlViewModel(double taskId) : ViewModelBase, I
 
             ClearForm();
         }
+        catch (PostgresException ex)
+        {
+            Loges.LoggingProcess(
+                level: LogLevel.Warning,
+                ex: ex,
+                message: $"Error DB (SQLState: {ex.SqlState}): {ex.MessageText}");
+
+            Loges.LoggingProcess(
+                level: LogLevel.Warning,
+                ex: ex,
+                message: $"Error DB (Detail: {ex.Detail})");
+
+            Loges.LoggingProcess(level: LogLevel.Warning,
+                ex: ex);
+        }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(LogLevel.Error, ex: ex);
+            Loges.LoggingProcess(LogLevel.Error, 
+                ex: ex);
         }
     }
 
@@ -101,8 +107,4 @@ public class AddSubProductUserControlViewModel(double taskId) : ViewModelBase, I
         PlannedQuantity = 1;
         Notes = string.Empty;
     }
-
-    public new event PropertyChangedEventHandler? PropertyChanged;
-    protected void OnPropertyChanged(string propertyName)
-        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }
