@@ -195,6 +195,7 @@ public class RightBoardUserControlViewModel : ViewModelBase, IRecipient<OpenOrCl
     private void UpdateUi()
     {
         ButtonAuthorizationText = ManagerCookie.IsUserLoggedIn() ? RightBoardProfileText : RightBoardLoginText;
+        var ImageProfile = ManagerCookie.IsUserLoggedIn() ? LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/profile-64.png") : LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/login-64.png");
 
         bool isLoggedIn = ManagerCookie.IsUserLoggedIn();
         IsAdministrator = isLoggedIn && ManagerCookie.IsAdministrator;
@@ -222,7 +223,7 @@ public class RightBoardUserControlViewModel : ViewModelBase, IRecipient<OpenOrCl
             new(RightBoardWindowsUserText, OpenWorkUserPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/home-64.png"), () => IsAdministratorOrMasterOrEmployee),
             new(RightBoardShipmentsText, OpenShipmentsUserPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/home-64.png"), () => IsAdministratorOrMasterOrManager),
             new(RightBoardSalaryText, OpenSalaryUserPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/login-64.png"), () => IsAll),
-            new(ButtonAuthorizationText, OpenAuthorizationCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/login-64.png")),
+            new(ButtonAuthorizationText, OpenAuthorizationCommand, ImageProfile),
         };
 
         foreach (var button in newButtons)

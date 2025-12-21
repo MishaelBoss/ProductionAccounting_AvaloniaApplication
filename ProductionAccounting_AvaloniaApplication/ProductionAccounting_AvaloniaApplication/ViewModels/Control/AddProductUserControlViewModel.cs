@@ -85,8 +85,9 @@ public class AddProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
             this.RaisePropertyChanged(nameof(IsActiveConfirmButton));
         }
     }
-    
-    private List<string> AvailableUnits { get; } =
+
+    [UsedImplicitly]
+    public List<string> AvailableUnits { get; } =
     [
         "кг",
         "шт"
