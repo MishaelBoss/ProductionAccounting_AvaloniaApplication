@@ -46,7 +46,18 @@ public class CompleteWorkFormUserControlViewModel : ViewModelBase
     }
 
     public ICommand ConfirmCommand 
-        => new RelayCommand(async () => await ConfirmCompleteAsync());
+        => new RelayCommand(async void () =>
+        {
+            try
+            {
+                await ConfirmCompleteAsync();
+            }
+            catch (Exception ex)
+            {
+                Loges.LoggingProcess(level: LogLevel.Critical, 
+                    ex: ex);
+            }
+        });
 
     public static ICommand CancelCommand
         => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseCompleteWorkFormStatusMessage(false)));
@@ -59,7 +70,7 @@ public class CompleteWorkFormUserControlViewModel : ViewModelBase
             {
                 await connection.OpenAsync();
 
-                string rateSql = @"SELECT wr.rate, wr.use_tonnage, wr.coefficient 
+                const string rateSql = @"SELECT wr.rate, wr.use_tonnage, wr.coefficient 
                              FROM public.work_rate wr
                              JOIN public.operation o ON o.name = wr.work_type
                              WHERE o.id = @operation_id";

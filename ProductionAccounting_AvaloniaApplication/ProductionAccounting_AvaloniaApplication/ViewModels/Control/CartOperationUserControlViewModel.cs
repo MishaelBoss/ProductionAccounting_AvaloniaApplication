@@ -29,8 +29,8 @@ public class CartOperationUserControlViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _operationCode, value);
     }
 
-    private string _price = string.Empty;
-    public string Price
+    private decimal _price;
+    public decimal Price
     {
         get => _price;
         set => this.RaiseAndSetIfChanged(ref _price, value);

@@ -4,13 +4,12 @@ using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ReactiveUI;
 using System;
-using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
-public class AddDepartmentUserControlViewModel : ViewModelBase, INotifyPropertyChanged
+public class AddDepartmentUserControlViewModel : ViewModelBase
 {
     private string _messageerror = string.Empty;
     public string Messageerror
@@ -34,12 +33,24 @@ public class AddDepartmentUserControlViewModel : ViewModelBase, INotifyPropertyC
         => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseAddDepartmentStatusMessage(false)));
 
     public ICommand ConfirmCommand
-        => new RelayCommand(async () => await SaveAsync());
+        => new RelayCommand(async void () =>
+        {
+            try
+            {
+                await SaveAsync();
+            }
+            catch (Exception ex)
+            {
+                Loges.LoggingProcess(level: LogLevel.Critical, 
+                    ex: ex, 
+                    message: "Error add");
+            }
+        });
 
     public bool IsActiveConfirmButton 
         => !string.IsNullOrEmpty(Department);
 
-    public async Task SaveAsync() {
+    private async Task SaveAsync() {
 
         if (string.IsNullOrEmpty(Department))
         {

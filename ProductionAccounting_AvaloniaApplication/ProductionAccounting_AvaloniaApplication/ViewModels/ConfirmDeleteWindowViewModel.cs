@@ -40,87 +40,102 @@ public class ConfirmDeleteWindowViewModel(double id, string title, string delete
             }
         });
 
-    private async Task DeleteAsync()
+     private async Task DeleteAsync()
     {
         try
         {
             await using var connection = new NpgsqlConnection(Arguments.Connection);
             await connection.OpenAsync();
-            await using var transaction = await connection.BeginTransactionAsync();
+            
+            NpgsqlTransaction? transaction = null;
+            if (_additionalQueries is not null && _additionalQueries.Length > 0)
+            {
+                transaction = await connection.BeginTransactionAsync();
+            }
+
             try
             {
-                var rowsAffected = 0;
-                if (_additionalQueries != null)
+                var totalRowsAffected = 0;
+
+                if (_additionalQueries is not null && _additionalQueries.Length > 0)
                 {
-                    try
+                    foreach (var query in _additionalQueries)
                     {
-                        foreach (var querty in _additionalQueries)
+                        try
                         {
-                            await using var command = new NpgsqlCommand(querty, connection, transaction);
+                            await using var command = new NpgsqlCommand(query, connection, transaction);
                             command.Parameters.AddWithValue("@id", Id);
-                            await command.ExecuteNonQueryAsync();
+                            var rows = await command.ExecuteNonQueryAsync();
+                            totalRowsAffected += rows;
+                            
+                            Loges.LoggingProcess(level: LogLevel.Debug,
+                                message: $"Additional query executed: {query}, rows affected: {rows}");
                         }
-
-                        await transaction.CommitAsync();
-                    }
-                    catch (PostgresException ex)
-                    {
-                        await transaction.RollbackAsync();
-
-                        Loges.LoggingProcess(level: LogLevel.Warning,
-                            ex: ex);
-                        throw;
-                    }
-                    catch (Exception ex)
-                    {
-                        await transaction.RollbackAsync();
-
-                        Loges.LoggingProcess(level: LogLevel.Warning,
-                            ex: ex);
-                        throw;
+                        catch (Exception ex)
+                        {
+                            Loges.LoggingProcess(level: LogLevel.Error,
+                                ex: ex,
+                                message: $"Failed to execute additional query: {query}");
+                            throw;
+                        }
                     }
                 }
 
-                await using (var command2 = new NpgsqlCommand(_deleteSql, connection))
+                await using (var mainCommand = new NpgsqlCommand(_deleteSql, connection))
                 {
-                    command2.Parameters.AddWithValue("@id", Id);
-                    rowsAffected += await command2.ExecuteNonQueryAsync();
+                    if (transaction is not null)
+                    {
+                        mainCommand.Transaction = transaction;
+                    }
+                    
+                    mainCommand.Parameters.AddWithValue("@id", Id);
+                    var mainRows = await mainCommand.ExecuteNonQueryAsync();
+                    totalRowsAffected += mainRows;
+                    
+                    Loges.LoggingProcess(level: LogLevel.Debug,
+                        message: $"Main query executed: {_deleteSql}, rows affected: {mainRows}");
                 }
 
-                if (rowsAffected > 0)
+                if (transaction is not null)
+                {
+                    await transaction.CommitAsync();
+                }
+
+                if (totalRowsAffected > 0)
                 {
                     Loges.LoggingProcess(level: LogLevel.Info,
-                        message: $"Deleted record with ID: {Id}");
+                        message: $"Successfully deleted records. Total rows affected: {totalRowsAffected}");
 
                     _onSuccessCallback.Invoke();
                     _window?.Close();
                 }
+                else
+                {
+                    Loges.LoggingProcess(level: LogLevel.Warning,
+                        message: $"No records found to delete for ID: {Id}");
+                    
+                    _window?.Close();
+                }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Loges.LoggingProcess(level: LogLevel.Error,
-                    ex: ex);
+                if (transaction is not null)
+                {
+                    await transaction.RollbackAsync();
+                }
+                throw;
             }
         }
-        catch (PostgresException ex) 
+        catch (PostgresException pgEx)
         {
             Loges.LoggingProcess(
-                level: LogLevel.Warning, 
-                ex: ex,
-                message: $"Error DB (SQLState: {ex.SqlState}): {ex.MessageText}" );
-                            
-            Loges.LoggingProcess(
-                level: LogLevel.Warning, 
-                ex: ex,
-                message: $"Error DB (Detail: {ex.Detail})" );
-            
-            Loges.LoggingProcess(level: LogLevel.Warning,
-                ex: ex);
+                level: LogLevel.Error,
+                ex: pgEx,
+                message: $"Database error (SQLState: {pgEx.SqlState}): {pgEx.MessageText}");
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(level: LogLevel.Warning,
-                ex: ex);
+            Loges.LoggingProcess(level: LogLevel.Error, ex: ex);
         }
     }
 }

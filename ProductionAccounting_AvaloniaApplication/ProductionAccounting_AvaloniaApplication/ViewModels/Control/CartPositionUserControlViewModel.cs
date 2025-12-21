@@ -8,12 +8,7 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 public class CartPositionUserControlViewModel : ViewModelBase
 {
-    private double _id = 0;
-    public double Id
-    {
-        get => _id;
-        set => this.RaiseAndSetIfChanged(ref _id, value);
-    }
+    public double Id { get; set; }
 
     private string _type = string.Empty;
     public string Type

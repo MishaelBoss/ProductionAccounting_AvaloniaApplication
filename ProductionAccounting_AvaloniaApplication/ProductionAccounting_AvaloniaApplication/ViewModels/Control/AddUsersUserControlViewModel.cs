@@ -6,15 +6,15 @@ using ProductionAccounting_AvaloniaApplication.Scripts;
 using ReactiveUI;
 using System;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using JetBrains.Annotations;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
-public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChanged
+public class AddUsersUserControlViewModel : ViewModelBase
 {
-    public double Id { get; }
+    private double Id { get; }
 
     private string _messageerror = string.Empty;
     public string Messageerror
@@ -78,6 +78,7 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
     }
 
     private string _login = string.Empty;
+    [UsedImplicitly]
     public string Login
     {
         get => _login;
@@ -89,6 +90,7 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
     }
 
     private string _firstUsername = string.Empty;
+    [UsedImplicitly]
     public string FirstUsername
     {
         get => _firstUsername;
@@ -100,6 +102,7 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
     }
 
     private string _lastUsername = string.Empty;
+    [UsedImplicitly]
     public string LastUsername
     {
         get => _lastUsername;
@@ -111,6 +114,7 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
     }
 
     private string _middleName = string.Empty;
+    [UsedImplicitly]
     public string MiddleName
     {
         get => _middleName;
@@ -122,6 +126,7 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
     }
 
     private decimal _baseSalary;
+    [UsedImplicitly]
     public decimal BaseSalary 
     {
         get => _baseSalary;
@@ -132,15 +137,17 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
         }
     }
 
-    private string _email;
-    public string Email
+    private string? _email = string.Empty;
+    [UsedImplicitly]
+    public string? Email
     {
         get => _email;
         set => this.RaiseAndSetIfChanged(ref _email, value);
     }
 
-    private string _phone;
-    public string Phone
+    private string? _phone = string.Empty;
+    [UsedImplicitly]
+    public string? Phone
     {
         get => _phone;
         set => this.RaiseAndSetIfChanged(ref _phone, value);
@@ -149,7 +156,7 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
     public AddUsersUserControlViewModel(double? id = null, string? login = null, string? firstName = null, string? lastName = null, string? middleName = null, decimal? baseSalary = null, string? email = null, string? phone = null)
     {
         Id = id ?? 0;
-        Login = login;
+        Login = login ?? string.Empty;
         FirstUsername = firstName ?? string.Empty;
         LastUsername = lastName ?? string.Empty;
         MiddleName = middleName ?? string.Empty;
@@ -161,10 +168,22 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
     }
 
     public static ICommand CancelCommand
-    => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseUserStatusMessage(false)));
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseUserStatusMessage(false)));
 
     public ICommand ConfirmCommand
-        => new RelayCommand(async () => await SaveAsync());
+        => new RelayCommand(async void () =>
+        {
+            try
+            {
+                await SaveAsync();
+            }
+            catch (Exception ex)
+            {
+                Loges.LoggingProcess(level: LogLevel.Critical, 
+                    ex: ex, 
+                    message: "Error add or update");
+            }
+        });
 
     public bool IsActiveConfirmButton
         => SelectedComboBoxItem != null 
@@ -180,15 +199,15 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
     {
         try
         {
-            string sqlUserTypes = "SELECT id, type_user FROM public.user_type";
-            string sqlDepartments = "SELECT id, type FROM public.departments";
-            string sqlPositions = "SELECT id, type FROM public.positions";
+            const string sqlUserTypes = "SELECT id, type_user FROM public.user_type";
+            const string sqlDepartments = "SELECT id, type FROM public.departments";
+            const string sqlPositions = "SELECT id, type FROM public.positions";
 
-            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await using var connection = new NpgsqlConnection(Arguments.Connection);
             await connection.OpenAsync();
 
-            using (var command = new NpgsqlCommand(sqlUserTypes, connection))
-            using (var reader = await command.ExecuteReaderAsync())
+            await using (var command = new NpgsqlCommand(sqlUserTypes, connection))
+            await using (var reader = await command.ExecuteReaderAsync())
             {
                 while (await reader.ReadAsync())
                 {
@@ -199,8 +218,8 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
                 }
             }
 
-            using (var command = new NpgsqlCommand(sqlDepartments, connection))
-            using (var reader = await command.ExecuteReaderAsync())
+            await using (var command = new NpgsqlCommand(sqlDepartments, connection))
+            await using (var reader = await command.ExecuteReaderAsync())
             {
                 while (await reader.ReadAsync())
                 {
@@ -211,8 +230,8 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
                 }
             }
 
-            using (var command = new NpgsqlCommand(sqlPositions, connection))
-            using (var reader = await command.ExecuteReaderAsync())
+            await using (var command = new NpgsqlCommand(sqlPositions, connection))
+            await using (var reader = await command.ExecuteReaderAsync())
             {
                 while (await reader.ReadAsync())
                 {
@@ -240,113 +259,94 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
                 Messageerror = "Не все поля заполнены";
                 return;
             }
-
-            try
+            
+            const string addUserSql = "INSERT INTO public.user (login, first_name, last_name, middle_name, base_salary, email, phone) " +
+                    "VALUES (@login, @first_name, @last_name, @middle_name, @base_salary, @email, @phone) RETURNING id";
+            const string updateUserSql = "UPDATE public.user SET login = @newLogin, middle_name = @newMiddleName, first_name = @newFirstName, last_name=     @newLastName, base_salary = @newBaseSalary WHERE id = @userID";
+            
+            var sql = Id == 0 ? updateUserSql : addUserSql;
+            
+            await using var connection = new NpgsqlConnection(Arguments.Connection);
+            await connection.OpenAsync();
+            await using var command = new NpgsqlCommand(sql, connection);
+            
+            command.Parameters.AddWithValue("@login", Login.Trim());
+            command.Parameters.AddWithValue("@first_name", FirstUsername.Trim());
+            command.Parameters.AddWithValue("@last_name", LastUsername.Trim());
+            command.Parameters.AddWithValue("@middle_name", MiddleName.Trim());
+            command.Parameters.AddWithValue("@base_salary", BaseSalary);
+            command.Parameters.AddWithValue("@email", Email?.Trim() ?? string.Empty);
+            command.Parameters.AddWithValue("@phone", Phone?.Trim() ?? string.Empty);
+            
+            if (Id == 0)
             {
-                string addUserSql = "INSERT INTO public.user (login, first_name, last_name, middle_name, base_salary, email, phone) " +
-                        "VALUES (@login, @first_name, @last_name, @middle_name, @base_salary, @email, @phone) RETURNING id";
-                string updateUserSql = "UPDATE public.user SET login = @newLogin, middle_name = @newMiddleName, first_name = @newFirstName, last_name =     @newLastName, base_salary = @newBaseSalary WHERE id = @userID";
-
-                string sql = string.Empty;
-
-                if(Id == 0) sql = addUserSql;
-                else sql = updateUserSql;
-
-                using var connection = new NpgsqlConnection(Arguments.Connection);
-                await connection.OpenAsync();
-                using var command = new NpgsqlCommand(sql, connection);
-                try
+                var userId = await command.ExecuteScalarAsync();
+                if (userId is null) 
                 {
-                    if (Id == 0)
-                    {
-                        command.Parameters.AddWithValue("@login", Login);
-                        command.Parameters.AddWithValue("@first_name", FirstUsername);
-                        command.Parameters.AddWithValue("@last_name", LastUsername);
-                        command.Parameters.AddWithValue("@middle_name", MiddleName);
-                        command.Parameters.AddWithValue("@base_salary", BaseSalary);
-                        command.Parameters.AddWithValue("@email", Email);
-                        command.Parameters.AddWithValue("@phone", Phone);
-
-                        var userId = await command.ExecuteScalarAsync();
-                        if (userId == null) 
-                        {
-                            Loges.LoggingProcess(level: LogLevel.Warning,
-                                "User id null");
-                            return;
-                        }
-
-                        string sql2 = "INSERT INTO public.user_to_user_type (user_id, user_type_id) VALUES (@user_id, @user_type_id)";
-                        using (var commandRel = new NpgsqlCommand(sql2, connection))
-                        {
-                            commandRel.Parameters.AddWithValue("@user_id", userId);
-                            commandRel.Parameters.AddWithValue("@user_type_id", SelectedComboBoxItem?.Id ?? 0);
-                            await commandRel.ExecuteNonQueryAsync();
-                        }
-
-                        string sql3 = "INSERT INTO public.user_to_departments (user_id, department_id) VALUES (@user_id, @department_id)";
-                        using (var commandDepartment = new NpgsqlCommand(sql3, connection))
-                        {
-                            commandDepartment.Parameters.AddWithValue("@user_id", userId);
-                            commandDepartment.Parameters.AddWithValue("@department_id", SelectedComboBoxItemDepartment?.Id ?? 0);
-                            await commandDepartment.ExecuteNonQueryAsync();
-                        }
-
-                        string sql4 = "INSERT INTO public.user_to_position (user_id, position_id) VALUES (@user_id, @position_id)";
-                        using (var commandPosition = new NpgsqlCommand(sql4, connection))
-                        {
-                            commandPosition.Parameters.AddWithValue("@user_id", userId);
-                            commandPosition.Parameters.AddWithValue("@position_id", SelectedComboBoxItemPosition?.Id ?? 0);
-                            await commandPosition.ExecuteNonQueryAsync();
-                        }
-
-                        WeakReferenceMessenger.Default.Send(new RefreshUserListMessage());
-                        WeakReferenceMessenger.Default.Send(new OpenOrCloseUserStatusMessage(false));
-
-                        ClearForm();
-                    }
-                    else
-                    {
-                        command.Parameters.AddWithValue("@userID", Id);
-                        command.Parameters.AddWithValue("@newLogin", Login);
-                        command.Parameters.AddWithValue("@newFirstName", FirstUsername);
-                        command.Parameters.AddWithValue("@newLastName", LastUsername);
-                        command.Parameters.AddWithValue("@newMiddleName", MiddleName);
-                        command.Parameters.AddWithValue("@newBaseSalary", BaseSalary);
-                        await command.ExecuteNonQueryAsync();
-
-                        string deleteSql = "DELETE FROM public.user_to_user_type WHERE user_id = @userID";
-                        using (var deleteCommand = new NpgsqlCommand(deleteSql, connection))
-                        {
-                            deleteCommand.Parameters.AddWithValue("@userID", Id);
-                            await deleteCommand.ExecuteNonQueryAsync();
-                        }
-
-                        string insertSql = "INSERT INTO public.user_to_user_type (user_id, user_type_id) VALUES (@userID, @userTypeID)";
-                        using (var insertCommand = new NpgsqlCommand(insertSql, connection))
-                        {
-                            insertCommand.Parameters.AddWithValue("@userID", Id);
-                            insertCommand.Parameters.AddWithValue("@userTypeID", SelectedComboBoxItem?.Id ?? 0);
-                            await insertCommand.ExecuteNonQueryAsync();
-                        }
-
-                        WeakReferenceMessenger.Default.Send(new RefreshUserListMessage());
-                        WeakReferenceMessenger.Default.Send(new OpenOrCloseUserStatusMessage(false));
-
-                        ClearForm();
-                    }
+                    Loges.LoggingProcess(level: LogLevel.Warning,
+                        "User id null");
+                    return;
                 }
-                catch (Exception ex)
+                
+                const string sql2 = "INSERT INTO public.user_to_user_type (user_id, user_type_id) VALUES (@user_id, @user_type_id)";
+                await using (var commandRel = new NpgsqlCommand(sql2, connection))
                 {
-                    Loges.LoggingProcess(level: LogLevel.Error,
-                        ex: ex);
+                    commandRel.Parameters.AddWithValue("@user_id", userId);
+                    commandRel.Parameters.AddWithValue("@user_type_id", SelectedComboBoxItem?.Id ?? 0);
+                    await commandRel.ExecuteNonQueryAsync();
+                }
+                
+                const string sql3 = "INSERT INTO public.user_to_departments (user_id, department_id) VALUES (@user_id, @departmen";
+                await using (var commandDepartment = new NpgsqlCommand(sql3, connection))
+                {
+                    commandDepartment.Parameters.AddWithValue("@user_id", userId);
+                    commandDepartment.Parameters.AddWithValue("@department_id", SelectedComboBoxItemDepartment?.Id ?? 0);
+                    await commandDepartment.ExecuteNonQueryAsync();
+                }
+                
+                const string sql4 = "INSERT INTO public.user_to_position (user_id, position_id) VALUES (@user_id, @position_id)";
+                await using (var commandPosition = new NpgsqlCommand(sql4, connection))
+                {
+                    commandPosition.Parameters.AddWithValue("@user_id", userId);
+                    commandPosition.Parameters.AddWithValue("@position_id", SelectedComboBoxItemPosition?.Id ?? 0);
+                    await commandPosition.ExecuteNonQueryAsync();
                 }
             }
-            catch (Exception ex)
+            else
             {
-                Loges.LoggingProcess(level: LogLevel.Warning,
-                    ex: ex);
-                Messageerror = "Неизвестная ошибка";
-            }
+                await command.ExecuteNonQueryAsync();
+                const string deleteSql = "DELETE FROM public.user_to_user_type WHERE user_id = @userID";
+                await using (var deleteCommand = new NpgsqlCommand(deleteSql, connection))
+                {
+                    deleteCommand.Parameters.AddWithValue("@userID", Id);
+                    await deleteCommand.ExecuteNonQueryAsync();
+                }
+                const string insertSql = "INSERT INTO public.user_to_user_type (user_id, user_type_id) VALUES (@userID, @userTypeID)";
+                await using (var insertCommand = new NpgsqlCommand(insertSql, connection))
+                {
+                    insertCommand.Parameters.AddWithValue("@userID", Id);
+                    insertCommand.Parameters.AddWithValue("@userTypeID", SelectedComboBoxItem?.Id ?? 0);
+                    await insertCommand.ExecuteNonQueryAsync();
+                }
+            }    
+            WeakReferenceMessenger.Default.Send(new OpenOrCloseUserStatusMessage(false));
+            WeakReferenceMessenger.Default.Send(new RefreshUserListMessage());
+            ClearForm();
+        }
+        catch (PostgresException ex)
+        {
+            Loges.LoggingProcess(
+                level: LogLevel.Warning,
+                ex: ex,
+                message: $"Error DB (SQLState: {ex.SqlState}): {ex.MessageText}");
+
+            Loges.LoggingProcess(
+                level: LogLevel.Warning,
+                ex: ex,
+                message: $"Error DB (Detail: {ex.Detail})");
+
+            Loges.LoggingProcess(level: LogLevel.Warning,
+                ex: ex);
         }
         catch (Exception ex)
         {

@@ -140,7 +140,19 @@ public class AddOperationUserControlViewModel : ViewModelBase
         => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseSubOperationStatusMessage(false)));
 
     public ICommand ConfirmCommand
-        => new RelayCommand(async () => await SaveAndLinkAsync());
+        => new RelayCommand(async void () =>
+        {
+            try
+            {
+                await SaveAndLinkAsync();
+            }
+            catch (Exception ex)
+            {
+                Loges.LoggingProcess(level: LogLevel.Critical, 
+                    ex: ex, 
+                    message: "Error add");
+            }
+        });
 
     public bool IsActiveConfirmButton
         => !string.IsNullOrWhiteSpace(SelectedUnit)

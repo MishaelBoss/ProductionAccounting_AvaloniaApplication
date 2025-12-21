@@ -7,14 +7,16 @@ using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using JetBrains.Annotations;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
-public class AddSubProductUserControlViewModel(double taskId) : ViewModelBase, INotifyPropertyChanged
+public class AddSubProductUserControlViewModel(double taskId) : ViewModelBase
 {
-    public double TaskId { get; } = taskId;
+    private double TaskId { get; } = taskId;
 
     private string? _title;
+    [UsedImplicitly]
     public string? Title 
     {
         get => _title;
@@ -26,6 +28,7 @@ public class AddSubProductUserControlViewModel(double taskId) : ViewModelBase, I
     }
 
     private decimal? _plannedQuantity = 1;
+    [UsedImplicitly]
     public decimal? PlannedQuantity
     {
         get => _plannedQuantity;
@@ -37,6 +40,7 @@ public class AddSubProductUserControlViewModel(double taskId) : ViewModelBase, I
     }
 
     private string? _notes;
+    [UsedImplicitly]
     public string? Notes
     {
         get => _notes;
@@ -52,7 +56,19 @@ public class AddSubProductUserControlViewModel(double taskId) : ViewModelBase, I
         && PlannedQuantity > 0;
 
     public ICommand SaveCurrentSubProductCommand
-        => new RelayCommand(async () => await SaveCurrentSubProductAsync());
+        => new RelayCommand(async void () =>
+        {
+            try
+            {
+                await SaveCurrentSubProductAsync();
+            }
+            catch (Exception ex)
+            {
+                Loges.LoggingProcess(level: LogLevel.Critical, 
+                    ex: ex, 
+                    message: "Error add or update");
+            }
+        });
 
     public static ICommand CancelCommand
         => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseAddSubProductStatusMessage(false)));
