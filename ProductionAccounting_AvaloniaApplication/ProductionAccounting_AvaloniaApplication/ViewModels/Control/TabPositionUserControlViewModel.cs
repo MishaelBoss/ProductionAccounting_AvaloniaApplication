@@ -5,11 +5,12 @@ using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using JetBrains.Annotations;
+using ReactiveUI;
 using static ProductionAccounting_AvaloniaApplication.ViewModels.Control.NotFoundUserControlViewModel;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
@@ -17,23 +18,20 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 public class TabPositionUserControlViewModel : ViewModelBase, IRecipient<RefreshPositionListMessage>
 {
     private string _search = string.Empty;
+    [UsedImplicitly]
     public string Search
     {
         get => _search;
         set
         {
-            if (_search != value)
-            {
-                _search = value;
-                OnPropertyChanged(nameof(Search));
-                PerformSearchList();
-            }
+            this.RaiseAndSetIfChanged(ref _search, value);
+            this.RaisePropertyChanged(nameof(PerformSearchList));
         }
     }
 
     public TabPositionUserControlViewModel()
     {
-        WeakReferenceMessenger.Default.Register<RefreshPositionListMessage>(this);
+        WeakReferenceMessenger.Default.Register(this);
     }
 
     public void Receive(RefreshPositionListMessage message)
@@ -41,41 +39,69 @@ public class TabPositionUserControlViewModel : ViewModelBase, IRecipient<Refresh
         GetList();
     }
 
-    public StackPanel? HomeMainContent { get; set; } = null;
+    public StackPanel? HomeMainContent { get; set; }
 
-    private readonly List<CartPositionUserControl> positionList = [];
-    private List<double> filteredPositionIds = [];
+    private readonly List<CartPositionUserControl> _positionList = [];
+    private List<double> _filteredPositionIds = [];
 
     public static ICommand DownloadAsyncCommand
-        => new RelayCommand(async () => await DownloadListAsync());
+        => new RelayCommand(async void () =>
+        {
+            try
+            {
+                await DownloadListAsync();
+            }
+            catch (Exception ex)
+            {
+                Loges.LoggingProcess(level: LogLevel.Critical, 
+                    ex: ex, 
+                    message: "Error download");
+            }
+        });
 
     public ICommand RefreshAsyncCommand
-        => new RelayCommand(() => GetList());
+        => new RelayCommand(GetList);
 
     private async void PerformSearchList()
     {
-        await ApplyFilters();
+        try
+        {
+            await ApplyFilters();
+        }
+        catch (Exception ex)
+        {
+            Loges.LoggingProcess(level: LogLevel.Error,
+                ex: ex);
+        }
     }
 
     public async void GetList()
     {
-        Search = string.Empty;
-        await ApplyFilters();
+        try
+        {
+            Search = string.Empty;
+            await ApplyFilters();
+        }
+        catch (Exception ex)
+        {
+            Loges.LoggingProcess(level: LogLevel.Error,
+                ex: ex);
+        }
     }
 
     private async Task ApplyFilters()
     {
         try
         {
-            filteredPositionIds = await GetFilteredPositionIdsAsync();
+            _filteredPositionIds = await GetFilteredPositionIdsAsync();
 
-            if (filteredPositionIds.Count > 0)
+            if (_filteredPositionIds.Count > 0)
             {
-                await SearchPositionAsync(filteredPositionIds);
+                await SearchPositionAsync(_filteredPositionIds);
             }
             else
             {
-                StackPanelHelper.ClearAndRefreshStackPanel<CartPositionUserControl>(HomeMainContent, positionList);
+                StackPanelHelper.ClearAndRefreshStackPanel(HomeMainContent, _positionList);
                 ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NotFound);
             }
         }
@@ -85,7 +111,7 @@ public class TabPositionUserControlViewModel : ViewModelBase, IRecipient<Refresh
                 message: "Error applying filters",
                 ex: ex);
 
-            StackPanelHelper.ClearAndRefreshStackPanel<CartPositionUserControl>(HomeMainContent, positionList);
+            StackPanelHelper.ClearAndRefreshStackPanel(HomeMainContent, _positionList);
         }
     }
 
@@ -95,7 +121,7 @@ public class TabPositionUserControlViewModel : ViewModelBase, IRecipient<Refresh
 
         try
         {
-            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await using var connection = new NpgsqlConnection(Arguments.Connection);
             await connection.OpenAsync();
 
             var sql = "SELECT DISTINCT id FROM public.positions WHERE 1=1";
@@ -108,13 +134,13 @@ public class TabPositionUserControlViewModel : ViewModelBase, IRecipient<Refresh
                 parameters.Add(new NpgsqlParameter("@search", $"%{Search}%"));
             }
 
-            using var command = new NpgsqlCommand(sql, connection);
+            await using var command = new NpgsqlCommand(sql, connection);
             foreach (var param in parameters)
             {
                 command.Parameters.Add(param);
             }
 
-            using var reader = await command.ExecuteReaderAsync();
+            await using var reader = await command.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
                 if (!reader.IsDBNull(0))
@@ -137,12 +163,12 @@ public class TabPositionUserControlViewModel : ViewModelBase, IRecipient<Refresh
 
         if (userIds.Count == 0)
         {
-            StackPanelHelper.ClearAndRefreshStackPanel<CartPositionUserControl>(HomeMainContent, positionList);
+            StackPanelHelper.ClearAndRefreshStackPanel(HomeMainContent, _positionList);
             ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NotFound);
             return;
         }
 
-        StackPanelHelper.ClearAndRefreshStackPanel<CartPositionUserControl>(HomeMainContent, positionList);
+        StackPanelHelper.ClearAndRefreshStackPanel(HomeMainContent, _positionList);
 
         try
         {
@@ -158,17 +184,17 @@ public class TabPositionUserControlViewModel : ViewModelBase, IRecipient<Refresh
 
             string sql = $"SELECT id, type FROM public.positions operation WHERE id IN ({string.Join(", ", paramNames)})";
 
-            using (var connection = new NpgsqlConnection(Arguments.Connection))
+            await using (var connection = new NpgsqlConnection(Arguments.Connection))
             {
                 await connection.OpenAsync();
-                using var command = new NpgsqlCommand(sql, connection);
+                await using var command = new NpgsqlCommand(sql, connection);
 
                 foreach (var param in parameters)
                 {
                     command.Parameters.Add(param);
                 }
 
-                using var reader = await command.ExecuteReaderAsync();
+                await using var reader = await command.ExecuteReaderAsync();
                 while (await reader.ReadAsync())
                 {
                     var viewModel = new CartPositionUserControlViewModel
@@ -182,17 +208,17 @@ public class TabPositionUserControlViewModel : ViewModelBase, IRecipient<Refresh
                         DataContext = viewModel
                     };
 
-                    positionList.Add(userControl);
+                    _positionList.Add(userControl);
                 }
             }
 
-            StackPanelHelper.RefreshStackPanelContent<CartPositionUserControl>(HomeMainContent, positionList);
+            StackPanelHelper.RefreshStackPanelContent(HomeMainContent, _positionList);
 
-            if (positionList.Count == 0) ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NotFound);
+            if (_positionList.Count == 0) ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NotFound);
         }
         catch (NpgsqlException ex)
         {
-            StackPanelHelper.ClearAndRefreshStackPanel<CartPositionUserControl>(HomeMainContent, positionList);
+            StackPanelHelper.ClearAndRefreshStackPanel(HomeMainContent, _positionList);
             ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NoConnectToDb);
             Loges.LoggingProcess(LogLevel.Critical,
                 "Connection or request error",
@@ -200,7 +226,7 @@ public class TabPositionUserControlViewModel : ViewModelBase, IRecipient<Refresh
         }
         catch (Exception ex)
         {
-            StackPanelHelper.ClearAndRefreshStackPanel<CartPositionUserControl>(HomeMainContent, positionList);
+            StackPanelHelper.ClearAndRefreshStackPanel(HomeMainContent, _positionList);
             ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NoConnectToDb);
             Loges.LoggingProcess(LogLevel.Error,
                 "Error loading positions by IDs",
@@ -214,38 +240,38 @@ public class TabPositionUserControlViewModel : ViewModelBase, IRecipient<Refresh
 
         try
         {
-            string sql = "SELECT * FROM public.positions";
+            const string sql = "SELECT * FROM public.positions";
 
-            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await using var connection = new NpgsqlConnection(Arguments.Connection);
             connection.Open();
 
-            using var command = new NpgsqlCommand(sql, connection);
-            using var reader = await command.ExecuteReaderAsync();
-            var fileSave = Path.Combine(Path.Combine(Paths.DestinationPathDB("AdminPanel", "Positions")), Files.DBEquipments);
+            await using var command = new NpgsqlCommand(sql, connection);
+            await using var reader = await command.ExecuteReaderAsync();
+            var fileSave = Path.Combine(Path.Combine(Paths.DestinationPathDb("AdminPanel", "Positions")), Files.DbEquipments);
 
-            using (var writer = new StreamWriter(fileSave))
+            await using (var writer = new StreamWriter(fileSave))
             {
                 for (int i = 0; i < reader.FieldCount; i++)
                 {
-                    writer.Write(reader.GetName(i));
+                    await writer.WriteAsync(reader.GetName(i));
                     if (i < reader.FieldCount - 1)
                     {
-                        writer.Write(",");
+                        await writer.WriteAsync(",");
                     }
                 }
-                writer.WriteLine();
+                await writer.WriteLineAsync();
 
                 while (reader.Read())
                 {
                     for (int i = 0; i < reader.FieldCount; i++)
                     {
-                        writer.Write(reader.GetValue(i).ToString());
+                        await writer.WriteAsync(reader.GetValue(i).ToString());
                         if (i < reader.FieldCount - 1)
                         {
-                            writer.Write(",");
+                            await writer.WriteAsync(",");
                         }
                     }
-                    writer.WriteLine();
+                    await writer.WriteLineAsync();
                 }
             }
 
@@ -264,8 +290,4 @@ public class TabPositionUserControlViewModel : ViewModelBase, IRecipient<Refresh
                 ex: ex);
         }
     }
-
-    public new event PropertyChangedEventHandler? PropertyChanged;
-    protected void OnPropertyChanged(string propertyName)
-        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }

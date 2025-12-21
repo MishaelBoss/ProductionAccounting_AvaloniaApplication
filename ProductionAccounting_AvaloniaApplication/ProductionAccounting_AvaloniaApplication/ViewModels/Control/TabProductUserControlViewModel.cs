@@ -328,10 +328,10 @@ public class TabProductUserControlViewModel : ViewModelBase, IRecipient<RefreshP
 
             await using var command = new NpgsqlCommand(sql, connection);
             await using var reader = await command.ExecuteReaderAsync();
-            var destinationPath = Paths.DestinationPathDB("AdminPanel", "Products");
+            var destinationPath = Paths.DestinationPathDb("AdminPanel", "Products");
             Directory.CreateDirectory(destinationPath);
 
-            var fileSave = Path.Combine(destinationPath, Files.DBEquipments);
+            var fileSave = Path.Combine(destinationPath, Files.DbEquipments);
 
             await using (var writer = new StreamWriter(fileSave))
             {

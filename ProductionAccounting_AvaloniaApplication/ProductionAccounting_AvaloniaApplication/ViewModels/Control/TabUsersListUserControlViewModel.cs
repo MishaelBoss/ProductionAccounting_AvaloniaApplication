@@ -488,7 +488,7 @@ public class TabUsersListUserControlViewModel : ViewModelBase, IRecipient<Refres
 
             await using var command = new NpgsqlCommand(sql, connection);
             await using var reader = await command.ExecuteReaderAsync();
-            var fileSave = Path.Combine(Path.Combine(Paths.DestinationPathDB("AdminPanel", "UsersList")), Files.DBEquipments);
+            var fileSave = Path.Combine(Path.Combine(Paths.DestinationPathDb("AdminPanel", "UsersList")), Files.DbEquipments);
 
             await using (var writer = new StreamWriter(fileSave))
             {

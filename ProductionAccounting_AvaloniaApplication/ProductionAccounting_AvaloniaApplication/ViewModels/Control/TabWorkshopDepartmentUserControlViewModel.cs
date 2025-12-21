@@ -248,7 +248,7 @@ public class TabWorkshopDepartmentUserControlViewModel : ViewModelBase, IRecipie
 
             await using var command = new NpgsqlCommand(sql, connection);
             await using var reader = await command.ExecuteReaderAsync();
-            var fileSave = Path.Combine(Path.Combine(Paths.DestinationPathDB("AdminPanel", "WorkshopsDepartments")), Files.DBEquipments);
+            var fileSave = Path.Combine(Path.Combine(Paths.DestinationPathDb("AdminPanel", "WorkshopsDepartments")), Files.DbEquipments);
 
             await using (var writer = new StreamWriter(fileSave))
             {
