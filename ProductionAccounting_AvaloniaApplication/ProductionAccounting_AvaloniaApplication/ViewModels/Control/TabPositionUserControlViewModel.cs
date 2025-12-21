@@ -81,7 +81,7 @@ public class TabPositionUserControlViewModel : ViewModelBase, IRecipient<Refresh
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(level: LogLevel.ERROR,
+            Loges.LoggingProcess(level: LogLevel.Error,
                 message: "Error applying filters",
                 ex: ex);
 
@@ -125,7 +125,7 @@ public class TabPositionUserControlViewModel : ViewModelBase, IRecipient<Refresh
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(LogLevel.ERROR, "Error getting filtered positions IDs", ex: ex);
+            Loges.LoggingProcess(LogLevel.Error, "Error getting filtered positions IDs", ex: ex);
         }
 
         return userIds;
@@ -193,16 +193,16 @@ public class TabPositionUserControlViewModel : ViewModelBase, IRecipient<Refresh
         catch (NpgsqlException ex)
         {
             StackPanelHelper.ClearAndRefreshStackPanel<CartPositionUserControl>(HomeMainContent, positionList);
-            ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NoConnectToDB);
-            Loges.LoggingProcess(LogLevel.CRITICAL,
+            ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NoConnectToDb);
+            Loges.LoggingProcess(LogLevel.Critical,
                 "Connection or request error",
                 ex: ex);
         }
         catch (Exception ex)
         {
             StackPanelHelper.ClearAndRefreshStackPanel<CartPositionUserControl>(HomeMainContent, positionList);
-            ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NoConnectToDB);
-            Loges.LoggingProcess(LogLevel.ERROR,
+            ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NoConnectToDb);
+            Loges.LoggingProcess(LogLevel.Error,
                 "Error loading positions by IDs",
                 ex: ex);
         }
@@ -253,13 +253,13 @@ public class TabPositionUserControlViewModel : ViewModelBase, IRecipient<Refresh
         }
         catch (NpgsqlException ex)
         {
-            Loges.LoggingProcess(LogLevel.ERROR,
+            Loges.LoggingProcess(LogLevel.Error,
                 "Connection or request error",
                 ex: ex);
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(LogLevel.ERROR,
+            Loges.LoggingProcess(LogLevel.Error,
                 "Connection or request error",
                 ex: ex);
         }

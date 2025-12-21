@@ -127,7 +127,7 @@ public class CartUserListUserControlViewModel : ViewModelBase, INotifyPropertyCh
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(level: LogLevel.WARNING, ex: ex);
+            Loges.LoggingProcess(level: LogLevel.Warning, ex: ex);
         }
     }
 

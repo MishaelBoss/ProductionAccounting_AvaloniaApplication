@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AvaloniaProject">
+    <option name="projectPerEditor">
+      <map>
+        <entry key="ProductionAccounting_AvaloniaApplication/Views/Control/AddProductUserControl.axaml" value="ProductionAccounting_AvaloniaApplication/ProductionAccounting_AvaloniaApplication.csproj" />
+        <entry key="ProductionAccounting_AvaloniaApplication/Views/Control/CompleteWorkFormUserControl.axaml" value="ProductionAccounting_AvaloniaApplication/ProductionAccounting_AvaloniaApplication.csproj" />
+      </map>
+    </option>
+  </component>
+</project>

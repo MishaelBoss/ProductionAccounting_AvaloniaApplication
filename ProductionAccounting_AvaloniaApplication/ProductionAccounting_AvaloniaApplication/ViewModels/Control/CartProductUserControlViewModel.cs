@@ -131,14 +131,14 @@ public class CartProductUserControlViewModel : ViewModelBase, INotifyPropertyCha
         }
         catch (PostgresException ex)
         {
-            Loges.LoggingProcess(level: LogLevel.WARNING,
+            Loges.LoggingProcess(level: LogLevel.Warning,
                 ex: ex);
 
             CanCompleteTask = false;
         }
         catch (Exception ex) 
         {
-            Loges.LoggingProcess(level: LogLevel.WARNING,
+            Loges.LoggingProcess(level: LogLevel.Warning,
                 ex: ex);
 
             CanCompleteTask = false;
@@ -195,12 +195,12 @@ public class CartProductUserControlViewModel : ViewModelBase, INotifyPropertyCha
         }
         catch (PostgresException ex)
         {
-            Loges.LoggingProcess(level: LogLevel.WARNING,
+            Loges.LoggingProcess(level: LogLevel.Warning,
                 ex: ex);
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(level: LogLevel.WARNING,
+            Loges.LoggingProcess(level: LogLevel.Warning,
                 ex: ex);
         }
     }

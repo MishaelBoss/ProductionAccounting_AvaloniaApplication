@@ -94,7 +94,7 @@ public class CartShipmentUserControlViewModel : ViewModelBase
         }
         catch (Exception ex) 
         {
-            Loges.LoggingProcess(level: LogLevel.WARNING,
+            Loges.LoggingProcess(level: LogLevel.Warning,
                 ex: ex);
         }
     }

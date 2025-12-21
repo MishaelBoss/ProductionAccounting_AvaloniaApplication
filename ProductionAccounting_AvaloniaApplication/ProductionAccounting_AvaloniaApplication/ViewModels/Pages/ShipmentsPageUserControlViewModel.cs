@@ -24,20 +24,32 @@ public class ShipmentsPageUserControlViewModel : ViewModelBase, IRecipient<Refre
         _ = LoadShipmentsAsync();
     }
 
-    public StackPanel? CartShipment { get; set; } = null;
+    public StackPanel? CartShipment { get; set; }
 
-    private readonly List<CartShipmentUserControl> shipmentsList = [];
+    private readonly List<CartShipmentUserControl> _shipmentsList = [];
 
     public ICommand RefreshCommand
-        => new RelayCommand(async () => await LoadShipmentsAsync());
+        => new RelayCommand(async void () =>
+        {
+            try
+            {
+                await LoadShipmentsAsync();
+            }
+            catch (Exception ex)
+            {
+                Loges.LoggingProcess(level: LogLevel.Critical,
+                    ex: ex, 
+                    message: "Error load shipments");
+            }
+        });
 
     public async Task LoadShipmentsAsync() 
     {
-        StackPanelHelper.ClearAndRefreshStackPanel<CartShipmentUserControl>(CartShipment, shipmentsList);
+        StackPanelHelper.ClearAndRefreshStackPanel<CartShipmentUserControl>(CartShipment, _shipmentsList);
 
         try
         {
-            string sql = @"
+            const string sql = @"
                     SELECT 
                         s.id,
                         s.product_task_id,
@@ -57,11 +69,11 @@ public class ShipmentsPageUserControlViewModel : ViewModelBase, IRecipient<Refre
                     JOIN public.product p ON p.id = pt.product_id
                     ORDER BY s.created_at DESC";
 
-            using (var connection = new NpgsqlConnection(Arguments.Connection))
+            await using (var connection = new NpgsqlConnection(Arguments.Connection))
             {
                 await connection.OpenAsync();
-                using var command = new NpgsqlCommand(sql, connection);
-                using var reader = await command.ExecuteReaderAsync();
+                await using var command = new NpgsqlCommand(sql, connection);
+                await using var reader = await command.ExecuteReaderAsync();
                 while (await reader.ReadAsync())
                 {
                     var viewModel = new CartShipmentUserControlViewModel()
@@ -85,15 +97,15 @@ public class ShipmentsPageUserControlViewModel : ViewModelBase, IRecipient<Refre
                         DataContext = viewModel,
                     };
 
-                    shipmentsList.Add(userControl);
+                    _shipmentsList.Add(userControl);
                 }
             }
 
-            StackPanelHelper.RefreshStackPanelContent<CartShipmentUserControl>(CartShipment, shipmentsList);
+            StackPanelHelper.RefreshStackPanelContent(CartShipment, _shipmentsList);
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(level: LogLevel.WARNING,
+            Loges.LoggingProcess(level: LogLevel.Warning,
                 ex: ex);
         }
     }

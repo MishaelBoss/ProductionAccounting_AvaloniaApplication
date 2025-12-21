@@ -7,16 +7,17 @@ using ProductionAccounting_AvaloniaApplication.Models;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using System;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Net.NetworkInformation;
 using System.Text.Json;
 using System.Windows.Input;
+using JetBrains.Annotations;
+using ReactiveUI;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
 
-public class SettingsPageUserControlViewModel : ViewModelBase, INotifyPropertyChanged
+public class SettingsPageUserControlViewModel : ViewModelBase
 {
     public SettingsPageUserControlViewModel()
     {
@@ -33,94 +34,76 @@ public class SettingsPageUserControlViewModel : ViewModelBase, INotifyPropertyCh
         => new RelayCommand(TestConnection);
 
     private string _ip = string.Empty;
+    [UsedImplicitly]
     public string Ip
     {
         get => _ip;
         set
         {
-            if(_ip != value)
-            {
-                _ip = value;
-                OnPropertyChanged(nameof(Ip));
-                ChangeServerIp();
-            }
+            this.RaiseAndSetIfChanged(ref _ip, value);
+            ChangeServerIp();
         }
     }
 
     private string _port = string.Empty;
+    [UsedImplicitly]
     public string Port
     {
         get => _port;
         set
         {
-            if(_port != value)
-            {
-                _port = value;
-                OnPropertyChanged(nameof(Port));
-                ChangeServerPort();
-            }
+            this.RaiseAndSetIfChanged(ref _port, value);
+            ChangeServerPort();
         }
     }
 
     private string _name = string.Empty;
+    [UsedImplicitly]
     public string Name
     {
         get => _name;
         set
         {
-            if(_name != value)
-            {
-                _name = value;
-                OnPropertyChanged(nameof(Name));
-                ChangeServerName();
-            }
+            this.RaiseAndSetIfChanged(ref _name, value);
+            ChangeServerName();
         }
     }
 
     private string _user = string.Empty;
+    [UsedImplicitly]
     public string User
     {
         get => _user;
         set
         {
-            if(_user != value)
-            {
-                _user = value;
-                OnPropertyChanged(nameof(User));
-                ChangeServerUser();
-            }
+            this.RaiseAndSetIfChanged(ref _user, value);
+            ChangeServerUser();
         }
     }
 
     private string _password = string.Empty;
+    [UsedImplicitly]
     public string Password
     {
         get => _password;
-        set
+        set 
         {
-            if(_password != value)
-            {
-                _password = value;
-                OnPropertyChanged(nameof(Password));
-                ChangeServerPassword();
-            }
+            this.RaiseAndSetIfChanged(ref _password, value);
+            ChangeServerPassword();
         }
     }
 
     private ObservableCollection<ComboBoxLocalization> ComboBoxLocalizations { get; } = [];
 
     private ComboBoxLocalization? _selectedComboBoxLocalization;
+    [UsedImplicitly]
     public ComboBoxLocalization? SelectedComboBoxLocalization
     {
         get => _selectedComboBoxLocalization;
         set
         {
-            if (_selectedComboBoxLocalization != value)
-            {
-                _selectedComboBoxLocalization = value;
-                OnPropertyChanged(nameof(SelectedComboBoxLocalization));
-                ChangeLocalization();
-            }
+            this.RaiseAndSetIfChanged(ref _selectedComboBoxLocalization, value);
+            ChangeLocalization();
         }
     }
 
@@ -137,32 +120,32 @@ public class SettingsPageUserControlViewModel : ViewModelBase, INotifyPropertyCh
             }
         });
 
-    public void ChangeServerIp()
+    private void ChangeServerIp()
     {
         ManagerSettingsJson.Change("Server.Ip", Ip);
     }
 
-    public void ChangeServerPort()
+    private void ChangeServerPort()
     {
         ManagerSettingsJson.Change("Server.Port", Port);
     }
 
-    public void ChangeServerName()
+    private void ChangeServerName()
     {
         ManagerSettingsJson.Change("Server.Name", Name);
     }
 
-    public void ChangeServerUser()
+    private void ChangeServerUser()
     {
         ManagerSettingsJson.Change("Server.User", User);
     }
 
-    public void ChangeServerPassword()
+    private void ChangeServerPassword()
     {
         ManagerSettingsJson.Change("Server.Password", Password);
     }
 
-    public void ChangeLocalization()
+    private void ChangeLocalization()
     {
         ManagerSettingsJson.Change("Language", SelectedComboBoxLocalization?.FileName ?? string.Empty);
     }
@@ -188,13 +171,13 @@ public class SettingsPageUserControlViewModel : ViewModelBase, INotifyPropertyCh
 
             if (reply is { Status: IPStatus.Success })
             {
-                Loges.LoggingProcess(level: LogLevel.INFO,
+                Loges.LoggingProcess(level: LogLevel.Info,
                     message: $"Address: {reply.Address}");
 
-                Loges.LoggingProcess(level: LogLevel.INFO,
+                Loges.LoggingProcess(level: LogLevel.Info,
                     message: $"Roundtrip time: {reply.RoundtripTime}");
 
-                Loges.LoggingProcess(level: LogLevel.INFO,
+                Loges.LoggingProcess(level: LogLevel.Info,
                     message: $"Time to live: {reply.Options?.Ttl}");
 
                 TestPostgreSqlConnection();
@@ -202,12 +185,12 @@ public class SettingsPageUserControlViewModel : ViewModelBase, INotifyPropertyCh
         }
         catch (PingException pex)
         {
-            Loges.LoggingProcess(LogLevel.WARNING,
+            Loges.LoggingProcess(LogLevel.Warning,
                 $"Ping failed: {pex.Message}");
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(LogLevel.ERROR,
+            Loges.LoggingProcess(LogLevel.Error,
                 $"Connection test failed: {ex.Message}");
         }
     }
@@ -221,11 +204,11 @@ public class SettingsPageUserControlViewModel : ViewModelBase, INotifyPropertyCh
 
             using var cmd = new NpgsqlCommand("SELECT 1", connection);
             var result = cmd.ExecuteScalar();
-            MessageBoxManager.GetMessageBoxStandard("Message", "PostgreSQL connection test successful").ShowWindowAsync();
+            MessageBoxManager.GetMessageBoxStandard("Message", $"PostgreSQL connection test successful, result: {result}").ShowWindowAsync();
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(LogLevel.ERROR,
+            Loges.LoggingProcess(LogLevel.Error,
                 $"Connection test failed: {ex.Message}");
             MessageBoxManager.GetMessageBoxStandard("Message", "PostgreSQL connection failed").ShowWindowAsync();
         }
@@ -270,9 +253,4 @@ public class SettingsPageUserControlViewModel : ViewModelBase, INotifyPropertyCh
             }
         }
     }
-
-
-    public new event PropertyChangedEventHandler? PropertyChanged;
-    protected void OnPropertyChanged(string propertyName)
-        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }

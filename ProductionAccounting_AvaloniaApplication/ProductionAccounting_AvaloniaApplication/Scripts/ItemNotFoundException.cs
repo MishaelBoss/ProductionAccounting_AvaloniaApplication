@@ -12,7 +12,7 @@ public static class ItemNotFoundException
     {
         var notFoundUserControl = new NotFoundUserControl { DataContext = new NotFoundUserControlViewModel(level) };
 
-        if (stackPanel == null || notFoundUserControl == null)
+        if (stackPanel is null)
             return;
 
         try
@@ -22,7 +22,7 @@ public static class ItemNotFoundException
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(LogLevel.ERROR,
+            Loges.LoggingProcess(LogLevel.Error,
                 "Error updating stack panel",
                 ex: ex);
         }

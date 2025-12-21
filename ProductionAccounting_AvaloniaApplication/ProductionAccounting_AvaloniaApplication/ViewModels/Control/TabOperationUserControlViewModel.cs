@@ -121,7 +121,7 @@ public class TabOperationUserControlViewModel : ViewModelBase, INotifyPropertyCh
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(level: LogLevel.ERROR,
+            Loges.LoggingProcess(level: LogLevel.Error,
                 message: "Error applying filters",
                 ex: ex);
 
@@ -177,7 +177,7 @@ public class TabOperationUserControlViewModel : ViewModelBase, INotifyPropertyCh
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(LogLevel.ERROR, "Error getting filtered user IDs", ex: ex);
+            Loges.LoggingProcess(LogLevel.Error, "Error getting filtered user IDs", ex: ex);
         }
 
         return userIds;
@@ -248,16 +248,16 @@ public class TabOperationUserControlViewModel : ViewModelBase, INotifyPropertyCh
         catch (NpgsqlException ex)
         {
             StackPanelHelper.ClearAndRefreshStackPanel<CartOperationUserControl>(HomeMainContent, operationList);
-            ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NoConnectToDB);
+            ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NoConnectToDb);
 
-            Loges.LoggingProcess(LogLevel.CRITICAL,
+            Loges.LoggingProcess(LogLevel.Critical,
                 "Connection or request error",
                 ex: ex);
         }
         catch (Exception ex)
         {
             StackPanelHelper.ClearAndRefreshStackPanel<CartOperationUserControl>(HomeMainContent, operationList);
-            Loges.LoggingProcess(LogLevel.ERROR,
+            Loges.LoggingProcess(LogLevel.Error,
                 "Error loading users by IDs",
                 ex: ex);
         }
@@ -308,13 +308,13 @@ public class TabOperationUserControlViewModel : ViewModelBase, INotifyPropertyCh
         }
         catch (NpgsqlException ex)
         {
-            Loges.LoggingProcess(LogLevel.ERROR,
+            Loges.LoggingProcess(LogLevel.Error,
                 "Connection or request error",
                 ex: ex);
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(LogLevel.ERROR,
+            Loges.LoggingProcess(LogLevel.Error,
                 "Connection or request error",
                 ex: ex);
         }

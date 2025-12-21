@@ -69,20 +69,20 @@ public class AddDepartmentUserControlViewModel : ViewModelBase, INotifyPropertyC
                 }
                 catch (Exception ex)
                 {
-                    Loges.LoggingProcess(level: LogLevel.ERROR,
+                    Loges.LoggingProcess(level: LogLevel.Error,
                         ex: ex);
                 }
             }
             catch (Exception ex)
             {
-                Loges.LoggingProcess(level: LogLevel.WARNING,
+                Loges.LoggingProcess(level: LogLevel.Warning,
                     ex: ex);
                 Messageerror = "Неизвестная ошибка";
             }
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(level: LogLevel.WARNING,
+            Loges.LoggingProcess(level: LogLevel.Warning,
                 ex: ex);
         }
     }

@@ -6,119 +6,140 @@ using ProductionAccounting_AvaloniaApplication.Scripts;
 using ProductionAccounting_AvaloniaApplication.Views.Control;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using JetBrains.Annotations;
+using ReactiveUI;
 using static ProductionAccounting_AvaloniaApplication.ViewModels.Control.NotFoundUserControlViewModel;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
-public class TabProductUserControlViewModel : ViewModelBase, INotifyPropertyChanged, IRecipient<RefreshProductListMessage>
+public class TabProductUserControlViewModel : ViewModelBase, IRecipient<RefreshProductListMessage>
 {
     private string _search = string.Empty;
+    [UsedImplicitly]
     public string Search
     {
         get => _search;
         set
         {
-            if (_search != value)
-            {
-                _search = value;
-                OnPropertyChanged(nameof(Search));
-                PerformSearchList();
-            }
+            this.RaiseAndSetIfChanged(ref _search, value);
+            PerformSearchList();
         }
     }
 
     private bool _showActive = true;
+    [UsedImplicitly]
     public bool ShowActive
     {
         get => _showActive;
         set
         {
-            if (_showActive != value)
-            {
-                _showActive = value;
-                OnPropertyChanged(nameof(ShowActive));
-                _ = ApplyFilters();
-            }
+            this.RaiseAndSetIfChanged(ref _showActive, value);
+            _ = ApplyFilters();
         }
     }
 
     private bool _showInactive = true;
+    [UsedImplicitly]
     public bool ShowInactive
     {
         get => _showInactive;
         set
         {
-            if (_showInactive != value)
-            {
-                _showInactive = value;
-                OnPropertyChanged(nameof(ShowInactive));
-                _ = ApplyFilters();
-            }
+            this.RaiseAndSetIfChanged(ref _showInactive, value);
+            _ = ApplyFilters();
         }
     }
 
     public TabProductUserControlViewModel()
     {
-        WeakReferenceMessenger.Default.Register<RefreshProductListMessage>(this);
+        WeakReferenceMessenger.Default.Register(this);
     }
 
     public void Receive(RefreshProductListMessage message)
         => GetList();
 
-    public StackPanel? HomeMainContent { get; set; } = null;
+    public StackPanel? HomeMainContent { get; set; }
 
-    private readonly List<CartProductUserControl> productList = [];
-    private List<double> filteredProductIds = [];
+    private readonly List<CartProductUserControl> _productList = [];
+    private List<double> _filteredProductIds = [];
 
     public ICommand ResetFiltersCommand
-        => new RelayCommand(() => ResetFilters());
+        => new RelayCommand(ResetFilters);
 
     public static ICommand DownloadAsyncCommand
-        => new RelayCommand(async () => await DownloadListAsync());
+        => new RelayCommand(async void () =>
+        {
+            try
+            {
+                await DownloadListAsync();
+            }
+            catch (Exception ex)
+            {
+                Loges.LoggingProcess(level: LogLevel.Critical, 
+                    ex: ex, message: 
+                    "Error download");
+            }
+        });
 
     public ICommand RefreshAsyncCommand
-        => new RelayCommand(() => GetList());
+        => new RelayCommand(GetList);
 
     private async void PerformSearchList()
     {
-        await ApplyFilters();
+        try
+        {
+            await ApplyFilters();
+        }
+        catch (Exception ex)
+        {
+            Loges.LoggingProcess(level: LogLevel.Error, 
+                ex: ex, message: 
+                "Error perform search");
+        }
     }
 
     public async void GetList()
     {
-        Search = string.Empty;
-        await ApplyFilters();
+        try
+        {
+            await ApplyFilters();
+        }
+        catch (Exception ex)
+        {
+            Loges.LoggingProcess(level: LogLevel.Error, 
+                ex: ex, message: 
+                "Error get list");
+        }
     }
 
     private async Task ApplyFilters()
     {
         try
         {
-            filteredProductIds = await GetFilteredProductIdsAsync();
+            _filteredProductIds = await GetFilteredProductIdsAsync();
 
-            if (filteredProductIds.Count > 0)
+            if (_filteredProductIds.Count > 0)
             {
-                await SearchProductAsync(filteredProductIds);
+                await SearchProductAsync(_filteredProductIds);
             }
             else
             {
-                StackPanelHelper.ClearAndRefreshStackPanel<CartProductUserControl>(HomeMainContent, productList);
+                StackPanelHelper.ClearAndRefreshStackPanel(HomeMainContent, _productList);
                 ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NotFound);
             }
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(level: LogLevel.ERROR,
+            Loges.LoggingProcess(level: LogLevel.Error,
                 message: "Error applying filters",
                 ex: ex);
 
-            StackPanelHelper.ClearAndRefreshStackPanel<CartProductUserControl>(HomeMainContent, productList);
+            StackPanelHelper.ClearAndRefreshStackPanel(HomeMainContent, _productList);
         }
     }
 
@@ -128,7 +149,7 @@ public class TabProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
 
         try
         {
-            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await using var connection = new NpgsqlConnection(Arguments.Connection);
             await connection.OpenAsync();
 
             var sql = "SELECT DISTINCT id FROM public.product WHERE 1=1";
@@ -153,13 +174,13 @@ public class TabProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
                 parameters.Add(new NpgsqlParameter("@search", $"%{Search}%"));
             }
 
-            using var command = new NpgsqlCommand(sql, connection);
+            await using var command = new NpgsqlCommand(sql, connection);
             foreach (var param in parameters)
             {
                 command.Parameters.Add(param);
             }
 
-            using var reader = await command.ExecuteReaderAsync();
+            await using var reader = await command.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
                 if (!reader.IsDBNull(0))
@@ -170,7 +191,7 @@ public class TabProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(LogLevel.ERROR, "Error getting filtered user IDs", ex: ex);
+            Loges.LoggingProcess(LogLevel.Error, "Error getting filtered user IDs", ex: ex);
         }
 
         return userIds;
@@ -180,26 +201,26 @@ public class TabProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
     {
         if (userIds.Count == 0)
         {
-            StackPanelHelper.ClearAndRefreshStackPanel<CartProductUserControl>(HomeMainContent, productList);
+            StackPanelHelper.ClearAndRefreshStackPanel(HomeMainContent, _productList);
             ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NotFound);
             return;
         }
 
-        StackPanelHelper.ClearAndRefreshStackPanel<CartProductUserControl>(HomeMainContent, productList);
+        StackPanelHelper.ClearAndRefreshStackPanel(HomeMainContent, _productList);
 
         try
         {
             var parameters = new List<NpgsqlParameter>();
             var paramNames = new List<string>();
 
-            for (int i = 0; i < userIds.Count; i++)
+            for (var i = 0; i < userIds.Count; i++)
             {
                 var paramName = $"@id{i}";
                 paramNames.Add(paramName);
                 parameters.Add(new NpgsqlParameter(paramName, userIds[i]));
             }
 
-            string sql = $@"
+            var sql = $@"
                     SELECT 
                         pt.id,
                         pt.product_id,
@@ -218,17 +239,17 @@ public class TabProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
                     WHERE p.id IN ({string.Join(", ", paramNames)}) 
                     ORDER BY pt.created_at DESC";
 
-            using (var connection = new NpgsqlConnection(Arguments.Connection))
+            await using (var connection = new NpgsqlConnection(Arguments.Connection))
             {
                 await connection.OpenAsync();
-                using var command = new NpgsqlCommand(sql, connection);
+                await using var command = new NpgsqlCommand(sql, connection);
 
                 foreach (var param in parameters)
                 {
                     command.Parameters.Add(param);
                 }
 
-                using var reader = await command.ExecuteReaderAsync();
+                await using var reader = await command.ExecuteReaderAsync();
                 while (await reader.ReadAsync())
                 {
                     var viewModel = new CartProductUserControlViewModel
@@ -252,29 +273,29 @@ public class TabProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
                         DataContext = viewModel
                     };
 
-                    productList.Add(userControl);
+                    _productList.Add(userControl);
                 }
 
-                if (productList.FirstOrDefault()?.DataContext is CartProductUserControlViewModel vm) await vm.CheckIsTaskCanBeCompleted();
+                if (_productList.FirstOrDefault()?.DataContext is CartProductUserControlViewModel vm) await vm.CheckIsTaskCanBeCompleted();
             }
 
-            StackPanelHelper.RefreshStackPanelContent<CartProductUserControl>(HomeMainContent, productList);
+            StackPanelHelper.RefreshStackPanelContent(HomeMainContent, _productList);
 
-            if (productList.Count == 0) ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NotFound);
+            if (_productList.Count == 0) ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NotFound);
         }
         catch (NpgsqlException ex)
         {
-            StackPanelHelper.ClearAndRefreshStackPanel<CartProductUserControl>(HomeMainContent, productList);
-            ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NoConnectToDB);
-            Loges.LoggingProcess(LogLevel.CRITICAL,
+            StackPanelHelper.ClearAndRefreshStackPanel(HomeMainContent, _productList);
+            ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NoConnectToDb);
+            Loges.LoggingProcess(LogLevel.Critical,
                 "Connection or request error",
                 ex: ex);
         }
         catch (Exception ex)
         {
-            StackPanelHelper.ClearAndRefreshStackPanel<CartProductUserControl>(HomeMainContent, productList);
-            ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NoConnectToDB);
-            Loges.LoggingProcess(LogLevel.ERROR,
+            StackPanelHelper.ClearAndRefreshStackPanel(HomeMainContent, _productList);
+            ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NoConnectToDb);
+            Loges.LoggingProcess(LogLevel.Error,
                 "Error loading users by IDs",
                 ex: ex);
         }
@@ -302,34 +323,34 @@ public class TabProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
                         ) pt ON p.id = pt.product_id
                         ORDER BY p.name";
 
-            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await using var connection = new NpgsqlConnection(Arguments.Connection);
             await connection.OpenAsync();
 
-            using var command = new NpgsqlCommand(sql, connection);
-            using var reader = await command.ExecuteReaderAsync();
+            await using var command = new NpgsqlCommand(sql, connection);
+            await using var reader = await command.ExecuteReaderAsync();
             var destinationPath = Paths.DestinationPathDB("AdminPanel", "Products");
             Directory.CreateDirectory(destinationPath);
 
             var fileSave = Path.Combine(destinationPath, Files.DBEquipments);
 
-            using (var writer = new StreamWriter(fileSave))
+            await using (var writer = new StreamWriter(fileSave))
             {
-                for (int i = 0; i < reader.FieldCount; i++)
+                for (var i = 0; i < reader.FieldCount; i++)
                 {
-                    writer.Write(reader.GetName(i));
+                    await writer.WriteAsync(reader.GetName(i));
                     if (i < reader.FieldCount - 1)
                     {
-                        writer.Write(",");
+                        await writer.WriteAsync(",");
                     }
                 }
                 await writer.WriteLineAsync();
 
                 while (await reader.ReadAsync())
                 {
-                    for (int i = 0; i < reader.FieldCount; i++)
+                    for (var i = 0; i < reader.FieldCount; i++)
                     {
                         var value = reader.GetValue(i);
-                        var stringValue = value?.ToString() ?? "";
+                        var stringValue = value.ToString() ?? "";
 
                         if (stringValue.Contains(',') || stringValue.Contains('\"') || stringValue.Contains('\n'))
                         {
@@ -358,13 +379,13 @@ public class TabProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
         }
         catch (NpgsqlException ex)
         {
-            Loges.LoggingProcess(LogLevel.ERROR, 
+            Loges.LoggingProcess(LogLevel.Error, 
                 "Database error downloading product list", 
                 ex: ex);
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(LogLevel.ERROR, 
+            Loges.LoggingProcess(LogLevel.Error, 
                 "Error downloading product list", 
                 ex: ex);
         }
@@ -376,8 +397,4 @@ public class TabProductUserControlViewModel : ViewModelBase, INotifyPropertyChan
         ShowInactive = true;
         Search = string.Empty;
     }
-
-    public new event PropertyChangedEventHandler? PropertyChanged;
-    protected void OnPropertyChanged(string propertyName)
-        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }

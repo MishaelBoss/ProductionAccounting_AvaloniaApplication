@@ -1,5 +1,4 @@
-﻿using Avalonia;
-using Avalonia.Media.Imaging;
+﻿using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -10,6 +9,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using JetBrains.Annotations;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
 
@@ -23,6 +23,7 @@ public class AuthorizationPageUserControlViewModel : ViewModelBase
     }
 
     private string _login = string.Empty;
+    [UsedImplicitly]
     public string Login
     {
         get => _login;
@@ -34,6 +35,7 @@ public class AuthorizationPageUserControlViewModel : ViewModelBase
     }
 
     private string _password = string.Empty;
+    [UsedImplicitly]
     public string Password
     {
         get => _password;
@@ -51,7 +53,8 @@ public class AuthorizationPageUserControlViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _eyeIcon, value);
     }
 
-    private bool _isPasswordVisible = false;
+    private bool _isPasswordVisible;
+    [UsedImplicitly]
     public bool IsPasswordVisible
     {
         get => _isPasswordVisible;
@@ -67,7 +70,19 @@ public class AuthorizationPageUserControlViewModel : ViewModelBase
         => new RelayCommand(() => { IsPasswordVisible = !IsPasswordVisible; UpdateEyeIcon(); });
 
     public ICommand ConfirmCommand
-        => new RelayCommand(async () => await Authorization());
+        => new RelayCommand(async void () =>
+        {
+            try
+            {
+                await Authorization();
+            }
+            catch (Exception ex)
+            {
+                Loges.LoggingProcess(level: LogLevel.Critical,
+                    ex: ex,
+                    message: "Failed to log in");
+            }
+        });
 
     public bool IsActiveConfirmButton
         => !string.IsNullOrEmpty(Login)
@@ -93,19 +108,19 @@ public class AuthorizationPageUserControlViewModel : ViewModelBase
 
             try
             {
-                string query = @"SELECT id, login, last_name, first_name, middle_name, password FROM public.""user"" WHERE login = @login";
+                const string query = @"SELECT id, login, last_name, first_name, middle_name, password FROM public.""user"" WHERE login = @login";
 
-                using var connection = new NpgsqlConnection(Arguments.Connection);
-                connection.Open();
-                using var command = new NpgsqlCommand(query, connection);
+                await using var connection = new NpgsqlConnection(Arguments.Connection);
+                await connection.OpenAsync();
+                await using var command = new NpgsqlCommand(query, connection);
                 command.Parameters.AddWithValue("@login", Login);
 
-                using var reader = command.ExecuteReader();
+                await using var reader = command.ExecuteReader();
                 if (reader.Read())
                 {
-                    double id = reader.GetDouble(0);
-                    string login = reader.GetString(1);
-                    string password = reader.GetString(5);
+                    var id = reader.GetDouble(0);
+                    var login = reader.GetString(1);
+                    var password = reader.GetString(5);
 
                     if (password == Password)
                     {
@@ -130,7 +145,7 @@ public class AuthorizationPageUserControlViewModel : ViewModelBase
             }
             catch (Exception ex)
             {
-                Loges.LoggingProcess(level: LogLevel.ERROR,
+                Loges.LoggingProcess(level: LogLevel.Error,
                     ex: ex,
                     message: "Error connecting to database");
                 Messageerror = "Ошибка подключения к базе данных";
@@ -138,21 +153,21 @@ public class AuthorizationPageUserControlViewModel : ViewModelBase
         }
         catch (PostgresException ex)
         {
-            Loges.LoggingProcess(level: LogLevel.WARNING,
+            Loges.LoggingProcess(level: LogLevel.Warning,
                 ex: ex,
                 message: "Unexpected error in authorization");
             Messageerror = "Неожиданная ошибка";
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(level: LogLevel.ERROR,
+            Loges.LoggingProcess(level: LogLevel.Error,
                 ex: ex,
                 message: "Unexpected error in authorization");
             Messageerror = "Неожиданная ошибка";
         }
     }
 
-    public void ClearForm()
+    private void ClearForm()
     {
         Messageerror = string.Empty;
         Login = string.Empty;

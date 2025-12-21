@@ -8,14 +8,14 @@ using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using JetBrains.Annotations;
 using static ProductionAccounting_AvaloniaApplication.ViewModels.Control.NotFoundUserControlViewModel;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
 
-public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyChanging
+public class TimesheetPageUserControlViewModel : ViewModelBase
 {
 
     public TimesheetPageUserControlViewModel()
@@ -26,11 +26,12 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
         _ = LoadListUsersAsync();
     }
 
-    public StackPanel? CartTimesheet { get; set; } = null;
+    public StackPanel? CartTimesheet { get; set; }
 
-    private readonly List<CartTimesheetUserControl> timesheetList = [];
+    private readonly List<CartTimesheetUserControl> _timesheetList = [];
 
     private DateTime _filterStartDate = DateTime.Today;
+    [UsedImplicitly]
     public DateTime FilterStartDate
     {
         get => _filterStartDate;
@@ -44,6 +45,7 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
     }
 
     private DateTime _filterEndDate = DateTime.Today;
+    [UsedImplicitly]
     public DateTime FilterEndDate
     {
         get => _filterEndDate;
@@ -57,6 +59,7 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
     }
 
     private DateTime _selectedDate = DateTime.Today;
+    [UsedImplicitly]
     public DateTime SelectedDate
     {
         get => _selectedDate;
@@ -64,6 +67,7 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
     }
 
     private TimesheetStatus? _selectedSingleStatus;
+    [UsedImplicitly]
     public TimesheetStatus? SelectedSingleStatus
     {
         get => _selectedSingleStatus;
@@ -71,6 +75,7 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
     }
 
     private ComboBoxUser? _selectedSingleUser;
+    [UsedImplicitly]
     public ComboBoxUser? SelectedSingleUser
     {
         get => _selectedSingleUser;
@@ -78,6 +83,7 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
     }
 
     private decimal _singleHours = 8.0m;
+    [UsedImplicitly]
     public decimal SingleHours
     {
         get => _singleHours;
@@ -85,6 +91,7 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
     }
 
     private string _singleNotes = string.Empty;
+    [UsedImplicitly]
     public string SingleNotes
     {
         get => _singleNotes;
@@ -92,6 +99,7 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
     }
 
     private DateTime _massEditStartDate = DateTime.Today;
+    [UsedImplicitly]
     public DateTime MassEditStartDate
     {
         get => _massEditStartDate;
@@ -99,12 +107,14 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
     }
 
     private DateTime _massEditEndDate = DateTime.Today;
+    [UsedImplicitly]
     public DateTime MassEditEndDate
     {
         get => _massEditEndDate;
         set => this.RaiseAndSetIfChanged(ref _massEditEndDate, value);
     }
 
+    [UsedImplicitly]
     public List<TimesheetStatus> Statuses { get; } =
     [
         new TimesheetStatus { Code = "Я", Name = "Явка", Description = "Рабочий день", Color = "#28a745" },
@@ -115,6 +125,7 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
     ];
 
     private TimesheetStatus? _selectedMassStatus;
+    [UsedImplicitly]
     public TimesheetStatus? SelectedMassStatus
     {
         get => _selectedMassStatus;
@@ -122,6 +133,7 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
     }
 
     private ObservableCollection<ComboBoxUser> _comboBoxUsers = [];
+    [UsedImplicitly]
     public ObservableCollection<ComboBoxUser> ComboBoxUsers
     {
         get => _comboBoxUsers;
@@ -129,20 +141,15 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
     }
 
     private ComboBoxUser? _userSelectionStates;
+    [UsedImplicitly]
     public ComboBoxUser? UserSelectionStates
     {
         get => _userSelectionStates;
-        set
-        {
-            if (_userSelectionStates != value)
-            {
-                _userSelectionStates = value;
-                OnPropertyChanged(nameof(UserSelectionStates));
-            }
-        }
+        set => this.RaiseAndSetIfChanged(ref _userSelectionStates, value);
     }
 
     private bool _applyToAllUsers = true;
+    [UsedImplicitly]
     public bool ApplyToAllUsers
     {
         get => _applyToAllUsers;
@@ -154,6 +161,7 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
     }
 
     private bool _applyToSelectedUsers;
+    [UsedImplicitly]
     public bool ApplyToSelectedUsers
     {
         get => _applyToSelectedUsers;
@@ -165,6 +173,7 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
     }
 
     private bool _excludeWeekends = true;
+    [UsedImplicitly]
     public bool ExcludeWeekends
     {
         get => _excludeWeekends;
@@ -172,6 +181,7 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
     }
 
     private decimal _massEditHours = 8.0m;
+    [UsedImplicitly]
     public decimal MassEditHours
     {
         get => _massEditHours;
@@ -179,15 +189,51 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
     }
 
     public ICommand RefreshTimesheetCommand
-        => new RelayCommand(async () => await RefreshTimesheetAsync());
+        => new RelayCommand(async void () =>
+        {
+            try
+            {
+                await RefreshTimesheetAsync();
+            }
+            catch (Exception ex)
+            {
+                Loges.LoggingProcess(level: LogLevel.Critical,
+                    ex: ex, 
+                    message: "Error refresh timesheet");
+            }
+        });
 
     public ICommand ApplyMassEditCommand
-        => new RelayCommand(async () => await ApplyMassEditAsync());
+        => new RelayCommand(async void () =>
+        {
+            try
+            {
+                await ApplyMassEditAsync();
+            }
+            catch (Exception ex)
+            {
+                Loges.LoggingProcess(level: LogLevel.Critical,
+                    ex: ex, 
+                    message: "Error save mass record");
+            }
+        });
 
     public ICommand SaveSingleRecordCommand
-        => new RelayCommand(async () => await SaveSingleRecordAsync());
+        => new RelayCommand(async void () =>
+        {
+            try
+            {
+                await SaveSingleRecordAsync();
+            }
+            catch (Exception ex)
+            {
+                Loges.LoggingProcess(level: LogLevel.Critical,
+                    ex: ex, 
+                    message: "Error save single record");
+            }
+        });
 
-    public async Task RefreshTimesheetAsync()
+    private async Task RefreshTimesheetAsync()
     {
         try
         {
@@ -203,22 +249,22 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
 
             await LoadTimesheetAsync(FilterStartDate, FilterEndDate);
 
-            Loges.LoggingProcess(LogLevel.INFO,
+            Loges.LoggingProcess(LogLevel.Info,
                 message: $"Табель обновлен за период: {FilterStartDate:dd.MM.yyyy} - {FilterEndDate:dd.MM.yyyy}");
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(LogLevel.ERROR,
+            Loges.LoggingProcess(LogLevel.Error,
                 ex: ex,
                 message: "Ошибка обновления табеля");
         }
     }
 
-    public async Task LoadListUsersAsync()
+    private async Task LoadListUsersAsync()
     {
         if (!Internet.ConnectToDataBase())
         {
-            Loges.LoggingProcess(LogLevel.ERROR,
+            Loges.LoggingProcess(LogLevel.Error,
                 message: "No connect to db");
             return;
         }
@@ -227,14 +273,14 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
         {
             ComboBoxUsers.Clear();
 
-            string sqlUsers = "SELECT id, first_name, last_name, middle_name, login FROM public.user WHERE is_active = true ORDER BY last_name, first_name";
+            const string sqlUsers = "SELECT id, first_name, last_name, middle_name, login FROM public.user WHERE is_active = true ORDER BY last_name, first_name";
 
-            using (var connection = new NpgsqlConnection(Arguments.Connection))
+            await using (var connection = new NpgsqlConnection(Arguments.Connection))
             {
                 await connection.OpenAsync();
 
-                using var command = new NpgsqlCommand(sqlUsers, connection);
-                using var reader = await command.ExecuteReaderAsync();
+                await using var command = new NpgsqlCommand(sqlUsers, connection);
+                await using var reader = await command.ExecuteReaderAsync();
                 while (await reader.ReadAsync())
                 {
                     var user = new ComboBoxUser(
@@ -253,30 +299,30 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(level: LogLevel.WARNING,
+            Loges.LoggingProcess(level: LogLevel.Warning,
                 ex: ex);
         }
     }
 
-    public async Task SaveSingleRecordAsync()
+    private async Task SaveSingleRecordAsync()
     {
         if (SelectedSingleUser == null || SelectedSingleStatus == null) return;
 
         try
         {
-            string sql = "INSERT INTO public.timesheet  (user_id, work_date, status, hours_worked, notes, created_by, created_at)" +
+            const string sql = "INSERT INTO public.timesheet  (user_id, work_date, status, hours_worked, notes, created_by, created_at)" +
                 "VALUES (@userId, @workDate, @status, @hoursWorked, @notes, @createdBy, @createdAt) " +
                 "ON CONFLICT (user_id, work_date) " +
                 "DO UPDATE SET status = EXCLUDED.status, hours_worked = EXCLUDED.hours_worked, notes = EXCLUDED.notes, updated_by = @createdBy, updated_at = @createdAt";
 
-            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await using var connection = new NpgsqlConnection(Arguments.Connection);
             await connection.OpenAsync();
-            using var command = new NpgsqlCommand(sql, connection);
+            await using var command = new NpgsqlCommand(sql, connection);
             command.Parameters.AddWithValue("@userId", SelectedSingleUser.Id);
             command.Parameters.AddWithValue("@workDate", SelectedDate);
             command.Parameters.AddWithValue("@status", SelectedSingleStatus.Code);
             command.Parameters.AddWithValue("@hoursWorked", SelectedSingleStatus.Code == "Я" ? SingleHours : 0);
-            command.Parameters.AddWithValue("@notes", SingleNotes ?? "");
+            command.Parameters.AddWithValue("@notes", SingleNotes);
             command.Parameters.AddWithValue("@createdBy", ManagerCookie.GetIdUser ?? 0);
             command.Parameters.AddWithValue("@createdAt", DateTime.Now);
 
@@ -288,17 +334,17 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(LogLevel.ERROR,
+            Loges.LoggingProcess(LogLevel.Error,
                 ex: ex,
                 message: "Ошибка сохранения единичной записи табеля");
         }
     }
 
-    public async Task ApplyMassEditAsync()
+    private async Task ApplyMassEditAsync()
     {
         if (!Internet.ConnectToDataBase())
         {
-            Loges.LoggingProcess(LogLevel.ERROR,
+            Loges.LoggingProcess(LogLevel.Error,
                 message: "No connect to db");
             return;
         }
@@ -313,14 +359,14 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
         var endDate = MassEditEndDate.Date;
         if (startDate > endDate) return;
 
-        int totalInserted = 0;
+        var totalInserted = 0;
 
         await using var connection = new NpgsqlConnection(Arguments.Connection);
         await connection.OpenAsync();
         await using var transaction = await connection.BeginTransactionAsync();
         try
         {
-            string sql = @"INSERT INTO public.timesheet (user_id, work_date, status, hours_worked, notes, created_by)" +
+            const string sql = @"INSERT INTO public.timesheet (user_id, work_date, status, hours_worked, notes, created_by)" +
             "VALUES (@userId, @workDate, @status, @hoursWorked, @notes, @createdBy) ON CONFLICT (user_id, work_date) DO NOTHING";
 
             await using var command = new NpgsqlCommand(sql, connection, transaction);
@@ -352,7 +398,7 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
             }
 
             await transaction.CommitAsync();
-            Loges.LoggingProcess(LogLevel.INFO,
+            Loges.LoggingProcess(LogLevel.Info,
                 message: $"Успешно добавлено {totalInserted} новых записей в табель");
 
             await RefreshTimesheetAsync();
@@ -360,7 +406,7 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
         catch (Exception ex)
         {
             await transaction.RollbackAsync();
-            Loges.LoggingProcess(LogLevel.ERROR,
+            Loges.LoggingProcess(LogLevel.Error,
                 ex: ex,
                 message: "Ошибка при массовом добавлении");
         }
@@ -378,19 +424,19 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
     {
         try
         {
-            StackPanelHelper.ClearAndRefreshStackPanel<CartTimesheetUserControl>(CartTimesheet, timesheetList);
+            StackPanelHelper.ClearAndRefreshStackPanel(CartTimesheet, _timesheetList);
 
-            string sql = "SELECT t.status, t.notes, t.hours_worked,t.user_id, u.login as user_login FROM public.timesheet t LEFT JOIN public.user u ON t.user_id = u.id WHERE t.work_date BETWEEN @startDate AND @endDate ORDER BY t.work_date DESC, u.login";
+            const string sql = "SELECT t.status, t.notes, t.hours_worked,t.user_id, u.login as user_login FROM public.timesheet t LEFT JOIN public.user u ON t.user_id = u.id WHERE t.work_date BETWEEN @startDate AND @endDate ORDER BY t.work_date DESC, u.login";
 
-            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await using var connection = new NpgsqlConnection(Arguments.Connection);
             await connection.OpenAsync();
 
-            using (var command = new NpgsqlCommand(sql, connection))
+            await using (var command = new NpgsqlCommand(sql, connection))
             {
                 command.Parameters.AddWithValue("@startDate", startDate.Date);
                 command.Parameters.AddWithValue("@endDate", endDate.Date);
 
-                using var reader = await command.ExecuteReaderAsync();
+                await using var reader = await command.ExecuteReaderAsync();
                 while (await reader.ReadAsync())
                 {
                     var viewModel = new CartTimesheetUserControlViewModel()
@@ -406,34 +452,30 @@ public class TimesheetPageUserControlViewModel : ViewModelBase, INotifyPropertyC
                         DataContext = viewModel
                     };
 
-                    timesheetList.Add(cartUser);
+                    _timesheetList.Add(cartUser);
                 }
             }
 
-            StackPanelHelper.RefreshStackPanelContent<CartTimesheetUserControl>(CartTimesheet, timesheetList);
+            StackPanelHelper.RefreshStackPanelContent(CartTimesheet, _timesheetList);
 
-            if (timesheetList.Count == 0)
+            if (_timesheetList.Count == 0)
                 ItemNotFoundException.Show(CartTimesheet, ErrorLevel.NotFound);
             else
-                Loges.LoggingProcess(LogLevel.INFO,
-                    message: $"Загружено {timesheetList.Count} записей за период: {startDate:dd.MM.yyyy} - {endDate:dd.MM.yyyy}");
+                Loges.LoggingProcess(LogLevel.Info,
+                    message: $"Загружено {_timesheetList.Count} записей за период: {startDate:dd.MM.yyyy} - {endDate:dd.MM.yyyy}");
         }
         catch (NpgsqlException ex)
         {
-            Loges.LoggingProcess(LogLevel.ERROR,
+            Loges.LoggingProcess(LogLevel.Error,
                 "Connection or request error",
                 ex: ex);
 
-            ItemNotFoundException.Show(CartTimesheet, ErrorLevel.NoConnectToDB);
+            ItemNotFoundException.Show(CartTimesheet, ErrorLevel.NoConnectToDb);
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(level: LogLevel.WARNING,
+            Loges.LoggingProcess(level: LogLevel.Warning,
                 ex: ex);
         }
     }
-
-    public new event PropertyChangedEventHandler? PropertyChanged;
-    protected void OnPropertyChanged(string propertyName)
-        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }

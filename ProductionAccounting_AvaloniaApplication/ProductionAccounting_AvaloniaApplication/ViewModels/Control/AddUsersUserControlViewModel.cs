@@ -270,7 +270,7 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(level: LogLevel.WARNING, 
+            Loges.LoggingProcess(level: LogLevel.Warning, 
                 ex: ex);
         }
     }
@@ -315,7 +315,7 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
                         var userId = await command.ExecuteScalarAsync();
                         if (userId == null) 
                         {
-                            Loges.LoggingProcess(level: LogLevel.WARNING,
+                            Loges.LoggingProcess(level: LogLevel.Warning,
                                 "User id null");
                             return;
                         }
@@ -382,20 +382,20 @@ public class AddUsersUserControlViewModel : ViewModelBase, INotifyPropertyChange
                 }
                 catch (Exception ex)
                 {
-                    Loges.LoggingProcess(level: LogLevel.ERROR,
+                    Loges.LoggingProcess(level: LogLevel.Error,
                         ex: ex);
                 }
             }
             catch (Exception ex)
             {
-                Loges.LoggingProcess(level: LogLevel.WARNING,
+                Loges.LoggingProcess(level: LogLevel.Warning,
                     ex: ex);
                 Messageerror = "Неизвестная ошибка";
             }
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(level: LogLevel.WARNING,
+            Loges.LoggingProcess(level: LogLevel.Warning,
                 ex: ex);
         }
     }

@@ -75,51 +75,42 @@ internal abstract class ManagerSettingsJson
             
             Arguments.AutoUpdate = data.AutoUpdate;
             Arguments.AutoUpdateCheck = data.AutoUpdateCheck;
-            
-            if (data.TimeCheckUpdate != null)
-            {
-                Arguments.TimeCheckUpdate.Seconds = data.TimeCheckUpdate.Seconds;
-                Arguments.TimeCheckUpdate.Minutes = data.TimeCheckUpdate.Minutes;
-                Arguments.TimeCheckUpdate.Hours = data.TimeCheckUpdate.Hours;
-            }
 
-            if (data.Loggers != null)
-            {
-                Arguments.Loggers.LoggerCritical = data.Loggers.LoggerCritical;
-                Arguments.Loggers.LoggerDebug = data.Loggers.LoggerDebug;
-                Arguments.Loggers.LoggerError = data.Loggers.LoggerError;
-                Arguments.Loggers.LoggerInfo = data.Loggers.LoggerInfo;
-                Arguments.Loggers.LoggerWarning = data.Loggers.LoggerWarning;
-            }
+            Arguments.TimeCheckUpdate.Seconds = data.TimeCheckUpdate.Seconds;
+            Arguments.TimeCheckUpdate.Minutes = data.TimeCheckUpdate.Minutes;
+            Arguments.TimeCheckUpdate.Hours = data.TimeCheckUpdate.Hours;
+
+            Arguments.Loggers.LoggerCritical = data.Loggers.LoggerCritical;
+            Arguments.Loggers.LoggerDebug = data.Loggers.LoggerDebug;
+            Arguments.Loggers.LoggerError = data.Loggers.LoggerError;
+            Arguments.Loggers.LoggerInfo = data.Loggers.LoggerInfo;
+            Arguments.Loggers.LoggerWarning = data.Loggers.LoggerWarning;
 
             Arguments.DeveloperDebug = data.DeveloperDebug;
             Arguments.OpenAfterDownloading = data.OpenAfterDownloading;
             Arguments.PathToLocalization = data.Language;
 
-            if (data.Server != null)
-            {
-                Arguments.Ip = data.Server.Ip ?? string.Empty;
-                Arguments.Port = data.Server.Port ?? string.Empty;
-                Arguments.Database = data.Server.Name ?? string.Empty;
-                Arguments.User = data.Server.User ?? string.Empty;
-                Arguments.Password = data.Server.Password ?? string.Empty;
-            }
+            Arguments.Ip = data.Server.Ip;
+            Arguments.Port = data.Server.Port;
+            Arguments.Database = data.Server.Name;
+            Arguments.User = data.Server.User;
+            Arguments.Password = data.Server.Password;
         }
         catch (FileNotFoundException)
         {
-            Loges.LoggingProcess(level: LogLevel.ERROR, 
+            Loges.LoggingProcess(level: LogLevel.Error, 
                 message: "file settings not found");
             CreateSettings();
         }
         catch (JsonException ex)
         {
-            Loges.LoggingProcess(level: LogLevel.ERROR, 
+            Loges.LoggingProcess(level: LogLevel.Error, 
                 ex.Message);
             CreateSettings();
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(level: LogLevel.ERROR, 
+            Loges.LoggingProcess(level: LogLevel.Error, 
                 ex.Message);
         }
     }
@@ -141,7 +132,7 @@ internal abstract class ManagerSettingsJson
 
             if (data == null)
             {
-                Loges.LoggingProcess(LogLevel.WARNING, "Failed to deserialize settings");
+                Loges.LoggingProcess(LogLevel.Warning, "Failed to deserialize settings");
                 return;
             }
 
@@ -151,7 +142,7 @@ internal abstract class ManagerSettingsJson
                 
                 if (parts.Length != 2)
                 {
-                    Loges.LoggingProcess(LogLevel.WARNING, 
+                    Loges.LoggingProcess(LogLevel.Warning, 
                         $"Invalid property path: {propertyPath}");
                     return;
                 }
@@ -162,29 +153,29 @@ internal abstract class ManagerSettingsJson
                         switch (parts[1].ToLower())
                         {
                             case "ip":
-                                data.Server.Ip = value?.ToString() ?? string.Empty;
+                                data.Server.Ip = value.ToString() ?? string.Empty;
                                 break;
                             case "port":
-                                data.Server.Port = value?.ToString() ?? string.Empty;
+                                data.Server.Port = value.ToString() ?? string.Empty;
                                 break;
                             case "name":
-                                data.Server.Name = value?.ToString() ?? string.Empty;
+                                data.Server.Name = value.ToString() ?? string.Empty;
                                 break;
                             case "user":
-                                data.Server.User = value?.ToString() ?? string.Empty;
+                                data.Server.User = value.ToString() ?? string.Empty;
                                 break;
                             case "password":
-                                data.Server.Password = value?.ToString() ?? string.Empty;
+                                data.Server.Password = value.ToString() ?? string.Empty;
                                 break;
                             default:
-                                Loges.LoggingProcess(LogLevel.WARNING,
+                                Loges.LoggingProcess(LogLevel.Warning,
                                     $"Unknown Server property: {parts[1]}");
                                 return;
                         }
                         break;
                         
                     default:
-                        Loges.LoggingProcess(LogLevel.WARNING,
+                        Loges.LoggingProcess(LogLevel.Warning,
                             $"Unknown object: {parts[0]}");
                         return;
                 }
@@ -194,7 +185,7 @@ internal abstract class ManagerSettingsJson
                 switch (propertyPath.ToLower())
                 {
                     case "language":
-                        data.Language = value?.ToString() ?? "ru_ru.json";
+                        data.Language = value.ToString() ?? "ru_ru.json";
                         break;
                     case "autoupdate":
                         data.AutoUpdate = Convert.ToBoolean(value);
@@ -209,7 +200,7 @@ internal abstract class ManagerSettingsJson
                         data.OpenAfterDownloading = Convert.ToBoolean(value);
                         break;
                     default:
-                        Loges.LoggingProcess(LogLevel.WARNING,
+                        Loges.LoggingProcess(LogLevel.Warning,
                             $"Unknown property: {propertyPath}");
                         return;
                 }

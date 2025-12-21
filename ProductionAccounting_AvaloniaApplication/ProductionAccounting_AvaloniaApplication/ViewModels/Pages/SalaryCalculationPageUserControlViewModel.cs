@@ -18,6 +18,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using JetBrains.Annotations;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
 
@@ -38,6 +39,7 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
     }
 
     private UserComboBoxItem? _selectedUser;
+    [UsedImplicitly]
     public UserComboBoxItem? SelectedUser
     {
         get => _selectedUser;
@@ -52,6 +54,7 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
     }
 
     private decimal _grandTotalGross;
+    [UsedImplicitly]
     public decimal GrandTotalGross
     {
         get => _grandTotalGross;
@@ -59,6 +62,7 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
     }
 
     private decimal _grandTotalTax;
+    [UsedImplicitly]
     public decimal GrandTotalTax
     {
         get => _grandTotalTax;
@@ -66,6 +70,7 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
     }
 
     private decimal _grandTotalNet;
+    [UsedImplicitly]
     public decimal GrandTotalNet
     {
         get => _grandTotalNet;
@@ -73,6 +78,7 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
     }
 
     private IStorageProvider? _storageProvider;
+    [UsedImplicitly]
     public IStorageProvider? StorageProvider
     {
         get => _storageProvider;
@@ -82,15 +88,39 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
     public ICommand ExportToPdfCommand
         => new AsyncRelayCommand(ExportToPdfAsync);
 
-    public StackPanel? SalaryContent { get; set; } = null;
+    public StackPanel? SalaryContent { get; set; }
 
-    private readonly List<SalaryRecordUserControl> salaryList = [];
+    private readonly List<SalaryRecordUserControl> _salaryList = [];
 
     public ICommand CalculateSalaryCommand
-        => new RelayCommand(async () => await CalculateSalaryAsync());
+        => new RelayCommand(async void () =>
+        {
+            try
+            {
+                await CalculateSalaryAsync();
+            }
+            catch (Exception ex)
+            {
+                Loges.LoggingProcess(level: LogLevel.Critical,
+                    ex: ex, 
+                    message: "Error calculate salary");
+            }
+        });
 
     public ICommand LoadUsersCommand
-        => new RelayCommand(async () => await LoadUsersAsync());
+        => new RelayCommand(async void () =>
+        {
+            try
+            {
+                await LoadUsersAsync();
+            }
+            catch (Exception ex)
+            {
+                Loges.LoggingProcess(level: LogLevel.Critical,
+                    ex: ex, 
+                    message: "Error load user");
+            }
+        });
 
     public SalaryCalculationPageUserControlViewModel()
     {
@@ -114,10 +144,10 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
                     WHERE is_active = true 
                     ORDER BY last_name, first_name";
 
-            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await using var connection = new NpgsqlConnection(Arguments.Connection);
             await connection.OpenAsync();
-            using var command = new NpgsqlCommand(sql, connection);
-            using var reader = await command.ExecuteReaderAsync();
+            await using var command = new NpgsqlCommand(sql, connection);
+            await using var reader = await command.ExecuteReaderAsync();
             var users = new List<UserComboBoxItem>{ new(0, "Все сотрудники", "", "", "") };
 
             while (await reader.ReadAsync())
@@ -136,7 +166,7 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(LogLevel.ERROR, "Ошибка загрузки пользователей", ex: ex);
+            Loges.LoggingProcess(LogLevel.Error, "Ошибка загрузки пользователей", ex: ex);
         }
     }
 
@@ -146,7 +176,7 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
         Console.WriteLine($"Период: {PeriodStart.DateTime:dd.MM.yyyy} - {PeriodEnd.DateTime:dd.MM.yyyy}");
         Console.WriteLine($"Сотрудник: {SelectedUser?.DisplayName ?? "Все"}");
 
-        StackPanelHelper.ClearAndRefreshStackPanel<SalaryRecordUserControl>(SalaryContent, salaryList);
+        StackPanelHelper.ClearAndRefreshStackPanel(SalaryContent, _salaryList);
 
         try
         {
@@ -199,8 +229,8 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
                 WHERE p.production_date BETWEEN @startDate AND @endDate
                     AND p.status IN ('issued', 'completed')
                     AND u.is_active = true";
-
-            if (SelectedUser != null && SelectedUser.Id > 0)
+            
+            if (SelectedUser is null && SelectedUser is { Id: > 0})
             {
                 sql += " AND p.user_id = @userId";
                 parameters.Add(new NpgsqlParameter("@userId", SelectedUser.Id));
@@ -211,16 +241,16 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
             parameters.Add(new NpgsqlParameter("@startDate", PeriodStart.DateTime.Date));
             parameters.Add(new NpgsqlParameter("@endDate", PeriodEnd.DateTime.Date.AddDays(1).AddSeconds(-1)));
 
-            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await using var connection = new NpgsqlConnection(Arguments.Connection);
             await connection.OpenAsync();
 
             var userFinalSalary = new Dictionary<double, UserFinalSalarySummary>();
 
-            using (var command = new NpgsqlCommand(sql, connection))
+            await using (var command = new NpgsqlCommand(sql, connection))
             {
                 foreach (var param in parameters) command.Parameters.Add(param);
 
-                using var reader = await command.ExecuteReaderAsync();
+                await using var reader = await command.ExecuteReaderAsync();
 
                 while (await reader.ReadAsync())
                 {
@@ -256,7 +286,7 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
                     };
 
                     var control = new SalaryRecordUserControl { DataContext = recordVm };
-                    salaryList.Add(control);
+                    _salaryList.Add(control);
 
                     if (!userFinalSalary.TryGetValue(userId, out var summary))
                     {
@@ -302,7 +332,7 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
                     IsSummary = true
                 };
 
-                salaryList.Add(new SalaryRecordUserControl { DataContext = summaryVm });
+                _salaryList.Add(new SalaryRecordUserControl { DataContext = summaryVm });
             }
 
             GrandTotalGross = grandTotalGross;
@@ -319,18 +349,18 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
                     NetSalary = grandTotalNet,
                     IsTotal = true
                 };
-                salaryList.Add(new SalaryRecordUserControl { DataContext = totalVm });
+                _salaryList.Add(new SalaryRecordUserControl { DataContext = totalVm });
             }
 
-            StackPanelHelper.RefreshStackPanelContent<SalaryRecordUserControl>(SalaryContent, salaryList);
+            StackPanelHelper.RefreshStackPanelContent(SalaryContent, _salaryList);
 
-            if (salaryList.Count == 0)
+            if (_salaryList.Count == 0)
                 ShowDetailedNoDataMessage();
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(LogLevel.ERROR, "Ошибка расчета зарплаты", ex: ex);
-            StackPanelHelper.ClearAndRefreshStackPanel<SalaryRecordUserControl>(SalaryContent, salaryList);
+            Loges.LoggingProcess(LogLevel.Error, "Ошибка расчета зарплаты", ex: ex);
+            StackPanelHelper.ClearAndRefreshStackPanel(SalaryContent, _salaryList);
             ShowDetailedNoDataMessage();
         }
     }
@@ -387,7 +417,7 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
             Margin = new Thickness(0, 0, 0, 10)
         };
 
-        checkButton.Click += async (s, e) => await CheckDatabaseStatus();
+        checkButton.Click += async (_, _) => await CheckDatabaseStatus();
         stackPanel.Children.Add(checkButton);
 
         SalaryContent?.Children.Add(stackPanel);
@@ -399,12 +429,12 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
         {
             Console.WriteLine("=== ПРОВЕРКА БАЗЫ ДАННЫХ ===");
 
-            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await using var connection = new NpgsqlConnection(Arguments.Connection);
             await connection.OpenAsync();
 
             Console.WriteLine($"Период: {PeriodStart.DateTime:yyyy-MM-dd} - {PeriodEnd.DateTime:yyyy-MM-dd}");
 
-            using (var cmd = new NpgsqlCommand(@"
+            await using (var cmd = new NpgsqlCommand(@"
                 SELECT 
                     COUNT(*) as total,
                     COUNT(CASE WHEN status = 'issued' THEN 1 END) as issued,
@@ -416,7 +446,7 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
                 cmd.Parameters.AddWithValue("@startDate", PeriodStart.DateTime.Date);
                 cmd.Parameters.AddWithValue("@endDate", PeriodEnd.DateTime.Date.AddDays(1).AddSeconds(-1));
 
-                using var reader = await cmd.ExecuteReaderAsync();
+                await using var reader = await cmd.ExecuteReaderAsync();
                 if (await reader.ReadAsync())
                 {
                     Console.WriteLine($"Записи в production:");
@@ -427,12 +457,12 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
             }
 
             Console.WriteLine("\nТарифы в work_rate:");
-            using (var cmd = new NpgsqlCommand(
+            await using (var cmd = new NpgsqlCommand(
                 "SELECT work_type, rate, use_tonnage, coefficient FROM public.work_rate WHERE is_active = true",
                 connection))
             {
-                using var reader = await cmd.ExecuteReaderAsync();
-                int count = 0;
+                await using var reader = await cmd.ExecuteReaderAsync();
+                var count = 0;
                 while (await reader.ReadAsync())
                 {
                     count++;
@@ -443,12 +473,12 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
             }
 
             Console.WriteLine("\nОперации в operation:");
-            using (var cmd = new NpgsqlCommand(
+            await using (var cmd = new NpgsqlCommand(
                 "SELECT id, name, price, unit FROM public.operation",
                 connection))
             {
-                using var reader = await cmd.ExecuteReaderAsync();
-                int count = 0;
+                await using var reader = await cmd.ExecuteReaderAsync();
+                var count = 0;
                 while (await reader.ReadAsync())
                 {
                     count++;
@@ -458,7 +488,7 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
             }
 
             Console.WriteLine("\nСвязь operation <-> work_rate:");
-            using (var cmd = new NpgsqlCommand(@"
+            await using (var cmd = new NpgsqlCommand(@"
                 SELECT 
                     o.name as operation_name,
                     o.price as operation_price,
@@ -472,8 +502,8 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
                 ORDER BY o.name",
                 connection))
             {
-                using var reader = await cmd.ExecuteReaderAsync();
-                int count = 0;
+                await using var reader = await cmd.ExecuteReaderAsync();
+                var count = 0;
                 while (await reader.ReadAsync())
                 {
                     count++;
@@ -484,7 +514,6 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
 
                     if (hasRate)
                     {
-                        var rateType = reader.GetString(3);
                         var workRate = reader.GetDecimal(4);
                         var useTonnage = reader.GetBoolean(5);
                         var coefficient = reader.GetDecimal(6);
@@ -516,7 +545,7 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
     {
         Console.WriteLine("=== Кнопка Экспорт в PDF нажата ===");
 
-        if (salaryList.Count == 0 || StorageProvider == null)
+        if (_salaryList.Count == 0 || StorageProvider == null)
         {
             Console.WriteLine("Нет данных или StorageProvider null");
             return;
@@ -590,7 +619,7 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
                                     header.Cell().Text("Сумма").Bold();
                                 });
 
-                                foreach (var record in salaryList)
+                                foreach (var record in _salaryList)
                                 {
                                     var vm = record.DataContext as SalaryRecordUserControlViewModel;
                                     if (vm == null || vm.IsSummary || vm.IsTotal) continue;
@@ -631,7 +660,7 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
                                     header.Cell().Text("К выдаче").Bold();
                                 });
 
-                                foreach (var record in salaryList)
+                                foreach (var record in _salaryList)
                                 {
                                     var vm = record.DataContext as SalaryRecordUserControlViewModel;
                                     if (vm == null || !vm.IsSummary) continue;
@@ -675,7 +704,7 @@ public class SalaryCalculationPageUserControlViewModel : ViewModelBase, INotifyP
         catch (Exception ex)
         {
             Console.WriteLine($"Ошибка экспорта PDF: {ex.Message}");
-            Loges.LoggingProcess(LogLevel.ERROR, "Ошибка экспорта PDF", ex: ex);
+            Loges.LoggingProcess(LogLevel.Error, "Ошибка экспорта PDF", ex: ex);
         }
     }
 

@@ -153,17 +153,17 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
         catch (NpgsqlException ex)
         {
             StackPanelHelper.ClearAndRefreshStackPanel<CartSubProductUserControl>(SubProductContent, subProductList);
-            ItemNotFoundException.Show(SubProductContent, ErrorLevel.NoConnectToDB);
+            ItemNotFoundException.Show(SubProductContent, ErrorLevel.NoConnectToDb);
 
-            Loges.LoggingProcess(LogLevel.ERROR,
+            Loges.LoggingProcess(LogLevel.Error,
                 "Connection or request error",
                 ex: ex);
         }
         catch (Exception ex)
         {
             StackPanelHelper.ClearAndRefreshStackPanel<CartSubProductUserControl>(SubProductContent, subProductList);
-            ItemNotFoundException.Show(SubProductContent, ErrorLevel.NoConnectToDB);
-            Loges.LoggingProcess(LogLevel.ERROR, ex: ex);
+            ItemNotFoundException.Show(SubProductContent, ErrorLevel.NoConnectToDb);
+            Loges.LoggingProcess(LogLevel.Error, ex: ex);
         }
     }
 
@@ -198,17 +198,17 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
         catch (NpgsqlException ex)
         {
             StackPanelHelper.ClearAndRefreshStackPanel<CartSubProductOperationUserControl>(SubProductOperation, subProductOperationList);
-            ItemNotFoundException.Show(SubProductOperation, ErrorLevel.NoConnectToDB);
+            ItemNotFoundException.Show(SubProductOperation, ErrorLevel.NoConnectToDb);
 
-            Loges.LoggingProcess(LogLevel.ERROR,
+            Loges.LoggingProcess(LogLevel.Error,
                 "Connection or request error",
                 ex: ex);
         }
         catch (Exception ex)
         {
             StackPanelHelper.ClearAndRefreshStackPanel<CartSubProductOperationUserControl>(SubProductOperation, subProductOperationList);
-            ItemNotFoundException.Show(SubProductOperation, ErrorLevel.NoConnectToDB);
-            Loges.LoggingProcess(LogLevel.ERROR, 
+            ItemNotFoundException.Show(SubProductOperation, ErrorLevel.NoConnectToDb);
+            Loges.LoggingProcess(LogLevel.Error, 
                 ex: ex);
         }
     }
@@ -286,16 +286,16 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
         catch (NpgsqlException ex)
         {
             StackPanelHelper.ClearAndRefreshStackPanel<CartSubProductOperationUserControl>(SubProductOperation, subProductOperationList);
-            ItemNotFoundException.Show(SubProductOperation, ErrorLevel.NoConnectToDB);
-            Loges.LoggingProcess(LogLevel.ERROR,
+            ItemNotFoundException.Show(SubProductOperation, ErrorLevel.NoConnectToDb);
+            Loges.LoggingProcess(LogLevel.Error,
                 "Connection or request error",
                 ex: ex);
         }
         catch (Exception ex)
         {
             StackPanelHelper.ClearAndRefreshStackPanel<CartSubProductOperationUserControl>(SubProductOperation, subProductOperationList);
-            ItemNotFoundException.Show(SubProductOperation, ErrorLevel.NoConnectToDB);
-            Loges.LoggingProcess(LogLevel.ERROR, 
+            ItemNotFoundException.Show(SubProductOperation, ErrorLevel.NoConnectToDb);
+            Loges.LoggingProcess(LogLevel.Error, 
                 ex: ex);
         }
     }

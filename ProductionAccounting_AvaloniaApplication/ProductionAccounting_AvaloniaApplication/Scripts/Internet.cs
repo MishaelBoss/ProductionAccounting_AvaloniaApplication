@@ -16,47 +16,45 @@ internal abstract class Internet
                 string.IsNullOrEmpty(Arguments.User) || 
                 string.IsNullOrEmpty(Arguments.Password))
             {
-                Loges.LoggingProcess(LogLevel.WARNING, 
+                Loges.LoggingProcess(LogLevel.Warning, 
                     "Database connection data is incomplete");
                 return false;
             }
 
-            using (var ping = new Ping())
+            using var ping = new Ping();
+            var hostName = Arguments.Ip;
+            var reply = ping.Send(hostName, 3000);
+
+            Loges.LoggingProcess(level: LogLevel.Info,
+                message: $"Ping status for ({hostName}): {reply.Status}");
+
+            if (reply is { Status: IPStatus.Success })
             {
-                string hostName = Arguments.Ip;
-                PingReply reply = ping.Send(hostName, 3000);
+                Loges.LoggingProcess(level: LogLevel.Info,
+                    message: $"Address: {reply.Address}");
 
-                Loges.LoggingProcess(level: LogLevel.INFO,
-                        message: $"Ping status for ({hostName}): {reply.Status}");
+                Loges.LoggingProcess(level: LogLevel.Info,
+                    message: $"Roundtrip time: {reply.RoundtripTime}");
 
-                if (reply is { Status: IPStatus.Success })
-                {
-                    Loges.LoggingProcess(level: LogLevel.INFO,
-                        message: $"Address: {reply.Address}");
+                Loges.LoggingProcess(level: LogLevel.Info,
+                    message: $"Time to live: {reply.Options?.Ttl}");
 
-                    Loges.LoggingProcess(level: LogLevel.INFO,
-                        message: $"Roundtrip time: {reply.RoundtripTime}");
-
-                    Loges.LoggingProcess(level: LogLevel.INFO,
-                        message: $"Time to live: {reply.Options?.Ttl}");
-
-                    return TestPostgreSqlConnection();
-                }
-                else
-                {
-                    return false;
-                }
+                return TestPostgreSqlConnection();
+            }
+            else
+            {
+                return false;
             }
         }
         catch (PingException pex)
         {
-            Loges.LoggingProcess(LogLevel.WARNING, 
+            Loges.LoggingProcess(LogLevel.Warning, 
                 $"Ping failed: {pex.Message}");
             return false;
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(LogLevel.ERROR, 
+            Loges.LoggingProcess(LogLevel.Error, 
                 $"Connection test failed: {ex.Message}");
             return false;
         }
@@ -66,22 +64,18 @@ internal abstract class Internet
     {
         try
         {
-            using (var connection = new NpgsqlConnection($"Server={Arguments.Ip};Port={Arguments.Port};Database={Arguments.Database};User Id={Arguments.User};Password={Arguments.Password};Timeout=5"))
-            {
-                connection.Open();
-                
-                using (var cmd = new NpgsqlCommand("SELECT 1", connection))
-                {
-                    var result = cmd.ExecuteScalar();
-                    Loges.LoggingProcess(LogLevel.INFO, 
-                        "PostgreSQL connection test successful");
-                    return true;
-                }
-            }
+            using var connection = new NpgsqlConnection($"Server={Arguments.Ip};Port={Arguments.Port};Database={Arguments.Database};User Id={Arguments.User};Password={Arguments.Password};Timeout=5");
+            connection.Open();
+
+            using var cmd = new NpgsqlCommand("SELECT 1", connection);
+            var result = cmd.ExecuteScalar();
+            Loges.LoggingProcess(LogLevel.Info, 
+                $"PostgreSQL connection test successful, result {result}");
+            return true;
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(LogLevel.WARNING, 
+            Loges.LoggingProcess(LogLevel.Warning, 
                 $"PostgreSQL connection failed: {ex.Message}");
             return false;
         }

@@ -91,7 +91,7 @@ public class AddSubProductUserControlViewModel(double taskId) : ViewModelBase, I
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(LogLevel.ERROR, ex: ex);
+            Loges.LoggingProcess(LogLevel.Error, ex: ex);
         }
     }
 

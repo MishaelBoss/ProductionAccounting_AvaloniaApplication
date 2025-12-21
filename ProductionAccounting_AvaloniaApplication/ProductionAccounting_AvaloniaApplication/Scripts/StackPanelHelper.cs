@@ -18,7 +18,7 @@ public class StackPanelHelper
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(LogLevel.ERROR,
+            Loges.LoggingProcess(LogLevel.Error,
                 "Error updating stack panel",
                 ex: ex);
         }
@@ -43,7 +43,7 @@ public class StackPanelHelper
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(LogLevel.ERROR,
+            Loges.LoggingProcess(LogLevel.Error,
                 "Error updating stack panel",
                 ex: ex);
         }

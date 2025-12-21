@@ -5,11 +5,12 @@ using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using JetBrains.Annotations;
+using ReactiveUI;
 using static ProductionAccounting_AvaloniaApplication.ViewModels.Control.NotFoundUserControlViewModel;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
@@ -17,23 +18,20 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 public class TabWorkshopDepartmentUserControlViewModel : ViewModelBase, IRecipient<RefreshDepartmentListMessage>
 {
     private string _search = string.Empty;
+    [UsedImplicitly]
     public string Search
     {
         get => _search;
         set
         {
-            if (_search != value)
-            {
-                _search = value;
-                OnPropertyChanged(nameof(Search));
-                PerformSearchList();
-            }
+            this.RaiseAndSetIfChanged(ref _search, value);
+            PerformSearchList();
         }
     }
 
     public TabWorkshopDepartmentUserControlViewModel()
     {
-        WeakReferenceMessenger.Default.Register<RefreshDepartmentListMessage>(this);
+        WeakReferenceMessenger.Default.Register(this);
     }
 
     public void Receive(RefreshDepartmentListMessage message)
@@ -41,51 +39,80 @@ public class TabWorkshopDepartmentUserControlViewModel : ViewModelBase, IRecipie
         GetList();
     }
 
-    public StackPanel? HomeMainContent { get; set; } = null;
+    public StackPanel? HomeMainContent { get; set; }
 
-    private readonly List<CartWorkshopDepartmentUserControl> workshopDepartmentList = [];
-    private List<double> filteredWorkshopDepartmentIds = [];
+    private readonly List<CartWorkshopDepartmentUserControl> _workshopDepartmentList = [];
+    private List<double> _filteredWorkshopDepartmentIds = [];
 
     public static ICommand DownloadAsyncCommand
-        => new RelayCommand(async () => await DownloadListAsync());
+        => new RelayCommand(async void () =>
+        {
+            try
+            {
+                await DownloadListAsync();
+            }
+            catch (Exception ex)
+            {
+                Loges.LoggingProcess(level: LogLevel.Error, 
+                    ex: ex, 
+                    message: "Error download");
+            }
+        });
 
     public ICommand RefreshAsyncCommand
-        => new RelayCommand(() => GetList());
+        => new RelayCommand(GetList);
 
     private async void PerformSearchList()
     {
-        await ApplyFilters();
+        try
+        {
+            await ApplyFilters();
+        }
+        catch (Exception ex)
+        {
+            Loges.LoggingProcess(level: LogLevel.Error, 
+                ex: ex, 
+                message: "Error perform search");
+        }
     }
 
     public async void GetList()
     {
-        Search = string.Empty;
-        await ApplyFilters();
+        try
+        {
+            await ApplyFilters();
+        }
+        catch (Exception ex)
+        {
+            Loges.LoggingProcess(level: LogLevel.Error, 
+                ex: ex, 
+                message: "Error get list");
+        }
     }
 
     private async Task ApplyFilters()
     {
         try
         {
-            filteredWorkshopDepartmentIds = await GetFilteredWorkshopDepartIdsAsync();
+            _filteredWorkshopDepartmentIds = await GetFilteredWorkshopDepartIdsAsync();
 
-            if (filteredWorkshopDepartmentIds.Count > 0)
+            if (_filteredWorkshopDepartmentIds.Count > 0)
             {
-                await SearchWorkshopDepartAsync(filteredWorkshopDepartmentIds);
+                await SearchWorkshopDepartAsync(_filteredWorkshopDepartmentIds);
             }
             else
             {
-                StackPanelHelper.ClearAndRefreshStackPanel<CartWorkshopDepartmentUserControl>(HomeMainContent, workshopDepartmentList);
+                StackPanelHelper.ClearAndRefreshStackPanel(HomeMainContent, _workshopDepartmentList);
                 ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NotFound);
             }
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(level: LogLevel.ERROR,
+            Loges.LoggingProcess(level: LogLevel.Error,
                 message: "Error applying filters",
                 ex: ex);
 
-            StackPanelHelper.ClearAndRefreshStackPanel<CartWorkshopDepartmentUserControl>(HomeMainContent, workshopDepartmentList);
+            StackPanelHelper.ClearAndRefreshStackPanel(HomeMainContent, _workshopDepartmentList);
         }
     }
 
@@ -95,7 +122,7 @@ public class TabWorkshopDepartmentUserControlViewModel : ViewModelBase, IRecipie
 
         try
         {
-            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await using var connection = new NpgsqlConnection(Arguments.Connection);
             await connection.OpenAsync();
 
             var sql = "SELECT DISTINCT id FROM public.departments WHERE 1=1";
@@ -108,13 +135,13 @@ public class TabWorkshopDepartmentUserControlViewModel : ViewModelBase, IRecipie
                 parameters.Add(new NpgsqlParameter("@search", $"%{Search}%"));
             }
 
-            using var command = new NpgsqlCommand(sql, connection);
+            await using var command = new NpgsqlCommand(sql, connection);
             foreach (var param in parameters)
             {
                 command.Parameters.Add(param);
             }
 
-            using var reader = await command.ExecuteReaderAsync();
+            await using var reader = await command.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
                 if (!reader.IsDBNull(0))
@@ -125,7 +152,7 @@ public class TabWorkshopDepartmentUserControlViewModel : ViewModelBase, IRecipie
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(LogLevel.ERROR, "Error getting filtered departments IDs", ex: ex);
+            Loges.LoggingProcess(LogLevel.Error, "Error getting filtered departments IDs", ex: ex);
         }
 
         return userIds;
@@ -137,38 +164,38 @@ public class TabWorkshopDepartmentUserControlViewModel : ViewModelBase, IRecipie
 
         if (userIds.Count == 0)
         {
-            StackPanelHelper.ClearAndRefreshStackPanel<CartWorkshopDepartmentUserControl>(HomeMainContent, workshopDepartmentList);
+            StackPanelHelper.ClearAndRefreshStackPanel(HomeMainContent, _workshopDepartmentList);
             ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NotFound);
             return;
         }
 
-        StackPanelHelper.ClearAndRefreshStackPanel<CartWorkshopDepartmentUserControl>(HomeMainContent, workshopDepartmentList);
+        StackPanelHelper.ClearAndRefreshStackPanel(HomeMainContent, _workshopDepartmentList);
 
         try
         {
             var parameters = new List<NpgsqlParameter>();
             var paramNames = new List<string>();
 
-            for (int i = 0; i < userIds.Count; i++)
+            for (var i = 0; i < userIds.Count; i++)
             {
                 var paramName = $"@id{i}";
                 paramNames.Add(paramName);
                 parameters.Add(new NpgsqlParameter(paramName, userIds[i]));
             }
 
-            string sql = $"SELECT id, type FROM public.departments operation WHERE id IN ({string.Join(", ", paramNames)})";
+            var sql = $"SELECT id, type FROM public.departments operation WHERE id IN ({string.Join(", ", paramNames)})";
 
-            using (var connection = new NpgsqlConnection(Arguments.Connection))
+            await using (var connection = new NpgsqlConnection(Arguments.Connection))
             {
                 await connection.OpenAsync();
-                using var command = new NpgsqlCommand(sql, connection);
+                await using var command = new NpgsqlCommand(sql, connection);
 
                 foreach (var param in parameters)
                 {
                     command.Parameters.Add(param);
                 }
 
-                using var reader = await command.ExecuteReaderAsync();
+                await using var reader = await command.ExecuteReaderAsync();
                 while (await reader.ReadAsync())
                 {
                     var viewModel = new CartWorkshopDepartmentUserControlViewModel
@@ -182,27 +209,27 @@ public class TabWorkshopDepartmentUserControlViewModel : ViewModelBase, IRecipie
                         DataContext = viewModel
                     };
 
-                    workshopDepartmentList.Add(userControl);
+                    _workshopDepartmentList.Add(userControl);
                 }
             }
 
-            StackPanelHelper.RefreshStackPanelContent<CartWorkshopDepartmentUserControl>(HomeMainContent, workshopDepartmentList);
+            StackPanelHelper.RefreshStackPanelContent(HomeMainContent, _workshopDepartmentList);
 
-            if (workshopDepartmentList.Count == 0) ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NotFound);
+            if (_workshopDepartmentList.Count == 0) ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NotFound);
         }
         catch (NpgsqlException ex)
         {
-            StackPanelHelper.ClearAndRefreshStackPanel<CartWorkshopDepartmentUserControl>(HomeMainContent, workshopDepartmentList);
-            ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NoConnectToDB);
-            Loges.LoggingProcess(LogLevel.CRITICAL,
+            StackPanelHelper.ClearAndRefreshStackPanel(HomeMainContent, _workshopDepartmentList);
+            ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NoConnectToDb);
+            Loges.LoggingProcess(LogLevel.Critical,
                 "Connection or request error",
                 ex: ex);
         }
         catch (Exception ex)
         {
-            StackPanelHelper.ClearAndRefreshStackPanel<CartWorkshopDepartmentUserControl>(HomeMainContent, workshopDepartmentList);
-            ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NoConnectToDB);
-            Loges.LoggingProcess(LogLevel.ERROR,
+            StackPanelHelper.ClearAndRefreshStackPanel(HomeMainContent, _workshopDepartmentList);
+            ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NoConnectToDb);
+            Loges.LoggingProcess(LogLevel.Error,
                 "Error loading departments by IDs",
                 ex: ex);
         }
@@ -214,38 +241,38 @@ public class TabWorkshopDepartmentUserControlViewModel : ViewModelBase, IRecipie
 
         try
         {
-            string sql = "SELECT * FROM public.departments";
+            const string sql = "SELECT * FROM public.departments";
 
-            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await using var connection = new NpgsqlConnection(Arguments.Connection);
             connection.Open();
 
-            using var command = new NpgsqlCommand(sql, connection);
-            using var reader = await command.ExecuteReaderAsync();
+            await using var command = new NpgsqlCommand(sql, connection);
+            await using var reader = await command.ExecuteReaderAsync();
             var fileSave = Path.Combine(Path.Combine(Paths.DestinationPathDB("AdminPanel", "WorkshopsDepartments")), Files.DBEquipments);
 
-            using (var writer = new StreamWriter(fileSave))
+            await using (var writer = new StreamWriter(fileSave))
             {
                 for (int i = 0; i < reader.FieldCount; i++)
                 {
-                    writer.Write(reader.GetName(i));
+                    await writer.WriteAsync(reader.GetName(i));
                     if (i < reader.FieldCount - 1)
                     {
-                        writer.Write(",");
+                        await writer.WriteAsync(",");
                     }
                 }
-                writer.WriteLine();
+                await writer.WriteLineAsync();
 
                 while (reader.Read())
                 {
                     for (int i = 0; i < reader.FieldCount; i++)
                     {
-                        writer.Write(reader.GetValue(i).ToString());
+                        await writer.WriteAsync(reader.GetValue(i).ToString());
                         if (i < reader.FieldCount - 1)
                         {
-                            writer.Write(",");
+                            await writer.WriteAsync(",");
                         }
                     }
-                    writer.WriteLine();
+                    await writer.WriteLineAsync();
                 }
             }
 
@@ -253,19 +280,15 @@ public class TabWorkshopDepartmentUserControlViewModel : ViewModelBase, IRecipie
         }
         catch (NpgsqlException ex)
         {
-            Loges.LoggingProcess(LogLevel.ERROR,
+            Loges.LoggingProcess(LogLevel.Error,
                 "Connection or request error",
                 ex: ex);
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(LogLevel.ERROR,
+            Loges.LoggingProcess(LogLevel.Error,
                 "Connection or request error",
                 ex: ex);
         }
     }
-
-    public new event PropertyChangedEventHandler? PropertyChanged;
-    protected void OnPropertyChanged(string propertyName)
-        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }

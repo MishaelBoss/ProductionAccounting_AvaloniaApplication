@@ -205,7 +205,7 @@ public class AddOperationUserControlViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(level: LogLevel.ERROR, ex: ex);
+            Loges.LoggingProcess(level: LogLevel.Error, ex: ex);
             Messageerror = $"Ошибка: {ex.Message}";
         }
     }
@@ -251,7 +251,7 @@ public class AddOperationUserControlViewModel : ViewModelBase
 
                     if (idResult == null || idResult == DBNull.Value)
                     {
-                        Loges.LoggingProcess(LogLevel.WARNING,
+                        Loges.LoggingProcess(LogLevel.Warning,
                             $"Не найдена операция для связи ID: {SubProductOperationId}");
                         return 0;
                     }
@@ -274,7 +274,7 @@ public class AddOperationUserControlViewModel : ViewModelBase
 
                     if (rowsAffected == 0)
                     {
-                        Loges.LoggingProcess(LogLevel.WARNING,
+                        Loges.LoggingProcess(LogLevel.Warning,
                             $"Не удалось обновить операцию ID: {operationId}");
                         return 0;
                     }
@@ -300,7 +300,7 @@ public class AddOperationUserControlViewModel : ViewModelBase
                 }
                 catch (Exception ex)
                 {
-                    Loges.LoggingProcess(LogLevel.WARNING,
+                    Loges.LoggingProcess(LogLevel.Warning,
                         $"Error while maintaining the tariff: {ex.Message}");
                 }
             }
@@ -309,14 +309,14 @@ public class AddOperationUserControlViewModel : ViewModelBase
         }
         catch (PostgresException ex)
         {
-            Loges.LoggingProcess(LogLevel.ERROR,
+            Loges.LoggingProcess(LogLevel.Error,
                 $"PostgreSQL error: {ex.MessageText}", ex: ex);
             Messageerror = $"Error DB: {ex.MessageText}";
             return 0;
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(LogLevel.ERROR,
+            Loges.LoggingProcess(LogLevel.Error,
                 $"General error: {ex.Message}", ex: ex);
             Messageerror = $"Error: {ex.Message}";
             return 0;
@@ -367,12 +367,12 @@ public class AddOperationUserControlViewModel : ViewModelBase
         }
         catch (PostgresException ex)
         {
-            Loges.LoggingProcess(level: LogLevel.WARNING, ex: ex);
+            Loges.LoggingProcess(level: LogLevel.Warning, ex: ex);
             return false;
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(LogLevel.ERROR, ex: ex);
+            Loges.LoggingProcess(LogLevel.Error, ex: ex);
             return false;
         }
     }

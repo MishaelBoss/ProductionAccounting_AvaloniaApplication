@@ -20,17 +20,16 @@ public class CompleteWorkFormUserControlViewModel : ViewModelBase
         SubProductOperationId = subProductOperationId;
         UserId = userId;
 
-        Loges.LoggingProcess(LogLevel.INFO,
+        Loges.LoggingProcess(LogLevel.Info,
                 $"taskName: {taskName} assignedQuantity: {plannedQuantity} productId: {productId} operationId: {operationId} subProductOperationId: {subProductOperationId} userId {userId}");
     }
 
-    public double AssignmentId { get; }
-    public string TaskName { get; } = string.Empty;
-    public decimal PlannedQuantity { get; }
-    public double ProductId { get; }
-    public double OperationId { get; }
-    public double SubProductOperationId { get; }
-    public double UserId { get; }
+    public string TaskName;
+    public decimal PlannedQuantity;
+    private double ProductId { get; }
+    private double OperationId { get; }
+    private double SubProductOperationId { get; }
+    private double UserId { get; }
 
     private decimal _completedToday;
     public decimal CompletedToday
@@ -56,7 +55,7 @@ public class CompleteWorkFormUserControlViewModel : ViewModelBase
     {
         try
         {
-            using (var connection = new NpgsqlConnection(Arguments.Connection))
+            await using (var connection = new NpgsqlConnection(Arguments.Connection))
             {
                 await connection.OpenAsync();
 
@@ -66,13 +65,13 @@ public class CompleteWorkFormUserControlViewModel : ViewModelBase
                              WHERE o.id = @operation_id";
 
                 decimal rate = 0;
-                bool useTonnage = false;
-                decimal coefficient = 1.0m;
+                var useTonnage = false;
+                var coefficient = 1.0m;
 
-                using (var rateCommand = new NpgsqlCommand(rateSql, connection))
+                await using (var rateCommand = new NpgsqlCommand(rateSql, connection))
                 {
                     rateCommand.Parameters.AddWithValue("@operation_id", OperationId);
-                    using var reader = await rateCommand.ExecuteReaderAsync();
+                    await using var reader = await rateCommand.ExecuteReaderAsync();
                     if (await reader.ReadAsync())
                     {
                         rate = reader.GetDecimal(0);
@@ -81,18 +80,18 @@ public class CompleteWorkFormUserControlViewModel : ViewModelBase
                     }
                 }
 
-                decimal calculatedAmount = 0;
-                string formula = "";
+                decimal calculatedAmount;
+                string formula;
 
                 if (useTonnage)
                 {
-                    string tonnageSql = @"SELECT sp.planned_weight 
+                    const string tonnageSql = @"SELECT sp.planned_weight 
                                     FROM public.sub_products sp
                                     JOIN public.sub_product_operations spo ON spo.sub_product_id = sp.id
                                     WHERE spo.id = @sub_product_op_id";
 
-                    decimal tonnage = 0;
-                    using (var tonnageCommand = new NpgsqlCommand(tonnageSql, connection))
+                    decimal tonnage;
+                    await using (var tonnageCommand = new NpgsqlCommand(tonnageSql, connection))
                     {
                         tonnageCommand.Parameters.AddWithValue("@sub_product_op_id", SubProductOperationId);
                         var result = await tonnageCommand.ExecuteScalarAsync();
@@ -108,13 +107,13 @@ public class CompleteWorkFormUserControlViewModel : ViewModelBase
                     formula = $"Тариф: {rate} × Кол-во: {CompletedToday} = {calculatedAmount}";
                 }
 
-                string sqlProduction = @"INSERT INTO public.production 
+                const string sqlProduction = @"INSERT INTO public.production 
                                    (user_id, product_id, operation_id, quantity, production_date, 
                                     notes, status, amount, tonnage, calculated_amount, calculation_formula)
                                    VALUES (@user_id, @product_id, @operation_id, @qty, CURRENT_DATE, 
                                            @notes, 'completed', @amount, @tonnage, @calculated_amount, @formula)";
 
-                using (var command = new NpgsqlCommand(sqlProduction, connection))
+                await using (var command = new NpgsqlCommand(sqlProduction, connection))
                 {
                     command.Parameters.AddWithValue("@user_id", UserId);
                     command.Parameters.AddWithValue("@product_id", ProductId);
@@ -132,7 +131,7 @@ public class CompleteWorkFormUserControlViewModel : ViewModelBase
                                         JOIN public.sub_product_operations spo ON spo.sub_product_id = sp.id
                                         WHERE spo.id = @sub_product_op_id";
 
-                        using var tonnageCommand = new NpgsqlCommand(tonnageSql, connection);
+                        await using var tonnageCommand = new NpgsqlCommand(tonnageSql, connection);
                         tonnageCommand.Parameters.AddWithValue("@sub_product_op_id", SubProductOperationId);
                         var tonnageResult = await tonnageCommand.ExecuteScalarAsync();
                         var tonnage = tonnageResult != null && tonnageResult != DBNull.Value ? Convert.ToDecimal(tonnageResult) : 0;
@@ -150,7 +149,7 @@ public class CompleteWorkFormUserControlViewModel : ViewModelBase
                                SET completed_quantity = completed_quantity + @qty 
                                WHERE id = @op_id";
 
-                using var command2 = new NpgsqlCommand(sqlUpdate, connection);
+                await using var command2 = new NpgsqlCommand(sqlUpdate, connection);
                 command2.Parameters.AddWithValue("@qty", CompletedToday);
                 command2.Parameters.AddWithValue("@op_id", SubProductOperationId);
                 await command2.ExecuteNonQueryAsync();
@@ -161,11 +160,11 @@ public class CompleteWorkFormUserControlViewModel : ViewModelBase
         }
         catch (NpgsqlException ex)
         {
-            Loges.LoggingProcess(LogLevel.CRITICAL, "Connection or request error", ex: ex);
+            Loges.LoggingProcess(LogLevel.Critical, "Connection or request error", ex: ex);
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(LogLevel.WARNING, "Error loading users by IDs", ex: ex);
+            Loges.LoggingProcess(LogLevel.Warning, "Error loading users by IDs", ex: ex);
         }
     }
 }

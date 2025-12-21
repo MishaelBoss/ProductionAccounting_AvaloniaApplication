@@ -1,11 +1,12 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 
 namespace ProductionAccounting_AvaloniaApplication.Scripts;
 
 internal abstract class Loges
 {
-    private static readonly object _lockObj = new object();
+    private static readonly Lock LockObj = new Lock();
     private static string? _currentLogDate;
     private static string? _currentLogPath;
 
@@ -13,43 +14,29 @@ internal abstract class Loges
     {
         EnsureLogDirectory();
 
-        if (ueea.ExceptionObject is Exception e) LoggingProcess(LogLevel.ERROR, e.ToString());
+        if (ueea.ExceptionObject is Exception e) LoggingProcess(LogLevel.Error, e.ToString());
     }
 
     public static void LoggingProcess(LogLevel level, string? message = null, Exception? ex = null)
     {
-        lock (_lockObj)
+        lock (LockObj)
         {
             EnsureLogDirectory();
             string todayDate = DateTime.Today.ToString("yyyy-MM-dd");
 
             switch (level)
             {
-                case LogLevel.INFO when Arguments.Loggers.LoggerInfo:
+                case LogLevel.Info when Arguments.Loggers.LoggerInfo:
+                case LogLevel.Debug when Arguments.Loggers.LoggerDebug:
+                case LogLevel.Warning when Arguments.Loggers.LoggerWarning:
+                case LogLevel.Error when Arguments.Loggers.LoggerError:
+                case LogLevel.Critical when Arguments.Loggers.LoggerCritical:
                     if (ShouldCreateNewLog(todayDate)) CreateNewLogFile(todayDate);
 
                     WriteLogEntry(level, message ?? string.Empty, ex);
                     break;
-                case LogLevel.DEBUG when Arguments.Loggers.LoggerDebug:
-                    if (ShouldCreateNewLog(todayDate)) CreateNewLogFile(todayDate);
-
-                    WriteLogEntry(level, message ?? string.Empty, ex);
-                    break;
-                case LogLevel.WARNING when Arguments.Loggers.LoggerWarning:
-                    if (ShouldCreateNewLog(todayDate)) CreateNewLogFile(todayDate);
-
-                    WriteLogEntry(level, message ?? string.Empty, ex);
-                    break;
-                case LogLevel.ERROR when Arguments.Loggers.LoggerError:
-                    if (ShouldCreateNewLog(todayDate)) CreateNewLogFile(todayDate);
-
-                    WriteLogEntry(level, message ?? string.Empty, ex);
-                    break;
-                case LogLevel.CRITICAL when Arguments.Loggers.LoggerCritical:
-                    if (ShouldCreateNewLog(todayDate)) CreateNewLogFile(todayDate);
-
-                    WriteLogEntry(level, message ?? string.Empty, ex);
-                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(level), level, null);
             }
         }
     }
@@ -76,7 +63,7 @@ internal abstract class Loges
 
     private static void WriteLogEntry(LogLevel level, string? message = null, Exception? ex = null)
     {
-        string entry = $"[{DateTime.Now:HH:mm:ss}]-[{level}:] {message} - index page error - {GetPageInfo(ex)} {Environment.NewLine}";
+        var entry = $"[{DateTime.Now:HH:mm:ss}]-[{level}:] {message} - index page error - {GetPageInfo(ex)} {Environment.NewLine}";
 
         if (!File.Exists(_currentLogPath)) return;
 
@@ -85,11 +72,7 @@ internal abstract class Loges
 
     private static string GetPageInfo(Exception? ex)
     {
-        if (ex != null && ex.StackTrace != null)
-        {
-            return GetPageFromStackTrace(ex.StackTrace);
-        }
-        return "Информация о странице не доступна";
+        return ex is { StackTrace: not null } ? GetPageFromStackTrace(ex.StackTrace) : "Информация о странице не доступна";
     }
 
     private static string GetPageFromStackTrace(string stackTrace)
@@ -100,9 +83,9 @@ internal abstract class Loges
 
 public enum LogLevel
 {
-    INFO = 0,
-    DEBUG = 1,
-    WARNING = 2,
-    ERROR = 3,
-    CRITICAL = 4
+    Info = 0,
+    Debug = 1,
+    Warning = 2,
+    Error = 3,
+    Critical = 4
 }
