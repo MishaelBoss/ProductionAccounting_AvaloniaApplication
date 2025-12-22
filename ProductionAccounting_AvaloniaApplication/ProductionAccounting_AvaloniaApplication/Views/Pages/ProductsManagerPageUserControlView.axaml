@@ -33,7 +33,7 @@
 		  		</StackPanel>
 			</Grid>
 		</Grid>
-		<controls:TabProductUserControl />
+		<controls:TabOrderUserControl />
     </Grid>
 
 </UserControl>

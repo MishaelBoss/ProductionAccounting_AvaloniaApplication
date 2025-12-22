@@ -14,7 +14,7 @@
 				<controls:TabUsersListUserControl />
 			</TabItem>
 			<TabItem Header="Product">
-				<controls:TabProductUserControl />
+				<controls:TabOrderUserControl />
 			</TabItem>
         </TabControl>
     </Grid>

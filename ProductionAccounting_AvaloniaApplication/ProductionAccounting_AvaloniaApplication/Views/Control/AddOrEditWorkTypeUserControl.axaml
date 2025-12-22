@@ -1,18 +1,18 @@
-<UserControl xmlns="https://github.com/avaloniaui"
+﻿<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:ProductionAccounting_AvaloniaApplication.ViewModels.Control"
-             x:DataType="vm:AddProductUserControlViewModel"
+             x:DataType="vm:AddOrEditWorkTypeUserControlViewModel"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="ProductionAccounting_AvaloniaApplication.Views.Control.AddProductUserControl">
+             x:Class="ProductionAccounting_AvaloniaApplication.AddOrEditWorkTypeUserControl">
 
     <UserControl.Styles>
         <StyleInclude Source="/Styles/Controls/FormStyles.axaml"/>
     </UserControl.Styles>
 
     <Grid>
-        <Border Background="#000000" Opacity="0.4" />
+		<Border Background="#000000" Opacity="0.4" />
 
         <Border VerticalAlignment="Center"
                 HorizontalAlignment="Center"
@@ -27,7 +27,7 @@
 
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel Spacing="16">
-                    <TextBlock Text="➕ Добавить новою марку"
+                    <TextBlock Text="➕ Добавить новый вид работы"
                                FontSize="24"
                                FontWeight="Medium"
                                HorizontalAlignment="Center"
@@ -39,45 +39,22 @@
                                FontSize="14"/>
 
                     <Grid ColumnDefinitions="Auto,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="12" ColumnSpacing="12">
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Имя продукта:" VerticalAlignment="Center" />
-                        <TextBox Grid.Row="0" Grid.Column="1" Watermark="Введите имя продукта" Text="{Binding ProductName}" />
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Название:" VerticalAlignment="Center" />
+                        <TextBox Grid.Row="0" Grid.Column="1" Watermark="введите название" Text="{Binding Type}" />
 
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Статья:" VerticalAlignment="Center" />
-                        <TextBox Grid.Row="1" Grid.Column="1" Watermark="Введите статью" Text="{Binding ProductArticle}" />
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Коэффициент:" VerticalAlignment="Center" />
+                        <TextBox Grid.Row="1" Grid.Column="1" Watermark="введите коэффициент" Text="{Binding Coefficient}" />
 
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Описание:" VerticalAlignment="Center" />
-                        <TextBox Grid.Row="2" Grid.Column="1" Watermark="Введите описание" Text="{Binding ProductDescription}" />
-
-                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Цена за единицу:" VerticalAlignment="Center" />
-                        <TextBox Grid.Row="3" Grid.Column="1" Watermark="Введите цену товара за единицу" Text="{Binding ProductPricePerUnit}" />
-
-                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Цена за кг:" VerticalAlignment="Center" />
-                        <TextBox Grid.Row="4" Grid.Column="1" Watermark="Введите цену товара за кг" Text="{Binding ProductPricePerKg}"/>
-
-                        <TextBlock Grid.Row="5" Grid.Column="0" Text="Марка:" VerticalAlignment="Center" />
-                        <TextBox Grid.Row="5" Grid.Column="1" Watermark="Введите марку" Text="{Binding ProductMark}" />
-
-                        <TextBlock Grid.Row="6" Grid.Column="0" Text="Коэффициент:" VerticalAlignment="Center" />
-                        <TextBox Grid.Row="6" Grid.Column="1" Watermark="Введите коэффициент" Text="{Binding ProductCoefficient}" />
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Тариф:" VerticalAlignment="Center" />
+                        <TextBox Grid.Row="3" Grid.Column="1" Watermark="введите тариф" Text="{Binding Rate}" />
                     </Grid>
 
                     <StackPanel Spacing="12">
                         <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="12">
                             <TextBlock Grid.Column="0" Text="Единица измерения:" VerticalAlignment="Center" />
                             <ComboBox Grid.Column="1"
-                                      ItemsSource="{Binding AvailableUnits}"
-                                      SelectedItem="{Binding SelectedUnit}"
-                                      MinHeight="32"
-                                      Padding="8,0"
-                                      Classes="StyledComboBox" />
-                        </Grid>
-
-                        <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="12">
-                            <TextBlock Grid.Column="0" Text="Пользователь:" VerticalAlignment="Center" />
-                            <ComboBox Grid.Column="1"
-                                      ItemsSource="{Binding Users}"
-                                      SelectedItem="{Binding SelectedUser}"
-                                      DisplayMemberBinding="{Binding FullName}"
+                                      ItemsSource="{Binding MeasurementUnits}"
+                                      SelectedItem="{Binding SelectMeasurementUnit}"
                                       MinHeight="32"
                                       Padding="8,0"
                                       Classes="StyledComboBox" />
@@ -96,7 +73,7 @@
                                 HorizontalContentAlignment="Center"
                                 Classes="AccentButton" />
 
-                        <Button Content="Cancel"
+                        <Button Content="Отменить"
                                 Command="{Binding CancelCommand}"
                                 Width="100"
                                 Height="36"

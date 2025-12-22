@@ -27,7 +27,7 @@
 
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel Spacing="16">
-                    <TextBlock Text="➕ Добавить новою под марку"
+                    <TextBlock Text="➕ Добавить новою марку"
                                FontSize="24"
                                FontWeight="Medium"
                                HorizontalAlignment="Center"
@@ -38,23 +38,49 @@
                                HorizontalAlignment="Center"
                                FontSize="14"/>
 
-                    <Grid ColumnDefinitions="Auto,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="12" ColumnSpacing="12">
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Название подмарки:" VerticalAlignment="Center" />
-                        <TextBox Grid.Row="0" Grid.Column="1" Watermark="Название подмарки (например: Крыша, Стена ×4, Фундамент)" Text="{Binding Title}" />
+                    <Grid ColumnDefinitions="Auto,Auto" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="12" ColumnSpacing="12">
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Название:" VerticalAlignment="Center" />
+                        <TextBox Grid.Row="0" Grid.Column="1" Watermark="Введите название (например: Крыша, Стена ×4, Фундамент)" Text="{Binding Title}" />
 
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="План:" VerticalAlignment="Center" />
-                        <TextBox Grid.Row="1" Grid.Column="1" Watermark="План (шт, т, м² — можно дробное: 4.5)" Text="{Binding PlannedQuantity}" />
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Количество:" VerticalAlignment="Center" />
+                        <TextBox Grid.Row="1" Grid.Column="1" Watermark="Введите количество в штук" Text="{Binding Quantity}" />
 
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Примечание:" VerticalAlignment="Center" />
-                        <TextBox Grid.Row="2" Grid.Column="1" Watermark="Примечание (необязательно)" Text="{Binding Notes}" />
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Тоннаж:" VerticalAlignment="Center" />
+                        <TextBox Grid.Row="2" Grid.Column="1" Watermark="Введите тоннаж" Text="{Binding Tonnage}" />
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Примечание:" VerticalAlignment="Center" />
+                        <TextBox Grid.Row="3" Grid.Column="1" Watermark="Введите примечание (необязательно)" Text="{Binding Notes}" />
                     </Grid>
+                    
+                    <StackPanel Spacing="12">
+                        <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="12">
+                            <TextBlock Grid.Column="0" Text="Сотрудник:" VerticalAlignment="Center" />
+                            <ComboBox Grid.Column="1"
+                                      ItemsSource="{Binding Employees}"
+                                      SelectedItem="{Binding SelectedEmployee}"
+                                      DisplayMemberBinding="{Binding FullName}"
+                                      MinHeight="32"
+                                      Padding="8,0"
+                                      Classes="StyledComboBox" />
+                        </Grid>
+
+                        <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="12">
+                            <TextBlock Grid.Column="0" Text="Вид работы:" VerticalAlignment="Center" />
+                            <ComboBox Grid.Column="1"
+                                      ItemsSource="{Binding WorkTypes}"
+                                      SelectedItem="{Binding SelectedWorkType}"
+                                      MinHeight="32"
+                                      Padding="8,0"
+                                      Classes="StyledComboBox" />
+                        </Grid>
+                    </StackPanel>
 
                     <StackPanel Orientation="Horizontal" 
                                 Spacing="12" 
                                 HorizontalAlignment="Center">
                         <Button Content="Сохранить"
                                 Command="{Binding SaveCurrentSubProductCommand}"
-                                IsEnabled="{Binding CanSaveCurrentSubProduct}"
+                                IsEnabled="{Binding IsActiveConfirmButton}"
                                 Width="140"
                                 Height="36"
                                 VerticalContentAlignment="Center"

@@ -1,6 +1,6 @@
 ﻿namespace ProductionAccounting_AvaloniaApplication.Scripts;
 
-public class OpenOrCloseProductViewStatusMessage(bool shouldOpen, string? name = null, double? productId = null, string? mark = null, decimal? coefficient = null, string? notes = null, string? status = null)
+public class OpenOrCloseOrderViewStatusMessage(bool shouldOpen, string? name = null, double? productId = null, string? mark = null, decimal? coefficient = null, string? notes = null, string? status = null)
 {
     public bool ShouldOpen { get; } = shouldOpen;
     public string Name { get; } = name ?? string.Empty;

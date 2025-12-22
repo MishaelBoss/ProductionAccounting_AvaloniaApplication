@@ -11,5 +11,5 @@ public class ReferenceBooksPageUserControlViewModel : ViewModelBase
         => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseUserStatusMessage(true)));
 
     public static ICommand AddProductCommand
-        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseProductStatusMessage(true)));
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseOrderStatusMessage(true)));
 }

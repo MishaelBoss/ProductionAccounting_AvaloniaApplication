@@ -8,5 +8,5 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
 public class ProductsManagerPageUserControlViewModel : ViewModelBase
 {
     public static ICommand AddProductCommand
-        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseProductStatusMessage(true)));
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseOrderStatusMessage(true)));
 }

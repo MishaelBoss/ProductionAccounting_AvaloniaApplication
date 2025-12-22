@@ -25,7 +25,7 @@ public class WorkMasterUserControlViewModel : ViewModelBase, IRecipient<RefreshP
 
     public StackPanel? CartTasks { get; set; }
 
-    private readonly List<CartProductUserControl> _productList = [];
+    private readonly List<CartOrderUserControl> _productList = [];
 
     public async Task LoadTasksAsync()
     {
@@ -62,21 +62,20 @@ public class WorkMasterUserControlViewModel : ViewModelBase, IRecipient<RefreshP
                 await using var reader = await command.ExecuteReaderAsync();
                 while (await reader.ReadAsync())
                 {
-                    var viewModel = new CartProductUserControlViewModel()
+                    var viewModel = new CartOrderUserControlViewModel
                     {
-                        Id = reader.GetDouble(0),
-                        ProductId = reader.GetDouble(1),
-                        ProductName = reader.GetString(2),
-                        Mark = reader.GetString(3),
-                        Article = reader.GetString(4),
-                        Unit = reader.GetString(5),
-                        PricePerUnit = reader.GetDecimal(6),
-                        Coefficient = reader.GetDecimal(7),
-                        Status = reader.GetString(8),
-                        CreatedAt = reader.GetDateTime(9)
+                        OrderId = reader.GetDouble(0),
+                        TaskProductId = reader.GetDouble(1),
+                        Name = reader.GetString(2),
+                        Counterparties = reader.GetString(3),
+                        TotalWeight = reader.GetDecimal(4),
+                        Coefficient = reader.GetDecimal(5),
+                        Status = reader.GetString(6),
+                        CreatedAt = reader.GetDateTime(7),
+                        Description = reader.GetString(8),
                     };
 
-                    var userControl = new CartProductUserControl()
+                    var userControl = new CartOrderUserControl()
                     {
                         DataContext = viewModel,
                     };
@@ -84,7 +83,7 @@ public class WorkMasterUserControlViewModel : ViewModelBase, IRecipient<RefreshP
                     _productList.Add(userControl);
                 }
 
-                if (_productList.FirstOrDefault()?.DataContext is CartProductUserControlViewModel vm) await vm.CheckIsTaskCanBeCompleted();
+                if (_productList.FirstOrDefault()?.DataContext is CartOrderUserControlViewModel vm) await vm.CheckIsTaskCanBeCompleted();
             }
 
             StackPanelHelper.RefreshStackPanelContent(CartTasks, _productList);

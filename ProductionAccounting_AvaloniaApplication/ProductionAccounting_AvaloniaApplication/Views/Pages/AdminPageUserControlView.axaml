@@ -46,10 +46,15 @@
 		  									HorizontalAlignment="Stretch"
 		  									Content="Add a position"/>
 
-									<Button Command="{Binding AddProductCommand}"
+									<Button Command="{Binding AddOrderCommand}"
 		  									VerticalAlignment="Stretch"
 		  									HorizontalAlignment="Stretch"
-		  									Content="Add a product"/>
+		  									Content="Add a order"/>
+
+									<Button Command="{Binding AddWorkTypeCommand}"
+		  									VerticalAlignment="Stretch"
+		  									HorizontalAlignment="Stretch"
+		  									Content="Add a work type"/>
 		  						</ListBox>
 		  					</Flyout>
 		  				</Button.Flyout>
@@ -69,7 +74,10 @@
 				<controls:TabPositionUserControl />
 			</TabItem>
 			<TabItem Header="Product">
-				<controls:TabProductUserControl />
+				<controls:TabOrderUserControl />
+			</TabItem>
+			<TabItem Header="Wort type">
+				<controls:TabWorkTypeUserControl />
 			</TabItem>
         </TabControl>
         

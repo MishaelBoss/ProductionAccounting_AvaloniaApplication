@@ -141,7 +141,7 @@ public class CartSubProductOperationUserControlViewModel : ViewModelBase
     public ICommand EditCommand 
         => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseSubOperationStatusMessage(true, SubProductId, SubProductOperationId, OperationName, OperationCode, OperationPrice, OperationTime, OperationDescription, PlannedQuantity)));
 
-    public ICommand DeleteCommand
+/*    public ICommand DeleteCommand
         => new RelayCommand(() =>
         {
             var viewModel = new ConfirmDeleteWindowViewModel(SubProductOperationId, OperationName ?? string.Empty, "DELETE FROM public.sub_product_operations WHERE id = @id", (() => WeakReferenceMessenger.Default.Send(new RefreshSubProductOperationsMessage(SubProductId))));
@@ -154,10 +154,10 @@ public class CartSubProductOperationUserControlViewModel : ViewModelBase
             viewModel.SetWindow(window);
 
             window.Show();
-        });
+        });*/
 
-    public ICommand AssignCommand 
-        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseEmployeeAssignmentMasterSubMarkStatusMessage(true, SubProductOperationId, SubProductId)));
+/*    public ICommand AssignCommand 
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseEmployeeAssignmentMasterSubMarkStatusMessage(true, SubProductOperationId, SubProductId)));*/
 
     public ICommand OpenSubmitWorkForAnEmployeeCommand
         => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseCompleteWorkFormStatusMessage(true, OperationName, PlannedQuantity, ProductId, OperationId, SubProductOperationId, AssignedToUserId)));

@@ -11,21 +11,18 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
     public class MainWindowViewModel : ViewModelBase,
         IRecipient<OpenOrCloseUserStatusMessage>, 
         IRecipient<OpenOrCloseAddDepartmentStatusMessage>, 
-        IRecipient<OpenOrCloseSubOperationStatusMessage>,
-        IRecipient<OpenOrCloseProductStatusMessage>, 
-        IRecipient<OpenOrCloseAddPositionStatusMessage>, 
+        IRecipient<OpenOrCloseOrderStatusMessage>, 
         IRecipient<OpenOrCloseAddSubProductStatusMessage>, 
-        IRecipient<OpenOrCloseProductViewStatusMessage>, 
-        IRecipient<OpenOrCloseEmployeeAssignmentMasterSubMarkStatusMessage>,
-        IRecipient<OpenOrCloseCompleteWorkFormStatusMessage>
+        IRecipient<OpenOrCloseOrderViewStatusMessage>, 
+        IRecipient<OpenOrCloseCompleteWorkFormStatusMessage>,
+        IRecipient<OpenOrCloseWorkTypeStatusMessage>
     {
         private readonly AddUsersUserControl _addUsers = new();
         private readonly AddDepartmentUserControl _addDepartment = new();
         private readonly AddPositionUserControl _addPosition = new();
-        private readonly AddOperationUserControl _addOperation = new();
-        private readonly AddProductUserControl _addProduct = new();
+        private readonly AddOrderUserControl _addOrder = new();
         private readonly AddSubProductUserControl _addSubProduct = new();
-        private readonly EmployeeAssignmentMasterSubMarkUserControl _employeeAssignmentMasterSubMarkUserControl = new();
+        private readonly AddOrEditWorkTypeUserControl _addOrEditWorkTypeUserControl = new();
         private readonly CompleteWorkFormUserControl _completeWorkFormUserControl = new();
 
         public Grid? ContentCenter = null;
@@ -48,22 +45,16 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
             WeakReferenceMessenger.Default.RegisterAll(this);
         }
 
-        public void Receive(OpenOrCloseProductViewStatusMessage message)
+        public void Receive(OpenOrCloseOrderViewStatusMessage message)
         {
             if (message.ShouldOpen)
             {
-                var productViewModel = new ProductViewUserControlViewModel(message.Name, message.ProductId, message.Mark, message.Coefficient, message.Notes, message.Status);
+                var productViewModel = new OrderViewUserControlViewModel(message.Name, message.ProductId, message.Mark, message.Coefficient, message.Notes, message.Status);
 
                 _viewPageUserControlViewModel.ShowViewModel(productViewModel);
 
                 CurrentPage = _viewPageUserControlViewModel;
             }
-        }
-
-        public void Receive(OpenOrCloseEmployeeAssignmentMasterSubMarkStatusMessage message)
-        {
-            if (message.ShouldOpen) ShowEmployeeAssignmentMasterSubMarkUserControl(message.ProductId, message.SubProductId);
-            else CloseEmployeeAssignmentMasterSubMarkUserControl();
         }
 
         public void Receive(OpenOrCloseCompleteWorkFormStatusMessage message)
@@ -78,22 +69,10 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
             else CloseAddDepartmentUserControl();
         }
 
-        public void Receive(OpenOrCloseSubOperationStatusMessage message)
+        public void Receive(OpenOrCloseOrderStatusMessage message)
         {
-            if (message.ShouldOpen) ShowOperationUsersUserControl(message.SubProductId, message.SubProductOperationId, message.OperationName, message.OperationCode, message.OperationPrice, message.OperationTime, message.OperationDescription, message.OperationQuantity);
-            else CloseOperationUsersUserControl();
-        }
-
-        public void Receive(OpenOrCloseProductStatusMessage message)
-        {
-            if (message.ShouldOpen) ShowProductUsersUserControl(message.Id, message.ProductName, message.ProductArticle, message.ProductDescription, message.ProductPricePerUnit, message.ProductPricePerKg, message.ProductMark, message.ProductCoefficient);
-            else CloseProductUsersUserControl();
-        }
-
-        public void Receive(OpenOrCloseAddPositionStatusMessage message)
-        {
-            if (message.ShouldOpen) ShowAddPositionUserControl();
-            else CloseAddPositionUserControl();
+            if (message.ShouldOpen) ShowOrderUsersUserControl(message.Id, message.Name, message.Counterparties, message.Description, message.TotalWeight, message.Coefficient);
+            else CloseOrderUsersUserControl();
         }
 
         public void Receive(OpenOrCloseUserStatusMessage message)
@@ -106,6 +85,12 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
         {
             if (message.ShouldOpen) ShowAddSubProductUserControl(message.TaskId);
             else CloseAddSubProductUserControl();
+        }
+
+        public void Receive(OpenOrCloseWorkTypeStatusMessage message)
+        {
+            if (message.ShouldOpen) ShowAddOrEditWorkTypeUserControl(message.Id, message.Type, message.Coefficient, message.Measurement, message.Rate);
+            else CloseAddOrEditWorkTypeUserControl();
         }
 
         private void ShowAddUsersUserControl(double? id = null, string? login = null, string? firstName = null, string? lastName = null, string? middleName = null, decimal? baseSalary = null, string? email = null, string? phone = null)
@@ -153,60 +138,16 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
             if (_addDepartment.Parent == ContentCenter) ContentCenter.Children.Remove(_addDepartment);
         }
 
-        private void ShowAddPositionUserControl()
-        {
-            if (ContentCenter == null) return;
-            if (ContentCenter.Children.Contains(_addPosition))
-            {
-                _addPosition.RefreshDataAsync();
-                return;
-            }
-
-            if (_addPosition.Parent is Panel currentParent) currentParent.Children.Remove(_addPosition);
-            ContentCenter.Children.Clear();
-            ContentCenter.Children.Add(_addPosition);
-
-            _addPosition.RefreshDataAsync();
-        }
-
-        private void CloseAddPositionUserControl()
-        {
-            if (ContentCenter == null) return;
-            ContentCenter.Children.Clear();
-            if (_addPosition.Parent == ContentCenter) ContentCenter.Children.Remove(_addPosition);
-        }
-
-        private void ShowOperationUsersUserControl(double subProductId, double subProductOperationId, string operationName, string operationCode, decimal operationPrice, decimal operationTime, string operationDescription, decimal operationQuantity)
-        {
-            if (ContentCenter == null) return;
-            var userControl = new AddOperationUserControl() {DataContext = new AddOperationUserControlViewModel(subProductId, subProductOperationId, operationName, operationCode, operationPrice, operationTime, operationDescription, operationQuantity) };
-
-            if (ContentCenter.Children.Contains(userControl)) return;
-
-            if (userControl.Parent is Panel currentParent) currentParent.Children.Remove(userControl);
-            ContentCenter.Children.Clear();
-            ContentCenter.Children.Add(userControl);
-        }
-
-        private void CloseOperationUsersUserControl()
-        {
-            if (ContentCenter == null) return;
-            ContentCenter.Children.Clear();
-            if (_addOperation.Parent == ContentCenter) ContentCenter.Children.Remove(_addOperation);
-        }
-
-        private void ShowProductUsersUserControl(
+        private void ShowOrderUsersUserControl(
             double? id = null,
-            string? productName = null,
-            string? productArticle = null,
-            string? productDescription = null,
-            decimal? productPricePerUnit = 0,
-            decimal? productPricePerKg = null,
-            string? productMark = null,
-            decimal? productCoefficient = null)
+            string? name = null,
+            string? counterparties = null,
+            string? description = null,
+            decimal? totalWeight = null,
+            decimal? coefficient = null)
         {
             if (ContentCenter == null) return;
-            var userControl = new AddProductUserControl { DataContext = new AddProductUserControlViewModel(id, productName, productArticle, productDescription, productPricePerUnit, productPricePerKg, productMark, productCoefficient) };
+            var userControl = new AddOrderUserControl { DataContext = new AddOrderUserControlViewModel(id, name, counterparties, description, totalWeight, coefficient) };
 
             if (ContentCenter.Children.Contains(userControl)) return;
             if (userControl.Parent is Panel currentParent) currentParent.Children.Remove(userControl);
@@ -214,11 +155,11 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
             ContentCenter.Children.Add(userControl);
         }
 
-        private void CloseProductUsersUserControl()
+        private void CloseOrderUsersUserControl()
         {
             if (ContentCenter == null) return;
             ContentCenter.Children.Clear();
-            if (_addProduct.Parent == ContentCenter) ContentCenter.Children.Remove(_addProduct);
+            if (_addOrder.Parent == ContentCenter) ContentCenter.Children.Remove(_addOrder);
         }
 
         private void ShowAddSubProductUserControl(double taskId)
@@ -239,28 +180,6 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
             if (_addSubProduct.Parent == ContentCenter) ContentCenter.Children.Remove(_addSubProduct);
         }
 
-        private void ShowEmployeeAssignmentMasterSubMarkUserControl(double productId, double subProductId)
-        {
-            if (ContentCenter == null) return;
-            var userControl = new EmployeeAssignmentMasterSubMarkUserControl { DataContext = new EmployeeAssignmentMasterSubMarkUserControlViewModel(productId, subProductId) };
-
-            if (ContentCenter.Children.Contains(userControl))
-            {
-                return;
-            }
-
-            if (userControl.Parent is Panel currentParent) currentParent.Children.Remove(userControl);
-            ContentCenter.Children.Clear();
-            ContentCenter.Children.Add(userControl);
-        }
-
-        private void CloseEmployeeAssignmentMasterSubMarkUserControl()
-        {
-            if (ContentCenter == null) return;
-            ContentCenter.Children.Clear();
-            if (_employeeAssignmentMasterSubMarkUserControl.Parent == ContentCenter) ContentCenter.Children.Remove(_employeeAssignmentMasterSubMarkUserControl);
-        }
-
         private void ShowCompleteWorkFormUserControl(string taskName, decimal assignedQuantity, double productId, double operationId, double subProductOperationId, double userId)
         {
             if (ContentCenter == null) return;
@@ -278,6 +197,25 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
             if (ContentCenter == null) return;
             ContentCenter.Children.Clear();
             if (_completeWorkFormUserControl.Parent == ContentCenter) ContentCenter.Children.Remove(_completeWorkFormUserControl);
+        }
+
+        private void ShowAddOrEditWorkTypeUserControl(double id, string type, decimal coefficient, string measurement, decimal rate)
+        {
+            if (ContentCenter == null) return;
+            var userControl = new AddOrEditWorkTypeUserControl { DataContext = new AddOrEditWorkTypeUserControlViewModel(id, type, coefficient, measurement, rate) };
+
+            if (ContentCenter.Children.Contains(userControl)) return;
+
+            if (userControl.Parent is Panel currentParent) currentParent.Children.Remove(userControl);
+            ContentCenter.Children.Clear();
+            ContentCenter.Children.Add(userControl);
+        }
+
+        private void CloseAddOrEditWorkTypeUserControl()
+        {
+            if (ContentCenter == null) return;
+            ContentCenter.Children.Clear();
+            if (_addOrEditWorkTypeUserControl.Parent == ContentCenter) ContentCenter.Children.Remove(_addOrEditWorkTypeUserControl);
         }
     }
 }

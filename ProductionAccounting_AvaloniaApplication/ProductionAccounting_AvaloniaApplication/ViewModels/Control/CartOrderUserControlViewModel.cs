@@ -10,10 +10,10 @@ using JetBrains.Annotations;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
-public class CartProductUserControlViewModel : ViewModelBase
+public class CartOrderUserControlViewModel : ViewModelBase
 {
     public ICommand OpenPruductViewCommand
-        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseProductViewStatusMessage(true, ProductName, Id, Mark, Coefficient, Notes, Status)));
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseOrderViewStatusMessage(true, Name, TaskProductId, Counterparties, Coefficient, Description, Status)));
 
     public ICommand CompleteTaskCommand
         => new RelayCommand(async void () =>
@@ -24,14 +24,14 @@ public class CartProductUserControlViewModel : ViewModelBase
             }
             catch (Exception ex)
             {
-                Loges.LoggingProcess(level: LogLevel.Critical, 
-                    ex: ex, 
+                Loges.LoggingProcess(level: LogLevel.Critical,
+                    ex: ex,
                     message: "Error complete task");
             }
         });
 
     public ICommand EditCommand
-        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseProductStatusMessage(true, ProductId, ProductName, Article, Description, PricePerUnit, PricePerUnitKg, Mark, Coefficient)));
+        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseOrderStatusMessage(true, OrderId, Name,Counterparties, Description, TotalWeight, Coefficient)));
 
     private string _status = "new";
     [UsedImplicitly]
@@ -65,32 +65,22 @@ public class CartProductUserControlViewModel : ViewModelBase
     };
 
     [UsedImplicitly]
-    public double Id { get; set; }
+    public double OrderId { get; set; }
     [UsedImplicitly]
-    public double ProductId { get; set; }
-
+    public double TaskProductId { get; set; }
     [UsedImplicitly]
-    public string Notes { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
     [UsedImplicitly]
-    public string ProductName { get; set; } = string.Empty;
-    [UsedImplicitly]
-    public string Mark { get; set; } = string.Empty;
-    [UsedImplicitly]
-    public string Article { get; set; } = string.Empty;
+    public string Counterparties { get; set; } = string.Empty;
     [UsedImplicitly]
     public string Description { get; set; } = string.Empty;
     [UsedImplicitly]
-    public string Unit { get; set; } = string.Empty;
-
-    [UsedImplicitly]
-    public decimal PricePerUnit { get; set; }
-
-    [UsedImplicitly]
-    public decimal PricePerUnitKg { get; set; }
+    public decimal TotalWeight { get; set; }
     [UsedImplicitly]
     public decimal Coefficient { get; set; }
 
     private bool _canCompleteTask;
+
     [UsedImplicitly]
     public bool CanCompleteTask 
     {
@@ -111,7 +101,7 @@ public class CartProductUserControlViewModel : ViewModelBase
                     "DELETE FROM public.production WHERE product_id = @id"
             ];
 
-            var viewModel = new ConfirmDeleteWindowViewModel(ProductId, ProductName, "DELETE FROM public.product WHERE id = @id", () => WeakReferenceMessenger.Default.Send(new RefreshProductListMessage()), deleteQueries);
+            var viewModel = new ConfirmDeleteWindowViewModel(OrderId, Name, "DELETE FROM public.order WHERE id = @id", () => WeakReferenceMessenger.Default.Send(new RefreshProductListMessage()), deleteQueries);
 
             var window = new ConfirmDeleteWindow()
             {
@@ -133,7 +123,7 @@ public class CartProductUserControlViewModel : ViewModelBase
         && CanCompleteTask
         && Status != "completed";
 
-    public async Task CheckIsTaskCanBeCompleted() 
+    public async Task CheckIsTaskCanBeCompleted()
     {
         try
         {
@@ -146,7 +136,7 @@ public class CartProductUserControlViewModel : ViewModelBase
             await using var connection = new NpgsqlConnection(Arguments.Connection);
             await connection.OpenAsync();
             await using var command = new NpgsqlCommand(sql, connection);
-            command.Parameters.AddWithValue("@task_id", Id);
+            command.Parameters.AddWithValue("@task_id", TaskProductId);
 
             var result = await command.ExecuteScalarAsync();
             CanCompleteTask = result != null && Convert.ToBoolean(result);
@@ -158,7 +148,7 @@ public class CartProductUserControlViewModel : ViewModelBase
 
             CanCompleteTask = false;
         }
-        catch (Exception ex) 
+        catch (Exception ex)
         {
             Loges.LoggingProcess(level: LogLevel.Warning,
                 ex: ex);
@@ -167,7 +157,7 @@ public class CartProductUserControlViewModel : ViewModelBase
         }
     }
 
-    private async Task CompleteTaskAndShipAsync() 
+    private async Task CompleteTaskAndShipAsync()
     {
         try
         {
@@ -180,7 +170,7 @@ public class CartProductUserControlViewModel : ViewModelBase
             const string toShipmentSql = "INSERT INTO public.shipments (product_task_id, product_id, planned_quantity, shipped_quantity, created_by, status, shipment_date) " +
                 "VALUES (@task_id, @product_id, @qty, @qty, @user_id, 'ready', CURRENT_DATE)";
             const string closeTaskSql = "UPDATE public.product_tasks SET status = 'completed' WHERE id = @id";
-            const string productActiveSql = "UPDATE public.product SET is_active = false WHERE id = @pId";
+            const string productActiveSql = "UPDATE public.order SET is_active = false WHERE id = @oId";
 
             decimal totalQuantity = 0;
 
@@ -189,7 +179,7 @@ public class CartProductUserControlViewModel : ViewModelBase
 
             await using (var command1 = new NpgsqlCommand(getDateSql, connection))
             {
-                command1.Parameters.AddWithValue("@task_id", Id);
+                command1.Parameters.AddWithValue("@task_id", OrderId);
                 await using var reader = await command1.ExecuteReaderAsync();
                 if (await reader.ReadAsync())
                 {
@@ -201,21 +191,21 @@ public class CartProductUserControlViewModel : ViewModelBase
 
             await using (var command2 = new NpgsqlCommand(toShipmentSql, connection))
             {
-                command2.Parameters.AddWithValue("@task_id", Id);
-                command2.Parameters.AddWithValue("@product_id", ProductId);
+                command2.Parameters.AddWithValue("@task_id", TaskProductId);
+                command2.Parameters.AddWithValue("@product_id", OrderId);
                 command2.Parameters.AddWithValue("@qty", totalQuantity);
                 command2.Parameters.AddWithValue("@user_id", ManagerCookie.GetIdUser ?? 0);
                 await command2.ExecuteNonQueryAsync();
             }
 
             await using var command3 = new NpgsqlCommand(closeTaskSql, connection);
-            command3.Parameters.AddWithValue("@id", Id);
+            command3.Parameters.AddWithValue("@id", OrderId);
             await command3.ExecuteNonQueryAsync();
 
             await using var command4 = new NpgsqlCommand(productActiveSql, connection);
-            command4.Parameters.AddWithValue("@pId", ProductId);
+            command4.Parameters.AddWithValue("@oId", OrderId);
             await command4.ExecuteNonQueryAsync();
-                
+
             WeakReferenceMessenger.Default.Send(new RefreshProductListMessage());
         }
         catch (PostgresException ex)

@@ -51,14 +51,23 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Views\Control\AddOrderUserControl.axaml.cs">
+      <DependentUpon>AddOrderUserControl.axaml</DependentUpon>
+    </Compile>
     <Compile Update="Views\Control\CartEmployeeTaskUserControl.axaml.cs">
       <DependentUpon>CartEmployeeTaskUserControl.axaml</DependentUpon>
     </Compile>
-    <Compile Update="Views\Control\ProductViewUserControlView.axaml.cs">
-      <DependentUpon>ProductViewUserControlView.axaml</DependentUpon>
+    <Compile Update="Views\Control\CartOrderUserControl.axaml.cs">
+      <DependentUpon>CartOrderUserControl.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Control\OrderViewUserControlView.axaml.cs">
+      <DependentUpon>OrderViewUserControlView.axaml</DependentUpon>
     </Compile>
     <Compile Update="Views\Control\AddSubProductUserControl.axaml.cs">
       <DependentUpon>AddSubProductUserControl.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Control\TabOrderUserControl.axaml.cs">
+      <DependentUpon>TabOrderUserControl.axaml</DependentUpon>
     </Compile>
     <Compile Update="Views\Control\WorkUserControl.axaml.cs">
       <DependentUpon>WorkUserControl.axaml</DependentUpon>

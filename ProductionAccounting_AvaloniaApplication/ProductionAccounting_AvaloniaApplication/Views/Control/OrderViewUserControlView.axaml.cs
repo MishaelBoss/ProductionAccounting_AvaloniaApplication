@@ -4,9 +4,9 @@ using ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 namespace ProductionAccounting_AvaloniaApplication.Views.Control;
 
-public partial class ProductViewUserControlView : UserControl
+public partial class OrderViewUserControlView : UserControl
 {
-    public ProductViewUserControlView()
+    public OrderViewUserControlView()
     {
         InitializeComponent();
         Loaded += OnLoaded;
@@ -14,9 +14,8 @@ public partial class ProductViewUserControlView : UserControl
 
     private void OnLoaded(object? sender, RoutedEventArgs e)
     {
-        if (DataContext is not ProductViewUserControlViewModel viewModel) return;
+        if (DataContext is not OrderViewUserControlViewModel viewModel) return;
         viewModel.SubProductContent = SubProductContent;
-        viewModel.SubProductOperation = SubProductOperation;
         _ = viewModel.LoadSubProductAsync();
     }
 }

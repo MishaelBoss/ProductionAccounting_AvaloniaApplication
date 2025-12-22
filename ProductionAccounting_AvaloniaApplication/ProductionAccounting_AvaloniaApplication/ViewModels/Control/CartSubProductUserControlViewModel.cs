@@ -1,75 +1,51 @@
 ﻿using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using ProductionAccounting_AvaloniaApplication.Scripts;
-using ReactiveUI;
 using System;
-using System.Collections.Generic;
 using System.Windows.Input;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
-public class CartSubProductUserControlViewModel : ViewModelBase
+public class CartSubProductUserControlViewModel(double id, double productTaskId, string name, string notes, decimal quantity, decimal tonnage, DateTime createAt) : ViewModelBase
 {
-    private double? _id;
-    public double? Id
-    {
-        get => _id;
-        set => this.RaiseAndSetIfChanged(ref _id, value);
-    }
+    private double _id { get; } = id;
+    private double _productTaskId { get; } = productTaskId;
 
-    private double? _productTaskId;
-    public double? ProductTaskId
-    {
-        get => _productTaskId;
-        set => this.RaiseAndSetIfChanged(ref _productTaskId, value);
-    }
-
-    private string? _name;
-    public string? Name
+    private string _name { get; } = name ?? string.Empty;
+    public string Name 
     {
         get => _name;
-        set => this.RaiseAndSetIfChanged(ref _name, value);
     }
 
-    private double? _plannedQuantity;
-    public double? PlannedQuantity
-    {
-        get => _plannedQuantity;
-        set => this.RaiseAndSetIfChanged(ref _plannedQuantity, value);
-    }
-
-    private double? _plannedWeight;
-    public double? PlannedWeight
-    {
-        get => _plannedWeight;
-        set => this.RaiseAndSetIfChanged(ref _plannedWeight, value);
-    }
-
-    private string? _notes;
-    public string? Notes
+    private string _notes { get; } = notes;
+    public string Notes
     {
         get => _notes;
-        set => this.RaiseAndSetIfChanged(ref _notes, value);
     }
 
-    private DateTime? _createAt;
-    public DateTime? CreateAt
+
+    private decimal _quantity { get; } = quantity;
+    public decimal Quantity
+    {
+        get => _quantity;
+    }
+
+    private decimal _tonnage { get; } = tonnage;
+    public decimal Tonnage
+    {
+        get => _tonnage;
+    }
+
+    private DateTime _createAt { get; } = createAt;
+    public DateTime CreateAt
     {
         get => _createAt;
-        set => this.RaiseAndSetIfChanged(ref _createAt, value);
-    }
-
-    private List<CartOperationUserControl> _operations = [];
-    public List<CartOperationUserControl> Operations 
-    {
-        get => _operations;
-        set => this.RaiseAndSetIfChanged(ref _operations, value);
     }
 
     public ICommand DeleteCommand
         => new RelayCommand(() =>
         {
-            var viewModel = new ConfirmDeleteWindowViewModel(Id ?? 0, Name ?? string.Empty, "DELETE FROM public.sub_products WHERE id = @id", () => WeakReferenceMessenger.Default.Send(new RefreshSubProductListMessage()));
+            var viewModel = new ConfirmDeleteWindowViewModel(id, name ?? string.Empty, "DELETE FROM public.sub_products WHERE id = @id", () => WeakReferenceMessenger.Default.Send(new RefreshSubProductListMessage()));
 
             var window = new ConfirmDeleteWindow()
             {
@@ -80,12 +56,6 @@ public class CartSubProductUserControlViewModel : ViewModelBase
 
             window.Show();
         });
-
-    public ICommand ViewCommand
-        => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseSubProductStatusMessage(true, Id)));
-
-    public bool IsNullNotes
-        => !string.IsNullOrEmpty(Notes);
 
     public static bool IsAdministrator
         => ManagerCookie.IsUserLoggedIn()

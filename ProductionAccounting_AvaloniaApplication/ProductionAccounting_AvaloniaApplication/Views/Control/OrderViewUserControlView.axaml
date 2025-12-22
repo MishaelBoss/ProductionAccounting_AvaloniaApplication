@@ -3,9 +3,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:ProductionAccounting_AvaloniaApplication.ViewModels.Control"
-             x:DataType="vm:ProductViewUserControlViewModel"
+             x:DataType="vm:OrderViewUserControlViewModel"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="ProductionAccounting_AvaloniaApplication.Views.Control.ProductViewUserControlView">
+             x:Class="ProductionAccounting_AvaloniaApplication.Views.Control.OrderViewUserControlView">
 
     <Grid ColumnDefinitions="*, Auto">
         <Border Background="White"
@@ -41,48 +41,6 @@
                                 Margin="0,10,0,0"/>
             </StackPanel>
         </ScrollViewer>
-
-        <Grid   Grid.Column="1"
-                Name="RightSidebar"
-                IsVisible="True"
-                Margin="5,0,0,0"
-                Width="400"
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch">
-            <Border Background="White"
-                     Opacity="0.5"
-                     CornerRadius="5"
-                     ClipToBounds="True"/>
-            <Button Command="{Binding AddOperationCommand}"
-							HorizontalAlignment="Right"
-		  					VerticalAlignment="Top"
-		  					Width="32"
-		  					Height="32"
-		  					ToolTip.Tip="Add"
-                            IsVisible="{Binding IsAdministratorOrMasterAndCanCompleteTask}">
-		  				<Image Source="/Assets/add-64.png"/>
-		  			</Button>
-             <ScrollViewer Margin="10">
-                 <StackPanel Orientation="Vertical">
-                     <StackPanel Orientation="Horizontal"
-                                 HorizontalAlignment="Center">
-                        <TextBlock Text="{Binding SubProductId}"/>
-                        <TextBlock Text="{Binding SubProductName}"/>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal"
-                                HorizontalAlignment="Center"
-                                Spacing="5">
-                            <TextBlock Text="{Binding SubProductPlannedQuantity}"/>
-                            <TextBlock Text="{Binding SubProductPlannedWeight}"/>
-                            <TextBlock Text="{Binding SubProductNotes}"/>
-                    </StackPanel>
-
-                     <ScrollViewer>
-						 <StackPanel Name="SubProductOperation"/>
-                     </ScrollViewer>
-                 </StackPanel>
-             </ScrollViewer>
-        </Grid>
     </Grid>
 
 </UserControl>

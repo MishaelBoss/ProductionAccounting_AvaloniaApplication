@@ -6,12 +6,12 @@ using ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 namespace ProductionAccounting_AvaloniaApplication.Views.Control;
 
-public partial class TabProductUserControl : UserControl
+public partial class TabOrderUserControl : UserControl
 {
-    public TabProductUserControl()
+    public TabOrderUserControl()
     {
         InitializeComponent();
-        DataContext = new TabProductUserControlViewModel();
+        DataContext = new TabOrderUserControlViewModel();
         Loaded += OnLoaded;
     }
 
@@ -19,7 +19,7 @@ public partial class TabProductUserControl : UserControl
     {
         try
         {
-            if (DataContext is not TabProductUserControlViewModel viewModel) return;
+            if (DataContext is not TabOrderUserControlViewModel viewModel) return;
             viewModel.HomeMainContent = HomeMainContent;
             await viewModel.LoadProductsWithResetAsync();
         }

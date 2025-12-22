@@ -15,10 +15,11 @@ using JetBrains.Annotations;
 using ReactiveUI;
 using System.Threading;
 using static ProductionAccounting_AvaloniaApplication.ViewModels.Control.NotFoundUserControlViewModel;
+using MsBox.Avalonia;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
-public class TabProductUserControlViewModel : ViewModelBase, IRecipient<RefreshProductListMessage>
+public class TabOrderUserControlViewModel : ViewModelBase, IRecipient<RefreshProductListMessage>
 {
     private string _search = string.Empty;
 
@@ -63,7 +64,7 @@ public class TabProductUserControlViewModel : ViewModelBase, IRecipient<RefreshP
     private readonly Lock _loadingLock = new();
     private bool _isLoading;
 
-    public TabProductUserControlViewModel()
+    public TabOrderUserControlViewModel()
     {
         WeakReferenceMessenger.Default.Register(this);
     }
@@ -83,7 +84,7 @@ public class TabProductUserControlViewModel : ViewModelBase, IRecipient<RefreshP
 
     public StackPanel? HomeMainContent { get; set; }
 
-    private readonly List<CartProductUserControl> _productList = [];
+    private readonly List<CartOrderUserControl> _orderList = [];
 
     public ICommand ResetFiltersCommand
         => new RelayCommand(ResetFilters);
@@ -178,7 +179,7 @@ public class TabProductUserControlViewModel : ViewModelBase, IRecipient<RefreshP
     {
         try
         {
-            _productList.Clear();
+            _orderList.Clear();
 
             HomeMainContent?.Children.Clear();
         }
@@ -213,7 +214,7 @@ public class TabProductUserControlViewModel : ViewModelBase, IRecipient<RefreshP
             await using var connection = new NpgsqlConnection(Arguments.Connection);
             await connection.OpenAsync();
 
-            var sql = "SELECT DISTINCT id FROM public.product WHERE 1=1";
+            var sql = "SELECT DISTINCT id FROM public.order WHERE 1=1";
             var parameters = new List<NpgsqlParameter>();
             
             if (!ShowActive || !ShowInactive)
@@ -280,21 +281,18 @@ public class TabProductUserControlViewModel : ViewModelBase, IRecipient<RefreshP
 
             var sql = $@"
                     SELECT 
+                        pt.order_id,
                         pt.id,
-                        pt.product_id,
-                        p.name,
-                        COALESCE(p.mark, '') AS mark,
-                        p.article,
-                        p.unit,
-                        p.price_per_unit,
-                        p.price_per_kg,
-                        p.coefficient,
+                        o.name,
+                        o.counterparties,
+                        o.total_weight,
+                        o.coefficient,
                         COALESCE(pt.status, 'new') AS status,
                         pt.created_at,
-                        p.description
+                        o.description
                     FROM public.product_tasks pt
-                    JOIN public.product p ON p.id = pt.product_id
-                    WHERE p.id IN ({string.Join(", ", paramNames)}) 
+                    JOIN public.order o ON o.id = pt.order_id
+                    WHERE o.id IN ({string.Join(", ", paramNames)}) 
                     ORDER BY pt.created_at DESC";
 
             await using var connection = new NpgsqlConnection(Arguments.Connection);
@@ -308,36 +306,33 @@ public class TabProductUserControlViewModel : ViewModelBase, IRecipient<RefreshP
 
             await using var reader = await command.ExecuteReaderAsync();
             
-            var newProductList = new List<CartProductUserControl>();
+            var newProductList = new List<CartOrderUserControl>();
             
             while (await reader.ReadAsync())
             {
-                var viewModel = new CartProductUserControlViewModel
+                var viewModel = new CartOrderUserControlViewModel
                 {
-                    Id = reader.GetDouble(0),
-                    ProductId = reader.GetDouble(1),
-                    ProductName = reader.GetString(2),
-                    Mark = reader.GetString(3),
-                    Article = reader.GetString(4),
-                    Unit = reader.GetString(5),
-                    PricePerUnit = reader.GetDecimal(6),
-                    PricePerUnitKg = reader.GetDecimal(7),
-                    Coefficient = reader.GetDecimal(8),
-                    Status = reader.GetString(9),
-                    CreatedAt = reader.GetDateTime(10),
-                    Description = reader.GetString(11),
+                    OrderId = reader.GetDouble(0),
+                    TaskProductId = reader.GetDouble(1),
+                    Name = reader.GetString(2),
+                    Counterparties = reader.GetString(3),
+                    TotalWeight = reader.GetDecimal(4),
+                    Coefficient = reader.GetDecimal(5),
+                    Status = reader.GetString(6),
+                    CreatedAt = reader.GetDateTime(7),
+                    Description = reader.GetString(8),
                 };
 
-                newProductList.Add(new CartProductUserControl
+                newProductList.Add(new CartOrderUserControl
                 {
                     DataContext = viewModel
                 });
             }
-            
-            _productList.Clear();
-            _productList.AddRange(newProductList);
 
-            if (newProductList.FirstOrDefault()?.DataContext is CartProductUserControlViewModel firstViewModel)
+            _orderList.Clear();
+            _orderList.AddRange(newProductList);
+
+            if (newProductList.FirstOrDefault()?.DataContext is CartOrderUserControlViewModel firstViewModel)
             {
                 await firstViewModel.CheckIsTaskCanBeCompleted();
             }
@@ -345,13 +340,13 @@ public class TabProductUserControlViewModel : ViewModelBase, IRecipient<RefreshP
             if (HomeMainContent != null)
             {
                 HomeMainContent.Children.Clear();
-                foreach (var product in _productList)
+                foreach (var product in _orderList)
                 {
                     HomeMainContent.Children.Add(product);
                 }
             }
 
-            if (_productList.Count == 0) ShowNotFoundMessage();
+            if (_orderList.Count == 0) ShowNotFoundMessage();
         }
         catch (NpgsqlException ex)
         {
@@ -481,7 +476,7 @@ public class TabProductUserControlViewModel : ViewModelBase, IRecipient<RefreshP
         }
     }
     
-    ~TabProductUserControlViewModel()
+    ~TabOrderUserControlViewModel()
     {
            WeakReferenceMessenger.Default.Unregister<RefreshProductListMessage>(this);
     }
