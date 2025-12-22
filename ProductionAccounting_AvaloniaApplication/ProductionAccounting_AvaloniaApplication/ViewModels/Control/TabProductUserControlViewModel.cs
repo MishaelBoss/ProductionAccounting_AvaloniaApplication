@@ -259,7 +259,6 @@ public class TabProductUserControlViewModel : ViewModelBase, IRecipient<RefreshP
                         ProductName = reader.GetString(2),
                         Mark = reader.GetString(3),
                         Article = reader.GetString(4),
-                        Unit = reader.GetString(5),
                         PricePerUnit = reader.GetDecimal(6),
                         PricePerUnitKg = reader.GetDecimal(7),
                         Coefficient = reader.GetDecimal(8),

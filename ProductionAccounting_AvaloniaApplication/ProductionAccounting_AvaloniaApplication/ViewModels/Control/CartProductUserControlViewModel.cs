@@ -4,24 +4,37 @@ using Npgsql;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ReactiveUI;
 using System;
-using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using JetBrains.Annotations;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
-public class CartProductUserControlViewModel : ViewModelBase, INotifyPropertyChanged
+public class CartProductUserControlViewModel : ViewModelBase
 {
     public ICommand OpenPruductViewCommand
         => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseProductViewStatusMessage(true, ProductName, Id, Mark, Coefficient, Notes, Status)));
 
     public ICommand CompleteTaskCommand
-        => new RelayCommand(async () => { if (!CanCompleteTask) return; await CompleteTaskAndShipAsync(); });
+        => new RelayCommand(async void () =>
+        {
+            try
+            {
+                if (!CanCompleteTask) return; await CompleteTaskAndShipAsync();
+            }
+            catch (Exception ex)
+            {
+                Loges.LoggingProcess(level: LogLevel.Critical, 
+                    ex: ex, 
+                    message: "Error complete task");
+            }
+        });
 
     public ICommand EditCommand
         => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseProductStatusMessage(true, ProductId, ProductName, Article, Description, PricePerUnit, PricePerUnitKg, Mark, Coefficient)));
 
     private string _status = "new";
+    [UsedImplicitly]
     public string Status
     {
         get => _status;
@@ -51,33 +64,39 @@ public class CartProductUserControlViewModel : ViewModelBase, INotifyPropertyCha
         _ => Status
     };
 
+    [UsedImplicitly]
     public double Id { get; set; }
+    [UsedImplicitly]
     public double ProductId { get; set; }
 
+    [UsedImplicitly]
     public string Notes { get; set; } = string.Empty;
+    [UsedImplicitly]
     public string ProductName { get; set; } = string.Empty;
+    [UsedImplicitly]
     public string Mark { get; set; } = string.Empty;
+    [UsedImplicitly]
     public string Article { get; set; } = string.Empty;
+    [UsedImplicitly]
     public string Description { get; set; } = string.Empty;
-    public string Unit { get; set; } = string.Empty;
 
+    [UsedImplicitly]
     public decimal PricePerUnit { get; set; }
 
+    [UsedImplicitly]
     public decimal PricePerUnitKg { get; set; }
+    [UsedImplicitly]
     public decimal Coefficient { get; set; }
 
     private bool _canCompleteTask;
+    [UsedImplicitly]
     public bool CanCompleteTask 
     {
         get => _canCompleteTask;
         set
         {
-            if (_canCompleteTask != value) 
-            {
-                _canCompleteTask = value;
-                OnPropertyChanged(nameof(CanCompleteTask));
-                OnPropertyChanged(nameof(IsAdministratorOrMasterAndCanCompleteTask));
-            }
+            this.RaiseAndSetIfChanged(ref _canCompleteTask, value);
+            this.RaisePropertyChanged(nameof(IsAdministratorOrMasterAndCanCompleteTask));
         }
     }
 
@@ -102,6 +121,7 @@ public class CartProductUserControlViewModel : ViewModelBase, INotifyPropertyCha
             window.Show();
         });
 
+    [UsedImplicitly]
     public static bool IsAdministratorOrMasterAndManager
         => ManagerCookie.IsUserLoggedIn()
         && (ManagerCookie.IsAdministrator || ManagerCookie.IsMaster || ManagerCookie.IsManager);
@@ -115,15 +135,15 @@ public class CartProductUserControlViewModel : ViewModelBase, INotifyPropertyCha
     {
         try
         {
-            string sql = @"
+            const string sql = @"
                         SELECT COUNT(*) = 0 
                         FROM public.sub_product_operations spo
                         JOIN public.sub_products sp ON sp.id = spo.sub_product_id
                         WHERE sp.product_task_id = @task_id
                             AND spo.completed_quantity < spo.planned_quantity";
-            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await using var connection = new NpgsqlConnection(Arguments.Connection);
             await connection.OpenAsync();
-            using var command = new NpgsqlCommand(sql, connection);
+            await using var command = new NpgsqlCommand(sql, connection);
             command.Parameters.AddWithValue("@task_id", Id);
 
             var result = await command.ExecuteScalarAsync();
@@ -149,36 +169,35 @@ public class CartProductUserControlViewModel : ViewModelBase, INotifyPropertyCha
     {
         try
         {
-            string getDateSql = "SELECT pt.product_id, SUM(spo.planned_quantity) " +
+            const string getDateSql = "SELECT pt.product_id, SUM(spo.planned_quantity) " +
                 "FROM public.product_tasks pt " +
                 "JOIN public.sub_products sp ON sp.product_task_id = pt.id " +
                 "JOIN public.sub_product_operations spo ON spo.sub_product_id = sp.id " +
                 "WHERE pt.id = @task_id " +
                 "GROUP BY pt.product_id";
-            string toShipmentSql = "INSERT INTO public.shipments (product_task_id, product_id, planned_quantity, shipped_quantity, created_by, status, shipment_date) " +
+            const string toShipmentSql = "INSERT INTO public.shipments (product_task_id, product_id, planned_quantity, shipped_quantity, created_by, status, shipment_date) " +
                 "VALUES (@task_id, @product_id, @qty, @qty, @user_id, 'ready', CURRENT_DATE)";
-            string closeTaskSql = "UPDATE public.product_tasks SET status = 'completed' WHERE id = @id";
+            const string closeTaskSql = "UPDATE public.product_tasks SET status = 'completed' WHERE id = @id";
+            const string productActiveSql = "UPDATE public.product SET is_active = false WHERE id = @pId";
 
-            double productId = 0;
             decimal totalQuantity = 0;
 
-            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await using var connection = new NpgsqlConnection(Arguments.Connection);
             await connection.OpenAsync();
 
-            using (var command1 = new NpgsqlCommand(getDateSql, connection))
+            await using (var command1 = new NpgsqlCommand(getDateSql, connection))
             {
                 command1.Parameters.AddWithValue("@task_id", Id);
-                using var reader = await command1.ExecuteReaderAsync();
+                await using var reader = await command1.ExecuteReaderAsync();
                 if (await reader.ReadAsync())
                 {
-                    productId = reader.GetDouble(0);
                     totalQuantity = reader.GetDecimal(1);
                 }
 
                 await reader.CloseAsync();
             }
 
-            using (var command2 = new NpgsqlCommand(toShipmentSql, connection))
+            await using (var command2 = new NpgsqlCommand(toShipmentSql, connection))
             {
                 command2.Parameters.AddWithValue("@task_id", Id);
                 command2.Parameters.AddWithValue("@product_id", ProductId);
@@ -187,10 +206,14 @@ public class CartProductUserControlViewModel : ViewModelBase, INotifyPropertyCha
                 await command2.ExecuteNonQueryAsync();
             }
 
-            using var command3 = new NpgsqlCommand(closeTaskSql, connection);
+            await using var command3 = new NpgsqlCommand(closeTaskSql, connection);
             command3.Parameters.AddWithValue("@id", Id);
             await command3.ExecuteNonQueryAsync();
 
+            await using var command4 = new NpgsqlCommand(productActiveSql, connection);
+            command4.Parameters.AddWithValue("@pId", ProductId);
+            await command4.ExecuteNonQueryAsync();
+                
             WeakReferenceMessenger.Default.Send(new RefreshProductListMessage());
         }
         catch (PostgresException ex)
@@ -204,8 +227,4 @@ public class CartProductUserControlViewModel : ViewModelBase, INotifyPropertyCha
                 ex: ex);
         }
     }
-
-    public new event PropertyChangedEventHandler? PropertyChanged;
-    protected void OnPropertyChanged(string propertyName)
-        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }
