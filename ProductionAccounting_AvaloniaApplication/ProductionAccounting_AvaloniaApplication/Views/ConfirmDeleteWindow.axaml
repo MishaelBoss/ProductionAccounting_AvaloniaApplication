@@ -11,57 +11,107 @@
 		WindowStartupLocation="CenterScreen"
         Title="ConfirmDeleteWindow">
 
-	<Border CornerRadius="12"
+    <Window.Styles>
+        <Style Selector="Window">
+            <Setter Property="Background" Value="Gray"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="BorderBrush" Value="#E1E5E9"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="20"/>
+        </Style>
+        
+        <Style Selector="Button:pointerover">
+            <Setter Property="Background" Value="#E1E5E9"/>
+            <Setter Property="Foreground" Value="#2C3E50"/>
+        </Style>
+
+        <Style Selector="Button:pressed">
+            <Setter Property="Background" Value="#D4D7DA"/>
+            <Setter Property="Foreground" Value="#2C3E50"/>
+        </Style>
+    </Window.Styles>
+
+    <Border CornerRadius="12"
             Background="LightGray"
             BorderBrush="#E1E5E9"
             BorderThickness="1"
-			PointerPressed="TopBorder">
-		
-        <Grid Margin="15"
-			  ColumnDefinitions="Auto, *, Auto">
+            Margin="0,0,0,0"
+            Padding="20"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center">
+        
+        <Grid Margin="0"
+              ColumnDefinitions="Auto, *, Auto"
+              RowDefinitions="Auto, Auto, Auto">
 
-			<StackPanel Grid.Column="1"
+            <StackPanel Grid.Column="1"
                         VerticalAlignment="Center"
-                        Margin="0,0,15,0">
-				<TextBlock 	Text="{Binding Title}"
-							Foreground="#2C3E50"
-							FontSize="14"
-							FontWeight="SemiBold"
-							Margin="0,0,0,2"/>
-				
-				<TextBlock 	Text="{Binding Id}"
-							Foreground="#7F8C8D"
-							FontSize="12"
-							Margin="0,0,0,1"/>
-			</StackPanel>
+                        Margin="0,0,15,0"
+                        Width="200">
 
-			<StackPanel Grid.Column="2"
-						Orientation="Horizontal"
-						Spacing="6"
-						VerticalAlignment="Center">
+                <TextBlock Text="{Binding Title}"
+                           Foreground="#2C3E50"
+                           FontSize="16"
+                           FontWeight="SemiBold"
+                           Margin="0,0,0,8"
+                           TextAlignment="Center"
+                           MaxWidth="200"/>
 
-				<Button Command="{Binding CancelCommand}"
-						Width="100"
-						Height="34"
-						CornerRadius="6"
-						Background="#757271"
-						BorderThickness="0"
-						ToolTip.Tip="Cancel">
-					<Label	HorizontalAlignment="Center" 
-							Content="Cancel"/>
-				</Button>
+                <TextBlock Text="{Binding Id}"
+                           Foreground="#7F8C8D"
+                           FontSize="12"
+                           Margin="0,0,0,1"
+                           TextAlignment="Center"
+                           MaxWidth="200"
+                           TextTrimming="CharacterEllipsis"/>
 
-				<Button Command="{Binding DeleteCommand}"
-						Width="100"
-						Height="34"
-						CornerRadius="6"
-						Background="#FF3B30"
-						BorderThickness="0"
-						ToolTip.Tip="Confirm">
-					<Label	HorizontalAlignment="Center" 
-							Content="Confirm"/>
-				</Button>
-			</StackPanel>
-		</Grid>
+            </StackPanel>
+
+            <StackPanel Grid.Column="2"
+                        Orientation="Horizontal"
+                        Spacing="12"
+                        VerticalAlignment="Center"
+                        Margin="0,0,0,0">
+
+                <Button Command="{Binding CancelCommand}"
+                        Width="100"
+                        Height="36"
+                        CornerRadius="8"
+                        Background="#E1E5E9"
+                        BorderThickness="0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Margin="0,0,6,0">
+
+                    <Label HorizontalAlignment="Center"
+                           Content="Cancel"
+                           Foreground="#2C3E50"
+                           FontSize="14"
+                           FontWeight="Medium"/>
+
+                </Button>
+
+                <Button Command="{Binding DeleteCommand}"
+                        Width="100"
+                        Height="36"
+                        CornerRadius="8"
+                        Background="#FF3B30"
+                        BorderThickness="0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Margin="0,0,0,0">
+
+                    <Label HorizontalAlignment="Center"
+                           Content="Confirm"
+                           Foreground="White"
+                           FontSize="14"
+                           FontWeight="Medium"/>
+
+                </Button>
+
+            </StackPanel>
+
+        </Grid>
+
     </Border>
 </Window>

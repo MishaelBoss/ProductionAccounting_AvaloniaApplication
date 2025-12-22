@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using JetBrains.Annotations;
@@ -28,7 +29,7 @@ public class TabUsersListUserControlViewModel : ViewModelBase, IRecipient<Refres
         set
         {
             this.RaiseAndSetIfChanged(ref _search, value);
-            PerformSearchListUsers();
+            _ = ScheduleSearchAsync();
         }
     }
 
@@ -47,7 +48,7 @@ public class TabUsersListUserControlViewModel : ViewModelBase, IRecipient<Refres
         set
         {
             this.RaiseAndSetIfChanged(ref _selectedComboBoxItem, value);
-            _ = ApplyFilters();
+            _ = ScheduleSearchAsync();
         }
     }
 
@@ -66,7 +67,7 @@ public class TabUsersListUserControlViewModel : ViewModelBase, IRecipient<Refres
         set
         {
             this.RaiseAndSetIfChanged(ref _selectedComboBoxItemDepartment, value);
-            _ = ApplyFilters();
+            _ = ScheduleSearchAsync();
         }
     }
 
@@ -85,7 +86,7 @@ public class TabUsersListUserControlViewModel : ViewModelBase, IRecipient<Refres
         set
         {
             this.RaiseAndSetIfChanged(ref _selectedComboBoxItemPosition, value);
-            _ = ApplyFilters();
+            _ = ScheduleSearchAsync();
         }
     }
 
@@ -97,7 +98,7 @@ public class TabUsersListUserControlViewModel : ViewModelBase, IRecipient<Refres
         set
         {
             this.RaiseAndSetIfChanged(ref _filterByRole, value);
-            _ = ApplyFilters();
+            _ = ScheduleSearchAsync();
         }
     }
 
@@ -109,7 +110,7 @@ public class TabUsersListUserControlViewModel : ViewModelBase, IRecipient<Refres
         set
         {
             this.RaiseAndSetIfChanged(ref _filterByDepartment, value);
-            _ = ApplyFilters();
+            _ = ScheduleSearchAsync();
         }
     }
 
@@ -121,7 +122,7 @@ public class TabUsersListUserControlViewModel : ViewModelBase, IRecipient<Refres
         set
         {
             this.RaiseAndSetIfChanged(ref _filterByPosition, value);
-            _ = ApplyFilters();
+            _ = ScheduleSearchAsync();
         }
     }
 
@@ -133,7 +134,7 @@ public class TabUsersListUserControlViewModel : ViewModelBase, IRecipient<Refres
         set
         {
             this.RaiseAndSetIfChanged(ref _showActiveUsers, value);
-            _ = ApplyFilters();
+            _ = ScheduleSearchAsync();
         }
     }
 
@@ -145,27 +146,38 @@ public class TabUsersListUserControlViewModel : ViewModelBase, IRecipient<Refres
         set
         {
             this.RaiseAndSetIfChanged(ref _showInactiveUsers, value);
-            _ = ApplyFilters();
+            _ = ScheduleSearchAsync();
         }
     }
+    
+    private CancellationTokenSource _searchCancellationTokenSource = new();
+    private readonly Lock _loadingLock = new();
+    private bool _isLoading;
 
     public TabUsersListUserControlViewModel()
     {
         WeakReferenceMessenger.Default.Register(this);
 
         _ = LoadListTypeToComboBoxAsync();
-        GetListUsers();
+        _ = LoadUsersWithResetAsync();
     }
 
-    public void Receive(RefreshUserListMessage message)
+    public async void Receive(RefreshUserListMessage message)
     {
-        GetListUsers();
+        try
+        {
+            await LoadUsersWithResetAsync();
+        }
+        catch (Exception ex)
+        {
+            Loges.LoggingProcess(level: LogLevel.Critical, 
+                ex: ex);
+        }
     }
 
     public StackPanel? HomeMainContent { get; set; }
 
     private readonly List<CartUserListUserControl> _userList = [];
-    private List<double> _filteredUserIds = [];
 
     public ICommand ResetFiltersCommand
         => new RelayCommand(ResetFilters);
@@ -184,61 +196,105 @@ public class TabUsersListUserControlViewModel : ViewModelBase, IRecipient<Refres
                     message: "Error download list user");
             }
         });
-
+    
     public ICommand ReturnListUsersCommand
-        => new RelayCommand(GetListUsers);
+        => new RelayCommand(async void () =>
+        {
+            try
+            {
+                await LoadUsersWithResetAsync();
+            }
+            catch (Exception ex)
+            {
+                Loges.LoggingProcess(level: LogLevel.Critical, 
+                    ex: ex, message: "Error refresh");
+            }
+        });
 
-    private async void PerformSearchListUsers()
+    private async Task ScheduleSearchAsync()
     {
         try
         {
-            await ApplyFilters();
+            await _searchCancellationTokenSource.CancelAsync();
+            _searchCancellationTokenSource = new CancellationTokenSource();
+            
+            await Task.Delay(300, _searchCancellationTokenSource.Token);
+            
+            _ = LoadUsersWithResetAsync();
+        }
+        catch (OperationCanceledException)
+        {
+            Loges.LoggingProcess(level: LogLevel.Info, 
+                message: "Search cancel");
         }
         catch (Exception ex)
         {
             Loges.LoggingProcess(level: LogLevel.Error, 
                 ex: ex, 
-                message: "Error perform search");
+                message: "Error scheduling search");
         }
     }
 
-    public async void GetListUsers()
+    public async Task LoadUsersWithResetAsync()
     {
+        lock (_loadingLock)
+        {
+            if (_isLoading) return;
+            _isLoading = true;
+        }
+
         try
         {
-            await ApplyFilters();
-        }
-        catch (Exception ex)
-        {
-            Loges.LoggingProcess(level: LogLevel.Error, 
-                ex: ex, 
-                message: "Error get list");
-        }
-    }
+            ClearProductList();
 
-    private async Task ApplyFilters()
-    {
-        try
-        {
-            _filteredUserIds = await GetFilteredUserIdsAsync();
+            var filteredProductIds = await GetFilteredUserIdsAsync();
 
-            if (_filteredUserIds.Count > 0)
-            {
-                await SearchUsersAsync(_filteredUserIds);
-            }
-            else
-            {
-                StackPanelHelper.ClearAndRefreshStackPanel(HomeMainContent, _userList);
-                ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NotFound);
-            }
+            if (filteredProductIds.Count > 0)  await LoadUserByIdsAsync(filteredProductIds);
+            else  ShowNotFoundMessage();
         }
         catch (Exception ex)
         {
             Loges.LoggingProcess(level: LogLevel.Error,
-                message: "Error applying filters",
+                message: "Error loading products",
                 ex: ex);
+            ClearProductList();
+        }
+        finally
+        {
+            lock (_loadingLock)
+            {
+                _isLoading = false;
+            }
+        }
+    }
 
-            StackPanelHelper.ClearAndRefreshStackPanel(HomeMainContent, _userList);
+    private void ClearProductList()
+    {
+        try
+        {
+            _userList.Clear();
+
+            HomeMainContent?.Children.Clear();
+        }
+        catch (Exception ex)
+        {
+            Loges.LoggingProcess(level: LogLevel.Warning,
+                message: "Error clearing product list",
+                ex: ex);
+        }
+    }
+
+    private void ShowNotFoundMessage()
+    {
+        try
+        {
+            ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NotFound);
+        }
+        catch (Exception ex)
+        {
+            Loges.LoggingProcess(level: LogLevel.Warning,
+                message: "Error showing not found message",
+                ex: ex);
         }
     }
 
@@ -266,13 +322,14 @@ public class TabUsersListUserControlViewModel : ViewModelBase, IRecipient<Refres
 
             if (!ShowActiveUsers || !ShowInactiveUsers)
             {
-                if (ShowActiveUsers && !ShowInactiveUsers)
+                switch (ShowActiveUsers)
                 {
-                    sql += " AND u.is_active = true";
-                }
-                else if (!ShowActiveUsers && ShowInactiveUsers)
-                {
-                    sql += " AND u.is_active = false";
+                    case true when !ShowInactiveUsers:
+                        sql += " AND u.is_active = true";
+                        break;
+                    case false when ShowInactiveUsers:
+                        sql += " AND u.is_active = false";
+                        break;
                 }
             }
 
@@ -377,7 +434,7 @@ public class TabUsersListUserControlViewModel : ViewModelBase, IRecipient<Refres
         }
     }
 
-    private async Task SearchUsersAsync(List<double> userIds)
+    private async Task LoadUserByIdsAsync(List<double> userIds)
     {
         if (userIds is { Count: 0 })
         {
@@ -402,46 +459,49 @@ public class TabUsersListUserControlViewModel : ViewModelBase, IRecipient<Refres
 
             var sql = @$"SELECT * FROM public.user WHERE id IN ({string.Join(", ", paramNames)}) AND id NOT IN ({ManagerCookie.GetIdUser})";
 
-            await using (var connection = new NpgsqlConnection(Arguments.Connection))
+            await using var connection = new NpgsqlConnection(Arguments.Connection);
+            
+            await connection.OpenAsync();
+            await using var command = new NpgsqlCommand(sql, connection);
+
+            foreach (var param in parameters)
             {
-                await connection.OpenAsync();
-                await using var command = new NpgsqlCommand(sql, connection);
-
-                foreach (var param in parameters)
-                {
-                    command.Parameters.Add(param);
-                }
-
-                await using var reader = await command.ExecuteReaderAsync();
-                while (await reader.ReadAsync())
-                {
-                    var userViewModel = new CartUserListUserControlViewModel
-                    {
-                        UserId = reader.IsDBNull(0) ? 0 : reader.GetDouble(0),
-                        Password = reader.IsDBNull(1) ? string.Empty : reader.GetString(1),
-                        FirstName = reader.IsDBNull(2) ? string.Empty : reader.GetString(2),
-                        LastName = reader.IsDBNull(3) ? string.Empty : reader.GetString(3),
-                        MiddleName = reader.IsDBNull(4) ? string.Empty : reader.GetString(4),
-                        DateJoined = reader.IsDBNull(5) ? string.Empty : reader.GetDateTime(5).ToString("yyyy-MM-dd"),
-                        Login = reader.IsDBNull(6) ? string.Empty : reader.GetString(6),
-                        BaseSalary = reader.IsDBNull(7) ? 0m : reader.GetDecimal(7),
-                        Email = reader.IsDBNull(8) ? string.Empty : reader.GetString(8),
-                        Phone = reader.IsDBNull(9) ? string.Empty : reader.GetString(9),
-                        IsActive = reader.IsDBNull(10) || reader.GetBoolean(10),
-                    };
-
-                    var userControl = new CartUserListUserControl
-                    {
-                        DataContext = userViewModel
-                    };
-
-                    _userList.Add(userControl);
-                }
+                command.Parameters.Add(param);
             }
+
+            await using var reader = await command.ExecuteReaderAsync();
+                
+            var newUserList = new List<CartUserListUserControl>();
+                
+            while (await reader.ReadAsync())
+            {
+                var userViewModel = new CartUserListUserControlViewModel
+                {
+                    UserId = reader.IsDBNull(0) ? 0 : reader.GetDouble(0),
+                    Password = reader.IsDBNull(1) ? string.Empty : reader.GetString(1),
+                    FirstName = reader.IsDBNull(2) ? string.Empty : reader.GetString(2),
+                    LastName = reader.IsDBNull(3) ? string.Empty : reader.GetString(3),
+                    MiddleName = reader.IsDBNull(4) ? string.Empty : reader.GetString(4),
+                    DateJoined = reader.IsDBNull(5) ? string.Empty : reader.GetDateTime(5).ToString("yyyy-MM-dd"),
+                    Login = reader.IsDBNull(6) ? string.Empty : reader.GetString(6),
+                    BaseSalary = reader.IsDBNull(7) ? 0m : reader.GetDecimal(7),
+                    Email = reader.IsDBNull(8) ? string.Empty : reader.GetString(8),
+                    Phone = reader.IsDBNull(9) ? string.Empty : reader.GetString(9),
+                    IsActive = reader.IsDBNull(10) || reader.GetBoolean(10),
+                };
+
+                newUserList.Add(new CartUserListUserControl
+                {
+                    DataContext = userViewModel
+                });
+            }
+                
+            _userList.Clear();
+            _userList.AddRange(newUserList);
 
             StackPanelHelper.RefreshStackPanelContent(HomeMainContent, _userList);
 
-            if (_userList.Count == 0) ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NotFound);
+            if (_userList.Count == 0) ShowNotFoundMessage();
         }
         catch (NpgsqlException ex)
         {
@@ -464,15 +524,36 @@ public class TabUsersListUserControlViewModel : ViewModelBase, IRecipient<Refres
 
     private void ResetFilters()
     {
-        FilterByRole = false;
-        FilterByDepartment = false;
-        FilterByPosition = false;
-        ShowActiveUsers = true;
-        ShowInactiveUsers = true;
-        SelectedComboBoxItem = null;
-        SelectedComboBoxItemDepartment = null;
-        SelectedComboBoxItemPosition = null;
-        Search = string.Empty;
+        try
+        {
+            FilterByRole = false;
+            FilterByDepartment = false;
+            FilterByPosition = false;
+            ShowActiveUsers = true;
+            ShowInactiveUsers = true;
+            SelectedComboBoxItem = null;
+            SelectedComboBoxItemDepartment = null;
+            SelectedComboBoxItemPosition = null;
+            Search = string.Empty;
+            
+            this.RaisePropertyChanged(nameof(FilterByRole));
+            this.RaisePropertyChanged(nameof(FilterByDepartment));
+            this.RaisePropertyChanged(nameof(FilterByPosition));
+            this.RaisePropertyChanged(nameof(ShowActiveUsers));
+            this.RaisePropertyChanged(nameof(ShowInactiveUsers));
+            this.RaisePropertyChanged(nameof(SelectedComboBoxItem));
+            this.RaisePropertyChanged(nameof(SelectedComboBoxItemDepartment));
+            this.RaisePropertyChanged(nameof(SelectedComboBoxItemPosition));
+            this.RaisePropertyChanged(nameof(Search));
+            
+            _ = LoadUsersWithResetAsync();
+        }
+        catch (Exception ex)
+        {
+            Loges.LoggingProcess(level: LogLevel.Error,
+                message: "Error resetting filters",
+                ex: ex);
+        }
     }
 
     private static async Task DownloadListAsync()
@@ -530,5 +611,10 @@ public class TabUsersListUserControlViewModel : ViewModelBase, IRecipient<Refres
                 "Connection or request error",
                 ex: ex);
         }
+    }
+    
+    ~TabUsersListUserControlViewModel()
+    {
+        WeakReferenceMessenger.Default.Unregister<RefreshUserListMessage>(this);
     }
 }
