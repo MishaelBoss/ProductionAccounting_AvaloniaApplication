@@ -79,6 +79,8 @@ public class CartProductUserControlViewModel : ViewModelBase
     public string Article { get; set; } = string.Empty;
     [UsedImplicitly]
     public string Description { get; set; } = string.Empty;
+    [UsedImplicitly]
+    public string Unit { get; set; } = string.Empty;
 
     [UsedImplicitly]
     public decimal PricePerUnit { get; set; }
