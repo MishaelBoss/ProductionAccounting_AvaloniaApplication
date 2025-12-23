@@ -35,18 +35,34 @@
 							FontSize="16"
 							FontWeight="SemiBold"
 							Margin="0,0,0,4"/>
-
-				<TextBlock	Text="{Binding Quantity}"
-							Foreground="#6B7280"
-							FontSize="13"
-							FontWeight="Medium"
-							Margin="0,0,0,8"/>
-
-				<TextBlock	Text="{Binding Tonnage}"
-							Foreground="#6B7280"
-							FontSize="13"
-							FontWeight="Medium"
-							Margin="0,0,0,8"/>
+				
+				<StackPanel Orientation="Horizontal"
+				            Spacing="16">
+					<TextBlock Text="Количество:"
+					           Foreground="#374151"
+					           FontSize="11"
+					           FontWeight="Medium"/>
+					
+					<TextBlock	Text="{Binding Quantity}"
+						          Foreground="#6B7280"
+						          FontSize="13"
+						          FontWeight="Medium"
+						          Margin="0,0,0,8"/>
+				</StackPanel>
+				
+				<StackPanel Orientation="Horizontal"
+				            Spacing="16">
+					<TextBlock Text="Тоннаж:"
+					           Foreground="#374151"
+					           FontSize="11"
+					           FontWeight="Medium"/>
+					
+					<TextBlock	Text="{Binding Tonnage}"
+						          Foreground="#6B7280"
+						          FontSize="13"
+						          FontWeight="Medium"
+						          Margin="0,0,0,8"/>
+				</StackPanel>
 
 				<StackPanel Orientation="Horizontal"
 							Spacing="16"
@@ -67,15 +83,23 @@
 						Orientation="Horizontal"
 						Spacing="6"
 						VerticalAlignment="Center">
+				
+				<Button Command="{Binding DeleteCommand}"
+				        CornerRadius="6"
+				        Background="Orange"
+				        BorderThickness="0"
+				        IsVisible="{Binding IsAdministrator}"
+				        Content="Сдать за сотрудника">
+				</Button>
 
 				<Button Command="{Binding DeleteCommand}"
-						Width="34"
-						Height="34"
-						CornerRadius="6"
-						Background="#FF3B30"
-						BorderThickness="0"
-						IsVisible="{Binding IsAdministrator}"
-						ToolTip.Tip="Удалить">
+				        Width="34"
+				        Height="34"
+				        CornerRadius="6"
+				        Background="#FF3B30"
+				        BorderThickness="0"
+				        IsVisible="{Binding IsAdministrator}"
+				        ToolTip.Tip="Удалить">
 					<Image Source="/Assets/remove-64.png"
 						   Width="18"
 						   Height="18"/>
