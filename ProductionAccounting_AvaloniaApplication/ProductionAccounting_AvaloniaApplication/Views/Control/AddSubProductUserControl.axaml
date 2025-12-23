@@ -52,29 +52,6 @@
                         <TextBox Grid.Row="3" Grid.Column="1" Watermark="Введите примечание (необязательно)" Text="{Binding Notes}" />
                     </Grid>
                     
-                    <StackPanel Spacing="12">
-                        <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="12">
-                            <TextBlock Grid.Column="0" Text="Сотрудник:" VerticalAlignment="Center" />
-                            <ComboBox Grid.Column="1"
-                                      ItemsSource="{Binding Employees}"
-                                      SelectedItem="{Binding SelectedEmployee}"
-                                      DisplayMemberBinding="{Binding FullName}"
-                                      MinHeight="32"
-                                      Padding="8,0"
-                                      Classes="StyledComboBox" />
-                        </Grid>
-
-                        <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="12">
-                            <TextBlock Grid.Column="0" Text="Вид работы:" VerticalAlignment="Center" />
-                            <ComboBox Grid.Column="1"
-                                      ItemsSource="{Binding WorkTypes}"
-                                      SelectedItem="{Binding SelectedWorkType}"
-                                      MinHeight="32"
-                                      Padding="8,0"
-                                      Classes="StyledComboBox" />
-                        </Grid>
-                    </StackPanel>
-
                     <StackPanel Orientation="Horizontal" 
                                 Spacing="12" 
                                 HorizontalAlignment="Center">

@@ -12,10 +12,10 @@ using System.Windows.Input;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
-public class AddSubProductUserControlViewModel : ViewModelBase
+public class AddSubProductUserControlViewModel(double taskId) : ViewModelBase
 {
-    private double TaskId { get; set; }
-    
+    private double TaskId { get; set; } = taskId;
+
     private string _messageerror = string.Empty;
     public string Messageerror
     {
@@ -55,37 +55,8 @@ public class AddSubProductUserControlViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _notes, value);
     }
 
-    [UsedImplicitly]
-    public ObservableCollection<ComboBoxUser> Employees { get; } = [];
-
-    private ComboBoxUser? _selectedEmployee;
-    public ComboBoxUser? SelectedEmployee
-    {
-        get => _selectedEmployee;
-        set => SetAndNotify(ref _selectedEmployee, value);
-    }
-
-    [UsedImplicitly]
-    public ObservableCollection<ComboBoxWorkType> WorkTypes { get; } = [];
-
-    private ComboBoxWorkType? _selectedWorkType;
-    public ComboBoxWorkType? SelectedWorkType
-    {
-        get => _selectedWorkType;
-        set => SetAndNotify(ref _selectedWorkType, value);
-    }
-
-    public AddSubProductUserControlViewModel(double taskId) 
-    {
-        TaskId = taskId;
-
-        _ = LoadComboBoxAsynck();
-    }
-
     private bool DesignedFields
         => !string.IsNullOrWhiteSpace(Title)
-        && SelectedEmployee != null 
-        && SelectedWorkType != null
         && Quantity > 0
         && Tonnage > 0;
 
@@ -114,104 +85,6 @@ public class AddSubProductUserControlViewModel : ViewModelBase
     {
         this.RaiseAndSetIfChanged(ref field, value);
         this.RaisePropertyChanged(nameof(IsActiveConfirmButton));
-    }
-
-    private async Task LoadComboBoxAsynck() 
-    {
-        try
-        {
-            await using var connection = new NpgsqlConnection(Arguments.Connection);
-            await connection.OpenAsync();
-
-            await LoadListUsersAsync(connection);
-            await LoadListWorkTypeAsync(connection);
-        }
-        catch (Exception ex) 
-        {
-            Loges.LoggingProcess(level: LogLevel.Warning,
-                ex: ex);
-        }
-    }
-
-    private async Task LoadListUsersAsync(NpgsqlConnection connection)
-    {
-        try
-        {
-            Employees.Clear();
-
-            const string sql = @"
-                                SELECT 
-                                    u.id, 
-                                    u.first_name, 
-                                    u.last_name, 
-                                    u.middle_name, 
-                                    u.login 
-                                FROM public.user AS u
-                                JOIN public.user_to_user_type AS uut ON u.id = uut.user_id
-                                JOIN public.user_type AS ut ON uut.user_type_id = ut.id
-                                WHERE u.is_active = true AND ut.type_user = 'Сотрудник'
-                                ORDER BY u.last_name, u.first_name";
-
-            await using var command = new NpgsqlCommand(sql, connection);
-            await using var reader = await command.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
-            {
-                var user = new ComboBoxUser(
-                    reader.GetDouble(0),
-                    reader.GetString(1),
-                    reader.GetString(2),
-                    reader.GetString(3),
-                    reader.GetString(4)
-                );
-
-                Employees.Add(user);
-            }
-        }
-        catch (PostgresException ex)
-        {
-            Loges.LoggingProcess(level: LogLevel.Warning,
-                ex: ex);
-        }
-        catch (Exception ex)
-        {
-            Loges.LoggingProcess(level: LogLevel.Warning,
-                ex: ex);
-        }
-    }
-
-    private async Task LoadListWorkTypeAsync(NpgsqlConnection connection)
-    {
-        try
-        {
-            WorkTypes.Clear();
-
-            const string sql = "SELECT * FROM public.work_type";
-
-            await using var command = new NpgsqlCommand(sql, connection);
-            await using var reader = await command.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
-            {
-                var work_type = new ComboBoxWorkType(
-                    reader.GetDouble(0),
-                    reader.GetString(1),
-                    reader.GetDecimal(2),
-                    reader.GetString(3),
-                    reader.GetDecimal(4)
-                );
-
-                WorkTypes.Add(work_type);
-            }
-        }
-        catch (PostgresException ex)
-        {
-            Loges.LoggingProcess(level: LogLevel.Warning,
-                ex: ex);
-        }
-        catch (Exception ex)
-        {
-            Loges.LoggingProcess(level: LogLevel.Warning,
-                ex: ex);
-        }
     }
 
     private async Task SaveCurrentSubProductAsync()
@@ -276,7 +149,5 @@ public class AddSubProductUserControlViewModel : ViewModelBase
         Quantity = 0;
         Tonnage = 0;
         Notes = string.Empty;
-        SelectedEmployee = null;
-        SelectedWorkType = null;
     }
 }
