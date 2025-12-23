@@ -108,8 +108,6 @@ public class AddSubProductUserControlViewModel(double taskId) : ViewModelBase
             command.Parameters.AddWithValue("@quantity", Quantity ?? 1);
             command.Parameters.AddWithValue("@tonnage", Tonnage ?? 1);
             command.Parameters.AddWithValue("@notes", Notes ?? "");
-            command.Parameters.AddWithValue("@work_type_id", SelectedWorkType?.Id ?? 0);
-            command.Parameters.AddWithValue("@assigned_to_user_id", SelectedEmployee?.Id ?? 0);
 
             await command.ExecuteNonQueryAsync();
 
