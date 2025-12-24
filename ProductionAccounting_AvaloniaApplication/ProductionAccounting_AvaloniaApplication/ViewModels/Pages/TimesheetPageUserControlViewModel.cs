@@ -28,7 +28,7 @@ public class TimesheetPageUserControlViewModel : ViewModelBase
 
     public StackPanel? CartTimesheet { get; set; }
 
-    private readonly List<CartTimesheetUserControl> _timesheetList = [];
+    private readonly List<CartTimesheetUserControl> _timesheetList = new();
 
     private DateTime _filterStartDate = DateTime.Today;
     [UsedImplicitly]
@@ -132,7 +132,7 @@ public class TimesheetPageUserControlViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _selectedMassStatus, value);
     }
 
-    private ObservableCollection<ComboBoxUser> _comboBoxUsers = [];
+    private ObservableCollection<ComboBoxUser> _comboBoxUsers = new();
     [UsedImplicitly]
     public ObservableCollection<ComboBoxUser> ComboBoxUsers
     {
@@ -310,33 +310,43 @@ public class TimesheetPageUserControlViewModel : ViewModelBase
 
         try
         {
-            const string sql = "INSERT INTO public.timesheet  (user_id, work_date, status, hours_worked, notes, created_by, created_at)" +
-                "VALUES (@userId, @workDate, @status, @hoursWorked, @notes, @createdBy, @createdAt) " +
-                "ON CONFLICT (user_id, work_date) " +
-                "DO UPDATE SET status = EXCLUDED.status, hours_worked = EXCLUDED.hours_worked, notes = EXCLUDED.notes, updated_by = @createdBy, updated_at = @createdAt";
+            const string sql = @"
+            INSERT INTO public.timesheet 
+                (user_id, work_date, status, hours_worked, notes, created_by, created_at) 
+            VALUES 
+                (@userId, @workDate, @status, @hoursWorked, @notes, @createdBy, @now) 
+            ON CONFLICT (user_id, work_date) 
+            DO UPDATE SET 
+                status = EXCLUDED.status, 
+                hours_worked = EXCLUDED.hours_worked, 
+                notes = EXCLUDED.notes, 
+                updated_by = @createdBy, 
+                updated_at = @now";
 
             await using var connection = new NpgsqlConnection(Arguments.Connection);
             await connection.OpenAsync();
+
             await using var command = new NpgsqlCommand(sql, connection);
+
+            var currentTime = DateTime.Now;
+            var currentUserId = ManagerCookie.GetIdUser ?? 0;
+
             command.Parameters.AddWithValue("@userId", SelectedSingleUser.Id);
             command.Parameters.AddWithValue("@workDate", SelectedDate);
             command.Parameters.AddWithValue("@status", SelectedSingleStatus.Code);
             command.Parameters.AddWithValue("@hoursWorked", SelectedSingleStatus.Code == "Я" ? SingleHours : 0);
-            command.Parameters.AddWithValue("@notes", SingleNotes);
-            command.Parameters.AddWithValue("@createdBy", ManagerCookie.GetIdUser ?? 0);
-            command.Parameters.AddWithValue("@createdAt", DateTime.Now);
+            command.Parameters.AddWithValue("@notes", (object)SingleNotes ?? DBNull.Value);
+            command.Parameters.AddWithValue("@createdBy", currentUserId);
+            command.Parameters.AddWithValue("@now", currentTime);
 
             await command.ExecuteNonQueryAsync();
 
             ClearSingleForm();
-
             await RefreshTimesheetAsync();
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(LogLevel.Error,
-                ex: ex,
-                message: "Ошибка сохранения единичной записи табеля");
+            Loges.LoggingProcess(LogLevel.Error, ex: ex, message: "Ошибка сохранения табеля");
         }
     }
 
@@ -344,15 +354,13 @@ public class TimesheetPageUserControlViewModel : ViewModelBase
     {
         if (!Internet.ConnectToDataBase())
         {
-            Loges.LoggingProcess(LogLevel.Error,
-                message: "No connect to db");
+            Loges.LoggingProcess(LogLevel.Error, message: "No connect to db");
             return;
         }
 
         if (SelectedMassStatus == null) return;
 
         var usersToProcess = ApplyToAllUsers ? [.. ComboBoxUsers] : (SelectedSingleUser != null ? new List<ComboBoxUser> { SelectedSingleUser } : []);
-
         if (usersToProcess.Count == 0) return;
 
         var startDate = MassEditStartDate.Date;
@@ -366,10 +374,23 @@ public class TimesheetPageUserControlViewModel : ViewModelBase
         await using var transaction = await connection.BeginTransactionAsync();
         try
         {
-            const string sql = @"INSERT INTO public.timesheet (user_id, work_date, status, hours_worked, notes, created_by)" +
-            "VALUES (@userId, @workDate, @status, @hoursWorked, @notes, @createdBy) ON CONFLICT (user_id, work_date) DO NOTHING";
+            const string sql = @"
+            INSERT INTO public.timesheet 
+                (user_id, work_date, status, hours_worked, notes, created_by, created_at)
+            VALUES 
+                (@userId, @workDate, @status, @hoursWorked, @notes, @createdBy, @now)
+            ON CONFLICT (user_id, work_date) 
+            DO UPDATE SET 
+                status = EXCLUDED.status, 
+                hours_worked = EXCLUDED.hours_worked, 
+                notes = EXCLUDED.notes, 
+                updated_by = @createdBy, 
+                updated_at = @now";
 
             await using var command = new NpgsqlCommand(sql, connection, transaction);
+
+            var now = DateTime.Now;
+            var currentUserId = ManagerCookie.GetIdUser ?? 0;
 
             foreach (var user in usersToProcess)
             {
@@ -388,7 +409,8 @@ public class TimesheetPageUserControlViewModel : ViewModelBase
                     command.Parameters.AddWithValue("@status", SelectedMassStatus.Code);
                     command.Parameters.AddWithValue("@hoursWorked", SelectedMassStatus.Code == "Я" ? MassEditHours : 0m);
                     command.Parameters.AddWithValue("@notes", $"Массовое добавление: {SelectedMassStatus.Name}");
-                    command.Parameters.AddWithValue("@createdBy", ManagerCookie.GetIdUser ?? 0);
+                    command.Parameters.AddWithValue("@createdBy", currentUserId);
+                    command.Parameters.AddWithValue("@now", now);
 
                     int affected = await command.ExecuteNonQueryAsync();
                     if (affected > 0) totalInserted++;
@@ -398,17 +420,14 @@ public class TimesheetPageUserControlViewModel : ViewModelBase
             }
 
             await transaction.CommitAsync();
-            Loges.LoggingProcess(LogLevel.Info,
-                message: $"Успешно добавлено {totalInserted} новых записей в табель");
+            Loges.LoggingProcess(LogLevel.Info, message: $"Успешно обработано {totalInserted} записей в табеле");
 
             await RefreshTimesheetAsync();
         }
         catch (Exception ex)
         {
             await transaction.RollbackAsync();
-            Loges.LoggingProcess(LogLevel.Error,
-                ex: ex,
-                message: "Ошибка при массовом добавлении");
+            Loges.LoggingProcess(LogLevel.Error, ex: ex, message: "Ошибка при массовом добавлении");
         }
     }
 
