@@ -90,42 +90,6 @@ public class TabUsersListUserControlViewModel : ViewModelBase, IRecipient<Refres
         }
     }
 
-    private bool _filterByRole;
-    [UsedImplicitly]
-    public bool FilterByRole
-    {
-        get => _filterByRole;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _filterByRole, value);
-            _ = ScheduleSearchAsync();
-        }
-    }
-
-    private bool _filterByDepartment;
-    [UsedImplicitly]
-    public bool FilterByDepartment
-    {
-        get => _filterByDepartment;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _filterByDepartment, value);
-            _ = ScheduleSearchAsync();
-        }
-    }
-
-    private bool _filterByPosition;
-    [UsedImplicitly]
-    public bool FilterByPosition
-    {
-        get => _filterByPosition;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _filterByPosition, value);
-            _ = ScheduleSearchAsync();
-        }
-    }
-
     private bool _showActiveUsers = true;
     [UsedImplicitly]
     public bool ShowActiveUsers
@@ -158,7 +122,6 @@ public class TabUsersListUserControlViewModel : ViewModelBase, IRecipient<Refres
     {
         WeakReferenceMessenger.Default.Register(this);
 
-        _ = LoadListTypeToComboBoxAsync();
         _ = LoadUsersWithResetAsync();
     }
 
@@ -310,12 +273,6 @@ public class TabUsersListUserControlViewModel : ViewModelBase, IRecipient<Refres
             var sql = @"
                         SELECT DISTINCT u.id
                         FROM public.""user"" u
-                        LEFT JOIN public.user_to_user_type utt ON u.id = utt.user_id
-                        LEFT JOIN public.user_type ut ON utt.user_type_id = ut.id
-                        LEFT JOIN public.user_to_departments ud ON u.id = ud.user_id
-                        LEFT JOIN public.departments d ON ud.department_id = d.id
-                        LEFT JOIN public.user_to_position up ON u.id = up.user_id
-                        LEFT JOIN public.positions p ON up.position_id = p.id
                         WHERE 1=1";
 
             var parameters = new List<NpgsqlParameter>();
@@ -339,24 +296,6 @@ public class TabUsersListUserControlViewModel : ViewModelBase, IRecipient<Refres
                 parameters.Add(new NpgsqlParameter("@search", $"%{Search}%"));
             }
 
-            if (FilterByRole && SelectedComboBoxItem != null)
-            {
-                sql += " AND ut.id = @roleId";
-                parameters.Add(new NpgsqlParameter("@roleId", SelectedComboBoxItem.Id));
-            }
-
-            if (FilterByDepartment && SelectedComboBoxItemDepartment != null)
-            {
-                sql += " AND d.id = @departmentId";
-                parameters.Add(new NpgsqlParameter("@departmentId", SelectedComboBoxItemDepartment.Id));
-            }
-
-            if (FilterByPosition && SelectedComboBoxItemPosition != null)
-            {
-                sql += " AND p.id = @positionId";
-                parameters.Add(new NpgsqlParameter("@positionId", SelectedComboBoxItemPosition.Id));
-            }
-
             await using var command = new NpgsqlCommand(sql, connection);
             foreach (var param in parameters)
             {
@@ -378,60 +317,6 @@ public class TabUsersListUserControlViewModel : ViewModelBase, IRecipient<Refres
         }
 
         return userIds;
-    }
-
-    private async Task LoadListTypeToComboBoxAsync()
-    {
-        try
-        {
-            const string sqlUserTypes = "SELECT id, type_user FROM public.user_type";
-            const string sqlDepartments = "SELECT id, type FROM public.departments";
-            const string sqlPositions = "SELECT id, type FROM public.positions";
-
-            await using var connection = new NpgsqlConnection(Arguments.Connection);
-            await connection.OpenAsync();
-
-            await using (var command = new NpgsqlCommand(sqlUserTypes, connection))
-            await using (var reader = await command.ExecuteReaderAsync())
-            {
-                while (await reader.ReadAsync())
-                {
-                    ComboBoxItems.Add(new ComboBoxTypeRolsUser(
-                        reader.GetDouble(0),
-                        reader.GetString(1)
-                    ));
-                }
-            }
-
-            await using (var command = new NpgsqlCommand(sqlDepartments, connection))
-            await using (var reader = await command.ExecuteReaderAsync())
-            {
-                while (await reader.ReadAsync())
-                {
-                    ComboBoxItemsDepartments.Add(new ComboBoxTypeDepartmentUser(
-                        reader.GetDouble(0),
-                        reader.GetString(1)
-                    ));
-                }
-            }
-
-            await using (var command = new NpgsqlCommand(sqlPositions, connection))
-            await using (var reader = await command.ExecuteReaderAsync())
-            {
-                while (await reader.ReadAsync())
-                {
-                    ComboBoxItemsPositions.Add(new ComboBoxTypePositionUser(
-                        reader.GetDouble(0),
-                        reader.GetString(1)
-                    ));
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Loges.LoggingProcess(level: LogLevel.Warning,
-                ex: ex);
-        }
     }
 
     private async Task LoadUserByIdsAsync(List<double> userIds)
@@ -526,9 +411,6 @@ public class TabUsersListUserControlViewModel : ViewModelBase, IRecipient<Refres
     {
         try
         {
-            FilterByRole = false;
-            FilterByDepartment = false;
-            FilterByPosition = false;
             ShowActiveUsers = true;
             ShowInactiveUsers = true;
             SelectedComboBoxItem = null;
@@ -536,9 +418,6 @@ public class TabUsersListUserControlViewModel : ViewModelBase, IRecipient<Refres
             SelectedComboBoxItemPosition = null;
             Search = string.Empty;
             
-            this.RaisePropertyChanged(nameof(FilterByRole));
-            this.RaisePropertyChanged(nameof(FilterByDepartment));
-            this.RaisePropertyChanged(nameof(FilterByPosition));
             this.RaisePropertyChanged(nameof(ShowActiveUsers));
             this.RaisePropertyChanged(nameof(ShowInactiveUsers));
             this.RaisePropertyChanged(nameof(SelectedComboBoxItem));
