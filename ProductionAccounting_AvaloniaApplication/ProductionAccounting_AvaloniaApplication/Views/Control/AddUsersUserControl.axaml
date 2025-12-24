@@ -61,38 +61,6 @@
                         <TextBox Grid.Row="6" Grid.Column="1" Watermark="+7 (999) 123-45-67" Text="{Binding Phone}" />
                     </Grid>
 
-                    <StackPanel Spacing="12">
-                        <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="12">
-                            <TextBlock Grid.Column="0" Text="Rank:" VerticalAlignment="Center" />
-                            <ComboBox Grid.Column="1"
-                                      ItemsSource="{Binding ComboBoxItems}"
-                                      SelectedItem="{Binding SelectedComboBoxItem}"
-                                      MinHeight="32"
-                                      Padding="8,0"
-                                      Classes="StyledComboBox" />
-                        </Grid>
-
-                        <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="12">
-                            <TextBlock Grid.Column="0" Text="Department:" VerticalAlignment="Center" />
-                            <ComboBox Grid.Column="1"
-                                      ItemsSource="{Binding ComboBoxItemsDepartments}"
-                                      SelectedItem="{Binding SelectedComboBoxItemDepartment}"
-                                      MinHeight="32"
-                                      Padding="8,0"
-                                      Classes="StyledComboBox" />
-                        </Grid>
-
-                        <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="12">
-                            <TextBlock Grid.Column="0" Text="Position:" VerticalAlignment="Center" />
-                            <ComboBox Grid.Column="1"
-                                      ItemsSource="{Binding ComboBoxItemsPositions}"
-                                      SelectedItem="{Binding SelectedComboBoxItemPosition}"
-                                      MinHeight="32"
-                                      Padding="8,0"
-                                      Classes="StyledComboBox" />
-                        </Grid>
-                    </StackPanel>
-
                     <StackPanel Orientation="Horizontal" 
                                 Spacing="12" 
                                 HorizontalAlignment="Center">

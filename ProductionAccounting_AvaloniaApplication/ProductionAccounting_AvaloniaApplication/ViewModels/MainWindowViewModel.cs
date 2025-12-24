@@ -10,18 +10,14 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase,
         IRecipient<OpenOrCloseUserStatusMessage>, 
-        IRecipient<OpenOrCloseAddDepartmentStatusMessage>, 
         IRecipient<OpenOrCloseSubOperationStatusMessage>,
         IRecipient<OpenOrCloseProductStatusMessage>, 
-        IRecipient<OpenOrCloseAddPositionStatusMessage>, 
         IRecipient<OpenOrCloseAddSubProductStatusMessage>, 
         IRecipient<OpenOrCloseProductViewStatusMessage>, 
         IRecipient<OpenOrCloseEmployeeAssignmentMasterSubMarkStatusMessage>,
         IRecipient<OpenOrCloseCompleteWorkFormStatusMessage>
     {
         private readonly AddUsersUserControl _addUsers = new();
-        private readonly AddDepartmentUserControl _addDepartment = new();
-        private readonly AddPositionUserControl _addPosition = new();
         private readonly AddOperationUserControl _addOperation = new();
         private readonly AddProductUserControl _addProduct = new();
         private readonly AddSubProductUserControl _addSubProduct = new();
@@ -71,13 +67,7 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
             if (message.ShouldOpen) ShowCompleteWorkFormUserControl(message.TaskName, message.PlannedQuantity, message.ProductId, message.OperationId, message.SubProductOperationId, message.UserId);
             else CloseCompleteWorkFormUserControl();
         }
-
-        public void Receive(OpenOrCloseAddDepartmentStatusMessage message)
-        {
-            if (message.ShouldOpen) ShowAddDepartmentUserControl();
-            else CloseAddDepartmentUserControl();
-        }
-
+        
         public void Receive(OpenOrCloseSubOperationStatusMessage message)
         {
             if (message.ShouldOpen) ShowOperationUsersUserControl(message.SubProductId, message.SubProductOperationId, message.OperationName, message.OperationCode, message.OperationPrice, message.OperationTime, message.OperationDescription, message.OperationQuantity);
@@ -88,12 +78,6 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
         {
             if (message.ShouldOpen) ShowProductUsersUserControl(message.Id, message.ProductName, message.ProductArticle, message.ProductDescription, message.ProductPricePerUnit, message.ProductPricePerKg, message.ProductMark, message.ProductCoefficient);
             else CloseProductUsersUserControl();
-        }
-
-        public void Receive(OpenOrCloseAddPositionStatusMessage message)
-        {
-            if (message.ShouldOpen) ShowAddPositionUserControl();
-            else CloseAddPositionUserControl();
         }
 
         public void Receive(OpenOrCloseUserStatusMessage message)
@@ -128,52 +112,6 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
             if (ContentCenter == null) return;
             ContentCenter.Children.Clear();
             if (_addUsers.Parent == ContentCenter) ContentCenter.Children.Remove(_addUsers);
-        }
-
-        private void ShowAddDepartmentUserControl()
-        {
-            if (ContentCenter == null) return;
-            if (ContentCenter.Children.Contains(_addDepartment))
-            {
-                _addDepartment.RefreshDataAsync();
-                return;
-            }
-
-            if (_addDepartment.Parent is Panel currentParent) currentParent.Children.Remove(_addDepartment);
-            ContentCenter.Children.Clear();
-            ContentCenter.Children.Add(_addDepartment);
-
-            _addDepartment.RefreshDataAsync();
-        }
-
-        private void CloseAddDepartmentUserControl()
-        {
-            if (ContentCenter == null) return;
-            ContentCenter.Children.Clear();
-            if (_addDepartment.Parent == ContentCenter) ContentCenter.Children.Remove(_addDepartment);
-        }
-
-        private void ShowAddPositionUserControl()
-        {
-            if (ContentCenter == null) return;
-            if (ContentCenter.Children.Contains(_addPosition))
-            {
-                _addPosition.RefreshDataAsync();
-                return;
-            }
-
-            if (_addPosition.Parent is Panel currentParent) currentParent.Children.Remove(_addPosition);
-            ContentCenter.Children.Clear();
-            ContentCenter.Children.Add(_addPosition);
-
-            _addPosition.RefreshDataAsync();
-        }
-
-        private void CloseAddPositionUserControl()
-        {
-            if (ContentCenter == null) return;
-            ContentCenter.Children.Clear();
-            if (_addPosition.Parent == ContentCenter) ContentCenter.Children.Remove(_addPosition);
         }
 
         private void ShowOperationUsersUserControl(double subProductId, double subProductOperationId, string operationName, string operationCode, decimal operationPrice, decimal operationTime, string operationDescription, decimal operationQuantity)

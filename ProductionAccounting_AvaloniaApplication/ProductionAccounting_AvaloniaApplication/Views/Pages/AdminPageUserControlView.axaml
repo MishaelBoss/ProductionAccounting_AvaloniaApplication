@@ -36,16 +36,6 @@
 		  									HorizontalAlignment="Stretch"
 		  									Content="Add user"/>
 
-		  							<Button Command="{Binding OpenDepartmentCommand}"
-		  									VerticalAlignment="Stretch"
-		  									HorizontalAlignment="Stretch"
-		  									Content="Add workshop/department"/>
-
-		  							<Button Command="{Binding OpenPositionCommand}"
-		  									VerticalAlignment="Stretch"
-		  									HorizontalAlignment="Stretch"
-		  									Content="Add a position"/>
-
 									<Button Command="{Binding AddProductCommand}"
 		  									VerticalAlignment="Stretch"
 		  									HorizontalAlignment="Stretch"
@@ -61,12 +51,6 @@
         <TabControl Margin="5">
 			<TabItem Header="Users">
 				<controls:TabUsersListUserControl />
-			</TabItem>
-			<TabItem Header="Workshop/department">
-				<controls:TabWorkshopDepartmentUserControl />
-			</TabItem>
-			<TabItem Header="Position">
-				<controls:TabPositionUserControl />
 			</TabItem>
 			<TabItem Header="Product">
 				<controls:TabProductUserControl />

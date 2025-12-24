@@ -9,12 +9,14 @@
         <entry key="ProductionAccounting_AvaloniaApplication/Views/Control/AddOperationUserControl.axaml" value="ProductionAccounting_AvaloniaApplication/ProductionAccounting_AvaloniaApplication.csproj" />
         <entry key="ProductionAccounting_AvaloniaApplication/Views/Control/AddPositionUserControl.axaml" value="ProductionAccounting_AvaloniaApplication/ProductionAccounting_AvaloniaApplication.csproj" />
         <entry key="ProductionAccounting_AvaloniaApplication/Views/Control/AddProductUserControl.axaml" value="ProductionAccounting_AvaloniaApplication/ProductionAccounting_AvaloniaApplication.csproj" />
+        <entry key="ProductionAccounting_AvaloniaApplication/Views/Control/AddUsersUserControl.axaml" value="ProductionAccounting_AvaloniaApplication/ProductionAccounting_AvaloniaApplication.csproj" />
         <entry key="ProductionAccounting_AvaloniaApplication/Views/Control/CartEmployeeTaskUserControl.axaml" value="ProductionAccounting_AvaloniaApplication/ProductionAccounting_AvaloniaApplication.csproj" />
         <entry key="ProductionAccounting_AvaloniaApplication/Views/Control/CartPositionUserControl.axaml" value="ProductionAccounting_AvaloniaApplication/ProductionAccounting_AvaloniaApplication.csproj" />
         <entry key="ProductionAccounting_AvaloniaApplication/Views/Control/CartProductUserControl.axaml" value="ProductionAccounting_AvaloniaApplication/ProductionAccounting_AvaloniaApplication.csproj" />
         <entry key="ProductionAccounting_AvaloniaApplication/Views/Control/CompleteWorkFormUserControl.axaml" value="ProductionAccounting_AvaloniaApplication/ProductionAccounting_AvaloniaApplication.csproj" />
         <entry key="ProductionAccounting_AvaloniaApplication/Views/Control/TabOperationUserControl.axaml" value="ProductionAccounting_AvaloniaApplication/ProductionAccounting_AvaloniaApplication.csproj" />
         <entry key="ProductionAccounting_AvaloniaApplication/Views/MainWindow.axaml" value="ProductionAccounting_AvaloniaApplication/ProductionAccounting_AvaloniaApplication.csproj" />
+        <entry key="ProductionAccounting_AvaloniaApplication/Views/Pages/AdminPageUserControlView.axaml" value="ProductionAccounting_AvaloniaApplication/ProductionAccounting_AvaloniaApplication.csproj" />
         <entry key="ProductionAccounting_AvaloniaApplication/Views/Pages/TimesheetPageUserControlView.axaml" value="ProductionAccounting_AvaloniaApplication/ProductionAccounting_AvaloniaApplication.csproj" />
       </map>
     </option>

@@ -23,60 +23,6 @@ public class AddUsersUserControlViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _messageerror, value);
     }
 
-    private ObservableCollection<ComboBoxTypeRolsUser> _comboBoxItems = [];
-    public ObservableCollection<ComboBoxTypeRolsUser> ComboBoxItems
-    {
-        get => _comboBoxItems;
-        set => this.RaiseAndSetIfChanged(ref _comboBoxItems, value);
-    }
-
-    private ComboBoxTypeRolsUser? _selectedComboBoxItem;
-    public ComboBoxTypeRolsUser? SelectedComboBoxItem
-    {
-        get => _selectedComboBoxItem;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _selectedComboBoxItem, value);
-            this.RaisePropertyChanged(nameof(IsActiveConfirmButton));
-        }
-    }
-
-    private ObservableCollection<ComboBoxTypeDepartmentUser> _comboBoxItemsDepartments = [];
-    public ObservableCollection<ComboBoxTypeDepartmentUser> ComboBoxItemsDepartments
-    {
-        get => _comboBoxItemsDepartments;
-        set => this.RaiseAndSetIfChanged(ref _comboBoxItemsDepartments, value);
-    }
-
-    private ComboBoxTypeDepartmentUser? _selectedComboBoxItemDepartment;
-    public ComboBoxTypeDepartmentUser? SelectedComboBoxItemDepartment
-    {
-        get => _selectedComboBoxItemDepartment;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _selectedComboBoxItemDepartment, value);
-            this.RaisePropertyChanged(nameof(IsActiveConfirmButton));
-        }
-    }
-
-    private ObservableCollection<ComboBoxTypePositionUser> _comboBoxItemsPositions = [];
-    public ObservableCollection<ComboBoxTypePositionUser> ComboBoxItemsPositions
-    {
-        get => _comboBoxItemsPositions;
-        set => this.RaiseAndSetIfChanged(ref _comboBoxItemsPositions, value);
-    }
-
-    private ComboBoxTypePositionUser? _selectedComboBoxItemPosition;
-    public ComboBoxTypePositionUser? SelectedComboBoxItemPosition
-    {
-        get => _selectedComboBoxItemPosition;
-        set
-        {
-            this.RaiseAndSetIfChanged(ref _selectedComboBoxItemPosition, value);
-            this.RaisePropertyChanged(nameof(IsActiveConfirmButton));
-        }
-    }
-
     private string _login = string.Empty;
     [UsedImplicitly]
     public string Login
@@ -163,8 +109,6 @@ public class AddUsersUserControlViewModel : ViewModelBase
         BaseSalary = baseSalary ?? 1.0m;
         Email = email ?? string.Empty;
         Phone = phone ?? string.Empty;
-
-        _ = LoadListTypeToComboBoxAsync();
     }
 
     public static ICommand CancelCommand
@@ -186,77 +130,18 @@ public class AddUsersUserControlViewModel : ViewModelBase
         });
 
     public bool IsActiveConfirmButton
-        => SelectedComboBoxItem != null 
-        && SelectedComboBoxItemDepartment != null 
-        && SelectedComboBoxItemPosition != null
-        && !string.IsNullOrEmpty(Login)
-        && !string.IsNullOrEmpty(MiddleName) 
-        && !string.IsNullOrEmpty(FirstUsername) 
-        && !string.IsNullOrEmpty(LastUsername)
-        && BaseSalary > 0;
-
-    private async Task LoadListTypeToComboBoxAsync()
-    {
-        try
-        {
-            const string sqlUserTypes = "SELECT id, type_user FROM public.user_type";
-            const string sqlDepartments = "SELECT id, type FROM public.departments";
-            const string sqlPositions = "SELECT id, type FROM public.positions";
-
-            await using var connection = new NpgsqlConnection(Arguments.Connection);
-            await connection.OpenAsync();
-
-            await using (var command = new NpgsqlCommand(sqlUserTypes, connection))
-            await using (var reader = await command.ExecuteReaderAsync())
-            {
-                while (await reader.ReadAsync())
-                {
-                    ComboBoxItems.Add(new ComboBoxTypeRolsUser(
-                        reader.GetDouble(0),
-                        reader.GetString(1)
-                    ));
-                }
-            }
-
-            await using (var command = new NpgsqlCommand(sqlDepartments, connection))
-            await using (var reader = await command.ExecuteReaderAsync())
-            {
-                while (await reader.ReadAsync())
-                {
-                    ComboBoxItemsDepartments.Add(new ComboBoxTypeDepartmentUser(
-                        reader.GetDouble(0),
-                        reader.GetString(1)
-                    ));
-                }
-            }
-
-            await using (var command = new NpgsqlCommand(sqlPositions, connection))
-            await using (var reader = await command.ExecuteReaderAsync())
-            {
-                while (await reader.ReadAsync())
-                {
-                    ComboBoxItemsPositions.Add(new ComboBoxTypePositionUser(
-                        reader.GetDouble(0),
-                        reader.GetString(1)
-                    ));
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Loges.LoggingProcess(level: LogLevel.Warning, 
-                ex: ex);
-        }
-    }
+        => !string.IsNullOrEmpty(Login)
+           && !string.IsNullOrEmpty(MiddleName) 
+           && !string.IsNullOrEmpty(FirstUsername) 
+           && !string.IsNullOrEmpty(LastUsername)
+           && BaseSalary > 0;
 
     private async Task SaveAsync()
     {
         try
         {
             if (string.IsNullOrEmpty(Login) || string.IsNullOrEmpty(FirstUsername) || 
-                string.IsNullOrEmpty(LastUsername) || string.IsNullOrEmpty(MiddleName) 
-                || SelectedComboBoxItem == null || SelectedComboBoxItemDepartment == null || 
-                SelectedComboBoxItemPosition == null)
+                string.IsNullOrEmpty(LastUsername) || string.IsNullOrEmpty(MiddleName))
             {
                 Messageerror = "Не все поля заполнены";
                 return;
@@ -306,21 +191,13 @@ public class AddUsersUserControlViewModel : ViewModelBase
                     return;
                 }
 
-                var userId = Convert.ToDouble(userIdObj); // или (long)userIdObj
-
-                await InsertRelationAsync(connection, "user_to_user_type", userId, SelectedComboBoxItem?.Id ?? 0);
-                await InsertRelationAsync(connection, "user_to_departments", userId, SelectedComboBoxItemDepartment?.Id ?? 0);
-                await InsertRelationAsync(connection, "user_to_position", userId, SelectedComboBoxItemPosition?.Id ?? 0);
+                var userId = Convert.ToDouble(userIdObj);
             }
             else
             {
                 await command.ExecuteNonQueryAsync();
 
                 await DeleteRelationsAsync(connection, Id);
-
-                await InsertRelationAsync(connection, "user_to_user_type", Id, SelectedComboBoxItem?.Id ?? 0);
-                await InsertRelationAsync(connection, "user_to_departments", Id, SelectedComboBoxItemDepartment?.Id ?? 0);
-                await InsertRelationAsync(connection, "user_to_position", Id, SelectedComboBoxItemPosition?.Id ?? 0);
             }
 
             WeakReferenceMessenger.Default.Send(new OpenOrCloseUserStatusMessage(false));
@@ -365,7 +242,6 @@ public class AddUsersUserControlViewModel : ViewModelBase
     private void ClearForm()
     {
         Messageerror = string.Empty;
-        ComboBoxItems.Clear();
         MiddleName = string.Empty;
         FirstUsername = string.Empty;
         LastUsername = string.Empty;
