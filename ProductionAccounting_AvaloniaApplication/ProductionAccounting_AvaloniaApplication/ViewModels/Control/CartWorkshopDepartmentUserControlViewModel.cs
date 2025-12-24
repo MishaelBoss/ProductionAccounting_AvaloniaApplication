@@ -41,6 +41,5 @@ public class CartWorkshopDepartmentUserControlViewModel : ViewModelBase
         });
 
     public static bool IsVisibleButtonDelete
-        => ManagerCookie.IsUserLoggedIn()
-        && ManagerCookie.IsAdministrator;
+        => ManagerCookie.IsUserLoggedIn();
 }

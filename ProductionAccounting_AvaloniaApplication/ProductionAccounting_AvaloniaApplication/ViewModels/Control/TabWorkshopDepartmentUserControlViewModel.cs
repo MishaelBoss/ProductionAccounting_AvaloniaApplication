@@ -160,7 +160,7 @@ public class TabWorkshopDepartmentUserControlViewModel : ViewModelBase, IRecipie
 
     private async Task SearchWorkshopDepartAsync(List<double> userIds)
     {
-        if (!ManagerCookie.IsUserLoggedIn() && !ManagerCookie.IsAdministrator) return;
+        if (!ManagerCookie.IsUserLoggedIn()) return;
 
         if (userIds.Count == 0)
         {

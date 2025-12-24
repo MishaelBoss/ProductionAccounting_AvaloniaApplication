@@ -159,7 +159,7 @@ public class TabPositionUserControlViewModel : ViewModelBase, IRecipient<Refresh
 
     private async Task SearchPositionAsync(List<double> userIds)
     {
-        if (!ManagerCookie.IsUserLoggedIn() && !ManagerCookie.IsAdministrator) return;
+        if (!ManagerCookie.IsUserLoggedIn()) return;
 
         if (userIds.Count == 0)
         {

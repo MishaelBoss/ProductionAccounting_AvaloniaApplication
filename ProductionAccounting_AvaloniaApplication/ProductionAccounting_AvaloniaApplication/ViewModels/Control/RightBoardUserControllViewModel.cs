@@ -121,69 +121,6 @@ public class RightBoardUserControlViewModel : ViewModelBase, IRecipient<OpenOrCl
         set => this.RaiseAndSetIfChanged(ref _buttons, value); 
     }
 
-    private bool _isAdministrator;
-    [UsedImplicitly]
-    public bool IsAdministrator
-    {
-        get => _isAdministrator;
-        set => this.RaiseAndSetIfChanged(ref _isAdministrator, value);
-    }
-
-    private bool _isMaster;
-    [UsedImplicitly]
-    public bool IsMaster
-    {
-        get => _isMaster;
-        set => this.RaiseAndSetIfChanged(ref _isMaster, value);
-    }
-
-    private bool _isEmployee;
-    [UsedImplicitly]
-    public bool IsEmployee
-    {
-        get => _isEmployee;
-        set => this.RaiseAndSetIfChanged(ref _isEmployee, value);
-    }
-
-    private bool _isManager;
-    [UsedImplicitly]
-    public bool IsManager
-    {
-        get => _isManager;
-        set => this.RaiseAndSetIfChanged(ref _isManager, value);
-    }
-
-    private bool _isAdministratorOrMaster;
-    public bool IsAdministratorOrMaster
-    {
-        get => _isAdministratorOrMaster;
-        set => this.RaiseAndSetIfChanged(ref _isAdministratorOrMaster, value);
-    }
-
-    private bool _isAdministratorOrManager;
-    [UsedImplicitly]
-    public bool IsAdministratorOrManager
-    {
-        get => _isAdministratorOrManager;
-        set => this.RaiseAndSetIfChanged(ref _isAdministratorOrManager, value);
-    }
-
-    private bool _isAdministratorOrMasterOrEmployee;
-    [UsedImplicitly]
-    public bool IsAdministratorOrMasterOrEmployee
-    {
-        get => _isAdministratorOrMasterOrEmployee;
-        set => this.RaiseAndSetIfChanged(ref _isAdministratorOrMasterOrEmployee, value);
-    }
-
-    private bool _isAdministratorOrMasterOrManager;
-    [UsedImplicitly]
-    public bool IsAdministratorOrMasterOrManager
-    {
-        get => _isAdministratorOrMasterOrManager;
-        set => this.RaiseAndSetIfChanged(ref _isAdministratorOrMasterOrManager, value);
-    }
-
     private bool _isAll;
     [UsedImplicitly]
     public bool IsAll
@@ -198,15 +135,7 @@ public class RightBoardUserControlViewModel : ViewModelBase, IRecipient<OpenOrCl
         var imageProfile = ManagerCookie.IsUserLoggedIn() ? LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/profile-64.png") : LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/login-64.png");
 
         var isLoggedIn = ManagerCookie.IsUserLoggedIn();
-        IsAdministrator = isLoggedIn && ManagerCookie.IsAdministrator;
-        IsMaster = isLoggedIn && ManagerCookie.IsMaster;
-        IsEmployee = isLoggedIn && ManagerCookie.IsEmployee;
-        IsManager = isLoggedIn && ManagerCookie.IsManager;
 
-        IsAdministratorOrMaster = IsAdministrator || IsMaster;
-        IsAdministratorOrManager = IsAdministrator || IsManager;
-        IsAdministratorOrMasterOrEmployee = IsAdministrator || IsMaster || IsEmployee;
-        IsAdministratorOrMasterOrManager = IsAdministrator || IsMaster || IsManager;
         IsAll = isLoggedIn;
 
         if (!isLoggedIn) OpenPage(_authorizationPageUserControlViewModel);
@@ -216,12 +145,12 @@ public class RightBoardUserControlViewModel : ViewModelBase, IRecipient<OpenOrCl
 
         var newButtons = new List<DashboardButtonViewModel>
         {
-            new(RightBoardAdminPanelText, OpenAdminPanelPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/administrator-64.png"), () => IsAdministrator),
-            new(RightBoardManagerText, OpenProductsManagerUserPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/administrator-64.png"), () => IsAdministratorOrManager),
-            new(RightBoardTimesheetText, OpenTimesheetPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/home-64.png"), () => IsAdministratorOrManager),
+            new(RightBoardAdminPanelText, OpenAdminPanelPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/administrator-64.png"), () => IsAll),
+            new(RightBoardManagerText, OpenProductsManagerUserPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/administrator-64.png"), () => IsAll),
+            new(RightBoardTimesheetText, OpenTimesheetPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/home-64.png"), () => IsAll),
             new(RightBoardReferenceBooksText, OpenReferenceBooksPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/library-64.png"), () => IsAll),
-            new(RightBoardWindowsUserText, OpenWorkUserPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/home-64.png"), () => IsAdministratorOrMasterOrEmployee),
-            new(RightBoardShipmentsText, OpenShipmentsUserPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/home-64.png"), () => IsAdministratorOrMasterOrManager),
+            new(RightBoardWindowsUserText, OpenWorkUserPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/home-64.png"), () => IsAll),
+            new(RightBoardShipmentsText, OpenShipmentsUserPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/home-64.png"), () => IsAll),
             new(RightBoardSalaryText, OpenSalaryUserPageCommand, LoadBitmap("avares://ProductionAccounting_AvaloniaApplication/Assets/login-64.png"), () => IsAll),
             new(ButtonAuthorizationText, OpenAuthorizationCommand, imageProfile),
         };

@@ -250,7 +250,7 @@ public class AddProductUserControlViewModel : ViewModelBase
 
     private async Task SaveAsync()
     {
-        if(!ManagerCookie.IsUserLoggedIn() && (!ManagerCookie.IsManager || !ManagerCookie.IsAdministrator)) return;
+        if(!ManagerCookie.IsUserLoggedIn()) return;
         
         if (!DesignedFields) return;
         

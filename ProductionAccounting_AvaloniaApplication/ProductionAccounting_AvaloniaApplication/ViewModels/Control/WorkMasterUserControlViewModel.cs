@@ -29,7 +29,7 @@ public class WorkMasterUserControlViewModel : ViewModelBase, IRecipient<RefreshP
 
     public async Task LoadTasksAsync()
     {
-        if (!ManagerCookie.IsUserLoggedIn() && (!ManagerCookie.IsMaster || !ManagerCookie.IsAdministrator)) return;
+        if (!ManagerCookie.IsUserLoggedIn()) return;
 
         StackPanelHelper.ClearAndRefreshStackPanel(CartTasks, _productList);
 

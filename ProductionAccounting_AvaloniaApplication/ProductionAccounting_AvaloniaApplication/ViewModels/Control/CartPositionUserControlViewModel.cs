@@ -33,6 +33,5 @@ public class CartPositionUserControlViewModel : ViewModelBase
         });
 
     public static bool IsAdministrator
-        => ManagerCookie.IsUserLoggedIn() 
-        && ManagerCookie.IsAdministrator;
+        => ManagerCookie.IsUserLoggedIn();
 }

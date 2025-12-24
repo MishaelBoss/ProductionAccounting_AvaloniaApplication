@@ -20,8 +20,7 @@ public class WorkPageUserControlViewModel : ViewModelBase
 
     public void ShowWork() 
     {
-        if (ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsEmployee) ShowWorkUserUserControl();
-        if (ManagerCookie.IsUserLoggedIn() && (ManagerCookie.IsAdministrator || ManagerCookie.IsMaster)) ShowWorkMasterUserControl();
+        if (ManagerCookie.IsUserLoggedIn()) ShowWorkMasterUserControl();
     }
 
     private void ShowWorkUserUserControl()

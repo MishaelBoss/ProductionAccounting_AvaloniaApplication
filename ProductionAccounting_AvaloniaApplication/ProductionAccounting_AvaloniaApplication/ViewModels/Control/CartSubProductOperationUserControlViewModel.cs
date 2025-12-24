@@ -109,8 +109,7 @@ public class CartSubProductOperationUserControlViewModel : ViewModelBase
         && !IsCompleted;
 
     public static bool IsAdministratorOrMasterAndManager
-        => ManagerCookie.IsUserLoggedIn()
-        && (ManagerCookie.IsAdministrator || ManagerCookie.IsMaster || ManagerCookie.IsManager);
+        => ManagerCookie.IsUserLoggedIn();
 
     public bool CanAssignTest
         => IsAdministratorOrMasterAndManager 

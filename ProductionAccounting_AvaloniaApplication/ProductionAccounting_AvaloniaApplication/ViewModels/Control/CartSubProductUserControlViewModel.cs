@@ -88,6 +88,5 @@ public class CartSubProductUserControlViewModel : ViewModelBase
         => !string.IsNullOrEmpty(Notes);
 
     public static bool IsAdministrator
-        => ManagerCookie.IsUserLoggedIn()
-        && ManagerCookie.IsAdministrator;
+        => ManagerCookie.IsUserLoggedIn();
 }
