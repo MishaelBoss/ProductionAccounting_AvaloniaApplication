@@ -211,11 +211,7 @@ public class AddProductUserControlViewModel : ViewModelBase
                                     u.middle_name, 
                                     u.login 
                                 FROM public.user AS u
-                                JOIN public.user_to_user_type AS uut ON u.id = uut.user_id
-                                JOIN public.user_type AS ut ON uut.user_type_id = ut.id
-                                WHERE u.is_active = true 
-                                    AND ut.type_user = 'Администратор'
-                                    OR ut.type_user = 'Мастер'
+                                WHERE u.is_active = true
                                 ORDER BY u.last_name, u.first_name";
 
             await using var connection = new NpgsqlConnection(Arguments.Connection);
