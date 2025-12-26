@@ -163,7 +163,7 @@ public class ProfilePageUserControlViewModel : ViewModelBase
                 Email = reader.IsDBNull(4) ? "none" : reader.GetString(4);
                 Phone = reader.IsDBNull(5) ? "none" : reader.GetString(5);
 
-                GetIdUser = reader.GetDouble(7);
+                GetIdUser = reader.GetDouble(6);
 
                 EmployeeName = $"{FirstName} {LastName} {MiddleName}";
             }
