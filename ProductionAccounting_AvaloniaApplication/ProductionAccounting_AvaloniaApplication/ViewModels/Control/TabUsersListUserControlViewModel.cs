@@ -9,43 +9,27 @@ using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using JetBrains.Annotations;
 using static ProductionAccounting_AvaloniaApplication.ViewModels.Control.NotFoundUserControlViewModel;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
-public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyChanged, IRecipient<RefreshUserListMessage>
+public class TabUsersListUserControlViewModel : ViewModelBase, IRecipient<RefreshUserListMessage>
 {
-    private bool _isProfileView = false;
-    public bool IsProfileView
-    {
-        get => _isProfileView;
-        set
-        {
-            if (_isProfileView != value)
-            {
-                _isProfileView = value;
-                OnPropertyChanged(nameof(IsProfileView));
-            }
-        }
-    }
-
     private string _search = string.Empty;
+    [UsedImplicitly]
     public string Search
     {
         get => _search;
         set
         {
-            if (_search != value)
-            {
-                _search = value;
-                OnPropertyChanged(nameof(Search));
-                PerformSearchListUsers();
-            }
+            this.RaiseAndSetIfChanged(ref _search, value);
+            _ = ScheduleSearchAsync();
         }
     }
 
@@ -57,17 +41,14 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
     }
 
     private ComboBoxTypeRolsUser? _selectedComboBoxItem;
+    [UsedImplicitly]
     public ComboBoxTypeRolsUser? SelectedComboBoxItem
     {
         get => _selectedComboBoxItem;
         set
         {
-            if (_selectedComboBoxItem != value)
-            {
-                _selectedComboBoxItem = value;
-                OnPropertyChanged(nameof(SelectedComboBoxItem));
-                _ = ApplyFilters();
-            }
+            this.RaiseAndSetIfChanged(ref _selectedComboBoxItem, value);
+            _ = ScheduleSearchAsync();
         }
     }
 
@@ -79,17 +60,14 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
     }
 
     private ComboBoxTypeDepartmentUser? _selectedComboBoxItemDepartment;
+    [UsedImplicitly]
     public ComboBoxTypeDepartmentUser? SelectedComboBoxItemDepartment
     {
         get => _selectedComboBoxItemDepartment;
         set
         {
-            if (_selectedComboBoxItemDepartment != value)
-            {
-                _selectedComboBoxItemDepartment = value;
-                OnPropertyChanged(nameof(SelectedComboBoxItemDepartment));
-                _ = ApplyFilters();
-            }
+            this.RaiseAndSetIfChanged(ref _selectedComboBoxItemDepartment, value);
+            _ = ScheduleSearchAsync();
         }
     }
 
@@ -101,156 +79,185 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
     }
 
     private ComboBoxTypePositionUser? _selectedComboBoxItemPosition;
+    [UsedImplicitly]
     public ComboBoxTypePositionUser? SelectedComboBoxItemPosition
     {
         get => _selectedComboBoxItemPosition;
         set
         {
-            if (_selectedComboBoxItemPosition != value)
-            {
-                _selectedComboBoxItemPosition = value;
-                OnPropertyChanged(nameof(SelectedComboBoxItemPosition));
-                _ = ApplyFilters();
-            }
-        }
-    }
-
-    private bool _filterByRole = false;
-    public bool FilterByRole
-    {
-        get => _filterByRole;
-        set
-        {
-            if (_filterByRole != value)
-            {
-                _filterByRole = value;
-                OnPropertyChanged(nameof(FilterByRole));
-                _ = ApplyFilters();
-            }
-        }
-    }
-
-    private bool _filterByDepartment = false;
-    public bool FilterByDepartment
-    {
-        get => _filterByDepartment;
-        set
-        {
-            if (_filterByDepartment != value)
-            {
-                _filterByDepartment = value;
-                OnPropertyChanged(nameof(FilterByDepartment));
-                _ = ApplyFilters();
-            }
-        }
-    }
-
-    private bool _filterByPosition = false;
-    public bool FilterByPosition
-    {
-        get => _filterByPosition;
-        set
-        {
-            if (_filterByPosition != value)
-            {
-                _filterByPosition = value;
-                OnPropertyChanged(nameof(FilterByPosition));
-                _ = ApplyFilters();
-            }
+            this.RaiseAndSetIfChanged(ref _selectedComboBoxItemPosition, value);
+            _ = ScheduleSearchAsync();
         }
     }
 
     private bool _showActiveUsers = true;
+    [UsedImplicitly]
     public bool ShowActiveUsers
     {
         get => _showActiveUsers;
         set
         {
-            if (_showActiveUsers != value)
-            {
-                _showActiveUsers = value;
-                OnPropertyChanged(nameof(ShowActiveUsers));
-                _ = ApplyFilters();
-            }
+            this.RaiseAndSetIfChanged(ref _showActiveUsers, value);
+            _ = ScheduleSearchAsync();
         }
     }
 
     private bool _showInactiveUsers = true;
+    [UsedImplicitly]
     public bool ShowInactiveUsers
     {
         get => _showInactiveUsers;
         set
         {
-            if (_showInactiveUsers != value)
-            {
-                _showInactiveUsers = value;
-                OnPropertyChanged(nameof(ShowInactiveUsers));
-                _ = ApplyFilters();
-            }
+            this.RaiseAndSetIfChanged(ref _showInactiveUsers, value);
+            _ = ScheduleSearchAsync();
         }
     }
+    
+    private CancellationTokenSource _searchCancellationTokenSource = new();
+    private readonly Lock _loadingLock = new();
+    private bool _isLoading;
 
     public TabUsersListUserControlViewModel()
     {
-        WeakReferenceMessenger.Default.Register<RefreshUserListMessage>(this);
+        WeakReferenceMessenger.Default.Register(this);
 
-        _ = LoadListTypeToComboBoxAsync();
-        GetListUsers();
+        _ = LoadUsersWithResetAsync();
     }
 
-    public void Receive(RefreshUserListMessage message)
-    {
-        GetListUsers();
-    }
-
-    public StackPanel? HomeMainContent { get; set; } = null;
-
-    private readonly List<CartUserListUserControl> userList = [];
-    private List<double> filteredUserIds = [];
-
-    public ICommand ResetFiltersCommand
-        => new RelayCommand(() => ResetFilters());
-
-    public static ICommand DownloadAsyncCommand
-        => new RelayCommand(async () => await DownloadListAsync());
-
-    public ICommand ReturnListUsersCommand
-        => new RelayCommand(() => GetListUsers());
-
-    private async void PerformSearchListUsers()
-    {
-        await ApplyFilters();
-    }
-
-    public async void GetListUsers()
-    {
-        Search = string.Empty;
-        await ApplyFilters();
-    }
-
-    private async Task ApplyFilters()
+    public async void Receive(RefreshUserListMessage message)
     {
         try
         {
-            filteredUserIds = await GetFilteredUserIdsAsync();
-
-            if (filteredUserIds.Count > 0)
-            {
-                await SearchUsersAsync(filteredUserIds);
-            }
-            else
-            {
-                StackPanelHelper.ClearAndRefreshStackPanel<CartUserListUserControl>(HomeMainContent, userList);
-                ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NotFound);
-            }
+            await LoadUsersWithResetAsync();
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(level: LogLevel.ERROR,
-                message: "Error applying filters",
+            Loges.LoggingProcess(level: LogLevel.Critical, 
                 ex: ex);
+        }
+    }
 
-            StackPanelHelper.ClearAndRefreshStackPanel<CartUserListUserControl>(HomeMainContent, userList);
+    public StackPanel? HomeMainContent { get; set; }
+
+    private readonly List<CartUserListUserControl> _userList = [];
+
+    public ICommand ResetFiltersCommand
+        => new RelayCommand(ResetFilters);
+
+    public static ICommand DownloadAsyncCommand
+        => new RelayCommand(async void () =>
+        {
+            try
+            {
+                await DownloadListAsync();
+            }
+            catch (Exception ex)
+            {
+                Loges.LoggingProcess(level: LogLevel.Critical, 
+                    ex: ex, 
+                    message: "Error download list user");
+            }
+        });
+    
+    public ICommand ReturnListUsersCommand
+        => new RelayCommand(async void () =>
+        {
+            try
+            {
+                await LoadUsersWithResetAsync();
+            }
+            catch (Exception ex)
+            {
+                Loges.LoggingProcess(level: LogLevel.Critical, 
+                    ex: ex, message: "Error refresh");
+            }
+        });
+
+    private async Task ScheduleSearchAsync()
+    {
+        try
+        {
+            await _searchCancellationTokenSource.CancelAsync();
+            _searchCancellationTokenSource = new CancellationTokenSource();
+            
+            await Task.Delay(300, _searchCancellationTokenSource.Token);
+            
+            _ = LoadUsersWithResetAsync();
+        }
+        catch (OperationCanceledException)
+        {
+            Loges.LoggingProcess(level: LogLevel.Info, 
+                message: "Search cancel");
+        }
+        catch (Exception ex)
+        {
+            Loges.LoggingProcess(level: LogLevel.Error, 
+                ex: ex, 
+                message: "Error scheduling search");
+        }
+    }
+
+    public async Task LoadUsersWithResetAsync()
+    {
+        lock (_loadingLock)
+        {
+            if (_isLoading) return;
+            _isLoading = true;
+        }
+
+        try
+        {
+            ClearProductList();
+
+            var filteredProductIds = await GetFilteredUserIdsAsync();
+
+            if (filteredProductIds.Count > 0)  await LoadUserByIdsAsync(filteredProductIds);
+            else  ShowNotFoundMessage();
+        }
+        catch (Exception ex)
+        {
+            Loges.LoggingProcess(level: LogLevel.Error,
+                message: "Error loading products",
+                ex: ex);
+            ClearProductList();
+        }
+        finally
+        {
+            lock (_loadingLock)
+            {
+                _isLoading = false;
+            }
+        }
+    }
+
+    private void ClearProductList()
+    {
+        try
+        {
+            _userList.Clear();
+
+            HomeMainContent?.Children.Clear();
+        }
+        catch (Exception ex)
+        {
+            Loges.LoggingProcess(level: LogLevel.Warning,
+                message: "Error clearing product list",
+                ex: ex);
+        }
+    }
+
+    private void ShowNotFoundMessage()
+    {
+        try
+        {
+            ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NotFound);
+        }
+        catch (Exception ex)
+        {
+            Loges.LoggingProcess(level: LogLevel.Warning,
+                message: "Error showing not found message",
+                ex: ex);
         }
     }
 
@@ -260,31 +267,26 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
 
         try
         {
-            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await using var connection = new NpgsqlConnection(Arguments.Connection);
             await connection.OpenAsync();
 
             var sql = @"
                         SELECT DISTINCT u.id
                         FROM public.""user"" u
-                        LEFT JOIN public.user_to_user_type utt ON u.id = utt.user_id
-                        LEFT JOIN public.user_type ut ON utt.user_type_id = ut.id
-                        LEFT JOIN public.user_to_departments ud ON u.id = ud.user_id
-                        LEFT JOIN public.departments d ON ud.department_id = d.id
-                        LEFT JOIN public.user_to_position up ON u.id = up.user_id
-                        LEFT JOIN public.positions p ON up.position_id = p.id
                         WHERE 1=1";
 
             var parameters = new List<NpgsqlParameter>();
 
             if (!ShowActiveUsers || !ShowInactiveUsers)
             {
-                if (ShowActiveUsers && !ShowInactiveUsers)
+                switch (ShowActiveUsers)
                 {
-                    sql += " AND u.is_active = true";
-                }
-                else if (!ShowActiveUsers && ShowInactiveUsers)
-                {
-                    sql += " AND u.is_active = false";
+                    case true when !ShowInactiveUsers:
+                        sql += " AND u.is_active = true";
+                        break;
+                    case false when ShowInactiveUsers:
+                        sql += " AND u.is_active = false";
+                        break;
                 }
             }
 
@@ -294,31 +296,13 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
                 parameters.Add(new NpgsqlParameter("@search", $"%{Search}%"));
             }
 
-            if (FilterByRole && SelectedComboBoxItem != null)
-            {
-                sql += " AND ut.id = @roleId";
-                parameters.Add(new NpgsqlParameter("@roleId", SelectedComboBoxItem.Id));
-            }
-
-            if (FilterByDepartment && SelectedComboBoxItemDepartment != null)
-            {
-                sql += " AND d.id = @departmentId";
-                parameters.Add(new NpgsqlParameter("@departmentId", SelectedComboBoxItemDepartment.Id));
-            }
-
-            if (FilterByPosition && SelectedComboBoxItemPosition != null)
-            {
-                sql += " AND p.id = @positionId";
-                parameters.Add(new NpgsqlParameter("@positionId", SelectedComboBoxItemPosition.Id));
-            }
-
-            using var command = new NpgsqlCommand(sql, connection);
+            await using var command = new NpgsqlCommand(sql, connection);
             foreach (var param in parameters)
             {
                 command.Parameters.Add(param);
             }
 
-            using var reader = await command.ExecuteReaderAsync();
+            await using var reader = await command.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
                 if (!reader.IsDBNull(0))
@@ -329,76 +313,22 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(LogLevel.ERROR, "Error getting filtered user IDs", ex: ex);
+            Loges.LoggingProcess(LogLevel.Error, "Error getting filtered user IDs", ex: ex);
         }
 
         return userIds;
     }
 
-    public async Task LoadListTypeToComboBoxAsync()
+    private async Task LoadUserByIdsAsync(List<double> userIds)
     {
-        try
+        if (userIds is { Count: 0 })
         {
-            string sqlUserTypes = "SELECT id, type_user FROM public.user_type";
-            string sqlDepartments = "SELECT id, type FROM public.departments";
-            string sqlPositions = "SELECT id, type FROM public.positions";
-
-            using var connection = new NpgsqlConnection(Arguments.Connection);
-            await connection.OpenAsync();
-
-            using (var command = new NpgsqlCommand(sqlUserTypes, connection))
-            using (var reader = await command.ExecuteReaderAsync())
-            {
-                while (await reader.ReadAsync())
-                {
-                    ComboBoxItems.Add(new ComboBoxTypeRolsUser(
-                        reader.GetDouble(0),
-                        reader.GetString(1)
-                    ));
-                }
-            }
-
-            using (var command = new NpgsqlCommand(sqlDepartments, connection))
-            using (var reader = await command.ExecuteReaderAsync())
-            {
-                while (await reader.ReadAsync())
-                {
-                    ComboBoxItemsDepartments.Add(new ComboBoxTypeDepartmentUser(
-                        reader.GetDouble(0),
-                        reader.GetString(1)
-                    ));
-                }
-            }
-
-            using (var command = new NpgsqlCommand(sqlPositions, connection))
-            using (var reader = await command.ExecuteReaderAsync())
-            {
-                while (await reader.ReadAsync())
-                {
-                    ComboBoxItemsPositions.Add(new ComboBoxTypePositionUser(
-                        reader.GetDouble(0),
-                        reader.GetString(1)
-                    ));
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Loges.LoggingProcess(level: LogLevel.WARNING,
-                ex: ex);
-        }
-    }
-
-    private async Task SearchUsersAsync(List<double> userIds)
-    {
-        if (userIds.Count == 0)
-        {
-            StackPanelHelper.ClearAndRefreshStackPanel<CartUserListUserControl>(HomeMainContent, userList);
+            StackPanelHelper.ClearAndRefreshStackPanel(HomeMainContent, _userList);
             ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NotFound);
             return;
         }
 
-        StackPanelHelper.ClearAndRefreshStackPanel<CartUserListUserControl>(HomeMainContent, userList);
+        StackPanelHelper.ClearAndRefreshStackPanel(HomeMainContent, _userList);
 
         try
         {
@@ -412,63 +342,66 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
                 parameters.Add(new NpgsqlParameter(paramName, userIds[i]));
             }
 
-            string sql = @$"SELECT * FROM public.user WHERE id IN ({string.Join(", ", paramNames)}) AND id NOT IN ({ManagerCookie.GetIdUser})";
+            var sql = @$"SELECT * FROM public.user WHERE id IN ({string.Join(", ", paramNames)}) AND id NOT IN ({ManagerCookie.GetIdUser})";
 
-            using (var connection = new NpgsqlConnection(Arguments.Connection))
+            await using var connection = new NpgsqlConnection(Arguments.Connection);
+            
+            await connection.OpenAsync();
+            await using var command = new NpgsqlCommand(sql, connection);
+
+            foreach (var param in parameters)
             {
-                await connection.OpenAsync();
-                using var command = new NpgsqlCommand(sql, connection);
-
-                foreach (var param in parameters)
-                {
-                    command.Parameters.Add(param);
-                }
-
-                using var reader = await command.ExecuteReaderAsync();
-                while (await reader.ReadAsync())
-                {
-                    var userViewModel = new CartUserListUserControlViewModel
-                    {
-                        UserID = reader.IsDBNull(0) ? 0 : reader.GetDouble(0),
-                        Password = reader.IsDBNull(1) ? string.Empty : reader.GetString(1),
-                        FirstName = reader.IsDBNull(2) ? string.Empty : reader.GetString(2),
-                        LastName = reader.IsDBNull(3) ? string.Empty : reader.GetString(3),
-                        MiddleName = reader.IsDBNull(4) ? string.Empty : reader.GetString(4),
-                        DateJoined = reader.IsDBNull(5) ? string.Empty : reader.GetDateTime(5).ToString("yyyy-MM-dd"),
-                        Login = reader.IsDBNull(6) ? string.Empty : reader.GetString(6),
-                        BaseSalary = reader.IsDBNull(7) ? 0m : reader.GetDecimal(7),
-                        Email = reader.IsDBNull(8) ? string.Empty : reader.GetString(8),
-                        Phone = reader.IsDBNull(9) ? string.Empty : reader.GetString(9),
-                        IsActive = reader.IsDBNull(10) || reader.GetBoolean(10),
-                    };
-
-                    var userControl = new CartUserListUserControl
-                    {
-                        DataContext = userViewModel
-                    };
-
-                    userList.Add(userControl);
-                }
+                command.Parameters.Add(param);
             }
 
-            StackPanelHelper.RefreshStackPanelContent<CartUserListUserControl>(HomeMainContent, userList);
+            await using var reader = await command.ExecuteReaderAsync();
+                
+            var newUserList = new List<CartUserListUserControl>();
+                
+            while (await reader.ReadAsync())
+            {
+                var userViewModel = new CartUserListUserControlViewModel
+                {
+                    UserId = reader.IsDBNull(0) ? 0 : reader.GetDouble(0),
+                    Password = reader.IsDBNull(1) ? string.Empty : reader.GetString(1),
+                    FirstName = reader.IsDBNull(2) ? string.Empty : reader.GetString(2),
+                    LastName = reader.IsDBNull(3) ? string.Empty : reader.GetString(3),
+                    MiddleName = reader.IsDBNull(4) ? string.Empty : reader.GetString(4),
+                    DateJoined = reader.IsDBNull(5) ? string.Empty : reader.GetDateTime(5).ToString("yyyy-MM-dd"),
+                    Login = reader.IsDBNull(6) ? string.Empty : reader.GetString(6),
+                    BaseSalary = reader.IsDBNull(7) ? 0m : reader.GetDecimal(7),
+                    Email = reader.IsDBNull(8) ? string.Empty : reader.GetString(8),
+                    Phone = reader.IsDBNull(9) ? string.Empty : reader.GetString(9),
+                    IsActive = reader.IsDBNull(10) || reader.GetBoolean(10),
+                };
 
-            if (userList.Count == 0) ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NotFound);
+                newUserList.Add(new CartUserListUserControl
+                {
+                    DataContext = userViewModel
+                });
+            }
+                
+            _userList.Clear();
+            _userList.AddRange(newUserList);
+
+            StackPanelHelper.RefreshStackPanelContent(HomeMainContent, _userList);
+
+            if (_userList.Count == 0) ShowNotFoundMessage();
         }
         catch (NpgsqlException ex)
         {
-            StackPanelHelper.ClearAndRefreshStackPanel<CartUserListUserControl>(HomeMainContent, userList);
-            ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NoConnectToDB);
+            StackPanelHelper.ClearAndRefreshStackPanel(HomeMainContent, _userList);
+            ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NoConnectToDb);
 
-            Loges.LoggingProcess(LogLevel.CRITICAL,
+            Loges.LoggingProcess(LogLevel.Critical,
                 "Connection or request error",
                 ex: ex);
         }
         catch (Exception ex)
         {
-            StackPanelHelper.ClearAndRefreshStackPanel<CartUserListUserControl>(HomeMainContent, userList);
-            ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NoConnectToDB);
-            Loges.LoggingProcess(LogLevel.ERROR,
+            StackPanelHelper.ClearAndRefreshStackPanel(HomeMainContent, _userList);
+            ItemNotFoundException.Show(HomeMainContent, ErrorLevel.NoConnectToDb);
+            Loges.LoggingProcess(LogLevel.Error,
                 "Error loading users by IDs",
                 ex: ex);
         }
@@ -476,55 +409,70 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
 
     private void ResetFilters()
     {
-        FilterByRole = false;
-        FilterByDepartment = false;
-        FilterByPosition = false;
-        ShowActiveUsers = true;
-        ShowInactiveUsers = true;
-        SelectedComboBoxItem = null;
-        SelectedComboBoxItemDepartment = null;
-        SelectedComboBoxItemPosition = null;
-        Search = string.Empty;
+        try
+        {
+            ShowActiveUsers = true;
+            ShowInactiveUsers = true;
+            SelectedComboBoxItem = null;
+            SelectedComboBoxItemDepartment = null;
+            SelectedComboBoxItemPosition = null;
+            Search = string.Empty;
+            
+            this.RaisePropertyChanged(nameof(ShowActiveUsers));
+            this.RaisePropertyChanged(nameof(ShowInactiveUsers));
+            this.RaisePropertyChanged(nameof(SelectedComboBoxItem));
+            this.RaisePropertyChanged(nameof(SelectedComboBoxItemDepartment));
+            this.RaisePropertyChanged(nameof(SelectedComboBoxItemPosition));
+            this.RaisePropertyChanged(nameof(Search));
+            
+            _ = LoadUsersWithResetAsync();
+        }
+        catch (Exception ex)
+        {
+            Loges.LoggingProcess(level: LogLevel.Error,
+                message: "Error resetting filters",
+                ex: ex);
+        }
     }
 
-    public static async Task DownloadListAsync()
+    private static async Task DownloadListAsync()
     {
         if (!ManagerCookie.IsUserLoggedIn()) return;
 
         try
         {
-            string sql = "SELECT * FROM public.user";
+            const string sql = "SELECT * FROM public.user";
 
-            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await using var connection = new NpgsqlConnection(Arguments.Connection);
             connection.Open();
 
-            using var command = new NpgsqlCommand(sql, connection);
-            using var reader = await command.ExecuteReaderAsync();
-            var fileSave = Path.Combine(Path.Combine(Paths.DestinationPathDB("AdminPanel", "UsersList")), Files.DBEquipments);
+            await using var command = new NpgsqlCommand(sql, connection);
+            await using var reader = await command.ExecuteReaderAsync();
+            var fileSave = Path.Combine(Path.Combine(Paths.DestinationPathDb("AdminPanel", "UsersList")), Files.DbEquipments);
 
-            using (var writer = new StreamWriter(fileSave))
+            await using (var writer = new StreamWriter(fileSave))
             {
                 for (int i = 0; i < reader.FieldCount; i++)
                 {
-                    writer.Write(reader.GetName(i));
+                    await writer.WriteAsync(reader.GetName(i));
                     if (i < reader.FieldCount - 1)
                     {
-                        writer.Write(",");
+                        await writer.WriteAsync(",");
                     }
                 }
-                writer.WriteLine();
+                await writer.WriteLineAsync();
 
                 while (reader.Read())
                 {
                     for (int i = 0; i < reader.FieldCount; i++)
                     {
-                        writer.Write(reader.GetValue(i).ToString());
+                        await writer.WriteAsync(reader.GetValue(i).ToString());
                         if (i < reader.FieldCount - 1)
                         {
-                            writer.Write(",");
+                            await writer.WriteAsync(",");
                         }
                     }
-                    writer.WriteLine();
+                    await writer.WriteLineAsync();
                 }
             }
 
@@ -532,19 +480,20 @@ public class TabUsersListUserControlViewModel : ViewModelBase, INotifyPropertyCh
         }
         catch (NpgsqlException ex)
         {
-            Loges.LoggingProcess(LogLevel.ERROR,
+            Loges.LoggingProcess(LogLevel.Error,
                 "Connection or request error",
                 ex: ex);
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(LogLevel.ERROR,
+            Loges.LoggingProcess(LogLevel.Error,
                 "Connection or request error",
                 ex: ex);
         }
     }
-
-    public new event PropertyChangedEventHandler? PropertyChanged;
-    protected void OnPropertyChanged(string propertyName)
-        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    
+    ~TabUsersListUserControlViewModel()
+    {
+        WeakReferenceMessenger.Default.Unregister<RefreshUserListMessage>(this);
+    }
 }

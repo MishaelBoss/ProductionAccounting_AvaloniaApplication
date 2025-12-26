@@ -1,5 +1,7 @@
+using System;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using ProductionAccounting_AvaloniaApplication.Scripts;
 using ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
 namespace ProductionAccounting_AvaloniaApplication.Views.Control;
@@ -13,10 +15,18 @@ public partial class TabProductUserControl : UserControl
         Loaded += OnLoaded;
     }
 
-    private void OnLoaded(object? sender, RoutedEventArgs e)
+    private async void OnLoaded(object? sender, RoutedEventArgs e)
     {
-        if (DataContext is not TabProductUserControlViewModel viewModel) return;
-        viewModel.HomeMainContent = HomeMainContent;
-        viewModel.GetList();
+        try
+        {
+            if (DataContext is not TabProductUserControlViewModel viewModel) return;
+            viewModel.HomeMainContent = HomeMainContent;
+            await viewModel.LoadProductsWithResetAsync();
+        }
+        catch (Exception ex)
+        {
+            Loges.LoggingProcess(level: LogLevel.Warning, 
+                ex: ex);
+        }
     }
 }

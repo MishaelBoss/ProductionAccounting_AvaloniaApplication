@@ -7,14 +7,14 @@ using ProductionAccounting_AvaloniaApplication.Views.Control;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using JetBrains.Annotations;
 using static ProductionAccounting_AvaloniaApplication.ViewModels.Control.NotFoundUserControlViewModel;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
-public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyChanged, IRecipient<RefreshSubProductListMessage>, IRecipient<OpenOrCloseSubProductStatusMessage>, IRecipient<RefreshSubProductOperationsMessage>
+public class ProductViewUserControlViewModel : ViewModelBase, IRecipient<RefreshSubProductListMessage>, IRecipient<OpenOrCloseSubProductStatusMessage>, IRecipient<RefreshSubProductOperationsMessage>
 {
     public string Name { get; }
     public double ProductId { get; }
@@ -88,8 +88,8 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
     public StackPanel? SubProductContent { get; set; } = null;
     public StackPanel? SubProductOperation { get; set; } = null;
 
-    private readonly List<CartSubProductUserControl> subProductList = [];
-    private readonly List<CartSubProductOperationUserControl> subProductOperationList = [];
+    private readonly List<CartSubProductUserControl> _subProductList = [];
+    private readonly List<CartSubProductOperationUserControl> _subProductOperationList = [];
 
     public ICommand AddSubProductCommand
         => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseAddSubProductStatusMessage(true, ProductId)));
@@ -99,11 +99,10 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
 
     public ICommand AddOperationCommand
         => new RelayCommand(() => { if (SubProductId.HasValue) WeakReferenceMessenger.Default.Send(new OpenOrCloseSubOperationStatusMessage(true, SubProductId.Value)); });
-
-
+    
+    [UsedImplicitly]
     public static bool IsAdministratorOrMasterAndManager
-        => ManagerCookie.IsUserLoggedIn()
-        && (ManagerCookie.IsAdministrator || ManagerCookie.IsMaster || ManagerCookie.IsManager);
+        => ManagerCookie.IsUserLoggedIn();
 
     public bool IsAdministratorOrMasterAndCanCompleteTask
         => IsAdministratorOrMasterAndManager 
@@ -111,20 +110,20 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
 
     public async Task LoadSubProductAsync()
     {
-        StackPanelHelper.ClearAndRefreshStackPanel<CartSubProductUserControl>(SubProductContent, subProductList);
+        StackPanelHelper.ClearAndRefreshStackPanel(SubProductContent, _subProductList);
 
         try
         {
-            string sql = "SELECT id, product_task_id, name, planned_quantity, planned_weight, notes, created_at FROM public.sub_products WHERE product_task_id = @product_task_id";
+            const string sql = "SELECT id, product_task_id, name, planned_quantity, planned_weight, notes, created_at FROM public.sub_products WHERE product_task_id = @product_task_id";
 
-            using (var connection = new NpgsqlConnection(Arguments.Connection))
+            await using (var connection = new NpgsqlConnection(Arguments.Connection))
             {
                 await connection.OpenAsync();
 
-                using var command = new NpgsqlCommand(sql, connection);
+                await using var command = new NpgsqlCommand(sql, connection);
                 command.Parameters.AddWithValue("@product_task_id", ProductId);
 
-                using var reader = await command.ExecuteReaderAsync();
+                await using var reader = await command.ExecuteReaderAsync();
                 while (await reader.ReadAsync())
                 {
                     var viewModel = new CartSubProductUserControlViewModel()
@@ -142,50 +141,59 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
                         DataContext = viewModel,
                     };
 
-                    subProductList.Add(userControl);
+                    _subProductList.Add(userControl);
                 }
             }
 
-            StackPanelHelper.RefreshStackPanelContent<CartSubProductUserControl>(SubProductContent, subProductList);
+            StackPanelHelper.RefreshStackPanelContent(SubProductContent, _subProductList);
 
-            if (subProductList.Count == 0) ItemNotFoundException.Show(SubProductContent, ErrorLevel.NotFound);
+            if (_subProductList.Count == 0) ItemNotFoundException.Show(SubProductContent, ErrorLevel.NotFound);
         }
         catch (NpgsqlException ex)
         {
-            StackPanelHelper.ClearAndRefreshStackPanel<CartSubProductUserControl>(SubProductContent, subProductList);
-            ItemNotFoundException.Show(SubProductContent, ErrorLevel.NoConnectToDB);
+            StackPanelHelper.ClearAndRefreshStackPanel(SubProductContent, _subProductList);
+            ItemNotFoundException.Show(SubProductContent, ErrorLevel.NoConnectToDb);
 
-            Loges.LoggingProcess(LogLevel.ERROR,
+            Loges.LoggingProcess(LogLevel.Error,
                 "Connection or request error",
                 ex: ex);
         }
         catch (Exception ex)
         {
-            StackPanelHelper.ClearAndRefreshStackPanel<CartSubProductUserControl>(SubProductContent, subProductList);
-            ItemNotFoundException.Show(SubProductContent, ErrorLevel.NoConnectToDB);
-            Loges.LoggingProcess(LogLevel.ERROR, ex: ex);
+            StackPanelHelper.ClearAndRefreshStackPanel(SubProductContent, _subProductList);
+            ItemNotFoundException.Show(SubProductContent, ErrorLevel.NoConnectToDb);
+            Loges.LoggingProcess(LogLevel.Error, ex: ex);
         }
     }
 
     private async void LoadSubProductViewAsync(double subProductId)
     {
-        await LoadDateSubProductAsync(subProductId);
-        await LoadDateSubOperationAsync(subProductId);
+        try
+        {
+            await LoadDateSubProductAsync(subProductId);
+            await LoadDateSubOperationAsync(subProductId);
+        }
+        catch (Exception ex)
+        {
+            Loges.LoggingProcess(level: LogLevel.Error,
+                ex: ex, 
+                message: "Error date");
+        }
     }
 
     private async Task LoadDateSubProductAsync(double subProductId)
     {
         try
         {
-            string sql = @"SELECT id, name, planned_quantity, planned_weight, notes, created_at FROM public.sub_products WHERE id = @id";
+            const string sql = @"SELECT id, name, planned_quantity, planned_weight, notes, created_at FROM public.sub_products WHERE id = @id";
 
-            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await using var connection = new NpgsqlConnection(Arguments.Connection);
             await connection.OpenAsync();
 
-            using var command1 = new NpgsqlCommand(sql, connection);
+            await using var command1 = new NpgsqlCommand(sql, connection);
             command1.Parameters.AddWithValue("@id", subProductId);
 
-            using var reader1 = await command1.ExecuteReaderAsync();
+            await using var reader1 = await command1.ExecuteReaderAsync();
             if (await reader1.ReadAsync())
             {
                 SubProductId = reader1.IsDBNull(0) ? 0 : reader1.GetDouble(0);
@@ -197,26 +205,26 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
         }
         catch (NpgsqlException ex)
         {
-            StackPanelHelper.ClearAndRefreshStackPanel<CartSubProductOperationUserControl>(SubProductOperation, subProductOperationList);
-            ItemNotFoundException.Show(SubProductOperation, ErrorLevel.NoConnectToDB);
+            StackPanelHelper.ClearAndRefreshStackPanel(SubProductOperation, _subProductOperationList);
+            ItemNotFoundException.Show(SubProductOperation, ErrorLevel.NoConnectToDb);
 
-            Loges.LoggingProcess(LogLevel.ERROR,
+            Loges.LoggingProcess(LogLevel.Error,
                 "Connection or request error",
                 ex: ex);
         }
         catch (Exception ex)
         {
-            StackPanelHelper.ClearAndRefreshStackPanel<CartSubProductOperationUserControl>(SubProductOperation, subProductOperationList);
-            ItemNotFoundException.Show(SubProductOperation, ErrorLevel.NoConnectToDB);
-            Loges.LoggingProcess(LogLevel.ERROR, 
+            StackPanelHelper.ClearAndRefreshStackPanel(SubProductOperation, _subProductOperationList);
+            ItemNotFoundException.Show(SubProductOperation, ErrorLevel.NoConnectToDb);
+            Loges.LoggingProcess(LogLevel.Error, 
                 ex: ex);
         }
     }
 
     private async Task LoadDateSubOperationAsync(double subProductId)
     {
-        subProductOperationList.Clear();
-        StackPanelHelper.ClearAndRefreshStackPanel<CartSubProductOperationUserControl>(SubProductOperation, subProductOperationList);
+        _subProductOperationList.Clear();
+        StackPanelHelper.ClearAndRefreshStackPanel(SubProductOperation, _subProductOperationList);
 
         try
         {
@@ -244,12 +252,12 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
                                             WHERE spo.sub_product_id = @sub_product_id
                                             ORDER BY spo.id";
 
-            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await using var connection = new NpgsqlConnection(Arguments.Connection);
             await connection.OpenAsync();
-            using (var command2 = new NpgsqlCommand(sqlSubProductOperations, connection))
+            await using (var command2 = new NpgsqlCommand(sqlSubProductOperations, connection))
             {
                 command2.Parameters.AddWithValue("@sub_product_id", subProductId);
-                using var reader2 = await command2.ExecuteReaderAsync();
+                await using var reader2 = await command2.ExecuteReaderAsync();
                 while (await reader2.ReadAsync())
                 {
                     var viewModel = new CartSubProductOperationUserControlViewModel()
@@ -275,27 +283,27 @@ public class ProductViewUserControlViewModel : ViewModelBase, INotifyPropertyCha
                         DataContext = viewModel,
                     };
 
-                    subProductOperationList.Add(userControl);
+                    _subProductOperationList.Add(userControl);
                 }
             }
 
-            StackPanelHelper.RefreshStackPanelContent<CartSubProductOperationUserControl>(SubProductOperation, subProductOperationList);
+            StackPanelHelper.RefreshStackPanelContent(SubProductOperation, _subProductOperationList);
 
-            if (subProductOperationList.Count == 0) ItemNotFoundException.Show(SubProductOperation, ErrorLevel.NotFound);
+            if (_subProductOperationList.Count == 0) ItemNotFoundException.Show(SubProductOperation, ErrorLevel.NotFound);
         }
         catch (NpgsqlException ex)
         {
-            StackPanelHelper.ClearAndRefreshStackPanel<CartSubProductOperationUserControl>(SubProductOperation, subProductOperationList);
-            ItemNotFoundException.Show(SubProductOperation, ErrorLevel.NoConnectToDB);
-            Loges.LoggingProcess(LogLevel.ERROR,
+            StackPanelHelper.ClearAndRefreshStackPanel(SubProductOperation, _subProductOperationList);
+            ItemNotFoundException.Show(SubProductOperation, ErrorLevel.NoConnectToDb);
+            Loges.LoggingProcess(LogLevel.Error,
                 "Connection or request error",
                 ex: ex);
         }
         catch (Exception ex)
         {
-            StackPanelHelper.ClearAndRefreshStackPanel<CartSubProductOperationUserControl>(SubProductOperation, subProductOperationList);
-            ItemNotFoundException.Show(SubProductOperation, ErrorLevel.NoConnectToDB);
-            Loges.LoggingProcess(LogLevel.ERROR, 
+            StackPanelHelper.ClearAndRefreshStackPanel(SubProductOperation, _subProductOperationList);
+            ItemNotFoundException.Show(SubProductOperation, ErrorLevel.NoConnectToDb);
+            Loges.LoggingProcess(LogLevel.Error, 
                 ex: ex);
         }
     }

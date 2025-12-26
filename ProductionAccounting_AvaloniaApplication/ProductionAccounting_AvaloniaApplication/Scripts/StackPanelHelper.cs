@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace ProductionAccounting_AvaloniaApplication.Scripts;
 
-public class StackPanelHelper
+public static class StackPanelHelper
 {
     public static void ClearAndRefreshStackPanel<T>(StackPanel? stackPanel, List<T>? userControls) where T : UserControl
     {
@@ -14,11 +14,11 @@ public class StackPanelHelper
         try
         {
             userControls.Clear();
-            RefreshStackPanelContent<T>(stackPanel, userControls);
+            RefreshStackPanelContent(stackPanel, userControls);
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(LogLevel.ERROR,
+            Loges.LoggingProcess(LogLevel.Error,
                 "Error updating stack panel",
                 ex: ex);
         }
@@ -35,15 +35,12 @@ public class StackPanelHelper
 
             foreach (var userControl in userControls)
             {
-                if (userControl != null)
-                {
-                    stackPanel.Children.Add(userControl);
-                }
+                stackPanel.Children.Add(userControl);
             }
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(LogLevel.ERROR,
+            Loges.LoggingProcess(LogLevel.Error,
                 "Error updating stack panel",
                 ex: ex);
         }

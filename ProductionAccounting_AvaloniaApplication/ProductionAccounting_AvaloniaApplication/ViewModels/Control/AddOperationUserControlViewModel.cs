@@ -5,9 +5,9 @@ using ProductionAccounting_AvaloniaApplication.Scripts;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using JetBrains.Annotations;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
@@ -20,66 +20,54 @@ public class AddOperationUserControlViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _messageerror, value);
     }
 
-    private double SubProductId { get; set; }
-    private double SubProductOperationId { get; set; }
+    private double SubProductId { get; }
+    private double SubProductOperationId { get; }
 
     private string _operationName = string.Empty;
+    [UsedImplicitly]
     public string OperationName
     {
         get => _operationName;
         set
         {
-            if (_operationName != value)
-            {
-                _operationName = value;
-                OnPropertyChanged(nameof(OperationName));
-                OnPropertyChanged(nameof(IsActiveConfirmButton));
-            }
+            this.RaiseAndSetIfChanged(ref _operationName, value);
+            this.RaisePropertyChanged(nameof(IsActiveConfirmButton));
         }
     }
 
     private string _operationCode = string.Empty;
+    [UsedImplicitly]
     public string OperationCode
     {
         get => _operationCode;
         set
         {
-            if (_operationCode != value)
-            {
-                _operationCode = value;
-                OnPropertyChanged(nameof(OperationCode));
-                OnPropertyChanged(nameof(IsActiveConfirmButton));
-            }
+            this.RaiseAndSetIfChanged(ref _operationCode, value);
+            this.RaisePropertyChanged(nameof(IsActiveConfirmButton));
         }
     }
 
     private decimal _operationPrice;
+    [UsedImplicitly]
     public decimal OperationPrice
     {
         get => _operationPrice;
         set
         {
-            if (_operationPrice != value)
-            {
-                _operationPrice = value;
-                OnPropertyChanged(nameof(OperationPrice));
-                OnPropertyChanged(nameof(IsActiveConfirmButton));
-            }
+            this.RaiseAndSetIfChanged(ref _operationPrice, value);
+            this.RaisePropertyChanged(nameof(IsActiveConfirmButton));
         }
     }
 
     private decimal _operationTime;
+    [UsedImplicitly]
     public decimal OperationTime
     {
         get => _operationTime;
         set
         {
-            if (_operationTime != value)
-            {
-                _operationTime = value;
-                OnPropertyChanged(nameof(OperationTime));
-                OnPropertyChanged(nameof(IsActiveConfirmButton));
-            }
+            this.RaiseAndSetIfChanged(ref _operationTime, value);
+            this.RaisePropertyChanged(nameof(IsActiveConfirmButton));
         }
     }
 
@@ -90,47 +78,38 @@ public class AddOperationUserControlViewModel : ViewModelBase
     ];
 
     private string _selectedUnit = "кг";
+    [UsedImplicitly]
     public string SelectedUnit
     {
         get => _selectedUnit;
         set
         {
-            if (_selectedUnit != value)
-            {
-                _selectedUnit = value;
-                OnPropertyChanged(nameof(SelectedUnit));
-                OnPropertyChanged(nameof(IsActiveConfirmButton));
-            }
+            this.RaiseAndSetIfChanged(ref _selectedUnit, value);
+            this.RaisePropertyChanged(nameof(IsActiveConfirmButton));
         }
     }
 
     private string _operationDescription = string.Empty;
+    [UsedImplicitly]
     public string OperationDescription
     {
         get => _operationDescription;
         set
         {
-            if (_operationDescription != value)
-            {
-                _operationDescription = value;
-                OnPropertyChanged(nameof(OperationDescription));
-                OnPropertyChanged(nameof(IsActiveConfirmButton));
-            }
+            this.RaiseAndSetIfChanged(ref _operationDescription, value);
+            this.RaisePropertyChanged(nameof(IsActiveConfirmButton));
         }
     }
 
     private decimal _operationQuantity = 1;
+    [UsedImplicitly]
     public decimal OperationQuantity
     {
         get => _operationQuantity;
         set
         {
-            if (_operationQuantity != value)
-            {
-                _operationQuantity = value;
-                OnPropertyChanged(nameof(OperationQuantity));
-                OnPropertyChanged(nameof(IsActiveConfirmButton));
-            }
+            this.RaiseAndSetIfChanged(ref _operationQuantity, value);
+            this.RaisePropertyChanged(nameof(IsActiveConfirmButton));
         }
     }
 
@@ -146,9 +125,9 @@ public class AddOperationUserControlViewModel : ViewModelBase
         SubProductId = subProductId;
         SubProductOperationId = subProductOperationId;
 
-        OperationName = operationName ?? string.Empty;
-        OperationCode = operationCode ?? string.Empty;
-        OperationDescription = operationDescription ?? string.Empty;
+        OperationName = operationName;
+        OperationCode = operationCode;
+        OperationDescription = operationDescription;
 
         OperationPrice = operationPrice > 0 ? operationPrice : 1.0m;
         OperationTime = operationTime > 0 ? operationTime : 1.0m;
@@ -161,7 +140,19 @@ public class AddOperationUserControlViewModel : ViewModelBase
         => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseSubOperationStatusMessage(false)));
 
     public ICommand ConfirmCommand
-        => new RelayCommand(async () => await SaveAndLinkAsync());
+        => new RelayCommand(async void () =>
+        {
+            try
+            {
+                await SaveAndLinkAsync();
+            }
+            catch (Exception ex)
+            {
+                Loges.LoggingProcess(level: LogLevel.Critical, 
+                    ex: ex, 
+                    message: "Error add");
+            }
+        });
 
     public bool IsActiveConfirmButton
         => !string.IsNullOrWhiteSpace(SelectedUnit)
@@ -205,7 +196,7 @@ public class AddOperationUserControlViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(level: LogLevel.ERROR, ex: ex);
+            Loges.LoggingProcess(level: LogLevel.Error, ex: ex);
             Messageerror = $"Ошибка: {ex.Message}";
         }
     }
@@ -214,22 +205,22 @@ public class AddOperationUserControlViewModel : ViewModelBase
     {
         try
         {
-            bool isNewOperation = SubProductOperationId == 0;
-            double operationId = 0;
+            var isNewOperation = SubProductOperationId == 0;
+            double operationId;
 
-            string sqlAddOperation = "INSERT INTO public.operation (name, operation_code, price, unit, time_required, description) " +
+            const string sqlAddOperation = "INSERT INTO public.operation (name, operation_code, price, unit, time_required, description) " +
                 "VALUES (@name, @operation_code, @price, @unit, @time_required, @description) RETURNING id";
 
-            string sqlUpdateOperation = "UPDATE public.operation SET name = @name, operation_code = @operation_code, price = @price, unit = @unit, time_required = @time_required, description = @description WHERE id = @operation_id";
+            const string sqlUpdateOperation = "UPDATE public.operation SET name = @name, operation_code = @operation_code, price = @price, unit = @unit, time_required = @time_required, description = @description WHERE id = @operation_id";
 
-            string rateSql = @"INSERT INTO public.work_rate (work_type, rate, use_tonnage, coefficient) " +
+            const string rateSql = @"INSERT INTO public.work_rate (work_type, rate, use_tonnage, coefficient) " +
                 "VALUES (@work_type, @rate, @use_tonnage, @coefficient)";
 
-            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await using var connection = new NpgsqlConnection(Arguments.Connection);
             await connection.OpenAsync();
             if (isNewOperation)
             {
-                using var command = new NpgsqlCommand(sqlAddOperation, connection);
+                await using var command = new NpgsqlCommand(sqlAddOperation, connection);
                 command.Parameters.AddWithValue("@name", OperationName.Trim());
                 command.Parameters.AddWithValue("@operation_code", OperationCode.Trim());
                 command.Parameters.AddWithValue("@price", OperationPrice);
@@ -242,8 +233,8 @@ public class AddOperationUserControlViewModel : ViewModelBase
             }
             else
             {
-                string getOperationIdSql = "SELECT operation_id FROM public.sub_product_operations WHERE id = @id";
-                using (var getIdCommand = new NpgsqlCommand(getOperationIdSql, connection))
+                const string getOperationIdSql = "SELECT operation_id FROM public.sub_product_operations WHERE id = @id";
+                await using (var getIdCommand = new NpgsqlCommand(getOperationIdSql, connection))
                 {
                     getIdCommand.Parameters.AddWithValue("@id", SubProductOperationId);
 
@@ -251,7 +242,7 @@ public class AddOperationUserControlViewModel : ViewModelBase
 
                     if (idResult == null || idResult == DBNull.Value)
                     {
-                        Loges.LoggingProcess(LogLevel.WARNING,
+                        Loges.LoggingProcess(LogLevel.Warning,
                             $"Не найдена операция для связи ID: {SubProductOperationId}");
                         return 0;
                     }
@@ -261,7 +252,7 @@ public class AddOperationUserControlViewModel : ViewModelBase
 
                 if (operationId > 0)
                 {
-                    using var command = new NpgsqlCommand(sqlUpdateOperation, connection);
+                    await using var command = new NpgsqlCommand(sqlUpdateOperation, connection);
                     command.Parameters.AddWithValue("@name", OperationName.Trim());
                     command.Parameters.AddWithValue("@operation_code", OperationCode.Trim());
                     command.Parameters.AddWithValue("@price", OperationPrice);
@@ -270,53 +261,51 @@ public class AddOperationUserControlViewModel : ViewModelBase
                     command.Parameters.AddWithValue("@description", OperationDescription.Trim());
                     command.Parameters.AddWithValue("@operation_id", operationId);
 
-                    int rowsAffected = await command.ExecuteNonQueryAsync();
+                    var rowsAffected = await command.ExecuteNonQueryAsync();
 
                     if (rowsAffected == 0)
                     {
-                        Loges.LoggingProcess(LogLevel.WARNING,
+                        Loges.LoggingProcess(LogLevel.Warning,
                             $"Не удалось обновить операцию ID: {operationId}");
                         return 0;
                     }
                 }
             }
 
-            if (operationId > 0)
+            if (!(operationId > 0)) return operationId;
+            try
             {
-                try
-                {
-                    using var rateCommand = new NpgsqlCommand(rateSql, connection);
-                    bool useTonnage = SelectedUnit == "кг";
-                    decimal coefficient = OperationName.Contains("Зачистка") ||
-                                        OperationName.Contains("Сборка") ||
-                                        OperationName.Contains("Сварка") ? 1.5m : 1.0m;
+                await using var rateCommand = new NpgsqlCommand(rateSql, connection);
+                var useTonnage = SelectedUnit == "кг";
+                var coefficient = OperationName.Contains("Зачистка") ||
+                                      OperationName.Contains("Сборка") ||
+                                      OperationName.Contains("Сварка") ? 1.5m : 1.0m;
 
-                    rateCommand.Parameters.AddWithValue("@work_type", OperationName.Trim());
-                    rateCommand.Parameters.AddWithValue("@rate", OperationPrice);
-                    rateCommand.Parameters.AddWithValue("@use_tonnage", useTonnage);
-                    rateCommand.Parameters.AddWithValue("@coefficient", coefficient);
+                rateCommand.Parameters.AddWithValue("@work_type", OperationName.Trim());
+                rateCommand.Parameters.AddWithValue("@rate", OperationPrice);
+                rateCommand.Parameters.AddWithValue("@use_tonnage", useTonnage);
+                rateCommand.Parameters.AddWithValue("@coefficient", coefficient);
 
-                    await rateCommand.ExecuteNonQueryAsync();
-                }
-                catch (Exception ex)
-                {
-                    Loges.LoggingProcess(LogLevel.WARNING,
-                        $"Error while maintaining the tariff: {ex.Message}");
-                }
+                await rateCommand.ExecuteNonQueryAsync();
+            }
+            catch (Exception ex)
+            {
+                Loges.LoggingProcess(LogLevel.Warning,
+                    $"Error while maintaining the tariff: {ex.Message}");
             }
 
             return operationId;
         }
         catch (PostgresException ex)
         {
-            Loges.LoggingProcess(LogLevel.ERROR,
+            Loges.LoggingProcess(LogLevel.Error,
                 $"PostgreSQL error: {ex.MessageText}", ex: ex);
             Messageerror = $"Error DB: {ex.MessageText}";
             return 0;
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(LogLevel.ERROR,
+            Loges.LoggingProcess(LogLevel.Error,
                 $"General error: {ex.Message}", ex: ex);
             Messageerror = $"Error: {ex.Message}";
             return 0;
@@ -329,31 +318,33 @@ public class AddOperationUserControlViewModel : ViewModelBase
         {
             if (SubProductOperationId > 0)
             {
-                string sqlUpdate = "UPDATE public.sub_product_operations " +
+                const string sqlUpdate = "UPDATE public.sub_product_operations " +
                     "SET planned_quantity = @quantity " +
                     "WHERE id = @sub_product_operation_id AND operation_id = @operation_id";
 
-                using var connection = new NpgsqlConnection(Arguments.Connection);
+                await using var connection = new NpgsqlConnection(Arguments.Connection);
                 await connection.OpenAsync();
-                using var command = new NpgsqlCommand(sqlUpdate, connection);
+                await using var command = new NpgsqlCommand(sqlUpdate, connection);
                 command.Parameters.AddWithValue("@sub_product_operation_id", SubProductOperationId);
                 command.Parameters.AddWithValue("@operation_id", operationId);
                 command.Parameters.AddWithValue("@quantity", quantity);
 
-                int rowsAffected = await command.ExecuteNonQueryAsync();
+                var rowsAffected = await command.ExecuteNonQueryAsync();
 
                 WeakReferenceMessenger.Default.Send(new RefreshSubProductOperationsMessage(SubProductId));
-
+                
+                ClearForm();
+                
                 return rowsAffected > 0;
             }
             else
             {
-                string sqlInsert = "INSERT INTO public.sub_product_operations (sub_product_id, operation_id, planned_quantity, notes, status) " +
+                const string sqlInsert = "INSERT INTO public.sub_product_operations (sub_product_id, operation_id, planned_quantity, notes, status) " +
                     "VALUES (@sub_product_id, @operation_id, @quantity, '', 'planned') RETURNING id";
 
-                using var connection = new NpgsqlConnection(Arguments.Connection);
+                await using var connection = new NpgsqlConnection(Arguments.Connection);
                 await connection.OpenAsync();
-                using var command = new NpgsqlCommand(sqlInsert, connection);
+                await using var command = new NpgsqlCommand(sqlInsert, connection);
                 command.Parameters.AddWithValue("@sub_product_id", SubProductId);
                 command.Parameters.AddWithValue("@operation_id", operationId);
                 command.Parameters.AddWithValue("@quantity", quantity);
@@ -361,23 +352,25 @@ public class AddOperationUserControlViewModel : ViewModelBase
                 var result = await command.ExecuteScalarAsync();
 
                 WeakReferenceMessenger.Default.Send(new RefreshSubProductOperationsMessage(SubProductId));
+                
+                ClearForm();
 
                 return result != null && result != DBNull.Value;
             }
         }
         catch (PostgresException ex)
         {
-            Loges.LoggingProcess(level: LogLevel.WARNING, ex: ex);
+            Loges.LoggingProcess(level: LogLevel.Warning, ex: ex);
             return false;
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(LogLevel.ERROR, ex: ex);
+            Loges.LoggingProcess(LogLevel.Error, ex: ex);
             return false;
         }
     }
 
-    public void ClearForm()
+    private void ClearForm()
     {
         OperationName = string.Empty;
         OperationCode = string.Empty;
@@ -388,8 +381,4 @@ public class AddOperationUserControlViewModel : ViewModelBase
         SelectedUnit = "шт";
         Messageerror = string.Empty;
     }
-
-    public new event PropertyChangedEventHandler? PropertyChanged;
-    protected void OnPropertyChanged(string propertyName)
-        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }

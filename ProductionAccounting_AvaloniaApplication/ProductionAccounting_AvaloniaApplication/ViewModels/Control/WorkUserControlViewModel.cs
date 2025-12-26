@@ -5,13 +5,12 @@ using ProductionAccounting_AvaloniaApplication.Scripts;
 using ProductionAccounting_AvaloniaApplication.Views.Control;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Threading.Tasks;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
-public class WorkUserControlViewModel : ViewModelBase, INotifyPropertyChanging, IRecipient<RefreshEmployeeTasksMessage>
+public class WorkUserControlViewModel : ViewModelBase, IRecipient<RefreshEmployeeTasksMessage>
 {
     public WorkUserControlViewModel() 
     {
@@ -23,17 +22,17 @@ public class WorkUserControlViewModel : ViewModelBase, INotifyPropertyChanging, 
         _ = LoadTodayAsync();
     }
 
-    public StackPanel? CartTasks { get; set; } = null;
+    public StackPanel? CartTasks { get; set; }
 
-    private readonly List<CartEmployeeTaskUserControl> tasksList = [];
+    private readonly List<CartEmployeeTaskUserControl> _tasksList = [];
 
     public async Task LoadTodayAsync()
     {
-        StackPanelHelper.ClearAndRefreshStackPanel<CartEmployeeTaskUserControl>(CartTasks, tasksList);
+        StackPanelHelper.ClearAndRefreshStackPanel(CartTasks, _tasksList);
 
         try
         {
-            string sql = @"
+            const string sql = @"
                         SELECT 
                             spo.id AS sub_product_operation_id,
                             sp.name AS sub_product_name,
@@ -52,14 +51,14 @@ public class WorkUserControlViewModel : ViewModelBase, INotifyPropertyChanging, 
                             AND spo.completed_quantity < spo.planned_quantity
                         ORDER BY spo.created_at DESC";
 
-            using (var connection = new NpgsqlConnection(Arguments.Connection))
+            await using (var connection = new NpgsqlConnection(Arguments.Connection))
             {
                 await connection.OpenAsync();
 
-                using var command = new NpgsqlCommand(sql, connection);
+                await using var command = new NpgsqlCommand(sql, connection);
                 command.Parameters.AddWithValue("@user_id", ManagerCookie.GetIdUser ?? 0);
 
-                using var reader = await command.ExecuteReaderAsync();
+                await using var reader = await command.ExecuteReaderAsync();
                 while (await reader.ReadAsync())
                 {
                     var viewModel = new CartEmployeeTaskUserControlViewModel()
@@ -69,7 +68,7 @@ public class WorkUserControlViewModel : ViewModelBase, INotifyPropertyChanging, 
                         OperationName = reader.GetString("operation_name"),
                         PlannedQuantity = reader.GetDecimal("planned_quantity"),
                         CompletedQuantity = reader.GetDecimal("completed_quantity"),
-                        Notes = reader.IsDBNull("notes") ? null : reader.GetString("notes"),
+                        Notes = await reader.IsDBNullAsync("notes") ? null : reader.GetString("notes"),
                         ProductId = reader.GetDouble("product_id"),
                         OperationId = reader.GetDouble("operation_id"),
                         UserId = reader.GetDouble("assigned_to_user_id")
@@ -80,27 +79,23 @@ public class WorkUserControlViewModel : ViewModelBase, INotifyPropertyChanging, 
                         DataContext = viewModel
                     };
 
-                    tasksList.Add(cartUser);
+                    _tasksList.Add(cartUser);
                 }
             }
 
-            StackPanelHelper.RefreshStackPanelContent<CartEmployeeTaskUserControl>(CartTasks, tasksList);
+            StackPanelHelper.RefreshStackPanelContent(CartTasks, _tasksList);
         }
         catch (NpgsqlException ex)
         {
-            Loges.LoggingProcess(LogLevel.CRITICAL,
+            Loges.LoggingProcess(LogLevel.Critical,
                 "Connection or request error",
                 ex: ex);
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(LogLevel.WARNING,
+            Loges.LoggingProcess(LogLevel.Warning,
                 "Error loading users by IDs",
                 ex: ex);
         }
     }
-
-    public new event PropertyChangedEventHandler? PropertyChanged;
-    protected void OnPropertyChanged(string propertyName)
-        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }

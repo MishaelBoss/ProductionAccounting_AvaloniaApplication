@@ -6,135 +6,86 @@
              x:DataType="vm:AddUsersUserControlViewModel"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
              x:Class="ProductionAccounting_AvaloniaApplication.Views.Control.AddUsersUserControl">
+    
+    <UserControl.Styles>
+        <StyleInclude Source="/Styles/Controls/FormStyles.axaml"/>
+    </UserControl.Styles>
 
     <Grid>
-		<Border Background="#000000" Opacity="0.5"/>
-		
-		<Border VerticalAlignment="Center" 
-				HorizontalAlignment="Center" 
-				Width="400" 
-				Height="600" 
-				Background="Gray" 
-				CornerRadius="12">
-			<Grid>
-				<ScrollViewer VerticalScrollBarVisibility="Auto">
-					<StackPanel Margin="20">
-						<TextBlock Margin="0 5" HorizontalAlignment="Center" Text="{Binding Messageerror}" />
+		<Border Background="#000000" Opacity="0.4" />
 
-						<TextBlock Margin="0 5">Login:</TextBlock>
-						<TextBox Watermark="Enter login" Text="{Binding Login}"/>
+        <Border VerticalAlignment="Center"
+                HorizontalAlignment="Center"
+                Width="500"
+                MaxHeight="700"
+                Background="Gray"
+                CornerRadius="16"
+                Padding="24"
+                BorderBrush="#E0E0E0"
+                BorderThickness="1"
+                BoxShadow="0 4 12 #00000020">
 
-						<TextBlock Margin="0 5">First name:</TextBlock>
-						<TextBox Watermark="Enter first name" Text="{Binding FirstUsername}"/>
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel Spacing="16">
+                    <TextBlock Text="➕ Добавить нового пользователя"
+                               FontSize="24"
+                               FontWeight="Medium"
+                               HorizontalAlignment="Center"
+                               Foreground="#1A1A1A" />
 
-						<TextBlock Margin="0 5">Last name:</TextBlock>
-						<TextBox Watermark="Enter last name" Text="{Binding LastUsername}"/>
+                    <TextBlock Text="{Binding Messageerror}"
+                               Foreground="Red"
+                               HorizontalAlignment="Center"
+                               FontSize="14"/>
 
-						<TextBlock Margin="0 5">Middle name:</TextBlock>
-						<TextBox Watermark="Enter Middle name" Text="{Binding MiddleName}"/>
+                    <Grid ColumnDefinitions="Auto,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="12" ColumnSpacing="12">
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Login:" VerticalAlignment="Center" />
+                        <TextBox Grid.Row="0" Grid.Column="1" Watermark="Enter login" Text="{Binding Login}" />
 
-						<TextBlock Margin="0 5">Base salary:</TextBlock>
-						<TextBox Watermark="Enter base salary" Text="{Binding BaseSalary}"/>
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="First name:" VerticalAlignment="Center" />
+                        <TextBox Grid.Row="1" Grid.Column="1" Watermark="Enter first name" Text="{Binding FirstUsername}" />
 
-						<TextBlock Margin="0 5">Email:</TextBlock>
-						<TextBox Watermark="Enter email" Text="{Binding Email}"/>
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Last name:" VerticalAlignment="Center" />
+                        <TextBox Grid.Row="2" Grid.Column="1" Watermark="Enter last name" Text="{Binding LastUsername}" />
 
-						<TextBlock Margin="0 5">Phone:</TextBlock>
-						<TextBox Watermark="Enter phone" Text="{Binding Phone}"/>
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Middle name:" VerticalAlignment="Center" />
+                        <TextBox Grid.Row="3" Grid.Column="1" Watermark="Enter middle name" Text="{Binding MiddleName}" />
 
-						<StackPanel Orientation="Vertical" 
-									HorizontalAlignment="Center"
-									Spacing="5">
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Base salary:" VerticalAlignment="Center" />
+                        <TextBox Grid.Row="4" Grid.Column="1" Watermark="e.g. 50000" Text="{Binding BaseSalary}"/>
 
-							<DockPanel HorizontalAlignment="Center">
-								<ComboBox Margin="3"
-										  Width="95"
-										  MinHeight="15"
-										  Height="27"
-										  DockPanel.Dock="Right"
-										  FontSize="12"
-										  ItemsSource="{Binding ComboBoxItems}"
-										  SelectedItem="{Binding SelectedComboBoxItem}">
-									<ComboBox.Styles>
-										<Style Selector="ComboBoxItem">
-											<Setter Property="Padding" Value="5, 0"/>
-											<Setter Property="Height" Value="20"/>
-											<Setter Property="MinHeight" Value="12"/>
-											<Setter Property="Foreground" Value="White"/>
-										</Style>
-									</ComboBox.Styles>
-								</ComboBox>
-								<TextBlock Text="Ranks"
-										   VerticalAlignment="Center"
-										   HorizontalAlignment="Right"/>
-							</DockPanel>
+                        <TextBlock Grid.Row="5" Grid.Column="0" Text="Email:" VerticalAlignment="Center" />
+                        <TextBox Grid.Row="5" Grid.Column="1" Watermark="user@example.com" Text="{Binding Email}" />
 
-							<DockPanel HorizontalAlignment="Center">
-								<ComboBox Margin="3"
-										  Width="95"
-										  MinHeight="15"
-										  Height="27"
-										  DockPanel.Dock="Right"
-										  FontSize="12"
-										  ItemsSource="{Binding ComboBoxItemsDepartments}"
-										  SelectedItem="{Binding SelectedComboBoxItemDepartment}">
-									<ComboBox.Styles>
-										<Style Selector="ComboBoxItem">
-											<Setter Property="Padding" Value="5, 0"/>
-											<Setter Property="Height" Value="20"/>
-											<Setter Property="MinHeight" Value="12"/>
-											<Setter Property="Foreground" Value="White"/>
-										</Style>
-									</ComboBox.Styles>
-								</ComboBox>
-								<TextBlock Text="Department"
-										   VerticalAlignment="Center"
-										   HorizontalAlignment="Right"/>
-							</DockPanel>
+                        <TextBlock Grid.Row="6" Grid.Column="0" Text="Phone:" VerticalAlignment="Center" />
+                        <TextBox Grid.Row="6" Grid.Column="1" Watermark="+7 (999) 123-45-67" Text="{Binding Phone}" />
+                    </Grid>
 
-							<DockPanel HorizontalAlignment="Center">
-								<ComboBox Margin="3"
-										  Width="95"
-										  MinHeight="15"
-										  Height="27"
-										  DockPanel.Dock="Right"
-										  FontSize="12"
-										  ItemsSource="{Binding ComboBoxItemsPositions}"
-										  SelectedItem="{Binding SelectedComboBoxItemPosition}">
-									<ComboBox.Styles>
-										<Style Selector="ComboBoxItem">
-											<Setter Property="Padding" Value="5, 0"/>
-											<Setter Property="Height" Value="20"/>
-											<Setter Property="MinHeight" Value="12"/>
-											<Setter Property="Foreground" Value="White"/>
-										</Style>
-									</ComboBox.Styles>
-								</ComboBox>
-								<TextBlock Text="Position"
-										   VerticalAlignment="Center"
-										   HorizontalAlignment="Right"/>
-							</DockPanel>
-						
-						</StackPanel>
+                    <StackPanel Orientation="Horizontal" 
+                                Spacing="12" 
+                                HorizontalAlignment="Center">
+                        <Button Content="Добавить"
+                                Command="{Binding ConfirmCommand}"
+                                IsEnabled="{Binding IsActiveConfirmButton}"
+                                Width="140"
+                                Height="36"
+                                VerticalContentAlignment="Center"
+                                HorizontalContentAlignment="Center"
+                                Classes="AccentButton" />
 
-						<StackPanel Orientation="Vertical"
-									VerticalAlignment="Center"
-									HorizontalAlignment="Center"
-									Spacing="10">
-
-							<Button Classes="ButtonLogin"
-									IsEnabled="{Binding IsActiveConfirmButton}"
-									Command="{Binding ConfirmCommand}"
-									Content="Add new user"/>
-
-							<Button Command="{Binding CancelCommand}"
-									Content="Cancel"
-									HorizontalAlignment="Center"
-									Background="Transparent"/>
-						</StackPanel>
-					</StackPanel>
-				</ScrollViewer>
-			</Grid>
-		</Border>
-	</Grid>
+                        <Button Content="Cancel"
+                                Command="{Binding CancelCommand}"
+                                Width="100"
+                                Height="36"
+                                Background="Transparent"
+                                BorderBrush="#CCCCCC"
+                                VerticalContentAlignment="Center"
+                                HorizontalContentAlignment="Center"
+                                Foreground="#666666" />
+                    </StackPanel>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+    
 </UserControl>

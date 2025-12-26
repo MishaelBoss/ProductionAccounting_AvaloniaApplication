@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ReactiveUI;
 using System.Windows.Input;
+using JetBrains.Annotations;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
@@ -29,6 +30,7 @@ public class CartEmployeeTaskUserControlViewModel : ViewModelBase
     }
 
     private string _operationName = "";
+    [UsedImplicitly]
     public string OperationName
     {
         get => _operationName;
@@ -36,6 +38,7 @@ public class CartEmployeeTaskUserControlViewModel : ViewModelBase
     }
 
     private decimal _plannedQuantity;
+    [UsedImplicitly]
     public decimal PlannedQuantity
     {
         get => _plannedQuantity;
@@ -43,6 +46,7 @@ public class CartEmployeeTaskUserControlViewModel : ViewModelBase
     }
 
     private decimal _completedQuantity;
+    [UsedImplicitly]
     public decimal CompletedQuantity
     {
         get => _completedQuantity;
@@ -56,6 +60,7 @@ public class CartEmployeeTaskUserControlViewModel : ViewModelBase
     }
 
     private string? _notes;
+    [UsedImplicitly]
     public string? Notes
     {
         get => _notes;
@@ -68,13 +73,11 @@ public class CartEmployeeTaskUserControlViewModel : ViewModelBase
         get => _status;
         set
         {
-            if (_status != value)
-            {
-                this.RaisePropertyChanged(nameof(StatusDisplay));
-                this.RaisePropertyChanged(nameof(ButtonText));
-                this.RaisePropertyChanged(nameof(ButtonColor));
-                this.RaisePropertyChanged(nameof(CanComplete));
-            }
+            if (_status == value) return;
+            this.RaisePropertyChanged(nameof(StatusDisplay));
+            this.RaisePropertyChanged(nameof(ButtonText));
+            this.RaisePropertyChanged(nameof(ButtonColor));
+            this.RaisePropertyChanged(nameof(CanComplete));
         }
     }
 

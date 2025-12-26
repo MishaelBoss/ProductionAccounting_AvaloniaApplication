@@ -7,47 +7,76 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="ProductionAccounting_AvaloniaApplication.EmployeeAssignmentMasterSubMarkUserControl">
 
+    <UserControl.Styles>
+        <StyleInclude Source="/Styles/Controls/FormStyles.axaml"/>
+    </UserControl.Styles>
+
     <Grid>
-        <Border Background="#000000" 
-				Opacity="0.5"/>
-        
-        <Border VerticalAlignment="Center" 
-                HorizontalAlignment="Center" 
-                Width="400" 
-                Height="190"
-                Background="Gray" 
-                CornerRadius="12">
-            <Grid>
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="20" 
-								Spacing="10">
-                        <ComboBox   HorizontalAlignment="Center"
-                                    ItemsSource="{Binding Employees}"
-                                    SelectedItem="{Binding SelectedEmployee}"
-                                    DisplayMemberBinding="{Binding FullName}"
-                                    PlaceholderText="Выберите сотрудника"
-                                    FontSize="22"
-                                    Height="70"/>
+        <Border Background="#000000" Opacity="0.4" />
 
-                        <StackPanel Orientation="Vertical"
-                                    VerticalAlignment="Center"
-                                    HorizontalAlignment="Center"
-                                    Spacing="10"
-                                    Margin="0,20,0,0">
+        <Border VerticalAlignment="Center"
+                HorizontalAlignment="Center"
+                Width="500"
+                MaxHeight="700"
+                Background="Gray"
+                CornerRadius="16"
+                Padding="24"
+                BorderBrush="#E0E0E0"
+                BorderThickness="1"
+                BoxShadow="0 4 12 #00000020">
 
-                            <Button Classes="ButtonLogin"
-                                    Command="{Binding AssignCommand}"
-                                    IsEnabled="{Binding CanAssign}"
-                                    Content="Назначить"/>
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel Spacing="16">
+                    <TextBlock Text="➕ Назначить сотрудника"
+                               FontSize="24"
+                               FontWeight="Medium"
+                               HorizontalAlignment="Center"
+                               Foreground="#1A1A1A" />
 
-                            <Button Command="{Binding CancelCommand}"
-                                    Content="Отмена"
-                                    HorizontalAlignment="Center"
-                                    Background="Transparent"/>
-                        </StackPanel>
+                    <TextBlock Text="{Binding Messageerror}"
+                               Foreground="Red"
+                               HorizontalAlignment="Center"
+                               FontSize="14"/>
+
+                    <StackPanel Spacing="12">
+                        <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="12">
+                            <TextBlock Grid.Column="0" Text="Сотрудник:" VerticalAlignment="Center" />
+                            <ComboBox Grid.Column="1"
+                                      ItemsSource="{Binding Employees}"
+                                      SelectedItem="{Binding SelectedEmployee}"
+                                      DisplayMemberBinding="{Binding FullName}"
+                                      PlaceholderText="Выберите сотрудника"
+                                      MinHeight="32"
+                                      Padding="8,0"
+                                      Classes="StyledComboBox" />
+                        </Grid>
+
                     </StackPanel>
-                </ScrollViewer>
-            </Grid>
+
+                    <StackPanel Orientation="Horizontal" 
+                                Spacing="12" 
+                                HorizontalAlignment="Center">
+                        <Button Content="Добавить"
+                                Command="{Binding AssignCommand}"
+                                IsEnabled="{Binding CanAssign}"
+                                Width="140"
+                                Height="36"
+                                VerticalContentAlignment="Center"
+                                HorizontalContentAlignment="Center"
+                                Classes="AccentButton" />
+
+                        <Button Content="Cancel"
+                                Command="{Binding CancelCommand}"
+                                Width="100"
+                                Height="36"
+                                Background="Transparent"
+                                BorderBrush="#CCCCCC"
+                                VerticalContentAlignment="Center"
+                                HorizontalContentAlignment="Center"
+                                Foreground="#666666" />
+                    </StackPanel>
+                </StackPanel>
+            </ScrollViewer>
         </Border>
     </Grid>
 

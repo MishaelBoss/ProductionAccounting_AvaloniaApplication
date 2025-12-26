@@ -8,12 +8,14 @@ using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using JetBrains.Annotations;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Pages;
 
 public class ProfilePageUserControlViewModel : ViewModelBase
 {
     private string _employeeName = string.Empty;
+    [UsedImplicitly]
     public string EmployeeName
     {
         get => _employeeName;
@@ -21,6 +23,7 @@ public class ProfilePageUserControlViewModel : ViewModelBase
     }
 
     private string _login = string.Empty;
+    [UsedImplicitly]
     public string Login
     {
         get => _login;
@@ -28,6 +31,7 @@ public class ProfilePageUserControlViewModel : ViewModelBase
     }
 
     private string _firstName = string.Empty;
+    [UsedImplicitly]
     public string FirstName
     {
         get => _firstName;
@@ -35,6 +39,7 @@ public class ProfilePageUserControlViewModel : ViewModelBase
     }
 
     private string _lastName = string.Empty;
+    [UsedImplicitly]
     public string LastName
     {
         get => _lastName;
@@ -42,6 +47,7 @@ public class ProfilePageUserControlViewModel : ViewModelBase
     }
 
     private string _middleName = string.Empty;
+    [UsedImplicitly]
     public string MiddleName
     {
         get => _middleName;
@@ -49,6 +55,7 @@ public class ProfilePageUserControlViewModel : ViewModelBase
     }
 
     private string _position = string.Empty;
+    [UsedImplicitly]
     public string Position
     {
         get => _position;
@@ -56,6 +63,7 @@ public class ProfilePageUserControlViewModel : ViewModelBase
     }
 
     private string _employee = string.Empty;
+    [UsedImplicitly]
     public string Employee
     {
         get => _employee;
@@ -63,6 +71,7 @@ public class ProfilePageUserControlViewModel : ViewModelBase
     }
 
     private string _department = string.Empty;
+    [UsedImplicitly]
     public string Department
     {
         get => _department;
@@ -70,6 +79,7 @@ public class ProfilePageUserControlViewModel : ViewModelBase
     }
 
     private string _email = string.Empty;
+    [UsedImplicitly]
     public string Email
     {
         get => _email;
@@ -77,6 +87,7 @@ public class ProfilePageUserControlViewModel : ViewModelBase
     }
 
     private string _phone = string.Empty;
+    [UsedImplicitly]
     public string Phone
     {
         get => _phone;
@@ -109,18 +120,27 @@ public class ProfilePageUserControlViewModel : ViewModelBase
         InitDateUserAsync(userId);
     }
 
-    public async void InitDateUserAsync(double userId)
+    private async void InitDateUserAsync(double userId)
     {
-        if (!ManagerCookie.IsUserLoggedIn()) return;
+        try
+        {
+            if (!ManagerCookie.IsUserLoggedIn()) return;
 
-        await LoadDateAsync(userId);
-        await LoadListTypeToComboBoxAsync(userId);
-        await LoadTimesheet(userId);
-        await LoadProductionHistory(userId);
+            await LoadDateAsync(userId);
+            await LoadListTypeToComboBoxAsync(userId);
+            await LoadTimesheet(userId);
+            await LoadProductionHistory(userId);
+        }
+        catch (Exception ex)
+        {
+            Loges.LoggingProcess(level: LogLevel.Critical,
+                ex: ex,
+                message: "Error init db user profile");
+        }
     }
 
-    private double _getIdUser = 0;
-    private double GetIdUser
+    private double? _getIdUser;
+    private double? GetIdUser
     {
         get => _getIdUser;
         set 
@@ -131,9 +151,17 @@ public class ProfilePageUserControlViewModel : ViewModelBase
     }
 
     public bool IsOwnProfile
-        =>  ManagerCookie.IsUserLoggedIn() && 
-        GetIdUser != 0 && 
-        GetIdUser == ManagerCookie.GetIdUser;
+    {
+        get
+        {
+            if (!ManagerCookie.IsUserLoggedIn()) return false;
+
+            var currentId = (long)(GetIdUser ?? 0);
+            var cookieId = (long)(ManagerCookie.GetIdUser ?? 0);
+
+            return currentId != 0 && currentId == cookieId;
+        }
+    }
 
     private async Task LoadListTypeToComboBoxAsync(double userId)
     {
@@ -141,7 +169,7 @@ public class ProfilePageUserControlViewModel : ViewModelBase
 
         try
         {
-            string sql = @"
+            const string sql = @"
                         SELECT 
                             ut.type_user,
                             d.type as department,
@@ -154,13 +182,13 @@ public class ProfilePageUserControlViewModel : ViewModelBase
                         LEFT JOIN public.positions p ON up.position_id = p.id
                         WHERE utt.user_id = @id";
 
-            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await using var connection = new NpgsqlConnection(Arguments.Connection);
             await connection.OpenAsync();
 
-            using var command = new NpgsqlCommand(sql, connection);
+            await using var command = new NpgsqlCommand(sql, connection);
             command.Parameters.AddWithValue("@id", userId);
 
-            using var reader = await command.ExecuteReaderAsync();
+            await using var reader = await command.ExecuteReaderAsync();
             if (await reader.ReadAsync())
             {
                 //UserType = reader.IsDBNull(0) ? "none" : reader.GetString(0);
@@ -170,7 +198,7 @@ public class ProfilePageUserControlViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(level: LogLevel.WARNING,
+            Loges.LoggingProcess(level: LogLevel.Warning,
                 ex: ex);
         }
     }
@@ -181,14 +209,14 @@ public class ProfilePageUserControlViewModel : ViewModelBase
 
         try
         {
-            string sql = @"SELECT login, first_name, last_name, middle_name, email, phone, employee_id, id FROM public.""user"" WHERE id = @id";
+            const string sql = @"SELECT login, first_name, last_name, middle_name, email, phone, employee_id, id FROM public.""user"" WHERE id = @id";
 
-            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await using var connection = new NpgsqlConnection(Arguments.Connection);
             await connection.OpenAsync();
-            using var command = new NpgsqlCommand(sql, connection);
+            await using var command = new NpgsqlCommand(sql, connection);
             command.Parameters.AddWithValue("@id", userId);
 
-            using var reader = await command.ExecuteReaderAsync();
+            await using var reader = await command.ExecuteReaderAsync();
             if (await reader.ReadAsync())
             {
                 Login = reader.IsDBNull(0) ? "none" : reader.GetString(0);
@@ -206,13 +234,13 @@ public class ProfilePageUserControlViewModel : ViewModelBase
         }
         catch (NpgsqlException ex)
         {
-            Loges.LoggingProcess(LogLevel.CRITICAL,
+            Loges.LoggingProcess(LogLevel.Critical,
                 "Connection or request error",
                 ex: ex);
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(LogLevel.CRITICAL,
+            Loges.LoggingProcess(LogLevel.Critical,
                 "Connection or request error",
                 ex: ex);
         }
@@ -222,16 +250,16 @@ public class ProfilePageUserControlViewModel : ViewModelBase
     {
         try
         {
-            string sql = @"SELECT status, notes, hours_worked, work_date FROM public.timesheet WHERE user_id = @userID";
+            const string sql = @"SELECT status, notes, hours_worked, work_date FROM public.timesheet WHERE user_id = @userID";
 
-            using (var connection = new NpgsqlConnection(Arguments.Connection))
+            await using (var connection = new NpgsqlConnection(Arguments.Connection))
             {
                 await connection.OpenAsync();
 
-                using var command = new NpgsqlCommand(sql, connection);
+                await using var command = new NpgsqlCommand(sql, connection);
                 command.Parameters.AddWithValue("@userID", userId);
 
-                using var reader = await command.ExecuteReaderAsync();
+                await using var reader = await command.ExecuteReaderAsync();
                 Tables.Clear();
 
                 while (await reader.ReadAsync())
@@ -252,13 +280,13 @@ public class ProfilePageUserControlViewModel : ViewModelBase
         }
         catch (NpgsqlException ex)
         {
-            Loges.LoggingProcess(LogLevel.CRITICAL,
+            Loges.LoggingProcess(LogLevel.Critical,
                 "Connection or request error",
                 ex: ex);
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(level: LogLevel.WARNING,
+            Loges.LoggingProcess(level: LogLevel.Warning,
                 ex: ex);
         }
     }
@@ -267,7 +295,7 @@ public class ProfilePageUserControlViewModel : ViewModelBase
     {
         try
         {
-            string sql = @"
+            const string sql = @"
                         SELECT 
                             p.production_date,
                             p.shift,
@@ -286,14 +314,14 @@ public class ProfilePageUserControlViewModel : ViewModelBase
                         WHERE p.user_id = @user_id
                         ORDER BY p.production_date DESC, p.created_at DESC";
 
-            using (var connection = new NpgsqlConnection(Arguments.Connection))
+            await using (var connection = new NpgsqlConnection(Arguments.Connection))
             {
                 await connection.OpenAsync();
 
-                using var command = new NpgsqlCommand(sql, connection);
+                await using var command = new NpgsqlCommand(sql, connection);
                 command.Parameters.AddWithValue("@user_id", userId);
 
-                using var reader = await command.ExecuteReaderAsync();
+                await using var reader = await command.ExecuteReaderAsync();
                 ProductionHistory.Clear();
 
                 while (await reader.ReadAsync())
@@ -301,7 +329,7 @@ public class ProfilePageUserControlViewModel : ViewModelBase
                     var productionItem = new ProductionHistoryViewModel()
                     {
                         ProductionDate = reader.GetDateTime(0),
-                        Shift = reader.IsDBNull(1) ? (int?)null : reader.GetInt32(1),
+                        Shift = reader.IsDBNull(1) ? null : reader.GetInt32(1),
                         ProductName = reader.GetString(2),
                         OperationName = reader.GetString(3),
                         OperationUnit = reader.GetString(4),
@@ -321,13 +349,13 @@ public class ProfilePageUserControlViewModel : ViewModelBase
         }
         catch (NpgsqlException ex)
         {
-            Loges.LoggingProcess(LogLevel.CRITICAL,
+            Loges.LoggingProcess(LogLevel.Critical,
                 "Connection or request error",
                 ex: ex);
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(level: LogLevel.WARNING,
+            Loges.LoggingProcess(level: LogLevel.Warning,
                 ex: ex);
         }
     }

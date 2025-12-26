@@ -5,13 +5,14 @@ using ProductionAccounting_AvaloniaApplication.Models;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using System;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using JetBrains.Annotations;
+using ReactiveUI;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
-public class EmployeeAssignmentMasterSubMarkUserControlViewModel : ViewModelBase, INotifyPropertyChanged
+public class EmployeeAssignmentMasterSubMarkUserControlViewModel : ViewModelBase
 {
     public EmployeeAssignmentMasterSubMarkUserControlViewModel(double id, double subProductId)
     {
@@ -20,24 +21,28 @@ public class EmployeeAssignmentMasterSubMarkUserControlViewModel : ViewModelBase
 
         _ = LoadListUsersAsync();
     }
+    
+    private string _messageerror = string.Empty;
+    public string Messageerror
+    {
+        get => _messageerror;
+        set => this.RaiseAndSetIfChanged(ref _messageerror, value);
+    }
 
-    public double Id { get; }
-    public double SubProductId { get; }
+    private double Id { get; }
+    private double SubProductId { get; }
 
+    [UsedImplicitly]
     public ObservableCollection<ComboBoxUser> Employees { get; } = [];
 
     private ComboBoxUser? _selectedEmployee;
     public ComboBoxUser? SelectedEmployee
     {
         get => _selectedEmployee;
-        set 
+        set
         {
-            if (_selectedEmployee != value) 
-            {
-                _selectedEmployee = value;
-                OnPropertyChanged(nameof(SelectedEmployee));
-                OnPropertyChanged(nameof(CanAssign));
-            }
+            this.RaiseAndSetIfChanged(ref _selectedEmployee, value);
+            this.RaisePropertyChanged(nameof(CanAssign));
         }
     }
 
@@ -45,22 +50,41 @@ public class EmployeeAssignmentMasterSubMarkUserControlViewModel : ViewModelBase
         =>  SelectedEmployee != null;
 
     public ICommand AssignCommand 
-        => new RelayCommand(async () => await AssignAsync());
+        => new RelayCommand(async void () =>
+        {
+            try
+            {
+                await AssignAsync();
+            }
+            catch (Exception ex)
+            {
+                Loges.LoggingProcess(level: LogLevel.Critical, 
+                    ex: ex, 
+                    message: "Failed to add");
+            }
+        });
 
     public static ICommand CancelCommand
         => new RelayCommand(() => WeakReferenceMessenger.Default.Send(new OpenOrCloseEmployeeAssignmentMasterSubMarkStatusMessage(false)));
 
     private async Task AssignAsync()
     {
+        if (SelectedEmployee?.Id == 0)
+        {
+            Messageerror = "Не все поля заполнены";
+            return;
+        }
+
         try
         {
-            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await using var connection = new NpgsqlConnection(Arguments.Connection);
             await connection.OpenAsync();
 
-            string sql = "UPDATE public.sub_product_operations SET assigned_to_user_id = @assigned_to_user_id WHERE id = @id";
+            const string sql = "UPDATE public.sub_product_operations SET assigned_to_user_id = @assigned_to_user_id WHERE id = @id";
 
-            using var command = new NpgsqlCommand(sql, connection);
-            command.Parameters.AddWithValue("@assigned_to_user_id", SelectedEmployee!.Id);
+            await using var command = new NpgsqlCommand(sql, connection);
+            if(SelectedEmployee is null) return;
+            command.Parameters.AddWithValue("@assigned_to_user_id", SelectedEmployee.Id);
             command.Parameters.AddWithValue("id", Id);
 
             await command.ExecuteNonQueryAsync();
@@ -70,12 +94,17 @@ public class EmployeeAssignmentMasterSubMarkUserControlViewModel : ViewModelBase
         }
         catch (PostgresException ex)
         {
-            Loges.LoggingProcess(level: LogLevel.WARNING,
+            Messageerror = "Ошибка базы данных";
+
+            Loges.LoggingProcess(level: LogLevel.Warning,
                 ex: ex);
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(LogLevel.ERROR, ex: ex);
+            Messageerror = "Неизвестная ошибка";
+
+            Loges.LoggingProcess(level: LogLevel.Error, 
+                ex: ex);
         }
     }
 
@@ -85,7 +114,7 @@ public class EmployeeAssignmentMasterSubMarkUserControlViewModel : ViewModelBase
         {
             Employees.Clear();
 
-            string sqlUsers = @"
+            const string sqlUsers = @"
                                 SELECT 
                                     u.id, 
                                     u.first_name, 
@@ -93,16 +122,13 @@ public class EmployeeAssignmentMasterSubMarkUserControlViewModel : ViewModelBase
                                     u.middle_name, 
                                     u.login 
                                 FROM public.user AS u
-                                JOIN public.user_to_user_type AS uut ON u.id = uut.user_id
-                                JOIN public.user_type AS ut ON uut.user_type_id = ut.id
-                                WHERE u.is_active = true AND ut.type_user = 'Сотрудник'
                                 ORDER BY u.last_name, u.first_name";
 
-            using var connection = new NpgsqlConnection(Arguments.Connection);
+            await using var connection = new NpgsqlConnection(Arguments.Connection);
             await connection.OpenAsync();
 
-            using var command = new NpgsqlCommand(sqlUsers, connection);
-            using var reader = await command.ExecuteReaderAsync();
+            await using var command = new NpgsqlCommand(sqlUsers, connection);
+            await using var reader = await command.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
                 var user = new ComboBoxUser(
@@ -118,18 +144,13 @@ public class EmployeeAssignmentMasterSubMarkUserControlViewModel : ViewModelBase
         }
         catch (PostgresException ex)
         {
-            Loges.LoggingProcess(level: LogLevel.WARNING,
+            Loges.LoggingProcess(level: LogLevel.Warning,
                 ex: ex);
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(level: LogLevel.WARNING,
+            Loges.LoggingProcess(level: LogLevel.Warning,
                 ex: ex);
         }
     }
-
-
-    public new event PropertyChangedEventHandler? PropertyChanged;
-    protected void OnPropertyChanged(string propertyName)
-        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }

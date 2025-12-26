@@ -5,14 +5,13 @@ using ProductionAccounting_AvaloniaApplication.Scripts;
 using ProductionAccounting_AvaloniaApplication.Views.Control;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using static ProductionAccounting_AvaloniaApplication.ViewModels.Control.NotFoundUserControlViewModel;
 
 namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control;
 
-public class WorkMasterUserControlViewModel : ViewModelBase, INotifyPropertyChanging, IRecipient<RefreshProductListMessage>
+public class WorkMasterUserControlViewModel : ViewModelBase, IRecipient<RefreshProductListMessage>
 {
     public WorkMasterUserControlViewModel() 
     {
@@ -24,15 +23,15 @@ public class WorkMasterUserControlViewModel : ViewModelBase, INotifyPropertyChan
         _ = LoadTasksAsync();
     }
 
-    public StackPanel? CartTasks { get; set; } = null;
+    public StackPanel? CartTasks { get; set; }
 
-    private readonly List<CartProductUserControl> productList = [];
+    private readonly List<CartProductUserControl> _productList = [];
 
     public async Task LoadTasksAsync()
     {
-        if (!ManagerCookie.IsUserLoggedIn() && (!ManagerCookie.IsMaster || !ManagerCookie.IsAdministrator)) return;
+        if (!ManagerCookie.IsUserLoggedIn()) return;
 
-        StackPanelHelper.ClearAndRefreshStackPanel<CartProductUserControl>(CartTasks, productList);
+        StackPanelHelper.ClearAndRefreshStackPanel(CartTasks, _productList);
 
         try
         {
@@ -55,12 +54,12 @@ public class WorkMasterUserControlViewModel : ViewModelBase, INotifyPropertyChan
                         AND pt.assigned_by = @UserId
                     ORDER BY pt.created_at DESC";
 
-            using (var connection = new NpgsqlConnection(Arguments.Connection))
+            await using (var connection = new NpgsqlConnection(Arguments.Connection))
             {
                 await connection.OpenAsync();
-                using var command = new NpgsqlCommand(sql, connection);
+                await using var command = new NpgsqlCommand(sql, connection);
                 command.Parameters.AddWithValue("@UserId", ManagerCookie.GetIdUser ?? 0);
-                using var reader = await command.ExecuteReaderAsync();
+                await using var reader = await command.ExecuteReaderAsync();
                 while (await reader.ReadAsync())
                 {
                     var viewModel = new CartProductUserControlViewModel()
@@ -82,31 +81,27 @@ public class WorkMasterUserControlViewModel : ViewModelBase, INotifyPropertyChan
                         DataContext = viewModel,
                     };
 
-                    productList.Add(userControl);
+                    _productList.Add(userControl);
                 }
 
-                if (productList.FirstOrDefault()?.DataContext is CartProductUserControlViewModel vm) await vm.CheckIsTaskCanBeCompleted();
+                if (_productList.FirstOrDefault()?.DataContext is CartProductUserControlViewModel vm) await vm.CheckIsTaskCanBeCompleted();
             }
 
-            StackPanelHelper.RefreshStackPanelContent<CartProductUserControl>(CartTasks, productList);
+            StackPanelHelper.RefreshStackPanelContent(CartTasks, _productList);
 
-            if (productList.Count == 0) ItemNotFoundException.Show(CartTasks, ErrorLevel.NotFound);
+            if (_productList.Count == 0) ItemNotFoundException.Show(CartTasks, ErrorLevel.NotFound);
         }
         catch (NpgsqlException ex)
         {
-            StackPanelHelper.ClearAndRefreshStackPanel<CartProductUserControl>(CartTasks, productList);
-            ItemNotFoundException.Show(CartTasks, ErrorLevel.NoConnectToDB);
-            Loges.LoggingProcess(LogLevel.CRITICAL, "Error connect to DB", ex: ex);
+            StackPanelHelper.ClearAndRefreshStackPanel(CartTasks, _productList);
+            ItemNotFoundException.Show(CartTasks, ErrorLevel.NoConnectToDb);
+            Loges.LoggingProcess(LogLevel.Critical, "Error connect to DB", ex: ex);
         }
         catch (Exception ex)
         {
-            StackPanelHelper.ClearAndRefreshStackPanel<CartProductUserControl>(CartTasks, productList);
-            Loges.LoggingProcess(LogLevel.WARNING, 
+            StackPanelHelper.ClearAndRefreshStackPanel(CartTasks, _productList);
+            Loges.LoggingProcess(LogLevel.Warning, 
                 ex: ex);
         }
     }
-
-    public new event PropertyChangedEventHandler? PropertyChanged;
-    protected void OnPropertyChanged(string propertyName)
-        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }

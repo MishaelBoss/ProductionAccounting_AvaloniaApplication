@@ -7,7 +7,7 @@ public class ViewModelBase : ReactiveObject
 {
     private readonly ManagerLocalization _localization;
 
-    public ViewModelBase()
+    protected ViewModelBase()
     {
         _localization = new ManagerLocalization();
         _localization.LoadLocalization();

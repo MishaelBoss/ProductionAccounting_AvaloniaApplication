@@ -5,29 +5,29 @@ using System.Reflection;
 
 namespace ProductionAccounting_AvaloniaApplication.Scripts;
 
-class Files
+static class Files
 {
     public const string ConfigSettingsFileName = "appsettings.json";
-    public const string DBUsers = "output.csv";
-    public const string DBEquipments = "output.csv";
+    public const string DbUsers = "output.csv";
+    public const string DbEquipments = "output.csv";
 }
 
-class Arguments
+static class Arguments
 {
-    private static readonly string? ExecPath = Process.GetCurrentProcess()?.MainModule?.FileName;
+    private static readonly string? ExecPath = Process.GetCurrentProcess().MainModule?.FileName;
     private static readonly string? WorkingDir = Path.GetDirectoryName(ExecPath);
     private static readonly string? SourcePath = Path.Combine(WorkingDir ?? string.Empty, Path.GetFileName(ExecPath) ?? string.Empty);
     public static string Exenames = Path.GetFileName(SourcePath);
-    public static string Applicationnames = Process.GetCurrentProcess().ProcessName;
+    public static readonly string Applicationnames = Process.GetCurrentProcess().ProcessName;
 
     public static bool IsAnyUserLoggedIn { get; set; } = false;
 
     #region Settings
-    public static readonly string? CurverVersion = Assembly.GetExecutingAssembly()?.GetName()?.Version?.ToString();
+    public static readonly string? CurverVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString();
     public static bool AutoUpdate { get; set; }
     public static bool AutoUpdateCheck { get; set; }
-    public static TimeCheckUpdate TimeCheckUpdate { get; private set; } = new TimeCheckUpdate();
-    public static Loggers Loggers { get; private set; } = new Loggers();
+    public static TimeCheckUpdate TimeCheckUpdate { get; private set; } = new ();
+    public static Loggers Loggers { get; private set; } = new ();
     public static bool DeveloperDebug { get; set; }
     public static bool OpenAfterDownloading { get; set; }
     public static string? PathToLocalization { get; set; }
@@ -73,21 +73,14 @@ class Arguments
             
             if (!hasConnectionData)
             {
-                if (Internet.ConnectToDataBase())
-                {
-                    _connectionString = $"Server={Ip};Port={Port};Database={Database};User Id={User};Password={Password};";
-                }
-                else
-                {
-                    _connectionString = string.Empty;
-                }
+                _connectionString = Internet.ConnectToDataBase() ? $"Server={Ip};Port={Port};Database={Database};User Id={User};Password={Password};" : string.Empty;
             }
             else
             {
                 _connectionString = $"Server={Ip};Port={Port};Database={Database};User Id={User};Password={Password};";
             }
             
-            return _connectionString ?? string.Empty;
+            return _connectionString;
         }
     }
 
@@ -98,14 +91,14 @@ class Arguments
     #endregion
 }
 
-class TimeCheckUpdate
+public class TimeCheckUpdate
 {
-    public int Hours { get; set; } = 0;
+    public int Hours { get; set; }
     public int Minutes { get; set; } = 1;
-    public int Seconds { get; set; } = 0;
+    public int Seconds { get; set; }
 }
 
-class Loggers
+public class Loggers
 {
     public bool LoggerCritical { get; set; }
     public bool LoggerWarning { get; set; }
@@ -114,13 +107,13 @@ class Loggers
     public bool LoggerInfo { get; set; }
 }
 
-class Paths
+internal static class Paths
 {
     #region WorkFolders
     public const string Settings = @".\settings";
     public const string Log = @".\log";
-    public static string SharedFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Arguments.Applicationnames);
-    private const string DB = @".\database";
+    public static readonly string SharedFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Arguments.Applicationnames);
+    private const string Db = @".\database";
     public const string Localization = @".\localization";
     public const string Temp = @".\temp";
     #endregion
@@ -131,12 +124,12 @@ class Paths
         return Path.Combine(directory, $"{name}.{extension}");
     }
 
-    public static string DestinationPathDB(params string[] paths)
+    public static string DestinationPathDb(params string[] paths)
     {
-        string[] allPaths = new string[paths.Length + 1];
-        allPaths[0] = DB;
+        var allPaths = new string[paths.Length + 1];
+        allPaths[0] = Db;
         Array.Copy(paths, 0, allPaths, 1, paths.Length);
-        string fullPath = Path.Combine(allPaths);
+        var fullPath = Path.Combine(allPaths);
         Directory.CreateDirectory(fullPath);
 
         return fullPath;

@@ -12,7 +12,7 @@ public class NotFoundUserControlViewModel : ViewModelBase
 
     public enum ErrorLevel
     {
-        NoConnectToDB,
+        NoConnectToDb,
         NotFound
     }
 
@@ -20,7 +20,7 @@ public class NotFoundUserControlViewModel : ViewModelBase
     {
         Error = level switch
         {
-            ErrorLevel.NoConnectToDB => "Не подключен к базе данных",
+            ErrorLevel.NoConnectToDb => "Не подключен к базе данных",
             ErrorLevel.NotFound => "Ничего не найдено",
             _ => "Неизвестная ошибка",
         };

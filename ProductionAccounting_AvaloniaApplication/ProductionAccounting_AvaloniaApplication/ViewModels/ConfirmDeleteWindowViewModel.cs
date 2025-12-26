@@ -9,96 +9,133 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels;
 
 public class ConfirmDeleteWindowViewModel(double id, string title, string deleteSql, Action onSuccessCallback, string[]? additionalQueries = null) : ViewModelBase
 {
-    private ConfirmDeleteWindow? window;
-    private readonly Action onSuccessCallback = onSuccessCallback;
-    private readonly string deleteSql = deleteSql;
-    private readonly string[]? additionalQueries = additionalQueries;
+    private ConfirmDeleteWindow? _window;
+    private readonly Action _onSuccessCallback = onSuccessCallback;
+    private readonly string _deleteSql = deleteSql;
+    private readonly string[]? _additionalQueries = additionalQueries;
 
-    public double Id { get; set; } = id;
+    private double Id { get; } = id;
     public string Title { get; set; } = title;
 
-    public void SetWindow(ConfirmDeleteWindow _window)
+    public void SetWindow(ConfirmDeleteWindow window)
     {
-        window = _window;
+        this._window = window;
     }
 
     public ICommand CancelCommand
-        => new RelayCommand(() => window?.Close());
+        => new RelayCommand(() => _window?.Close());
 
     public ICommand DeleteCommand
-        => new RelayCommand(async () => await DeleteAsync());
-
-    public async Task DeleteAsync()
-    {
-        try
+        => new RelayCommand(async void () =>
         {
-            using var connection = new NpgsqlConnection(Arguments.Connection);
-            await connection.OpenAsync();
-            await using var transaction = await connection.BeginTransactionAsync();
             try
             {
-                int rowsAffected = 0;
-                if (additionalQueries != null)
-                {
-                    try
-                    {
-                        foreach (var querty in additionalQueries)
-                        {
-                            await using var command = new NpgsqlCommand(querty, connection, transaction);
-                            command.Parameters.AddWithValue("@id", Id);
-                            await command.ExecuteNonQueryAsync();
-                        }
-
-                        await transaction.CommitAsync();
-                    }
-                    catch (PostgresException ex)
-                    {
-                        await transaction.RollbackAsync();
-
-                        Loges.LoggingProcess(level: LogLevel.WARNING,
-                            ex: ex);
-                        throw;
-                    }
-                    catch (Exception ex)
-                    {
-                        await transaction.RollbackAsync();
-
-                        Loges.LoggingProcess(level: LogLevel.WARNING,
-                            ex: ex);
-                        throw;
-                    }
-                }
-
-                using (var command2 = new NpgsqlCommand(deleteSql, connection))
-                {
-                    command2.Parameters.AddWithValue("@id", Id);
-                    rowsAffected += await command2.ExecuteNonQueryAsync();
-                }
-
-                if (rowsAffected > 0)
-                {
-                    Loges.LoggingProcess(level: LogLevel.INFO,
-                        message: $"Deleted record with ID: {Id}");
-
-                    onSuccessCallback?.Invoke();
-                    window?.Close();
-                }
+                await DeleteAsync();
             }
             catch (Exception ex)
             {
-                Loges.LoggingProcess(level: LogLevel.ERROR,
-                    ex: ex);
+                Loges.LoggingProcess(level: LogLevel.Critical,
+                    ex: ex,
+                    message: "Failed to delete");
+            }
+        });
+
+     private async Task DeleteAsync()
+    {
+        try
+        {
+            await using var connection = new NpgsqlConnection(Arguments.Connection);
+            await connection.OpenAsync();
+            
+            NpgsqlTransaction? transaction = null;
+            if (_additionalQueries is not null && _additionalQueries.Length > 0)
+            {
+                transaction = await connection.BeginTransactionAsync();
+            }
+
+            try
+            {
+                var totalRowsAffected = 0;
+
+                if (_additionalQueries is not null && _additionalQueries.Length > 0)
+                {
+                    foreach (var query in _additionalQueries)
+                    {
+                        try
+                        {
+                            await using var command = new NpgsqlCommand(query, connection, transaction);
+                            command.Parameters.AddWithValue("@id", Id);
+                            var rows = await command.ExecuteNonQueryAsync();
+                            totalRowsAffected += rows;
+                            
+                            Loges.LoggingProcess(level: LogLevel.Debug,
+                                message: $"Additional query executed: {query}, rows affected: {rows}");
+                        }
+                        catch (Exception ex)
+                        {
+                            Loges.LoggingProcess(level: LogLevel.Error,
+                                ex: ex,
+                                message: $"Failed to execute additional query: {query}");
+                            throw;
+                        }
+                    }
+                }
+
+                await using (var mainCommand = new NpgsqlCommand(_deleteSql, connection))
+                {
+                    if (transaction is not null)
+                    {
+                        mainCommand.Transaction = transaction;
+                    }
+                    
+                    mainCommand.Parameters.AddWithValue("@id", Id);
+                    var mainRows = await mainCommand.ExecuteNonQueryAsync();
+                    totalRowsAffected += mainRows;
+                    
+                    Loges.LoggingProcess(level: LogLevel.Debug,
+                        message: $"Main query executed: {_deleteSql}, rows affected: {mainRows}");
+                }
+
+                if (transaction is not null)
+                {
+                    await transaction.CommitAsync();
+                }
+
+                if (totalRowsAffected > 0)
+                {
+                    Loges.LoggingProcess(level: LogLevel.Info,
+                        message: $"Successfully deleted records. Total rows affected: {totalRowsAffected}");
+
+                    _onSuccessCallback.Invoke();
+                    _window?.Close();
+                }
+                else
+                {
+                    Loges.LoggingProcess(level: LogLevel.Warning,
+                        message: $"No records found to delete for ID: {Id}");
+                    
+                    _window?.Close();
+                }
+            }
+            catch (Exception)
+            {
+                if (transaction is not null)
+                {
+                    await transaction.RollbackAsync();
+                }
+                throw;
             }
         }
-        catch (PostgresException ex) 
+        catch (PostgresException pgEx)
         {
-            Loges.LoggingProcess(level: LogLevel.WARNING,
-                ex: ex);
+            Loges.LoggingProcess(
+                level: LogLevel.Error,
+                ex: pgEx,
+                message: $"Database error (SQLState: {pgEx.SqlState}): {pgEx.MessageText}");
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(level: LogLevel.WARNING,
-                ex: ex);
+            Loges.LoggingProcess(level: LogLevel.Error, ex: ex);
         }
     }
 }

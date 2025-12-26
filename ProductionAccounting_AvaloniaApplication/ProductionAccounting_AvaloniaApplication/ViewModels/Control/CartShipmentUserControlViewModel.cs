@@ -64,8 +64,7 @@ public class CartShipmentUserControlViewModel : ViewModelBase
     };
 
     public static bool IsAdministrator
-        => ManagerCookie.IsUserLoggedIn() 
-        && ManagerCookie.IsAdministrator;
+        => ManagerCookie.IsUserLoggedIn();
 
     public bool CanNotes 
         => !string.IsNullOrEmpty(Notes);
@@ -94,7 +93,7 @@ public class CartShipmentUserControlViewModel : ViewModelBase
         }
         catch (Exception ex) 
         {
-            Loges.LoggingProcess(level: LogLevel.WARNING,
+            Loges.LoggingProcess(level: LogLevel.Warning,
                 ex: ex);
         }
     }

@@ -16,7 +16,7 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels.Control
         
         public ICommand Command { get; } = command;
         public Bitmap IconPath { get; } = iconPath;
-        public Func<bool> IsVisibleFunc { get; } = isVisibleFunc ?? (() => true);
+        private Func<bool> IsVisibleFunc { get; } = isVisibleFunc ?? (() => true);
         
         public bool IsVisible => IsVisibleFunc();
         

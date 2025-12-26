@@ -18,7 +18,7 @@ public class ManagerLocalization
             string localizationPath = Path.Combine(Paths.Localization, Arguments.PathToLocalization);
 
             if (!File.Exists(localizationPath)) {
-                Loges.LoggingProcess(level: LogLevel.WARNING,
+                Loges.LoggingProcess(level: LogLevel.Warning,
                     $"Localization file not found: {localizationPath}");
                 return;
             }
@@ -33,22 +33,22 @@ public class ManagerLocalization
             _localizationData = JsonConvert.DeserializeObject<LocalizationData>(json, settings);
 
             if(_localizationData == null)
-                Loges.LoggingProcess(level: LogLevel.WARNING,
+                Loges.LoggingProcess(level: LogLevel.Warning,
                     "Failed to deserialize localization data");
         }
         catch (FileNotFoundException)
         {
-            Loges.LoggingProcess(level: LogLevel.WARNING,
+            Loges.LoggingProcess(level: LogLevel.Warning,
                 "file not found json");
         }
         catch (System.Text.Json.JsonException ex)
         {
-            Loges.LoggingProcess(level: LogLevel.WARNING,
+            Loges.LoggingProcess(level: LogLevel.Warning,
                 ex: ex);
         }
         catch (Exception ex)
         {
-            Loges.LoggingProcess(level: LogLevel.ERROR,
+            Loges.LoggingProcess(level: LogLevel.Error,
                 ex: ex);
         }
     }
