@@ -54,28 +54,12 @@ public class ProfilePageUserControlViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _middleName, value);
     }
 
-    private string _position = string.Empty;
-    [UsedImplicitly]
-    public string Position
-    {
-        get => _position;
-        set => this.RaiseAndSetIfChanged(ref _position, value);
-    }
-
     private string _employee = string.Empty;
     [UsedImplicitly]
     public string Employee
     {
         get => _employee;
         set => this.RaiseAndSetIfChanged(ref _employee, value);
-    }
-
-    private string _department = string.Empty;
-    [UsedImplicitly]
-    public string Department
-    {
-        get => _department;
-        set => this.RaiseAndSetIfChanged(ref _department, value);
     }
 
     private string _email = string.Empty;
@@ -127,7 +111,6 @@ public class ProfilePageUserControlViewModel : ViewModelBase
             if (!ManagerCookie.IsUserLoggedIn()) return;
 
             await LoadDateAsync(userId);
-            await LoadListTypeToComboBoxAsync(userId);
             await LoadTimesheet(userId);
             await LoadProductionHistory(userId);
         }
@@ -160,46 +143,6 @@ public class ProfilePageUserControlViewModel : ViewModelBase
             var cookieId = (long)(ManagerCookie.GetIdUser ?? 0);
 
             return currentId != 0 && currentId == cookieId;
-        }
-    }
-
-    private async Task LoadListTypeToComboBoxAsync(double userId)
-    {
-        if (!ManagerCookie.IsUserLoggedIn()) return;
-
-        try
-        {
-            const string sql = @"
-                        SELECT 
-                            ut.type_user,
-                            d.type as department,
-                            p.type as position
-                        FROM public.user_to_user_type utt
-                        LEFT JOIN public.user_type ut ON utt.user_type_id = ut.id
-                        LEFT JOIN public.user_to_departments ud ON ud.user_id = utt.user_id
-                        LEFT JOIN public.departments d ON ud.department_id = d.id
-                        LEFT JOIN public.user_to_position up ON up.user_id = utt.user_id
-                        LEFT JOIN public.positions p ON up.position_id = p.id
-                        WHERE utt.user_id = @id";
-
-            await using var connection = new NpgsqlConnection(Arguments.Connection);
-            await connection.OpenAsync();
-
-            await using var command = new NpgsqlCommand(sql, connection);
-            command.Parameters.AddWithValue("@id", userId);
-
-            await using var reader = await command.ExecuteReaderAsync();
-            if (await reader.ReadAsync())
-            {
-                //UserType = reader.IsDBNull(0) ? "none" : reader.GetString(0);
-                Department = reader.IsDBNull(1) ? "none" : reader.GetString(1);
-                Position = reader.IsDBNull(2) ? "none" : reader.GetString(2);
-            }
-        }
-        catch (Exception ex)
-        {
-            Loges.LoggingProcess(level: LogLevel.Warning,
-                ex: ex);
         }
     }
 

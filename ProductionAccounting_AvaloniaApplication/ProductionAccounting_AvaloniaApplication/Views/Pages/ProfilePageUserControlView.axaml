@@ -75,20 +75,6 @@
                         </Border>
 
                         <Border Background="#2D2D30" 
-                                CornerRadius="10"
-                                Padding="14">
-                            <Grid ColumnDefinitions="Auto,*">
-                                <PathIcon   Data="{StaticResource BuildingRegular}"
-                                            Foreground="#AAAAAA"
-                                            Width="20"/>
-                                <TextBlock  Grid.Column="1"
-                                            Margin="12,0,0,0" 
-                                            Text="{Binding Department}"
-                                            Foreground="White"/>
-                            </Grid>
-                        </Border>
-
-                        <Border Background="#2D2D30" 
                                 CornerRadius="10" 
                                 Padding="14">
                             <Grid ColumnDefinitions="Auto,*">
