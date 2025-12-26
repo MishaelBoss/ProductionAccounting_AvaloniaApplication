@@ -58,6 +58,5 @@ public class CartSubProductUserControlViewModel(double id, double productTaskId,
         });
 
     public static bool IsAdministrator
-        => ManagerCookie.IsUserLoggedIn()
-        && ManagerCookie.IsAdministrator;
+        => ManagerCookie.IsUserLoggedIn();
 }

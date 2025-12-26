@@ -332,18 +332,15 @@ public class TabOrderUserControlViewModel : ViewModelBase, IRecipient<RefreshPro
             _orderList.Clear();
             _orderList.AddRange(newProductList);
 
-            if (newProductList.FirstOrDefault()?.DataContext is CartOrderUserControlViewModel firstViewModel)
-            {
-                await firstViewModel.CheckIsTaskCanBeCompleted();
-            }
+            for (global::System.Int32 i = 0; i < newProductList.Count; i++) 
+                if (newProductList[i]?.DataContext is CartOrderUserControlViewModel firstViewModel)
+                    await firstViewModel.CheckIsTaskCanBeCompleted();
 
             if (HomeMainContent != null)
             {
                 HomeMainContent.Children.Clear();
-                foreach (var product in _orderList)
-                {
+                foreach (var product in _orderList) 
                     HomeMainContent.Children.Add(product);
-                }
             }
 
             if (_orderList.Count == 0) ShowNotFoundMessage();

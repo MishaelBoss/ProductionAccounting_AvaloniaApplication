@@ -46,10 +46,6 @@
                                     FontWeight="SemiBold"
                                     Foreground="White"
                                     HorizontalAlignment="Center"/>
-                        <TextBlock  Text="{Binding Position}"
-                                    FontSize="14"
-                                    Foreground="#BBBBBB"
-                                    HorizontalAlignment="Center"/>
                     </StackPanel>
 
                     <ItemsControl   Grid.Row="1" 
@@ -59,34 +55,6 @@
                                 <StackPanel Spacing="14"/>
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
-
-                        <Border Background="#2D2D30"
-                                CornerRadius="10"
-                                Padding="14">
-                            <Grid ColumnDefinitions="Auto,*">
-                                <PathIcon   Data="{StaticResource PersonRegular}"
-                                            Foreground="#AAAAAA"
-                                            Width="20"/>
-                                <TextBlock  Grid.Column="1" 
-                                            Margin="12,0,0,0" 
-                                            Text="{Binding Employee}" 
-                                            Foreground="White"/>
-                            </Grid>
-                        </Border>
-
-                        <Border Background="#2D2D30" 
-                                CornerRadius="10"
-                                Padding="14">
-                            <Grid ColumnDefinitions="Auto,*">
-                                <PathIcon   Data="{StaticResource BuildingRegular}"
-                                            Foreground="#AAAAAA"
-                                            Width="20"/>
-                                <TextBlock  Grid.Column="1"
-                                            Margin="12,0,0,0" 
-                                            Text="{Binding Department}"
-                                            Foreground="White"/>
-                            </Grid>
-                        </Border>
 
                         <Border Background="#2D2D30" 
                                 CornerRadius="10" 

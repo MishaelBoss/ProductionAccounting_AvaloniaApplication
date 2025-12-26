@@ -196,8 +196,6 @@ public class AddOrderUserControlViewModel : ViewModelBase
 
     private async Task SaveAsync()
     {
-        if(!ManagerCookie.IsUserLoggedIn() || (!ManagerCookie.IsManager && !ManagerCookie.IsAdministrator)) return;
-        
         if (!DesignedFields) return;
         
         try

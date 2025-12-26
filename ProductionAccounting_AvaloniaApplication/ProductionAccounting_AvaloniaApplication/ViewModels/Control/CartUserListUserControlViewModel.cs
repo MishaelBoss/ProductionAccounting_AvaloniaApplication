@@ -119,8 +119,7 @@ public class CartUserListUserControlViewModel : ViewModelBase, INotifyPropertyCh
 
 
     public static bool IsAdministrator
-        => ManagerCookie.IsUserLoggedIn()
-        && ManagerCookie.IsAdministrator;
+        => ManagerCookie.IsUserLoggedIn();
 
     private async Task ChangeActiveUserAsync() {
         try

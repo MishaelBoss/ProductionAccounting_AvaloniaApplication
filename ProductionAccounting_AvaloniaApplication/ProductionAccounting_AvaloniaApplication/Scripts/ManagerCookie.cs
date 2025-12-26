@@ -11,10 +11,6 @@ public static class ManagerCookie
     public static double? GetIdUser { get; private set; } = 0;
     public static string? GetFirstName { get; private set; } = string.Empty;
     public static string? GetLastName { get; private set; } = string.Empty;
-    public static bool IsAdministrator { get; private set; }
-    public static bool IsManager { get; private set; }
-    public static bool IsMaster { get; private set; }
-    public static bool IsEmployee { get; private set; }
 
     public static void SaveLoginCookie(double id, string username, string token, DateTime expires, string path)
     {
@@ -79,45 +75,6 @@ public static class ManagerCookie
                         return false;
                     }
                 }
-
-                const string sql2 = "SELECT user_type_id FROM public.user_to_user_type WHERE user_id = @id";
-                using (var command = new NpgsqlCommand(sql2, connection))
-                {
-                    command.Parameters.AddWithValue("@id", data.Id);
-
-                    using var reader = command.ExecuteReader();
-                    if (reader.Read())
-                    {
-                        int userTypeId = reader.IsDBNull(0) ? 0 : reader.GetInt32(0);
-
-                        IsAdministrator = userTypeId == 1;
-                        IsManager = userTypeId == 2;
-                        IsMaster = userTypeId == 3;
-                        IsEmployee = userTypeId == 4;
-
-                    }
-                    else
-                    {
-                        IsAdministrator = IsManager = IsMaster = IsEmployee = false;
-                    }
-                }
-
-                /*                    if (user_type_id > 0)
-                                    {
-                                        string sql3 = "SELECT type_user FROM public.\"user_type\" WHERE id = @id";
-                                        using (var command = new NpgsqlCommand(sql3, connection))
-                                        {
-                                            command.Parameters.AddWithValue("@id", user_type_id);
-
-                                            using (var reader = command.ExecuteReader())
-                                            {
-                                                if (reader.Read())
-                                                {
-                                                    user_type_name = reader.IsDBNull(0) ? string.Empty : reader.GetString(0);
-                                                }
-                                            }
-                                        }
-                                    }*/
 
                 return login == data.Username;
             }

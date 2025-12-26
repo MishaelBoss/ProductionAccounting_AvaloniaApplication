@@ -115,8 +115,7 @@ public class CartOrderUserControlViewModel : ViewModelBase
 
     [UsedImplicitly]
     public static bool IsAdministratorOrMasterAndManager
-        => ManagerCookie.IsUserLoggedIn()
-        && (ManagerCookie.IsAdministrator || ManagerCookie.IsMaster || ManagerCookie.IsManager);
+        => ManagerCookie.IsUserLoggedIn();
 
     public bool IsAdministratorOrMasterAndCanCompleteTask
         => IsAdministratorOrMasterAndManager 

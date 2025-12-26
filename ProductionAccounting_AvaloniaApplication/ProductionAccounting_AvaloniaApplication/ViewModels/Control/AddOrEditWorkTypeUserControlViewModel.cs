@@ -97,8 +97,6 @@ public class AddOrEditWorkTypeUserControlViewModel : ViewModelBase
 
     private async Task SaveAsync() 
     {
-        if (!ManagerCookie.IsUserLoggedIn() && ManagerCookie.IsAdministrator) return;
-
         if (!DesignedFields) 
         {
             Messageerror = "Не все поля заполнены";
