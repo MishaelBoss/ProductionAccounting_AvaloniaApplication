@@ -10,20 +10,15 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase,
         IRecipient<OpenOrCloseUserStatusMessage>, 
-        IRecipient<OpenOrCloseAddDepartmentStatusMessage>, 
         IRecipient<OpenOrCloseOrderStatusMessage>, 
         IRecipient<OpenOrCloseAddSubProductStatusMessage>, 
         IRecipient<OpenOrCloseOrderViewStatusMessage>, 
-        IRecipient<OpenOrCloseCompleteWorkFormStatusMessage>,
         IRecipient<OpenOrCloseWorkTypeStatusMessage>
     {
         private readonly AddUsersUserControl _addUsers = new();
-        private readonly AddDepartmentUserControl _addDepartment = new();
-        private readonly AddPositionUserControl _addPosition = new();
         private readonly AddOrderUserControl _addOrder = new();
         private readonly AddSubProductUserControl _addSubProduct = new();
         private readonly AddOrEditWorkTypeUserControl _addOrEditWorkTypeUserControl = new();
-        private readonly CompleteWorkFormUserControl _completeWorkFormUserControl = new();
 
         public Grid? ContentCenter = null;
 
@@ -55,18 +50,6 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
 
                 CurrentPage = _viewPageUserControlViewModel;
             }
-        }
-
-        public void Receive(OpenOrCloseCompleteWorkFormStatusMessage message)
-        {
-            if (message.ShouldOpen) ShowCompleteWorkFormUserControl(message.TaskName, message.PlannedQuantity, message.ProductId, message.OperationId, message.SubProductOperationId, message.UserId);
-            else CloseCompleteWorkFormUserControl();
-        }
-
-        public void Receive(OpenOrCloseAddDepartmentStatusMessage message)
-        {
-            if (message.ShouldOpen) ShowAddDepartmentUserControl();
-            else CloseAddDepartmentUserControl();
         }
 
         public void Receive(OpenOrCloseOrderStatusMessage message)
@@ -115,29 +98,6 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
             if (_addUsers.Parent == ContentCenter) ContentCenter.Children.Remove(_addUsers);
         }
 
-        private void ShowAddDepartmentUserControl()
-        {
-            if (ContentCenter == null) return;
-            if (ContentCenter.Children.Contains(_addDepartment))
-            {
-                _addDepartment.RefreshDataAsync();
-                return;
-            }
-
-            if (_addDepartment.Parent is Panel currentParent) currentParent.Children.Remove(_addDepartment);
-            ContentCenter.Children.Clear();
-            ContentCenter.Children.Add(_addDepartment);
-
-            _addDepartment.RefreshDataAsync();
-        }
-
-        private void CloseAddDepartmentUserControl()
-        {
-            if (ContentCenter == null) return;
-            ContentCenter.Children.Clear();
-            if (_addDepartment.Parent == ContentCenter) ContentCenter.Children.Remove(_addDepartment);
-        }
-
         private void ShowOrderUsersUserControl(
             double? id = null,
             string? name = null,
@@ -178,25 +138,6 @@ namespace ProductionAccounting_AvaloniaApplication.ViewModels
             if (ContentCenter == null) return;
             ContentCenter.Children.Clear();
             if (_addSubProduct.Parent == ContentCenter) ContentCenter.Children.Remove(_addSubProduct);
-        }
-
-        private void ShowCompleteWorkFormUserControl(string taskName, decimal assignedQuantity, double productId, double operationId, double subProductOperationId, double userId)
-        {
-            if (ContentCenter == null) return;
-            var userControl = new CompleteWorkFormUserControl { DataContext = new CompleteWorkFormUserControlViewModel(taskName, assignedQuantity, productId, operationId, subProductOperationId, userId) };
-
-            if (ContentCenter.Children.Contains(userControl)) return;
-
-            if (userControl.Parent is Panel currentParent) currentParent.Children.Remove(userControl);
-            ContentCenter.Children.Clear();
-            ContentCenter.Children.Add(userControl);
-        }
-
-        private void CloseCompleteWorkFormUserControl()
-        {
-            if (ContentCenter == null) return;
-            ContentCenter.Children.Clear();
-            if (_completeWorkFormUserControl.Parent == ContentCenter) ContentCenter.Children.Remove(_completeWorkFormUserControl);
         }
 
         private void ShowAddOrEditWorkTypeUserControl(double id, string type, decimal coefficient, string measurement, decimal rate)

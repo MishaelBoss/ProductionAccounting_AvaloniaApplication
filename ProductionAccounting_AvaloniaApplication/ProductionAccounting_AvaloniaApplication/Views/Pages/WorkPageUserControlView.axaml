@@ -34,8 +34,6 @@
                     </StackPanel>
                 </Grid>
             </Border>
-
-            <Grid Grid.Row="2" Name="WorkContent"/>
         </Grid>
     </ScrollViewer>
 
