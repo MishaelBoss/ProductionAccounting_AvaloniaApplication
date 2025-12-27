@@ -2,11 +2,9 @@
 using CommunityToolkit.Mvvm.Messaging;
 using JetBrains.Annotations;
 using Npgsql;
-using ProductionAccounting_AvaloniaApplication.Models;
 using ProductionAccounting_AvaloniaApplication.Scripts;
 using ReactiveUI;
 using System;
-using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
